@@ -8,15 +8,9 @@ from bs4 import BeautifulSoup
 from config import *
 import psutil
 import logging
-import sys
 
-root = logging.getLogger()
-handler = logging.StreamHandler(sys.stdout)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logging.basicConfig(filename="log.txt", format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
-handler.setFormatter(formatter)
-root.addHandler(handler)
 
 # Global variables
 # Make Session for requests
