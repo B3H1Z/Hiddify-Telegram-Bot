@@ -1,0 +1,97 @@
+# Description: This file contains all the reply and inline keyboard markups used in the bot.
+from telebot.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
+from template import KEY_MARKUP
+
+# Main Menu Reply Keyboard Markup
+def main_menu_keyboard_markup():
+    markup = ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
+    markup.add(KeyboardButton(KEY_MARKUP['USERS_LIST']))
+    markup.add(KeyboardButton(KEY_MARKUP['USERS_SEARCH']))
+    markup.add(KeyboardButton(KEY_MARKUP['ADD_USER']))
+    markup.add(KeyboardButton(KEY_MARKUP['SERVER_STATUS']), KeyboardButton(KEY_MARKUP['SERVER_BACKUP']))
+    return markup
+
+
+# Users List Inline Keyboard Markup
+def users_list_markup(users, page=1):
+    markup = InlineKeyboardMarkup(row_width=3)
+    USER_PER_PAGE = 20
+    start = (page - 1) * USER_PER_PAGE
+    end = start + USER_PER_PAGE
+    keys = []
+    for user in users[start:end]:
+        keys.append(InlineKeyboardButton(user['name'], callback_data=f"info:***REMOVED***user['uuid']***REMOVED***"))
+    markup.add(*keys)
+    if page < len(users) / USER_PER_PAGE:
+        markup.add(InlineKeyboardButton(KEY_MARKUP['NEXT_PAGE'], callback_data=f"next:***REMOVED***page + 1***REMOVED***"), row_width=2)
+    if page > 1:
+        markup.add(InlineKeyboardButton(KEY_MARKUP['PREV_PAGE'], callback_data=f"next:***REMOVED***page - 1***REMOVED***"), row_width=1)
+    return markup
+
+
+# Single User Inline Keyboard Markup
+def user_info_markup(uuid):
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 1
+    markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_USER'], callback_data=f"user_config:***REMOVED***uuid***REMOVED***"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['EDIT_USER'], callback_data=f"user_edit:***REMOVED***uuid***REMOVED***"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['DELETE_USER'], callback_data=f"user_delete:***REMOVED***uuid***REMOVED***"))
+    return markup
+
+
+# Single User Edit Inline Keyboard Markup
+def edit_user_markup(uuid):
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 2
+    markup.add(InlineKeyboardButton(KEY_MARKUP['EDIT_NAME'], callback_data=f"user_edit_name:***REMOVED***uuid***REMOVED***"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['EDIT_USAGE'], callback_data=f"user_edit_usage:***REMOVED***uuid***REMOVED***"),
+               InlineKeyboardButton(KEY_MARKUP['RESET_USAGE'], callback_data=f"user_edit_reset_usage:***REMOVED***uuid***REMOVED***"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['EDIT_DAYS'], callback_data=f"user_edit_days:***REMOVED***uuid***REMOVED***"),
+               InlineKeyboardButton(KEY_MARKUP['RESET_DAYS'], callback_data=f"user_edit_reset_days:***REMOVED***uuid***REMOVED***"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['EDIT_COMMENT'], callback_data=f"user_edit_comment:***REMOVED***uuid***REMOVED***"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['UPDATE_MESSAGE'], callback_data=f"user_edit_update:***REMOVED***uuid***REMOVED***"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_user_panel:***REMOVED***uuid***REMOVED***"))
+    return markup
+
+
+# Add User Reply Keyboard Markup
+def while_add_user_markup():
+    markup = ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+    markup.add(KeyboardButton(KEY_MARKUP['CANCEL']))
+    return markup
+
+
+def while_edit_user_markup():
+    markup = ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+    markup.add(KeyboardButton(KEY_MARKUP['CANCEL']))
+    return markup
+
+
+# Confirm Add User Reply Keyboard Markup
+def confirm_add_user_markup():
+    markup = ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+    markup.add(KeyboardButton(KEY_MARKUP['CONFIRM']))
+    markup.add(KeyboardButton(KEY_MARKUP['CANCEL']))
+    return markup
+
+
+def sub_url_user_list_markup(uuid):
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 1
+    markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_DIR'], callback_data=f"conf_dir:***REMOVED***uuid***REMOVED***"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_SUB'], callback_data=f"conf_sub_url:***REMOVED***uuid***REMOVED***"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_SUB_B64'], callback_data=f"conf_sub_url_b64:***REMOVED***uuid***REMOVED***"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_CLASH'], callback_data=f"conf_clash:***REMOVED***uuid***REMOVED***"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_HIDDIFY'], callback_data=f"conf_hiddify:***REMOVED***uuid***REMOVED***"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_user_panel:***REMOVED***uuid***REMOVED***"))
+
+    return markup
+
+
+def search_user_markup():
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 1
+    markup.add(InlineKeyboardButton(KEY_MARKUP['SEARCH_USER_NAME'], callback_data=f"search_name:name"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['SEARCH_USER_UUID'], callback_data=f"search_uuid:uuid"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['SEARCH_USER_CONFIG'], callback_data=f"search_config:config"))
+    return markup
