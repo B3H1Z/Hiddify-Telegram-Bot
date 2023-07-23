@@ -288,7 +288,7 @@ def callback_query(call):
         if not sub:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
             return
-        bot.send_message(call.message.chat.id, f"***REMOVED***KEY_MARKUP['CONFIGS_HIDDIFY']***REMOVED***\n***REMOVED***sub['hidden_configs']***REMOVED***",
+        bot.send_message(call.message.chat.id, f"***REMOVED***KEY_MARKUP['CONFIGS_HIDDIFY']***REMOVED***\n***REMOVED***sub['hiddify_configs']***REMOVED***",
                          reply_markup=main_menu_keyboard_markup())
 
     else:
