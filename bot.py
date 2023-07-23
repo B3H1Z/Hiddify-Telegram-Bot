@@ -415,7 +415,7 @@ def add_user_usage_days(message):
         return
     add_user_data['usage_days'] = message.text
     bot.send_message(message.chat.id,
-                     f"***REMOVED***MESSAGES['ADD_USER_CONFIRM']***REMOVED***\n\n***REMOVED***MESSAGES['INFO_USER']***REMOVED*** ***REMOVED***add_user_data['name']***REMOVED***\n "
+                     f"***REMOVED***MESSAGES['ADD_USER_CONFIRM']***REMOVED***\n\n***REMOVED***MESSAGES['INFO_USER']***REMOVED*** ***REMOVED***add_user_data['name']***REMOVED***\n"
                      f"***REMOVED***MESSAGES['INFO_USAGE']***REMOVED*** ***REMOVED***add_user_data['limit']***REMOVED*** GB\n***REMOVED***MESSAGES['INFO_REMAINING_DAYS']***REMOVED*** ***REMOVED***add_user_data['usage_days']***REMOVED*** ***REMOVED***MESSAGES['DAY']***REMOVED***",
                      reply_markup=confirm_add_user_markup())
     bot.register_next_step_handler(message, confirm_add_user)
