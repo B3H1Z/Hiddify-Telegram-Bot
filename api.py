@@ -113,9 +113,9 @@ def list_users():
         delete_id_param = delete_info.find("input", ***REMOVED***"id": "id"***REMOVED***)['value']
         delete_url_param = delete_info.find("input", ***REMOVED***"id": "url"***REMOVED***)['value']
         delete_csrf_param = row.find("input", ***REMOVED***"name": "csrf_token"***REMOVED***)['value']
-        if LANG == "EN":
+        try:
             edit_url = row.find("a", ***REMOVED***"title": "Edit Record"***REMOVED***)['href']
-        else:
+        except:
             edit_url = row.find("a", ***REMOVED***"title": "ویرایش رکورد"***REMOVED***)['href']
 
         users_list.append(***REMOVED***
@@ -157,9 +157,9 @@ def add_user(name, usage_limit_GB=100, package_days=30, mode="no_reset", comment
     users = users_page()
     if not users:
         return False
-    if LANG == "EN":
+    try:
         add_user_btn = users.find("a", ***REMOVED***"title": "Create New Record"***REMOVED***)['href']
-    else:
+    except:
         add_user_btn = users.find("a", ***REMOVED***"title": "ایجاد رکورد جدید"***REMOVED***)['href']
 
     add_user_page_url = BASE_URL + add_user_btn
@@ -200,6 +200,7 @@ def add_user(name, usage_limit_GB=100, package_days=30, mode="no_reset", comment
 def delete_user(uuid):
     logging.info(f"Delete user - ***REMOVED***uuid***REMOVED***")
     users = list_users()
+
     for user in users:
         if user['uuid'] == uuid:
             delete_user_url = BASE_URL + user['delete']['action']
