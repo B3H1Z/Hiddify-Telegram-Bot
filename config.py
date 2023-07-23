@@ -1,6 +1,8 @@
 # Description: Configuration file for the bot
 import json
 import logging
+import requests
+from termcolor import colored
 
 logging.basicConfig(filename="log.txt", format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -26,7 +28,7 @@ def create_config_file(admin_id, token, url, lang):
 
 def read_config_file():
     if not is_config_exists():
-        print("Config file not found! Please run config.py script first!")
+        print(colored("Config file not found! Please run config.py script first!", "red"))
         raise FileNotFoundError("config.json file not found!")
     with open("config.json", "r") as f:
         return json.load(f)
@@ -43,26 +45,51 @@ def set_variables(json):
     LANG = json["lang"]
 
 
+def panel_url_validator(url):
+    if not url.startswith("https://" or "http://"):
+        raise ValueError("URL must start with http:// or https://")
+    if url.endswith("/"):
+        url = url[:-1]
+    if url.endswith("admin"):
+        url = url.replace("/admin", "")
+    if url.endswith("admin/user"):
+        url = url.replace("/admin/user", "")
+    print(colored("Checking URL...", "yellow"))
+    request = requests.get(f"***REMOVED***url***REMOVED***/admin/")
+    if request.status_code != 200:
+        print(colored("URL is not valid!", "red"))
+        raise ValueError("URL is not valid!")
+    elif request.status_code == 200:
+        print(colored("URL is valid!", "green"))
+    return url
+
 def set_by_user():
-    print("Example: 123456789 (get it from @userinfobot)")
+    print(colored("Example: 123456789\n[get it from @userinfobot]", "yellow"))
     admin_id = input("Enter Telegram Admin Number ID: ")
     if not admin_id.isdigit():
+        print(colored("Admin ID must be a number!", "red"))
         raise ValueError("Admin ID must be a number!")
 
-    print("Example: 123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ (get it from @BotFather)")
+    print(colored("Example: 123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ\n[get it from @BotFather]", "yellow"))
     token = input("Enter your bot token: ")
     if not token:
+        print(colored("Token is required!", "red"))
         raise ValueError("Token is required!")
 
     print(
-        "Example: https://panel.example.com/7frgemkvtE0/78854985-68dp-425c-989b-7ap0c6kr9bd4 (exactly like this!))")
+        colored(
+            "Example: https://panel.example.com/7frgemkvtE0/78854985-68dp-425c-989b-7ap0c6kr9bd4\n[exactly like this!]",
+            "yellow"))
     url = input("Enter your panel URL:")
     if not url:
+        print(colored("URL is required!", "red"))
         raise ValueError("URL is required!")
+    url = panel_url_validator(url)
 
-    print("Example: EN (default: FA)")
-    lang = input("Enter your language (EN, FA): ") or "FA"
+    print(colored("Example: EN (default: FA)\n[It is better that the language of the bot is the same as the panel]", "yellow"))
+    lang = input("Select your language (EN(English), FA(Persian)): ") or "FA"
     if lang not in ["EN", "FA"]:
+        print(colored("Language must be EN or FA!", "red"))
         raise ValueError("Language must be EN or FA!")
     return int(admin_id), token, url, lang
 
@@ -73,15 +100,15 @@ if __name__ == '__main__':
 
         # Create config file
         create_config_file(*set_by_user())
-        print("Config file created successfully!")
+        print(colored("Config file created successfully!", "green"))
         logging.info("Config file created successfully!")
     else:
         logging.info("Config file found!")
-        print("Config file is exist!")
+        print(colored("Config file is exist!", "green"))
         if input("Do you want to change config? (y/n): ").lower() == "y":
             # Create config file
             create_config_file(*set_by_user())
-            print("Config file updated successfully!")
+            print(colored("Config file updated successfully!"))
             logging.info("Config file updated successfully!")
 
 set_variables(read_config_file())
