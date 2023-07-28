@@ -38,7 +38,7 @@ def is_it_cancel(message, response=MESSAGES['CANCELED']):
 
 # ----------------------------------- Add User Area -----------------------------------
 # Add user Data dict
-add_user_data = ***REMOVED******REMOVED***
+add_user_data = {}
 
 
 # Add User - Name
@@ -54,7 +54,7 @@ def add_user_name(message):
 def add_user_limit(message):
     if is_it_cancel(message):
         return
-    if not is_it_digit(message, f"***REMOVED***MESSAGES['ERROR_INVALID_NUMBER']***REMOVED***\n***REMOVED***MESSAGES['ADD_USER_USAGE_LIMIT']***REMOVED***",
+    if not is_it_digit(message, f"{MESSAGES['ERROR_INVALID_NUMBER']}\n{MESSAGES['ADD_USER_USAGE_LIMIT']}",
                        while_add_user_markup()):
         bot.register_next_step_handler(message, add_user_limit)
         return
@@ -67,14 +67,14 @@ def add_user_limit(message):
 def add_user_usage_days(message):
     if is_it_cancel(message, MESSAGES['CANCEL_ADD_USER']):
         return
-    if not is_it_digit(message, f"***REMOVED***MESSAGES['ERROR_INVALID_NUMBER']***REMOVED***\n***REMOVED***MESSAGES['ADD_USER_DAYS']***REMOVED***",
+    if not is_it_digit(message, f"{MESSAGES['ERROR_INVALID_NUMBER']}\n{MESSAGES['ADD_USER_DAYS']}",
                        while_add_user_markup()):
         bot.register_next_step_handler(message, add_user_usage_days)
         return
     add_user_data['usage_days'] = message.text
     bot.send_message(message.chat.id,
-                     f"***REMOVED***MESSAGES['ADD_USER_CONFIRM']***REMOVED***\n\n***REMOVED***MESSAGES['INFO_USER']***REMOVED*** ***REMOVED***add_user_data['name']***REMOVED***\n"
-                     f"***REMOVED***MESSAGES['INFO_USAGE']***REMOVED*** ***REMOVED***add_user_data['limit']***REMOVED*** GB\n***REMOVED***MESSAGES['INFO_REMAINING_DAYS']***REMOVED*** ***REMOVED***add_user_data['usage_days']***REMOVED*** ***REMOVED***MESSAGES['DAY']***REMOVED***",
+                     f"{MESSAGES['ADD_USER_CONFIRM']}\n\n{MESSAGES['INFO_USER']} {add_user_data['name']}\n"
+                     f"{MESSAGES['INFO_USAGE']} {add_user_data['limit']} GB\n{MESSAGES['INFO_REMAINING_DAYS']} {add_user_data['usage_days']} {MESSAGES['DAY']}",
                      reply_markup=confirm_add_user_markup())
     bot.register_next_step_handler(message, confirm_add_user)
 
@@ -116,7 +116,7 @@ def edit_user_name(message, uuid):
     if not status:
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=main_menu_keyboard_markup())
         return
-    bot.send_message(message.chat.id, f"***REMOVED***MESSAGES['SUCCESS_USER_NAME_EDITED']***REMOVED*** ***REMOVED***message.text***REMOVED*** ",
+    bot.send_message(message.chat.id, f"{MESSAGES['SUCCESS_USER_NAME_EDITED']} {message.text} ",
                      reply_markup=main_menu_keyboard_markup())
 
 
@@ -132,7 +132,7 @@ def edit_user_usage(message, uuid):
     if not status:
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=main_menu_keyboard_markup())
         return
-    bot.send_message(message.chat.id, f"***REMOVED***MESSAGES['SUCCESS_USER_USAGE_EDITED']***REMOVED*** ***REMOVED***message.text***REMOVED*** ",
+    bot.send_message(message.chat.id, f"{MESSAGES['SUCCESS_USER_USAGE_EDITED']} {message.text} ",
                      reply_markup=main_menu_keyboard_markup())
 
 
@@ -148,7 +148,7 @@ def edit_user_days(message, uuid):
     if not status:
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=main_menu_keyboard_markup())
         return
-    bot.send_message(message.chat.id, f"***REMOVED***MESSAGES['SUCCESS_USER_DAYS_EDITED']***REMOVED*** ***REMOVED***message.text***REMOVED*** ",
+    bot.send_message(message.chat.id, f"{MESSAGES['SUCCESS_USER_DAYS_EDITED']} {message.text} ",
                      reply_markup=main_menu_keyboard_markup())
 
 
@@ -162,7 +162,7 @@ def edit_user_comment(message, uuid):
     if not status:
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=main_menu_keyboard_markup())
         return
-    bot.send_message(message.chat.id, f"***REMOVED***MESSAGES['SUCCESS_USER_COMMENT_EDITED']***REMOVED*** ***REMOVED***message.text***REMOVED*** ",
+    bot.send_message(message.chat.id, f"{MESSAGES['SUCCESS_USER_COMMENT_EDITED']} {message.text} ",
                      reply_markup=main_menu_keyboard_markup())
 
 
@@ -327,7 +327,7 @@ def callback_query(call):
         msgs = configs_template(configs['vless'])
         for message in msgs:
             if message:
-                bot.send_message(call.message.chat.id, f"***REMOVED***message***REMOVED***",
+                bot.send_message(call.message.chat.id, f"{message}",
                                  reply_markup=main_menu_keyboard_markup(),
                                  parse_mode="HTML")
     # User Configs - VMess Configs Callback
@@ -343,7 +343,7 @@ def callback_query(call):
         msgs = configs_template(configs['vmess'])
         for message in msgs:
             if message:
-                bot.send_message(call.message.chat.id, f"***REMOVED***message***REMOVED***",
+                bot.send_message(call.message.chat.id, f"{message}",
                                  reply_markup=main_menu_keyboard_markup(),
                                  parse_mode="HTML")
     # User Configs - Trojan Configs Callback
@@ -359,7 +359,7 @@ def callback_query(call):
         msgs = configs_template(configs['trojan'])
         for message in msgs:
             if message:
-                bot.send_message(call.message.chat.id, f"***REMOVED***message***REMOVED***",
+                bot.send_message(call.message.chat.id, f"{message}",
                                  reply_markup=main_menu_keyboard_markup(),
                                  parse_mode="HTML")
 
@@ -369,7 +369,7 @@ def callback_query(call):
         if not sub:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
             return
-        bot.send_message(call.message.chat.id, f"***REMOVED***KEY_MARKUP['CONFIGS_SUB']***REMOVED***\n***REMOVED***sub['sub_link']***REMOVED***",
+        bot.send_message(call.message.chat.id, f"{KEY_MARKUP['CONFIGS_SUB']}\n{sub['sub_link']}",
                          reply_markup=main_menu_keyboard_markup())
     # User Configs - Base64 Subscription Configs Callback
     elif key == "conf_sub_url_b64":
@@ -377,7 +377,7 @@ def callback_query(call):
         if not sub:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
             return
-        bot.send_message(call.message.chat.id, f"***REMOVED***KEY_MARKUP['CONFIGS_SUB_B64']***REMOVED***\n***REMOVED***sub['sub_link_b64']***REMOVED***",
+        bot.send_message(call.message.chat.id, f"{KEY_MARKUP['CONFIGS_SUB_B64']}\n{sub['sub_link_b64']}",
                          reply_markup=main_menu_keyboard_markup())
     # User Configs - Subscription Configs For Clash Callback
     elif key == "conf_clash":
@@ -385,7 +385,7 @@ def callback_query(call):
         if not sub:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
             return
-        bot.send_message(call.message.chat.id, f"***REMOVED***KEY_MARKUP['CONFIGS_CLASH']***REMOVED***\n***REMOVED***sub['clash_configs']***REMOVED***",
+        bot.send_message(call.message.chat.id, f"{KEY_MARKUP['CONFIGS_CLASH']}\n{sub['clash_configs']}",
                          reply_markup=main_menu_keyboard_markup())
     # User Configs - Subscription Configs For Hiddify Callback
     elif key == "conf_hiddify":
@@ -393,7 +393,7 @@ def callback_query(call):
         if not sub:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
             return
-        bot.send_message(call.message.chat.id, f"***REMOVED***KEY_MARKUP['CONFIGS_HIDDIFY']***REMOVED***\n***REMOVED***sub['hiddify_configs']***REMOVED***",
+        bot.send_message(call.message.chat.id, f"{KEY_MARKUP['CONFIGS_HIDDIFY']}\n{sub['hiddify_configs']}",
                          reply_markup=main_menu_keyboard_markup())
 
     else:

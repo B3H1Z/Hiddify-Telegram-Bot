@@ -1,8 +1,8 @@
 # Description: This file contains all the templates used in the bot.
 from config import LANG
 
-KEY_MARKUP = ***REMOVED***
-    'EN': ***REMOVED***
+KEY_MARKUP = {
+    'EN': {
         'CONFIRM': '✅Confirm',
         'CANCEL': '❌Cancel',
         'USERS_LIST': '👤Users Management',
@@ -32,8 +32,8 @@ KEY_MARKUP = ***REMOVED***
         'SEARCH_USER_UUID': 'Search by UUID',
         'SEARCH_USER_CONFIG': 'Search by Config',
 
-    ***REMOVED***,
-    'FA': ***REMOVED***
+    },
+    'FA': {
         'CONFIRM': '✅تأیید',
         'CANCEL': '❌لغو',
         'USERS_LIST': '👤مدیریت کاربران',
@@ -62,12 +62,12 @@ KEY_MARKUP = ***REMOVED***
         'SEARCH_USER_NAME': 'جستجو با نام',
         'SEARCH_USER_UUID': 'جستجو با UUID',
         'SEARCH_USER_CONFIG': 'جستجو با کانفیگ',
-    ***REMOVED***
-***REMOVED***
+    }
+}
 
 # Response Messages Template
-MESSAGES = ***REMOVED***
-    'EN': ***REMOVED***
+MESSAGES = {
+    'EN': {
         'WELCOME': "Welcome to Hiddify Management Bot.",
         'ERROR_INVALID_NUMBER': "❌Only numbers are allowed!",
         'ERROR_USER_NOT_FOUND': "❌User not found",
@@ -117,8 +117,8 @@ MESSAGES = ***REMOVED***
         'SEARCH_USER_CONFIG': 'Please enter one of the config of the user: ',
         'SEARCH_RESULT': '[Search Result]',
 
-    ***REMOVED***,
-    'FA': ***REMOVED***
+    },
+    'FA': {
         'WELCOME': "به ربات مدیریت Hiddify خوش آمدید.",
         'ERROR_INVALID_NUMBER': "❌تنها اعداد مجاز هستند!",
         'ERROR_USER_NOT_FOUND': "❌کاربر یافت نشد",
@@ -168,17 +168,17 @@ MESSAGES = ***REMOVED***
         'SEARCH_USER_CONFIG': 'لطفاً یکی از کانفیگ های کاربر را وارد کنید: ',
         'SEARCH_RESULT': '[نتیجه جستجو]',
 
-    ***REMOVED***
+    }
 
-***REMOVED***
-BOT_COMMANDS = ***REMOVED***
-    'EN': ***REMOVED***
+}
+BOT_COMMANDS = {
+    'EN': {
         'START': 'start',
-    ***REMOVED***,
-    'FA': ***REMOVED***
+    },
+    'FA': {
         'START': 'شروع',
-    ***REMOVED***
-***REMOVED***
+    }
+}
 
 # Set Language of Messages
 KEY_MARKUP = KEY_MARKUP[LANG]
@@ -189,13 +189,13 @@ BOT_COMMANDS = BOT_COMMANDS[LANG]
 # Single User Info Message Template
 def user_info_template(usr, header=""):
     return f"""
-***REMOVED***header***REMOVED***
-***REMOVED***MESSAGES['INFO_USER']***REMOVED*** <a href='***REMOVED***usr['link']***REMOVED***'> ***REMOVED***usr['name']***REMOVED*** </a>
+{header}
+{MESSAGES['INFO_USER']} <a href='{usr['link']}'> {usr['name']} </a>
 --------------------------------
-***REMOVED***MESSAGES['INFO_USAGE']***REMOVED*** ***REMOVED***usr['usage']***REMOVED***
-***REMOVED***MESSAGES['INFO_REMAINING_DAYS']***REMOVED*** ***REMOVED***usr['remaining_day']***REMOVED***
-***REMOVED***MESSAGES['INFO_LAST_CONNECTION']***REMOVED*** ***REMOVED***usr['last_connection']***REMOVED***
-***REMOVED***MESSAGES['INFO_COMMENT']***REMOVED*** ***REMOVED***usr['comment']***REMOVED***
+{MESSAGES['INFO_USAGE']} {usr['usage']}
+{MESSAGES['INFO_REMAINING_DAYS']} {usr['remaining_day']}
+{MESSAGES['INFO_LAST_CONNECTION']} {usr['last_connection']}
+{MESSAGES['INFO_COMMENT']} {usr['comment']}
             """
 
 
@@ -208,11 +208,11 @@ def users_list_template(users, heder=""):
             online_users += 1
 
     return f"""
-***REMOVED***heder***REMOVED***
-***REMOVED***MESSAGES['HEADER_USERS_LIST']***REMOVED***
-***REMOVED***MESSAGES['HEADER_USERS_LIST_MSG']***REMOVED***
-***REMOVED***MESSAGES['NUM_USERS']***REMOVED*** ***REMOVED***len(users)***REMOVED***
-***REMOVED***MESSAGES['NUM_USERS_ONLINE']***REMOVED*** ***REMOVED***online_users***REMOVED*** 
+{heder}
+{MESSAGES['HEADER_USERS_LIST']}
+{MESSAGES['HEADER_USERS_LIST_MSG']}
+{MESSAGES['NUM_USERS']} {len(users)}
+{MESSAGES['NUM_USERS_ONLINE']} {online_users} 
 """
 
 
@@ -222,7 +222,7 @@ def configs_template(configs):
     chunk_size = 5
 
     for config in configs:
-        messages.append(f"<b>***REMOVED***config[1]***REMOVED***</b>\n<code>***REMOVED***config[0]***REMOVED***</code>\n")
+        messages.append(f"<b>{config[1]}</b>\n<code>{config[0]}</code>\n")
 
     for i in range(0, len(messages), chunk_size):
         chunk = messages[i:i + chunk_size]
@@ -236,7 +236,7 @@ def system_status_template(status):
 < b > System
 Status < / b >
 --------------------------------
-< b > CPU: < / b > ***REMOVED***status['cpu']***REMOVED*** %
-< b > RAM: < / b > ***REMOVED***status['ram']***REMOVED*** %
-< b > DISK: < / b > ***REMOVED***status['disk']***REMOVED*** %
+< b > CPU: < / b > {status['cpu']} %
+< b > RAM: < / b > {status['ram']} %
+< b > DISK: < / b > {status['disk']} %
 """

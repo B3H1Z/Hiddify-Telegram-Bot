@@ -18,12 +18,12 @@ def is_config_exists():
 
 def create_config_file(admin_id, token, url, lang):
     with open("config.json", "w") as f:
-        json.dump(***REMOVED***
-        ***REMOVED***admin_id],
+        json.dump({
+            "admin_id": [admin_id],
             "token": token,
             "url": url,
             "lang": lang
-        ***REMOVED***, f, indent=4)
+        }, f, indent=4)
 
 
 def read_config_file():
@@ -55,7 +55,7 @@ def panel_url_validator(url):
     if url.endswith("admin/user"):
         url = url.replace("/admin/user", "")
     print(colored("Checking URL...", "yellow"))
-    request = requests.get(f"***REMOVED***url***REMOVED***/admin/")
+    request = requests.get(f"{url}/admin/")
     if request.status_code != 200:
         print(colored("URL is not valid!", "red"))
         raise ValueError("URL is not valid!")

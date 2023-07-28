@@ -23,44 +23,44 @@ USERS_DIR = "/admin/user/"
 
 # Get request - return request object
 def get_request(url):
-    logging.info(f"GET Request to ***REMOVED***privacy_friendly_logging_request(url)***REMOVED***")
+    logging.info(f"GET Request to {privacy_friendly_logging_request(url)}")
     global session
     try:
         req = session.get(url)
-        logging.info(f"GET Request to ***REMOVED***privacy_friendly_logging_request(url)***REMOVED*** - Status Code: ***REMOVED***req.status_code***REMOVED***")
+        logging.info(f"GET Request to {privacy_friendly_logging_request(url)} - Status Code: {req.status_code}")
         return req
     except requests.exceptions.ConnectionError as e:
-        logging.exception(f"Connection Exception: ***REMOVED***e***REMOVED***")
+        logging.exception(f"Connection Exception: {e}")
         return False
     except requests.exceptions.Timeout as e:
-        logging.exception(f"Timeout Exception: ***REMOVED***e***REMOVED***")
+        logging.exception(f"Timeout Exception: {e}")
         return False
     except requests.exceptions.RequestException as e:
-        logging.exception(f"General Connection Exception: ***REMOVED***e***REMOVED***")
+        logging.exception(f"General Connection Exception: {e}")
         return False
     except Exception as e:
-        logging.exception(f"General Exception: ***REMOVED***e***REMOVED***")
+        logging.exception(f"General Exception: {e}")
         return False
 
 
 # Post request - return request object
 def post_request(url, data):
-    logging.info(f"POST Request to ***REMOVED***privacy_friendly_logging_request(url)***REMOVED*** - Data: ***REMOVED***data***REMOVED***")
+    logging.info(f"POST Request to {privacy_friendly_logging_request(url)} - Data: {data}")
     global session
     try:
         req = session.post(url, data=data)
         return req
     except requests.exceptions.ConnectionError as e:
-        logging.exception(f"Connection Exception: ***REMOVED***e***REMOVED***")
+        logging.exception(f"Connection Exception: {e}")
         return False
     except requests.exceptions.Timeout as e:
-        logging.exception(f"Timeout Exception: ***REMOVED***e***REMOVED***")
+        logging.exception(f"Timeout Exception: {e}")
         return False
     except requests.exceptions.RequestException as e:
-        logging.exception(f"General Connection Exception: ***REMOVED***e***REMOVED***")
+        logging.exception(f"General Connection Exception: {e}")
         return False
     except Exception as e:
-        logging.exception(f"General Exception: ***REMOVED***e***REMOVED***")
+        logging.exception(f"General Exception: {e}")
         return False
 
 
@@ -77,7 +77,7 @@ def users_page():
         soup = BeautifulSoup(req.text, "html.parser")
         return soup
     except Exception as e:
-        logging.exception(f"Parse BeautifulSoup Exception: ***REMOVED***e***REMOVED***")
+        logging.exception(f"Parse BeautifulSoup Exception: {e}")
         return False
 
 
@@ -90,59 +90,59 @@ def list_users():
     if not users:
         return False
 
-    table = users.find("table", ***REMOVED***"class": "table table-bordered table-hover"***REMOVED***)
+    table = users.find("table", {"class": "table table-bordered table-hover"})
     rows = table.find_all("tr")
     rows.pop(0)
 
     for row in rows:
-        uuid = row.find("td", ***REMOVED***"class": "col-uuid"***REMOVED***)
-        name = row.find("td", ***REMOVED***"class": "col-name"***REMOVED***)
-        if name.find("i", ***REMOVED***"class": "fa-solid fa-circle-check text-success"***REMOVED***):
+        uuid = row.find("td", {"class": "col-uuid"})
+        name = row.find("td", {"class": "col-name"})
+        if name.find("i", {"class": "fa-solid fa-circle-check text-success"}):
             enable = "y"
         else:
             enable = "n"
-        usage = row.find("td", ***REMOVED***"class": "col-current_usage_GB"***REMOVED***)
-        remaining_day = row.find("td", ***REMOVED***"class": "col-remaining_days"***REMOVED***)
-        comment = row.find("td", ***REMOVED***"class": "col-comment"***REMOVED***)
-        last_connection = row.find("td", ***REMOVED***"class": "col-last_online"***REMOVED***)
-        mode = row.find("td", ***REMOVED***"class": "col-mode"***REMOVED***)
+        usage = row.find("td", {"class": "col-current_usage_GB"})
+        remaining_day = row.find("td", {"class": "col-remaining_days"})
+        comment = row.find("td", {"class": "col-comment"})
+        last_connection = row.find("td", {"class": "col-last_online"})
+        mode = row.find("td", {"class": "col-mode"})
 
-        delete_info = row.find("td", ***REMOVED***"class": "list-buttons-column"***REMOVED***)
+        delete_info = row.find("td", {"class": "list-buttons-column"})
 
         delete_url_action = delete_info.find("form")['action']
 
-        delete_id_param = delete_info.find("input", ***REMOVED***"id": "id"***REMOVED***)['value']
-        delete_url_param = delete_info.find("input", ***REMOVED***"id": "url"***REMOVED***)['value']
-        delete_csrf_param = row.find("input", ***REMOVED***"name": "csrf_token"***REMOVED***)['value']
+        delete_id_param = delete_info.find("input", {"id": "id"})['value']
+        delete_url_param = delete_info.find("input", {"id": "url"})['value']
+        delete_csrf_param = row.find("input", {"name": "csrf_token"})['value']
         try:
-            edit_url = row.find("a", ***REMOVED***"title": "Edit Record"***REMOVED***)['href']
+            edit_url = row.find("a", {"title": "Edit Record"})['href']
         except:
-            edit_url = row.find("a", ***REMOVED***"title": "ویرایش رکورد"***REMOVED***)['href']
+            edit_url = row.find("a", {"title": "ویرایش رکورد"})['href']
 
-        users_list.append(***REMOVED***
+        users_list.append({
             "name": name.text.strip(),
             "usage": usage.text.strip(),
             "remaining_day": remaining_day.text.strip(),
             "comment": comment.text.strip(),
             "last_connection": last_connection.text.strip(),
             "uuid": uuid.text.strip(),
-            "link": f"***REMOVED***BASE_URL***REMOVED***/***REMOVED***urlparse(PANEL_URL).path.split('/')[1]***REMOVED***/***REMOVED***uuid.text.strip()***REMOVED***/",
+            "link": f"{BASE_URL}/{urlparse(PANEL_URL).path.split('/')[1]}/{uuid.text.strip()}/",
             "edit_url": edit_url,
             "mode": mode.text.strip(),
             "enable": enable,
-            "delete": ***REMOVED***
+            "delete": {
                 "action": delete_url_action,
                 "id": delete_id_param,
                 "url": delete_url_param,
                 "csrf": delete_csrf_param
-            ***REMOVED***
-        ***REMOVED***)
+            }
+        })
     return users_list
 
 
 # Get single user info - return dict of user info
 def user_info(uuid):
-    logging.info(f"Get info of user single user - ***REMOVED***uuid***REMOVED***")
+    logging.info(f"Get info of user single user - {uuid}")
     lu = list_users()
     if not lu:
         return False
@@ -159,9 +159,9 @@ def add_user(name, usage_limit_GB=100, package_days=30, mode="no_reset", comment
     if not users:
         return False
     try:
-        add_user_btn = users.find("a", ***REMOVED***"title": "Create New Record"***REMOVED***)['href']
+        add_user_btn = users.find("a", {"title": "Create New Record"})['href']
     except:
-        add_user_btn = users.find("a", ***REMOVED***"title": "ایجاد رکورد جدید"***REMOVED***)['href']
+        add_user_btn = users.find("a", {"title": "ایجاد رکورد جدید"})['href']
 
     add_user_page_url = BASE_URL + add_user_btn
     add_get_req = get_request(add_user_page_url)
@@ -173,13 +173,13 @@ def add_user(name, usage_limit_GB=100, package_days=30, mode="no_reset", comment
     try:
         soup = BeautifulSoup(add_get_req.text, "html.parser")
     except Exception as e:
-        logging.exception(f"Parse BeautifulSoup Exception: ***REMOVED***e***REMOVED***")
+        logging.exception(f"Parse BeautifulSoup Exception: {e}")
         return False
 
-    csrf_token = soup.find("input", ***REMOVED***"name": "csrf_token"***REMOVED***)['value']
-    uuid = soup.find("input", ***REMOVED***"name": "uuid"***REMOVED***)['value']
+    csrf_token = soup.find("input", {"name": "csrf_token"})['value']
+    uuid = soup.find("input", {"name": "uuid"})['value']
 
-    params = ***REMOVED***
+    params = {
         "csrf_token": csrf_token,
         "uuid": uuid,
         "name": name,
@@ -188,7 +188,7 @@ def add_user(name, usage_limit_GB=100, package_days=30, mode="no_reset", comment
         "mode": mode,
         "comment": comment,
         "enable": enable
-    ***REMOVED***
+    }
 
     add_post_req = post_request(add_user_page_url, data=params)
     if not add_post_req:
@@ -199,17 +199,17 @@ def add_user(name, usage_limit_GB=100, package_days=30, mode="no_reset", comment
 
 # Delete user - return True if user deleted
 def delete_user(uuid):
-    logging.info(f"Delete user - ***REMOVED***uuid***REMOVED***")
+    logging.info(f"Delete user - {uuid}")
     users = list_users()
 
     for user in users:
         if user['uuid'] == uuid:
             delete_user_url = BASE_URL + user['delete']['action']
-            params = ***REMOVED***
+            params = {
                 "id": user['delete']['id'],
                 "url": user['delete']['url'],
                 "csrf_token": user['delete']['csrf']
-            ***REMOVED***
+            }
             delete_req = post_request(delete_user_url, data=params)
             if not delete_req:
                 return False
@@ -221,7 +221,7 @@ def delete_user(uuid):
 
 # Edit user - return True if user edited
 def edit_user(uuid, **kwargs):
-    logging.info(f"Edit user - ***REMOVED***uuid***REMOVED***")
+    logging.info(f"Edit user - {uuid}")
     user = user_info(uuid)
     if not user:
         return False
@@ -234,14 +234,14 @@ def edit_user(uuid, **kwargs):
         return False
 
     soup = BeautifulSoup(edit_get_req.text, "html.parser")
-    csrf_token = soup.find("input", ***REMOVED***"name": "csrf_token"***REMOVED***)['value']
-    uuid = soup.find("input", ***REMOVED***"name": "uuid"***REMOVED***)['value']
-    name = soup.find("input", ***REMOVED***"name": "name"***REMOVED***)['value']
-    usage_limit_GB = soup.find("input", ***REMOVED***"name": "usage_limit_GB"***REMOVED***)['value']
-    package_days = soup.find("input", ***REMOVED***"name": "package_days"***REMOVED***)['value']
-    mode = soup.find("select", ***REMOVED***"name": "mode"***REMOVED***).find("option", selected=True)['value']
-    comment = soup.find("input", ***REMOVED***"name": "comment"***REMOVED***).text.strip()
-    enable = soup.find("input", ***REMOVED***"name": "enable"***REMOVED***)['value']
+    csrf_token = soup.find("input", {"name": "csrf_token"})['value']
+    uuid = soup.find("input", {"name": "uuid"})['value']
+    name = soup.find("input", {"name": "name"})['value']
+    usage_limit_GB = soup.find("input", {"name": "usage_limit_GB"})['value']
+    package_days = soup.find("input", {"name": "package_days"})['value']
+    mode = soup.find("select", {"name": "mode"}).find("option", selected=True)['value']
+    comment = soup.find("input", {"name": "comment"}).text.strip()
+    enable = soup.find("input", {"name": "enable"})['value']
 
     if not kwargs:
         return False
@@ -266,7 +266,7 @@ def edit_user(uuid, **kwargs):
     else:
         reset_days = False
 
-    params = ***REMOVED***
+    params = {
         "csrf_token": csrf_token,
         "uuid": uuid,
         "name": name,
@@ -275,7 +275,7 @@ def edit_user(uuid, **kwargs):
         "mode": mode,
         "comment": comment,
         "enable": enable
-    ***REMOVED***
+    }
     if reset_usage:
         params['reset_usage'] = reset_usage
     if reset_days:
@@ -289,15 +289,15 @@ def edit_user(uuid, **kwargs):
 
 
 def sub_links(uuid):
-    logging.info(f"Get sub links of user - ***REMOVED***uuid***REMOVED***")
-    sub = ***REMOVED******REMOVED***
+    logging.info(f"Get sub links of user - {uuid}")
+    sub = {}
     PANEL_DIR = urlparse(PANEL_URL).path.split('/')
     # Clash open app: clash://install-config?url=
     # Hidden open app: clashmeta://install-config?url=
-    sub['clash_configs'] = f"***REMOVED***BASE_URL***REMOVED***/***REMOVED***PANEL_DIR[1]***REMOVED***/***REMOVED***uuid***REMOVED***/clash/all.yml"
-    sub['hiddify_configs'] = f"***REMOVED***BASE_URL***REMOVED***/***REMOVED***PANEL_DIR[1]***REMOVED***/***REMOVED***uuid***REMOVED***/clash/meta/all.yml"
-    sub['sub_link'] = f"***REMOVED***BASE_URL***REMOVED***/***REMOVED***PANEL_DIR[1]***REMOVED***/***REMOVED***uuid***REMOVED***/all.txt"
-    sub['sub_link_b64'] = f"***REMOVED***BASE_URL***REMOVED***/***REMOVED***PANEL_DIR[1]***REMOVED***/***REMOVED***uuid***REMOVED***/all.txt"
+    sub['clash_configs'] = f"{BASE_URL}/{PANEL_DIR[1]}/{uuid}/clash/all.yml"
+    sub['hiddify_configs'] = f"{BASE_URL}/{PANEL_DIR[1]}/{uuid}/clash/meta/all.yml"
+    sub['sub_link'] = f"{BASE_URL}/{PANEL_DIR[1]}/{uuid}/all.txt"
+    sub['sub_link_b64'] = f"{BASE_URL}/{PANEL_DIR[1]}/{uuid}/all.txt"
     return sub
 
 
@@ -310,11 +310,11 @@ def sub_parse(sub):
 
     urls = re.findall(r'(vless:\/\/[^\n]+)|(vmess:\/\/[^\n]+)|(trojan:\/\/[^\n]+)', res.text)
 
-    config_links = ***REMOVED***
+    config_links = {
         'vless': [],
         'vmess': [],
         'trojan': []
-    ***REMOVED***
+    }
     for url in urls:
         if url[0]:
             match = re.search(r'#(.+)$', url[0])
@@ -337,7 +337,7 @@ def sub_parse(sub):
 def backup_panel():
     logging.info(f"Backup panel")
     dir_panel = urlparse(PANEL_URL).path.split('/')
-    backup_url = f"***REMOVED***BASE_URL***REMOVED***/***REMOVED***dir_panel[1]***REMOVED***/***REMOVED***dir_panel[2]***REMOVED***/admin/backup/backupfile/"
+    backup_url = f"{BASE_URL}/{dir_panel[1]}/{dir_panel[2]}/admin/backup/backupfile/"
 
     backup_req = get_request(backup_url)
     if not backup_req or backup_req.status_code != 200:
@@ -347,7 +347,7 @@ def backup_panel():
     dt_string = now.strftime("%d-%m-%Y_%H-%M-%S")
 
     folder_name = "backup"
-    file_name = f"backup_***REMOVED***dt_string***REMOVED***.json"
+    file_name = f"backup_{dt_string}.json"
 
     file_name = os.path.join(folder_name, file_name)
     if not os.path.exists(folder_name):
@@ -360,7 +360,7 @@ def backup_panel():
 # Extract UUID from config
 def extract_uuid_from_config(config):
     logging.info(f"Extract UUID from config")
-    uuid_pattern = r"([0-9a-fA-F]***REMOVED***8***REMOVED***-(?:[0-9a-fA-F]***REMOVED***4***REMOVED***-)***REMOVED***3***REMOVED***[0-9a-fA-F]***REMOVED***12***REMOVED***)"
+    uuid_pattern = r"([0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12})"
     match = re.search(uuid_pattern, config)
 
     if match:
@@ -375,11 +375,11 @@ def system_status():
     cpu_usage = psutil.cpu_percent()
     ram_usage = psutil.virtual_memory().percent
     disk_usage = psutil.disk_usage('/').percent
-    return ***REMOVED***
+    return {
         'cpu': cpu_usage,
         'ram': ram_usage,
         'disk': disk_usage
-    ***REMOVED***
+    }
 
 
 # Search user by name
@@ -414,7 +414,7 @@ def base64decoder(s):
         conf = base64.b64decode(s).decode("utf-8")
         conf = json.loads(conf)
     except Exception as e:
-        logging.exception(f"Parse BeautifulSoup Exception: ***REMOVED***e***REMOVED***")
+        logging.exception(f"Parse BeautifulSoup Exception: {e}")
         conf = False
 
     return conf

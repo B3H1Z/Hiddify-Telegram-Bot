@@ -20,12 +20,12 @@ def users_list_markup(users, page=1):
     end = start + USER_PER_PAGE
     keys = []
     for user in users[start:end]:
-        keys.append(InlineKeyboardButton(user['name'], callback_data=f"info:***REMOVED***user['uuid']***REMOVED***"))
+        keys.append(InlineKeyboardButton(user['name'], callback_data=f"info:{user['uuid']}"))
     markup.add(*keys)
     if page < len(users) / USER_PER_PAGE:
-        markup.add(InlineKeyboardButton(KEY_MARKUP['NEXT_PAGE'], callback_data=f"next:***REMOVED***page + 1***REMOVED***"), row_width=2)
+        markup.add(InlineKeyboardButton(KEY_MARKUP['NEXT_PAGE'], callback_data=f"next:{page + 1}"), row_width=2)
     if page > 1:
-        markup.add(InlineKeyboardButton(KEY_MARKUP['PREV_PAGE'], callback_data=f"next:***REMOVED***page - 1***REMOVED***"), row_width=1)
+        markup.add(InlineKeyboardButton(KEY_MARKUP['PREV_PAGE'], callback_data=f"next:{page - 1}"), row_width=1)
     return markup
 
 
@@ -33,9 +33,9 @@ def users_list_markup(users, page=1):
 def user_info_markup(uuid):
     markup = InlineKeyboardMarkup()
     markup.row_width = 1
-    markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_USER'], callback_data=f"user_config:***REMOVED***uuid***REMOVED***"))
-    markup.add(InlineKeyboardButton(KEY_MARKUP['EDIT_USER'], callback_data=f"user_edit:***REMOVED***uuid***REMOVED***"))
-    markup.add(InlineKeyboardButton(KEY_MARKUP['DELETE_USER'], callback_data=f"user_delete:***REMOVED***uuid***REMOVED***"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_USER'], callback_data=f"user_config:{uuid}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['EDIT_USER'], callback_data=f"user_edit:{uuid}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['DELETE_USER'], callback_data=f"user_delete:{uuid}"))
     return markup
 
 
@@ -43,14 +43,14 @@ def user_info_markup(uuid):
 def edit_user_markup(uuid):
     markup = InlineKeyboardMarkup()
     markup.row_width = 2
-    markup.add(InlineKeyboardButton(KEY_MARKUP['EDIT_NAME'], callback_data=f"user_edit_name:***REMOVED***uuid***REMOVED***"))
-    markup.add(InlineKeyboardButton(KEY_MARKUP['EDIT_USAGE'], callback_data=f"user_edit_usage:***REMOVED***uuid***REMOVED***"),
-               InlineKeyboardButton(KEY_MARKUP['RESET_USAGE'], callback_data=f"user_edit_reset_usage:***REMOVED***uuid***REMOVED***"))
-    markup.add(InlineKeyboardButton(KEY_MARKUP['EDIT_DAYS'], callback_data=f"user_edit_days:***REMOVED***uuid***REMOVED***"),
-               InlineKeyboardButton(KEY_MARKUP['RESET_DAYS'], callback_data=f"user_edit_reset_days:***REMOVED***uuid***REMOVED***"))
-    markup.add(InlineKeyboardButton(KEY_MARKUP['EDIT_COMMENT'], callback_data=f"user_edit_comment:***REMOVED***uuid***REMOVED***"))
-    markup.add(InlineKeyboardButton(KEY_MARKUP['UPDATE_MESSAGE'], callback_data=f"user_edit_update:***REMOVED***uuid***REMOVED***"))
-    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_user_panel:***REMOVED***uuid***REMOVED***"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['EDIT_NAME'], callback_data=f"user_edit_name:{uuid}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['EDIT_USAGE'], callback_data=f"user_edit_usage:{uuid}"),
+               InlineKeyboardButton(KEY_MARKUP['RESET_USAGE'], callback_data=f"user_edit_reset_usage:{uuid}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['EDIT_DAYS'], callback_data=f"user_edit_days:{uuid}"),
+               InlineKeyboardButton(KEY_MARKUP['RESET_DAYS'], callback_data=f"user_edit_reset_days:{uuid}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['EDIT_COMMENT'], callback_data=f"user_edit_comment:{uuid}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['UPDATE_MESSAGE'], callback_data=f"user_edit_update:{uuid}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_user_panel:{uuid}"))
     return markup
 
 
@@ -78,12 +78,12 @@ def confirm_add_user_markup():
 def sub_url_user_list_markup(uuid):
     markup = InlineKeyboardMarkup()
     markup.row_width = 1
-    markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_DIR'], callback_data=f"conf_dir:***REMOVED***uuid***REMOVED***"))
-    markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_SUB'], callback_data=f"conf_sub_url:***REMOVED***uuid***REMOVED***"))
-    markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_SUB_B64'], callback_data=f"conf_sub_url_b64:***REMOVED***uuid***REMOVED***"))
-    markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_CLASH'], callback_data=f"conf_clash:***REMOVED***uuid***REMOVED***"))
-    markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_HIDDIFY'], callback_data=f"conf_hiddify:***REMOVED***uuid***REMOVED***"))
-    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_user_panel:***REMOVED***uuid***REMOVED***"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_DIR'], callback_data=f"conf_dir:{uuid}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_SUB'], callback_data=f"conf_sub_url:{uuid}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_SUB_B64'], callback_data=f"conf_sub_url_b64:{uuid}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_CLASH'], callback_data=f"conf_clash:{uuid}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_HIDDIFY'], callback_data=f"conf_hiddify:{uuid}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_user_panel:{uuid}"))
 
     return markup
 
@@ -91,10 +91,10 @@ def sub_url_user_list_markup(uuid):
 def sub_user_list_markup(uuid):
     markup = InlineKeyboardMarkup()
     markup.row_width = 1
-    markup.add(InlineKeyboardButton('Vless', callback_data=f"conf_dir_vless:***REMOVED***uuid***REMOVED***"))
-    markup.add(InlineKeyboardButton('Vmess', callback_data=f"conf_dir_vmess:***REMOVED***uuid***REMOVED***"))
-    markup.add(InlineKeyboardButton('Trojan', callback_data=f"conf_dir_trojan:***REMOVED***uuid***REMOVED***"))
-    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_user_panel:***REMOVED***uuid***REMOVED***"))
+    markup.add(InlineKeyboardButton('Vless', callback_data=f"conf_dir_vless:{uuid}"))
+    markup.add(InlineKeyboardButton('Vmess', callback_data=f"conf_dir_vmess:{uuid}"))
+    markup.add(InlineKeyboardButton('Trojan', callback_data=f"conf_dir_trojan:{uuid}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_user_panel:{uuid}"))
     return markup
 
 # Search User Inline Keyboard Markup
