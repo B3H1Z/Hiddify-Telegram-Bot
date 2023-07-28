@@ -4,7 +4,7 @@ import logging
 import requests
 from termcolor import colored
 
-logging.basicConfig(filename="log.txt", format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+logging.basicConfig(filename="hiddify-telegram-bot.log", format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 
 
