@@ -60,7 +60,7 @@ def while_add_user_markup():
     markup.add(KeyboardButton(KEY_MARKUP['CANCEL']))
     return markup
 
-
+# Edit User Reply Keyboard Markup
 def while_edit_user_markup():
     markup = ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
     markup.add(KeyboardButton(KEY_MARKUP['CANCEL']))
@@ -74,7 +74,7 @@ def confirm_add_user_markup():
     markup.add(KeyboardButton(KEY_MARKUP['CANCEL']))
     return markup
 
-
+# Subscription URL Inline Keyboard Markup
 def sub_url_user_list_markup(uuid):
     markup = InlineKeyboardMarkup()
     markup.row_width = 1
@@ -87,7 +87,17 @@ def sub_url_user_list_markup(uuid):
 
     return markup
 
+# Subscription Configs Inline Keyboard Markup
+def sub_user_list_markup(uuid):
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 1
+    markup.add(InlineKeyboardButton('Vless', callback_data=f"conf_dir_vless:***REMOVED***uuid***REMOVED***"))
+    markup.add(InlineKeyboardButton('Vmess', callback_data=f"conf_dir_vmess:***REMOVED***uuid***REMOVED***"))
+    markup.add(InlineKeyboardButton('Trojan', callback_data=f"conf_dir_trojan:***REMOVED***uuid***REMOVED***"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_user_panel:***REMOVED***uuid***REMOVED***"))
+    return markup
 
+# Search User Inline Keyboard Markup
 def search_user_markup():
     markup = InlineKeyboardMarkup()
     markup.row_width = 1

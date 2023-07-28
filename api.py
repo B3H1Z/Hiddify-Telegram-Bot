@@ -9,7 +9,7 @@ from config import *
 import psutil
 import logging
 
-logging.basicConfig(filename="log.txt", format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+logging.basicConfig(filename="hiddify-telegram-bot.log", format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 
 # Global variables
@@ -23,10 +23,11 @@ USERS_DIR = "/admin/user/"
 
 # Get request - return request object
 def get_request(url):
-    logging.info(f"GET Request to ***REMOVED***url***REMOVED***")
+    logging.info(f"GET Request to ***REMOVED***privacy_friendly_logging_request(url)***REMOVED***")
     global session
     try:
         req = session.get(url)
+        logging.info(f"GET Request to ***REMOVED***privacy_friendly_logging_request(url)***REMOVED*** - Status Code: ***REMOVED***req.status_code***REMOVED***")
         return req
     except requests.exceptions.ConnectionError as e:
         logging.exception(f"Connection Exception: ***REMOVED***e***REMOVED***")
@@ -44,7 +45,7 @@ def get_request(url):
 
 # Post request - return request object
 def post_request(url, data):
-    logging.info(f"POST Request to ***REMOVED***url***REMOVED*** - Data: ***REMOVED***data***REMOVED***")
+    logging.info(f"POST Request to ***REMOVED***privacy_friendly_logging_request(url)***REMOVED*** - Data: ***REMOVED***data***REMOVED***")
     global session
     try:
         req = session.post(url, data=data)
@@ -300,6 +301,7 @@ def sub_links(uuid):
     return sub
 
 
+# Parse sub links
 def sub_parse(sub):
     logging.info(f"Parse sub links")
     res = get_request(sub)
@@ -315,15 +317,23 @@ def sub_parse(sub):
     ***REMOVED***
     for url in urls:
         if url[0]:
-            config_links['vless'].append(url[0])
+            match = re.search(r'#(.+)$', url[0])
+            if match:
+                config_links['vless'].append([url[0], match.group(1)])
         elif url[1]:
-            config_links['vmess'].append(url[1])
+            config = url[1].replace("vmess://", "")
+            config_parsed = base64decoder(config)
+            if config_parsed:
+                config_links['vmess'].append([url[1], config_parsed['ps']])
         elif url[2]:
-            config_links['trojan'].append(url[2])
+            match = re.search(r'#(.+)$', url[2])
+            if match:
+                config_links['trojan'].append([url[2], match.group(1)])
 
     return config_links
 
 
+# Backup panel
 def backup_panel():
     logging.info(f"Backup panel")
     dir_panel = urlparse(PANEL_URL).path.split('/')
@@ -347,6 +357,7 @@ def backup_panel():
     return file_name
 
 
+# Extract UUID from config
 def extract_uuid_from_config(config):
     logging.info(f"Extract UUID from config")
     uuid_pattern = r"([0-9a-fA-F]***REMOVED***8***REMOVED***-(?:[0-9a-fA-F]***REMOVED***4***REMOVED***-)***REMOVED***3***REMOVED***[0-9a-fA-F]***REMOVED***12***REMOVED***)"
@@ -359,6 +370,7 @@ def extract_uuid_from_config(config):
         return None
 
 
+# System status
 def system_status():
     cpu_usage = psutil.cpu_percent()
     ram_usage = psutil.virtual_memory().percent
@@ -370,6 +382,7 @@ def system_status():
     ***REMOVED***
 
 
+# Search user by name
 def search_user_by_name(name):
     users = list_users()
     if not users:
@@ -383,6 +396,7 @@ def search_user_by_name(name):
     return False
 
 
+# Search user by uuid
 def search_user_by_uuid(uuid):
     users = list_users()
     if not users:
@@ -393,6 +407,7 @@ def search_user_by_uuid(uuid):
     return False
 
 
+# Base64 decoder
 def base64decoder(s):
     import base64
     try:
@@ -405,6 +420,7 @@ def base64decoder(s):
     return conf
 
 
+# Search user by config
 def search_user_by_config(config):
     if config.startswith("vmess://"):
         config = config.replace("vmess://", "")
@@ -420,3 +436,10 @@ def search_user_by_config(config):
         if user:
             return user
     return False
+
+
+# Privacy-friendly logging - replace your panel url with panel.private.com
+def privacy_friendly_logging_request(url):
+    url = urlparse(url)
+    url = url.scheme + "://" + "panel.private.com" + url.path
+    return url
