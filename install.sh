@@ -45,6 +45,7 @@ sleep 5
 # Check if the bot process is running
 if pgrep -f "python3 hiddifyTelegramBot.py" >/dev/null; then
     echo "Bot setup completed successfully!"
+    echo "Send [/start] in telegram bot"
 else
     display_error_and_exit "Failed to start the bot. Please check for errors and try again."
 fi
