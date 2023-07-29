@@ -119,7 +119,7 @@ MESSAGES = {
 
     },
     'FA': {
-        'WELCOME': "به ربات مدیریت Hiddify خوش آمدید.",
+        'WELCOME': "به ربات مدیریت هیدیفای خوش آمدید.",
         'ERROR_INVALID_NUMBER': "❌تنها اعداد مجاز هستند!",
         'ERROR_USER_NOT_FOUND': "❌کاربر یافت نشد",
         'ERROR_INVALID_COMMAND': "❌فرمان نامعتبر",
