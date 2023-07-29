@@ -68,7 +68,7 @@ KEY_MARKUP = {
 # Response Messages Template
 MESSAGES = {
     'EN': {
-        'WELCOME': "Welcome to Hiddify Management Bot.",
+        'WELCOME': "Welcome to Hiddify Management Bot",
         'ERROR_INVALID_NUMBER': "❌Only numbers are allowed!",
         'ERROR_USER_NOT_FOUND': "❌User not found",
         'ERROR_INVALID_COMMAND': "❌Invalid command",
