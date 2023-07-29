@@ -232,11 +232,9 @@ def configs_template(configs):
 
 def system_status_template(status):
     return f"""
-
-< b > System
-Status < / b >
+<b> System Status </b>
 --------------------------------
-< b > CPU: < / b > {status['cpu']} %
-< b > RAM: < / b > {status['ram']} %
-< b > DISK: < / b > {status['disk']} %
+<b> CPU: </b> {status['cpu']}%
+<b> RAM: </b> {status['ram']}%
+<b> DISK: </b> {status['disk']}%
 """
