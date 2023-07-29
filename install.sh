@@ -35,7 +35,7 @@ nohup python3 hiddifyTelegramBot.py >/dev/null 2>&1 &
 
 # Step 5: Add cron job to start the bot on reboot
 echo "Step 5: Adding cron job to start the bot on reboot..."
-(crontab -l 2>/dev/null; echo "@reboot /usr/bin/python3 /opt/Hiddify-Telegram-Bot/hiddifyTelegramBot.py >/dev/null 2>&1") | crontab -
+(crontab -l 2>/dev/null; echo "@reboot cd /opt/Hiddify-Telegram-Bot && ./restart.sh") | crontab -
 
 # Wait for a few seconds to check if the bot started successfully
 sleep 5
