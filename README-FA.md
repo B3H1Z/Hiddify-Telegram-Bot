@@ -44,7 +44,7 @@
      sudo bash -c "$(curl -Lfo- https://raw.githubusercontent.com/B3H1Z/Hiddify-Telegram-Bot/main/install.sh)"
 
 #
-### اطلاعات مورد نیاز برای راه اندازی
+## اطلاعات مورد نیاز برای راه اندازی
 1. `شناسه تلگرام ادمین` : آن را از ربات[ User Info Bot](https://t.me/userinfobot) بگیرید (مثال: `123456789`)
 2. `توکن ربات تلگرام` : آن را از ربات [BotFather](https://t.me/BotFather) بگیرید (
    مثال: `1234567890:ABCdEfGhIjKlMnOpQrStUvWxYz`)
