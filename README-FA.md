@@ -38,54 +38,36 @@
 -  دریافت پشتیبان از پنل شما
 -  نمایش وضعیت سرور (رم، پردازنده، دیسک)
 
-## نصب خودکار
+## نصب 
 با استفاده از این دستور ربات را به صورت خودکار نصب کنید
  
      sudo bash -c "$(curl -Lfo- https://raw.githubusercontent.com/B3H1Z/Hiddify-Telegram-Bot/main/install.sh)"
 
 #
-### نصب دستی
-- #### ابتدا ریپو را کلون کنید و وارد آن شوید
-
-      git clone https://github.com/B3H1Z/Hiddify-Telegram-Bot.git /opt/Hiddify-Telegram-Bot && cd /opt/Hiddify-Telegram-Bot
-
-- #### سپس نیازمندی‌ها را نصب کنید
-
-      pip install -r /opt/Hiddify-Telegram-Bot/requirements.txt
-- #### حالا فایل config.py را اجرا کرده و فیلدهای مورد نیاز را پر کنید تا یک فایل config.json تولید شود.
-
-      python3 /opt/Hiddify-Telegram-Bot/config.py
-
-- #### فیلدهای مورد نیاز عبارتند از:
-
-1. `شناسه تلگرام ادمین` : آن را از [ربات User Info](https://t.me/userinfobot) بگیرید (مثال: `123456789`)
-2. `توکن ربات تلگرام` : آن را از [BotFather](https://t.me/BotFather) بگیرید (
+### اطلاعات مورد نیاز برای راه اندازی
+1. `شناسه تلگرام ادمین` : آن را از ربات[ User Info Bot](https://t.me/userinfobot) بگیرید (مثال: `123456789`)
+2. `توکن ربات تلگرام` : آن را از ربات [BotFather](https://t.me/BotFather) بگیرید (
    مثال: `1234567890:ABCdEfGhIjKlMnOpQrStUvWxYz`)
-3. `آدرس پنل Hiddify` : آدرس پنل Hiddify خود را وارد کنید (
+3. `آدرس پنل Hiddify` : آدرس پنل هیدیفای خود را وارد کنید (
    مثال: `https://panel.example.com/7frgemkvtE0/78854985-68dp-425c-989b-7ap0c6kr9bd4`) <b>دقیقاً مانند این الگو!</b>
 4. `زبان ربات` : گزینه‌ها `en` و `fa` می‌باشند [پیش‌فرض `fa`]
 
-- ### حالا ربات را در پس‌زمینه با استفاده از nohup اجرا کنید
-
-      nohup python3 /opt/Hiddify-Telegram-Bot/hiddifyTelegramBot.py &
-
-  حالا می‌توانید از ربات در تلگرام با دستور `/start` استفاده کنید.
-
 
 ## دستورات
-- ### برای به‌روزرسانی ربات از این دستور استفاده کنید
+- به‌روزرسانی ربات 
 
       cd /opt/Hiddify-Telegram-Bot/ && chmod +x update.sh && ./update.sh
-- ### برای راه‌اندازی مجدد ربات از این دستور استفاده کنید
+- راه‌اندازی مجدد ربات
 
       cd /opt/Hiddify-Telegram-Bot/ && chmod +x restart.sh && ./restart.sh
-- ### برای متوقف کردن ربات از این دستور استفاده کنید
+- متوقف کردن ربات
 
       pkill -9 -f hiddifyTelegramBot.py
-- ### برای دریافت لاگ ربات از این دستور استفاده کنید
+- دریافت لاگ های ربات
 
       cat /opt/Hiddify-Telegram-Bot/hiddify-telegram-bot.log
-- ### برای دریافت تنظیمات ربات از این دستور استفاده کنید
+- اطلاعات پیکربندی ربات
+
       cat /opt/Hiddify-Telegram-Bot/config.json
 
 ## اسکرین شات
