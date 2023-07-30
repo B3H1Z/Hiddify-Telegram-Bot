@@ -9,9 +9,6 @@ from config import *
 import psutil
 import logging
 
-logging.basicConfig(filename="hiddify-telegram-bot.log", format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
-
 # Global variables
 # Make Session for requests
 session = requests.session()
@@ -65,20 +62,50 @@ def post_request(url, data):
 
 
 # Send request to users page - return bs4 object
-def users_page():
+def users_page(only_first_page=False):
     logging.info(f"Request for users page")
-    global session
-    users_url = PANEL_URL + USERS_DIR
-    req = get_request(users_url)
-    if not req:
-        return False
 
-    try:
-        soup = BeautifulSoup(req.text, "html.parser")
-        return soup
-    except Exception as e:
-        logging.exception(f"Parse BeautifulSoup Exception: {e}")
-        return False
+    global session
+    pages = []
+    page_num = 0
+    users_per_page = 50
+    users_url = PANEL_URL + USERS_DIR
+
+    while True:
+        req = get_request(users_url + f"?page={page_num}")
+        if not req:
+            return False
+
+        try:
+            soup = BeautifulSoup(req.text, "html.parser")
+
+            table = soup.find("table", {"class": "table table-bordered table-hover"})
+            rows = table.find_all("tr")
+            rows.pop(0)
+
+            # If that page is empty
+            if len(rows) == 1:
+                try:
+                    no_user_message = rows[0].find("div", {"class": "text-center"})
+                    if no_user_message:
+                        break
+                except:
+                    pass
+
+            pages.append(soup)
+
+            if only_first_page:
+                return soup
+
+            if len(rows) >= users_per_page:
+                page_num += 1
+                continue
+            else:
+                break
+        except Exception as e:
+            logging.exception(f"Parse BeautifulSoup Exception: {e}")
+            return False
+    return pages
 
 
 # List users - return list of all users
@@ -86,57 +113,58 @@ def list_users():
     logging.info(f"Parse users page")
     users_list = []
 
-    users = users_page()
-    if not users:
+    pages = users_page()
+    if not pages:
         return False
 
-    table = users.find("table", {"class": "table table-bordered table-hover"})
-    rows = table.find_all("tr")
-    rows.pop(0)
+    for page in pages:
+        table = page.find("table", {"class": "table table-bordered table-hover"})
+        rows = table.find_all("tr")
+        rows.pop(0)
 
-    for row in rows:
-        uuid = row.find("td", {"class": "col-uuid"})
-        name = row.find("td", {"class": "col-name"})
-        if name.find("i", {"class": "fa-solid fa-circle-check text-success"}):
-            enable = "y"
-        else:
-            enable = "n"
-        usage = row.find("td", {"class": "col-current_usage_GB"})
-        remaining_day = row.find("td", {"class": "col-remaining_days"})
-        comment = row.find("td", {"class": "col-comment"})
-        last_connection = row.find("td", {"class": "col-last_online"})
-        mode = row.find("td", {"class": "col-mode"})
+        for row in rows:
+            uuid = row.find("td", {"class": "col-uuid"})
+            name = row.find("td", {"class": "col-name"})
+            if name.find("i", {"class": "fa-solid fa-circle-check text-success"}):
+                enable = "y"
+            else:
+                enable = "n"
+            usage = row.find("td", {"class": "col-current_usage_GB"})
+            remaining_day = row.find("td", {"class": "col-remaining_days"})
+            comment = row.find("td", {"class": "col-comment"})
+            last_connection = row.find("td", {"class": "col-last_online"})
+            mode = row.find("td", {"class": "col-mode"})
 
-        delete_info = row.find("td", {"class": "list-buttons-column"})
+            delete_info = row.find("td", {"class": "list-buttons-column"})
 
-        delete_url_action = delete_info.find("form")['action']
+            delete_url_action = delete_info.find("form")['action']
 
-        delete_id_param = delete_info.find("input", {"id": "id"})['value']
-        delete_url_param = delete_info.find("input", {"id": "url"})['value']
-        delete_csrf_param = row.find("input", {"name": "csrf_token"})['value']
-        try:
-            edit_url = row.find("a", {"title": "Edit Record"})['href']
-        except:
-            edit_url = row.find("a", {"title": "ویرایش رکورد"})['href']
+            delete_id_param = delete_info.find("input", {"id": "id"})['value']
+            delete_url_param = delete_info.find("input", {"id": "url"})['value']
+            delete_csrf_param = row.find("input", {"name": "csrf_token"})['value']
+            try:
+                edit_url = row.find("a", {"title": "Edit Record"})['href']
+            except:
+                edit_url = row.find("a", {"title": "ویرایش رکورد"})['href']
 
-        users_list.append({
-            "name": name.text.strip(),
-            "usage": usage.text.strip(),
-            "remaining_day": remaining_day.text.strip(),
-            "comment": comment.text.strip(),
-            "last_connection": last_connection.text.strip(),
-            "uuid": uuid.text.strip(),
-            "link": f"{BASE_URL}/{urlparse(PANEL_URL).path.split('/')[1]}/{uuid.text.strip()}/",
-            "edit_url": edit_url,
-            "mode": mode.text.strip(),
-            "enable": enable,
-            "delete": {
-                "action": delete_url_action,
-                "id": delete_id_param,
-                "url": delete_url_param,
-                "csrf": delete_csrf_param
-            }
-        })
+            users_list.append({
+                "name": name.text.strip(),
+                "usage": usage.text.strip(),
+                "remaining_day": remaining_day.text.strip(),
+                "comment": comment.text.strip(),
+                "last_connection": last_connection.text.strip(),
+                "uuid": uuid.text.strip(),
+                "link": f"{BASE_URL}/{urlparse(PANEL_URL).path.split('/')[1]}/{uuid.text.strip()}/",
+                "edit_url": edit_url,
+                "mode": mode.text.strip(),
+                "enable": enable,
+                "delete": {
+                    "action": delete_url_action,
+                    "id": delete_id_param,
+                    "url": delete_url_param,
+                    "csrf": delete_csrf_param
+                }
+            })
     return users_list
 
 
@@ -155,13 +183,13 @@ def user_info(uuid):
 # Add user - return UUID of created user
 def add_user(name, usage_limit_GB=100, package_days=30, mode="no_reset", comment="", enable="y"):
     logging.info(f"Add user")
-    users = users_page()
-    if not users:
+    page = users_page(only_first_page=True)
+    if not page:
         return False
     try:
-        add_user_btn = users.find("a", {"title": "Create New Record"})['href']
+        add_user_btn = page.find("a", {"title": "Create New Record"})['href']
     except:
-        add_user_btn = users.find("a", {"title": "ایجاد رکورد جدید"})['href']
+        add_user_btn = page.find("a", {"title": "ایجاد رکورد جدید"})['href']
 
     add_user_page_url = BASE_URL + add_user_btn
     add_get_req = get_request(add_user_page_url)
