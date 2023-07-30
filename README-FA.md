@@ -48,30 +48,29 @@
 1. `شناسه تلگرام ادمین` : آن را از ربات[ User Info Bot](https://t.me/userinfobot) بگیرید (مثال: `123456789`)
 2. `توکن ربات تلگرام` : آن را از ربات [BotFather](https://t.me/BotFather) بگیرید (
    مثال: `1234567890:ABCdEfGhIjKlMnOpQrStUvWxYz`)
-3. `آدرس پنل Hiddify` : آدرس پنل هیدیفای خود را وارد کنید (
+3. `آدرس پنل هیدیفای` : آدرس پنل هیدیفای خود را وارد کنید (
    مثال: `https://panel.example.com/7frgemkvtE0/78854985-68dp-425c-989b-7ap0c6kr9bd4`) <b>دقیقاً مانند این الگو!</b>
 4. `زبان ربات` : گزینه‌ها `en` و `fa` می‌باشند [پیش‌فرض `fa`]
 
 
 ## دستورات
-- به‌روزرسانی ربات 
+ به‌روزرسانی ربات 
 
       cd /opt/Hiddify-Telegram-Bot/ && chmod +x update.sh && ./update.sh
-- راه‌اندازی مجدد ربات
+ راه‌اندازی مجدد ربات
 
       cd /opt/Hiddify-Telegram-Bot/ && chmod +x restart.sh && ./restart.sh
-- متوقف کردن ربات
+ متوقف کردن ربات
 
       pkill -9 -f hiddifyTelegramBot.py
-- دریافت لاگ های ربات
+ دریافت لاگ های ربات
 
       cat /opt/Hiddify-Telegram-Bot/hiddify-telegram-bot.log
-- اطلاعات پیکربندی ربات
+ اطلاعات پیکربندی ربات
 
       cat /opt/Hiddify-Telegram-Bot/config.json
 
-## اسکرین شات
-برخی از قابلیت های ربات
+## اسکرین شات‌ها
 - <img src="https://github.com/B3H1Z/Hiddify-Telegram-Bot/blob/main/screenshots/Keyboard.PNG?raw=True" width=50% height=50%>
 - <img src="https://github.com/B3H1Z/Hiddify-Telegram-Bot/blob/main/screenshots/UsersList.PNG?raw=True" width=50% height=50%>
 - <img src="https://github.com/B3H1Z/Hiddify-Telegram-Bot/blob/main/screenshots/UserInfo.PNG?raw=True" width=50% height=50%>
@@ -80,4 +79,4 @@
 - <img src="https://github.com/B3H1Z/Hiddify-Telegram-Bot/blob/main/screenshots/Search.PNG?raw=True" width=50% height=50%>
 - <img src="https://github.com/B3H1Z/Hiddify-Telegram-Bot/blob/main/screenshots/AddUser.PNG?raw=True" width=50% height=50%>
 - <img src="https://github.com/B3H1Z/Hiddify-Telegram-Bot/blob/main/screenshots/BackupAndStartus.PNG?raw=True" width=50% height=50%>
-```
+
