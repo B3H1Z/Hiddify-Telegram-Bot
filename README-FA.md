@@ -19,36 +19,37 @@
 
 </p>
 
-<h1 align="center"/>ربات Hidy</h1>
+<h1 align="center"/>هیدی بات</h1>
 
-با استفاده از این ربات می‌توانید پنل Hiddify خود را از طریق تلگرام مدیریت کنید.
+با استفاده از این ربات می‌توانید پنل هیدیفای خود را از طریق تلگرام مدیریت کنید.
 
-ما در نسخه آزمایشی (BETA) هستیم و برای بهبود آن در حال کار هستیم. لطفاً هر گونه باگ یا مشکلی که پیدا می‌کنید را گزارش دهید.
+ما در نسخه آزمایشی (BETA) هستیم و در حال بهبود آن هستیم. لطفاً هر گونه باگ یا مشکلی که پیدا می‌کنید را گزارش دهید.
 
-لطفاً توجه داشته باشید که این ربات <b>رسمی نیست</b> و هیچ ارتباطی با Hiddify ندارد.
+لطفاً توجه داشته باشید که این ربات <b>رسمی نیست</b> و هیچ ارتباطی با هیدیفای ندارد.
 
 بعضی از ویژگی‌ها عبارتند از:
-- [x] افزودن کاربران
-- [x] حذف کاربران
-- [x] ویرایش کاربران
-- [x] نمایش لیست کاربران
-- [x] جستجوی کاربران (بر اساس نام، تنظیمات، UUID)
-- [x] نمایش اطلاعات کاربران (نام، ترافیک، تاریخ و غیره)
-- [x] نمایش پیکربندی‌ها و لینک‌های اشتراک کاربر
-- [x] دریافت پشتیبان از پنل شما
-- [x] نمایش وضعیت سرور (رم، پردازنده، دیسک)
-- [x] و غیره...
+-  افزودن کاربران
+-  حذف کاربران
+-  ویرایش کاربران
+-  نمایش لیست کاربران
+-  جستجوی کاربران (بر اساس نام، تنظیمات، UUID)
+-  نمایش اطلاعات کاربران (نام، ترافیک، تاریخ و غیره)
+-  نمایش پیکربندی‌ها و لینک‌های اشتراک کاربر
+-  دریافت پشتیبان از پنل شما
+-  نمایش وضعیت سرور (رم، پردازنده، دیسک)
 
-## نصب
+## نصب خودکار
+با استفاده از این دستور ربات را به صورت خودکار نصب کنید
+ 
      sudo bash -c "$(curl -Lfo- https://raw.githubusercontent.com/B3H1Z/Hiddify-Telegram-Bot/main/install.sh)"
 
 #
 ### نصب دستی
-- #### کلون کردن مخزن و ورود به آن
+- #### ابتدا ریپو را کلون کنید و وارد آن شوید
 
       git clone https://github.com/B3H1Z/Hiddify-Telegram-Bot.git /opt/Hiddify-Telegram-Bot && cd /opt/Hiddify-Telegram-Bot
 
-- #### نصب نیازمندی‌ها
+- #### سپس نیازمندی‌ها را نصب کنید
 
       pip install -r /opt/Hiddify-Telegram-Bot/requirements.txt
 - #### حالا فایل config.py را اجرا کرده و فیلدهای مورد نیاز را پر کنید تا یک فایل config.json تولید شود.
@@ -87,10 +88,8 @@
 - ### برای دریافت تنظیمات ربات از این دستور استفاده کنید
       cat /opt/Hiddify-Telegram-Bot/config.json
 
-## عکس‌های ن
-
-مایه
-بعضی از عکس‌های نمایه ربات:
+## اسکرین شات
+برخی از قابلیت های ربات
 - <img src="https://github.com/B3H1Z/Hiddify-Telegram-Bot/blob/main/screenshots/Keyboard.PNG?raw=True" width=50% height=50%>
 - <img src="https://github.com/B3H1Z/Hiddify-Telegram-Bot/blob/main/screenshots/UsersList.PNG?raw=True" width=50% height=50%>
 - <img src="https://github.com/B3H1Z/Hiddify-Telegram-Bot/blob/main/screenshots/UserInfo.PNG?raw=True" width=50% height=50%>
@@ -100,5 +99,3 @@
 - <img src="https://github.com/B3H1Z/Hiddify-Telegram-Bot/blob/main/screenshots/AddUser.PNG?raw=True" width=50% height=50%>
 - <img src="https://github.com/B3H1Z/Hiddify-Telegram-Bot/blob/main/screenshots/BackupAndStartus.PNG?raw=True" width=50% height=50%>
 ```
-
-Please note that I've translated the content, including the code snippets and URLs, to Persian (Farsi) language.
