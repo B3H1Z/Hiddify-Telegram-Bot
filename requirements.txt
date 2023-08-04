@@ -1,4 +1,3 @@
-beautifulsoup4==4.12.2
 psutil==5.9.4
 pyTelegramBotAPI==4.12.0
 requests==2.30.0
