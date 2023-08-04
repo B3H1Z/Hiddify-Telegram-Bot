@@ -16,10 +16,10 @@ if ! command -v python3 &>/dev/null || ! command -v pip &>/dev/null; then
     display_error_and_exit "Python 3 and pip are required. Please install them and try again."
 fi
 
-# Step 1: Clone the repository and change directory
-#echo "Step 1: Cloning the repository and changing directory..."
-#git clone https://github.com/B3H1Z/Hiddify-Telegram-Bot.git /opt/Hiddify-Telegram-Bot || display_error_and_exit "Failed to clone the repository."
-#cd /opt/Hiddify-Telegram-Bot || display_error_and_exit "Failed to change directory."
+ Step 1: Clone the repository and change directory
+echo "Step 1: Cloning the repository and changing directory..."
+git clone https://github.com/B3H1Z/Hiddify-Telegram-Bot.git /opt/Hiddify-Telegram-Bot || display_error_and_exit "Failed to clone the repository."
+cd /opt/Hiddify-Telegram-Bot || display_error_and_exit "Failed to change directory."
 
 # Step 2: Install requirements
 echo "Step 2: Installing requirements..."
