@@ -1,11 +1,9 @@
 # Description: API for connecting to the panel
-import os
+
+from config import *
+import template
 import re
 from datetime import datetime
-from urllib.parse import urlparse
-import requests
-from bs4 import BeautifulSoup
-from config import *
 import psutil
 import logging
 
@@ -61,259 +59,78 @@ def post_request(url, data):
         return False
 
 
-# Send request to users page - return bs4 object
-def users_page(only_first_page=False):
-    logging.info(f"Request for users page")
+def users_to_dict(users_dict):
+    users_array = []
+    for user in users_dict:
+        users_array.append({'id': user[0], 'uuid': user[1], 'name': user[2], 'last_online': user[3],
+                            'expiry_time': user[4],
+                            'usage_limit_GB': user[5], 'package_days': user[6], 'mode': user[7],
+                            'monthly': user[8], 'start_date': user[9], 'current_usage_GB': user[10],
+                            'last_reset_time': user[11], 'comment': user[12], 'telegram_id': user[13],
+                            'added_by': user[14], 'max_ips': user[15], 'enable': user[16]})
+    return users_array
 
-    global session
-    pages = []
-    page_num = 0
-    users_per_page = 50
-    users_url = PANEL_URL + USERS_DIR
 
-    while True:
-        req = get_request(users_url + f"?page={page_num}")
-        if not req:
-            return False
+def calculate_remaining_days(start_date, package_days):
+    import datetime
+    if start_date is None:
+        return package_days
+    start_date = datetime.datetime.strptime(start_date, "%Y-%m-%d")
+    remaining_days = package_days - (datetime.datetime.now() - start_date).days
+    return remaining_days
 
-        try:
-            soup = BeautifulSoup(req.text, "html.parser")
 
-            table = soup.find("table", {"class": "table table-bordered table-hover"})
-            rows = table.find_all("tr")
-            rows.pop(0)
+def calculate_remaining_usage(usage_limit_GB, current_usage_GB):
+    remaining_usage = usage_limit_GB - current_usage_GB
+    return round(remaining_usage, 2)
 
-            # If that page is empty
-            if len(rows) == 1:
-                try:
-                    no_user_message = rows[0].find("div", {"class": "text-center"})
-                    if no_user_message:
-                        break
-                except:
-                    pass
 
-            pages.append(soup)
-
-            if only_first_page:
-                return soup
-
-            if len(rows) >= users_per_page:
-                page_num += 1
-                continue
-            else:
-                break
-        except Exception as e:
-            logging.exception(f"Parse BeautifulSoup Exception: {e}")
-            return False
-    return pages
+def calculate_remaining_last_online(last_online_date_time):
+    import datetime
+    if last_online_date_time == "0001-01-01 00:00:00.000000":
+        return template.MESSAGES['NEVER']
+    last_online_date_time = datetime.datetime.strptime(last_online_date_time, "%Y-%m-%d %H:%M:%S.%f")
+    last_online_time = (datetime.datetime.now() - last_online_date_time)
+    last_online = template.last_online_time_template(last_online_time)
+    return last_online
 
 
 # List users - return list of all users
-def list_users():
+def users_list():
     logging.info(f"Parse users page")
     users_list = []
+    users = DB.select_users()
+    users = users_to_dict(users)
+    for user in users:
+        users_list.append({
+            "name": user['name'],
+            "usage": {
+                'usage_limit_GB': round(user['usage_limit_GB'], 2),
+                'current_usage_GB': round(user['current_usage_GB'], 2),
+                'remaining_usage_GB': calculate_remaining_usage(user['usage_limit_GB'], user['current_usage_GB'])
+            },
+            "remaining_day": calculate_remaining_days(user['start_date'], user['package_days']),
+            "comment": user['comment'],
+            "last_connection": calculate_remaining_last_online(user['last_online']) if user['last_online'] else None,
+            "uuid": user['uuid'],
+            "link": f"{BASE_URL}/{urlparse(PANEL_URL).path.split('/')[1]}/{user['uuid']}/",
+            "mode": user['mode'],
+            "enable": user['enable'],
+        })
 
-    pages = users_page()
-    if not pages:
-        return False
-
-    for page in pages:
-        table = page.find("table", {"class": "table table-bordered table-hover"})
-        rows = table.find_all("tr")
-        rows.pop(0)
-
-        for row in rows:
-            uuid = row.find("td", {"class": "col-uuid"})
-            name = row.find("td", {"class": "col-name"})
-            if name.find("i", {"class": "fa-solid fa-circle-check text-success"}):
-                enable = "y"
-            else:
-                enable = "n"
-            usage = row.find("td", {"class": "col-current_usage_GB"})
-            remaining_day = row.find("td", {"class": "col-remaining_days"})
-            comment = row.find("td", {"class": "col-comment"})
-            last_connection = row.find("td", {"class": "col-last_online"})
-            mode = row.find("td", {"class": "col-mode"})
-
-            delete_info = row.find("td", {"class": "list-buttons-column"})
-
-            delete_url_action = delete_info.find("form")['action']
-
-            delete_id_param = delete_info.find("input", {"id": "id"})['value']
-            delete_url_param = delete_info.find("input", {"id": "url"})['value']
-            delete_csrf_param = row.find("input", {"name": "csrf_token"})['value']
-            try:
-                edit_url = row.find("a", {"title": "Edit Record"})['href']
-            except:
-                edit_url = row.find("a", {"title": "ویرایش رکورد"})['href']
-
-            users_list.append({
-                "name": name.text.strip(),
-                "usage": usage.text.strip(),
-                "remaining_day": remaining_day.text.strip(),
-                "comment": comment.text.strip(),
-                "last_connection": last_connection.text.strip(),
-                "uuid": uuid.text.strip(),
-                "link": f"{BASE_URL}/{urlparse(PANEL_URL).path.split('/')[1]}/{uuid.text.strip()}/",
-                "edit_url": edit_url,
-                "mode": mode.text.strip(),
-                "enable": enable,
-                "delete": {
-                    "action": delete_url_action,
-                    "id": delete_id_param,
-                    "url": delete_url_param,
-                    "csrf": delete_csrf_param
-                }
-            })
     return users_list
 
 
 # Get single user info - return dict of user info
 def user_info(uuid):
     logging.info(f"Get info of user single user - {uuid}")
-    lu = list_users()
+    lu = users_list()
     if not lu:
         return False
     for user in lu:
         if user['uuid'] == uuid:
             return user
     return False
-
-
-# Add user - return UUID of created user
-def add_user(name, usage_limit_GB=100, package_days=30, mode="no_reset", comment="", enable="y"):
-    logging.info(f"Add user")
-    page = users_page(only_first_page=True)
-    if not page:
-        return False
-    try:
-        add_user_btn = page.find("a", {"title": "Create New Record"})['href']
-    except:
-        add_user_btn = page.find("a", {"title": "ایجاد رکورد جدید"})['href']
-
-    add_user_page_url = BASE_URL + add_user_btn
-    add_get_req = get_request(add_user_page_url)
-    if not add_get_req:
-        return False
-    if add_get_req.status_code != 200:
-        return False
-
-    try:
-        soup = BeautifulSoup(add_get_req.text, "html.parser")
-    except Exception as e:
-        logging.exception(f"Parse BeautifulSoup Exception: {e}")
-        return False
-
-    csrf_token = soup.find("input", {"name": "csrf_token"})['value']
-    uuid = soup.find("input", {"name": "uuid"})['value']
-
-    params = {
-        "csrf_token": csrf_token,
-        "uuid": uuid,
-        "name": name,
-        "usage_limit_GB": usage_limit_GB,
-        "package_days": package_days,
-        "mode": mode,
-        "comment": comment,
-        "enable": enable
-    }
-
-    add_post_req = post_request(add_user_page_url, data=params)
-    if not add_post_req:
-        return False
-    if add_post_req.status_code == 200:
-        return uuid
-
-
-# Delete user - return True if user deleted
-def delete_user(uuid):
-    logging.info(f"Delete user - {uuid}")
-    users = list_users()
-
-    for user in users:
-        if user['uuid'] == uuid:
-            delete_user_url = BASE_URL + user['delete']['action']
-            params = {
-                "id": user['delete']['id'],
-                "url": user['delete']['url'],
-                "csrf_token": user['delete']['csrf']
-            }
-            delete_req = post_request(delete_user_url, data=params)
-            if not delete_req:
-                return False
-            if delete_req.status_code == 200:
-                return True
-            else:
-                return False
-
-
-# Edit user - return True if user edited
-def edit_user(uuid, **kwargs):
-    logging.info(f"Edit user - {uuid}")
-    user = user_info(uuid)
-    if not user:
-        return False
-
-    edit_user_page_url = BASE_URL + user['edit_url']
-    edit_get_req = get_request(edit_user_page_url)
-    if not edit_get_req:
-        return False
-    if edit_get_req.status_code != 200:
-        return False
-
-    soup = BeautifulSoup(edit_get_req.text, "html.parser")
-    csrf_token = soup.find("input", {"name": "csrf_token"})['value']
-    uuid = soup.find("input", {"name": "uuid"})['value']
-    name = soup.find("input", {"name": "name"})['value']
-    usage_limit_GB = soup.find("input", {"name": "usage_limit_GB"})['value']
-    package_days = soup.find("input", {"name": "package_days"})['value']
-    mode = soup.find("select", {"name": "mode"}).find("option", selected=True)['value']
-    comment = soup.find("input", {"name": "comment"}).text.strip()
-    enable = soup.find("input", {"name": "enable"})['value']
-
-    if not kwargs:
-        return False
-    if "name" in kwargs:
-        name = kwargs['name']
-    if "usage_limit_GB" in kwargs:
-        usage_limit_GB = kwargs['usage_limit_GB']
-    if "remaining_days" in kwargs:
-        package_days = kwargs['remaining_days']
-    if "mode" in kwargs:
-        mode = kwargs['mode']
-    if "comment" in kwargs:
-        comment = kwargs['comment']
-    if "enable" in kwargs:
-        enable = kwargs['enable']
-    if "reset_usage" in kwargs:
-        reset_usage = kwargs['reset_usage']
-    else:
-        reset_usage = False
-    if "reset_days" in kwargs:
-        reset_days = kwargs['reset_days']
-    else:
-        reset_days = False
-
-    params = {
-        "csrf_token": csrf_token,
-        "uuid": uuid,
-        "name": name,
-        "usage_limit_GB": usage_limit_GB,
-        "package_days": package_days,
-        "mode": mode,
-        "comment": comment,
-        "enable": enable
-    }
-    if reset_usage:
-        params['reset_usage'] = reset_usage
-    if reset_days:
-        params['reset_days'] = reset_days
-
-    add_post_req = post_request(edit_user_page_url, data=params)
-    if not add_post_req:
-        return False
-    if add_post_req.status_code == 200:
-        return True
 
 
 def sub_links(uuid):
@@ -412,7 +229,7 @@ def system_status():
 
 # Search user by name
 def search_user_by_name(name):
-    users = list_users()
+    users = users_list()
     if not users:
         return False
     res = []
@@ -426,7 +243,7 @@ def search_user_by_name(name):
 
 # Search user by uuid
 def search_user_by_uuid(uuid):
-    users = list_users()
+    users = users_list()
     if not users:
         return False
     for user in users:
@@ -442,7 +259,6 @@ def base64decoder(s):
         conf = base64.b64decode(s).decode("utf-8")
         conf = json.loads(conf)
     except Exception as e:
-        logging.exception(f"Parse BeautifulSoup Exception: {e}")
         conf = False
 
     return conf

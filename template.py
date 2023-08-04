@@ -101,8 +101,9 @@ MESSAGES = {
         'NEW_USER_INFO': "[New User Info]",
         'EDITED_USER_INFO': "[User Info Updated]",
         'GB': 'GB',
-        'DAY': 'Day',
+        'DAY_EXPIRE': 'Days',
         'INFO_USAGE': '📊Usage:',
+        'OF': 'of',
         'INFO_REMAINING_DAYS': '📆Remaining Days:',
         'INFO_LAST_CONNECTION': '📶Last Connection:',
         'INFO_COMMENT': '📝Comment:',
@@ -116,6 +117,14 @@ MESSAGES = {
         'SEARCH_USER_UUID': 'Please enter the UUID of the user: ',
         'SEARCH_USER_CONFIG': 'Please enter one of the config of the user: ',
         'SEARCH_RESULT': '[Search Result]',
+        'MONTH': 'Months',
+        'WEEK': 'Weeks',
+        'DAY': 'Days',
+        'HOUR': 'Hours',
+        'MINUTE': 'Minutes',
+        'ONLINE': 'Online',
+        'AGO': "ago",
+        'NEVER': 'Never',
 
     },
     'FA': {
@@ -152,8 +161,9 @@ MESSAGES = {
         'NEW_USER_INFO': "[اطلاعات کاربر جدید]",
         'EDITED_USER_INFO': "[اطلاعات کاربر به‌روزرسانی شد]",
         'GB': 'گیگابایت',
-        'DAY': 'روز',
+        'DAY_EXPIRE': 'روز دیگر',
         'INFO_USAGE': '📊مصرف:',
+        'OF': 'از',
         'INFO_REMAINING_DAYS': '📆انقضا:',
         'INFO_LAST_CONNECTION': '📶آخرین اتصال:',
         'INFO_COMMENT': '📝یادداشت:',
@@ -167,6 +177,14 @@ MESSAGES = {
         'SEARCH_USER_UUID': 'لطفاً UUID کاربر را وارد کنید: ',
         'SEARCH_USER_CONFIG': 'لطفاً یکی از کانفیگ های کاربر را وارد کنید: ',
         'SEARCH_RESULT': '[نتیجه جستجو]',
+        'MONTH': 'ماه',
+        'WEEK': 'هفته',
+        'DAY': 'روز',
+        'HOUR': 'ساعت',
+        'MINUTE': 'دقیقه',
+        'ONLINE': 'آنلاین',
+        'AGO': 'پیش',
+        'NEVER': 'هرگز',
 
     }
 
@@ -188,12 +206,14 @@ BOT_COMMANDS = BOT_COMMANDS[LANG]
 
 # Single User Info Message Template
 def user_info_template(usr, header=""):
+    if not usr['comment']:
+        usr['comment'] = "-"
     return f"""
 {header}
 {MESSAGES['INFO_USER']} <a href='{usr['link']}'> {usr['name']} </a>
 --------------------------------
-{MESSAGES['INFO_USAGE']} {usr['usage']}
-{MESSAGES['INFO_REMAINING_DAYS']} {usr['remaining_day']}
+{MESSAGES['INFO_USAGE']} {usr['usage']['current_usage_GB']} {MESSAGES['OF']} {usr['usage']['usage_limit_GB']} {MESSAGES['GB']}
+{MESSAGES['INFO_REMAINING_DAYS']} {usr['remaining_day']} {MESSAGES['DAY_EXPIRE']}
 {MESSAGES['INFO_LAST_CONNECTION']} {usr['last_connection']}
 {MESSAGES['INFO_COMMENT']} {usr['comment']}
             """
@@ -204,7 +224,7 @@ def users_list_template(users, heder=""):
     # Number of Online Users
     online_users = 0
     for user in users:
-        if user['last_connection'] == "Online":
+        if user['last_connection'] == "Online" or user['last_connection'] == "آنلاین":
             online_users += 1
 
     return f"""
@@ -238,3 +258,20 @@ def system_status_template(status):
 <b> RAM: </b> {status['ram']}%
 <b> DISK: </b> {status['disk']}%
 """
+
+
+def last_online_time_template(last_online_time):
+    if last_online_time.days >= 30:
+        return f"{last_online_time.days // 30} {MESSAGES['MONTH']} {MESSAGES['AGO']} "
+    elif last_online_time.days >= 7:
+        return f"{last_online_time.days // 7} {MESSAGES['WEEK']} {MESSAGES['AGO']}"
+    elif last_online_time.days > 0:
+        return f"{last_online_time.days} {MESSAGES['DAY']} {MESSAGES['AGO']}"
+    elif last_online_time.seconds > 3600:
+        return f"{last_online_time.seconds // 3600} {MESSAGES['HOUR']} {MESSAGES['AGO']}"
+    elif last_online_time.seconds <= 5 * 60:
+        return f"{MESSAGES['ONLINE']}"
+    elif last_online_time.seconds > 60:
+        return f"{last_online_time.seconds // 60} {MESSAGES['MINUTE']} {MESSAGES['AGO']}"
+    else:
+        return MESSAGES['NEVER']

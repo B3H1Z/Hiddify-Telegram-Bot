@@ -74,7 +74,7 @@ def add_user_usage_days(message):
     add_user_data['usage_days'] = message.text
     bot.send_message(message.chat.id,
                      f"{MESSAGES['ADD_USER_CONFIRM']}\n\n{MESSAGES['INFO_USER']} {add_user_data['name']}\n"
-                     f"{MESSAGES['INFO_USAGE']} {add_user_data['limit']} GB\n{MESSAGES['INFO_REMAINING_DAYS']} {add_user_data['usage_days']} {MESSAGES['DAY']}",
+                     f"{MESSAGES['INFO_USAGE']} {add_user_data['limit']} {MESSAGES['GB']}\n{MESSAGES['INFO_REMAINING_DAYS']} {add_user_data['usage_days']} {MESSAGES['DAY']}",
                      reply_markup=confirm_add_user_markup())
     bot.register_next_step_handler(message, confirm_add_user)
 
@@ -86,8 +86,8 @@ def confirm_add_user(message):
         return
     if message.text == KEY_MARKUP['CONFIRM']:
         msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'])
-        res = api.add_user(name=add_user_data['name'], usage_limit_GB=add_user_data['limit'],
-                           package_days=add_user_data['usage_days'])
+        res = DB.add_default_user(name=add_user_data['name'], package_days=int(add_user_data['usage_days']),
+                                  usage_limit_GB=int(add_user_data['limit']), added_by=int(PANEL_ADMIN_ID))
         if res:
             bot.send_message(message.chat.id, MESSAGES['SUCCESS_ADD_USER'], reply_markup=main_menu_keyboard_markup())
             usr = api.user_info(res)
@@ -111,7 +111,7 @@ def edit_user_name(message, uuid):
     if is_it_cancel(message):
         return
     msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=while_edit_user_markup())
-    status = api.edit_user(uuid, name=message.text)
+    status = DB.edit_user(uuid, name=message.text)
     bot.delete_message(message.chat.id, msg_wait.message_id)
     if not status:
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=main_menu_keyboard_markup())
@@ -127,12 +127,12 @@ def edit_user_usage(message, uuid):
     if not is_it_digit(message):
         return
     msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=while_edit_user_markup())
-    status = api.edit_user(uuid, usage_limit_GB=message.text)
+    status = DB.edit_user(uuid, usage_limit_GB=int(message.text))
     bot.delete_message(message.chat.id, msg_wait.message_id)
     if not status:
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=main_menu_keyboard_markup())
         return
-    bot.send_message(message.chat.id, f"{MESSAGES['SUCCESS_USER_USAGE_EDITED']} {message.text} ",
+    bot.send_message(message.chat.id, f"{MESSAGES['SUCCESS_USER_USAGE_EDITED']} {message.text} {MESSAGES['GB']}",
                      reply_markup=main_menu_keyboard_markup())
 
 
@@ -143,12 +143,12 @@ def edit_user_days(message, uuid):
     if not is_it_digit(message):
         return
     msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=while_edit_user_markup())
-    status = api.edit_user(uuid, remaining_days=message.text)
+    status = DB.edit_user(uuid, package_days=int(message.text))
     bot.delete_message(message.chat.id, msg_wait.message_id)
     if not status:
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=main_menu_keyboard_markup())
         return
-    bot.send_message(message.chat.id, f"{MESSAGES['SUCCESS_USER_DAYS_EDITED']} {message.text} ",
+    bot.send_message(message.chat.id, f"{MESSAGES['SUCCESS_USER_DAYS_EDITED']} {message.text} {MESSAGES['DAY_EXPIRE']} ",
                      reply_markup=main_menu_keyboard_markup())
 
 
@@ -157,7 +157,7 @@ def edit_user_comment(message, uuid):
     if is_it_cancel(message):
         return
     msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=while_edit_user_markup())
-    status = api.edit_user(uuid, comment=message.text)
+    status = DB.edit_user(uuid, comment=message.text)
     bot.delete_message(message.chat.id, msg_wait.message_id)
     if not status:
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=main_menu_keyboard_markup())
@@ -240,7 +240,7 @@ def callback_query(call):
 
     # Next Page Callback
     elif key == "next":
-        users_list = api.list_users()
+        users_list = api.users_list()
         if not users_list:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'])
             return
@@ -250,7 +250,7 @@ def callback_query(call):
     # ----------------------------------- Single User Info Area Callbacks -----------------------------------
     # Delete User Callback
     elif key == "user_delete":
-        status = api.delete_user(uuid)
+        status = DB.delete_user(uuid=uuid)
         if not status:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=main_menu_keyboard_markup())
             return
@@ -284,7 +284,7 @@ def callback_query(call):
         bot.register_next_step_handler(call.message, edit_user_usage, uuid)
     # Edit User - Reset Usage Callback
     elif key == "user_edit_reset_usage":
-        status = api.edit_user(uuid, reset_usage="y")
+        status = DB.reset_package_usage(uuid=uuid)
         if not status:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=main_menu_keyboard_markup())
             return
@@ -295,7 +295,7 @@ def callback_query(call):
         bot.register_next_step_handler(call.message, edit_user_days, uuid)
     # Edit User - Reset Days Callback
     elif key == "user_edit_reset_days":
-        status = api.edit_user(uuid, reset_days="y")
+        status = DB.reset_package_days(uuid=uuid)
         if not status:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=main_menu_keyboard_markup())
             return
@@ -439,7 +439,7 @@ def send_welcome(message):
 # Send users list Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['USERS_LIST'])
 def all_users_list(message):
-    users_list = api.list_users()
+    users_list = api.users_list()
     if not users_list:
         bot.send_message(message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'])
         return
