@@ -23,6 +23,8 @@
 
 با استفاده از این ربات می‌توانید پنل هیدیفای خود را از طریق تلگرام مدیریت کنید.
 
+این ربات را **در همان سرور** پنل هیدیفای خود نصب کنید.
+
 > ما در نسخه آزمایشی (BETA) هستیم و در حال بهبود آن هستیم. لطفاً اگر باگ یا مشکلی دیدید، با ما در ارتباط باشید.
 
 لطفاً توجه داشته باشید که این ربات <b>رسمی نیست</b> و ارتباطی با تیم هیدیفای ندارد.
@@ -73,6 +75,10 @@ sudo bash -c "$(curl -Lfo- https://raw.githubusercontent.com/B3H1Z/Hiddify-Teleg
  اطلاعات پیکربندی ربات
 
       cat /opt/Hiddify-Telegram-Bot/config.json
+ 
+ تغییر پیکربندی ربات
+
+      cd /opt/Hiddify-Telegram-Bot/ && python3 config.py && ./restart.sh
 
 ## اسکرین شات‌ها
 - <img src="https://github.com/B3H1Z/Hiddify-Telegram-Bot/blob/main/screenshots/Keyboard.PNG?raw=True" width=50% height=50%>
