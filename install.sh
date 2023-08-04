@@ -17,9 +17,9 @@ if ! command -v python3 &>/dev/null || ! command -v pip &>/dev/null; then
 fi
 
 # Step 1: Clone the repository and change directory
-echo "Step 1: Cloning the repository and changing directory..."
-git clone https://github.com/B3H1Z/Hiddify-Telegram-Bot.git /opt/Hiddify-Telegram-Bot || display_error_and_exit "Failed to clone the repository."
-cd /opt/Hiddify-Telegram-Bot || display_error_and_exit "Failed to change directory."
+#echo "Step 1: Cloning the repository and changing directory..."
+#git clone https://github.com/B3H1Z/Hiddify-Telegram-Bot.git /opt/Hiddify-Telegram-Bot || display_error_and_exit "Failed to clone the repository."
+#cd /opt/Hiddify-Telegram-Bot || display_error_and_exit "Failed to change directory."
 
 # Step 2: Install requirements
 echo "Step 2: Installing requirements..."
@@ -28,6 +28,27 @@ pip install -r requirements.txt || display_error_and_exit "Failed to install req
 # Step 3: Run config.py to generate config.json
 echo "Step 3: Running config.py to generate config.json..."
 python3 config.py || display_error_and_exit "Failed to run config.py."
+
+echo "Making a copy of /opt/hiddify-config/hiddify-panel/hiddifypanel.db"
+if [ -f "/opt/hiddify-config/hiddify-panel/hiddifypanel.db" ]
+then
+    echo "File /opt/hiddify-config/hiddify-panel/hiddifypanel.db exists."
+else
+    echo "Error: File /opt/hiddify-config/hiddify-panel/hiddifypanel.db does not exists."
+    echo "Please install hiddify-panel and try again."
+    exit 1
+fi
+
+if [ -d "/opt/Hiddify-Telegram-Bot/backup/DB" ]
+then
+    echo "Directory /opt/Hiddify-Telegram-Bot/backup/DB exists."
+else
+    echo "Creating directory /opt/Hiddify-Telegram-Bot/backup/DB"
+    mkdir -p /opt/Hiddify-Telegram-Bot/backup/DB
+fi
+cp /opt/hiddify-config/hiddify-panel/hiddifypanel.db /opt/Hiddify-Telegram-Bot/backup/DB/hiddifypanel.db
+
+
 
 # Step 4: Run the bot in the background using nohup
 echo "Step 4: Running the bot in the background..."
