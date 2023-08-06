@@ -48,7 +48,7 @@ cp /opt/hiddify-config/hiddify-panel/hiddifypanel.db /opt/Hiddify-Telegram-Bot/B
 
 # Step 4: Run the bot in the background using nohup
 echo "Step 4: Running the bot in the background..."
-nohup python3 hidyBot.py >/dev/null 2>&1 &
+nohup python3 hiddifyTelegramBot.py >/dev/null 2>&1 &
 
 # Step 5: Add cron job to start the bot on reboot
 echo "Step 5: Adding cron job to start the bot on reboot..."
@@ -63,7 +63,7 @@ chmod +x /opt/Hiddify-Telegram-Bot/update.sh
 sleep 5
 
 # Check if the bot process is running
-if pgrep -f "python3 hidyBot.py" >/dev/null; then
+if pgrep -f "python3 hiddifyTelegramBot.py" >/dev/null; then
   echo "Bot setup completed successfully!"
   echo "Send [/start] in telegram bot"
 else
