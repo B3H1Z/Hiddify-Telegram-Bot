@@ -1,6 +1,6 @@
 # Description: This file contains all the reply and inline keyboard markups used in the bot.
 from telebot.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
-from template import KEY_MARKUP
+from AdminBot.template import KEY_MARKUP
 
 # Main Menu Reply Keyboard Markup
 def main_menu_keyboard_markup():

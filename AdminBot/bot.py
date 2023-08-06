@@ -1,7 +1,7 @@
 # Description: Main Bot File
 from config import *
-from template import *
-from markup import *
+from AdminBot.template import *
+from AdminBot.markup import *
 import api
 import telebot
 
@@ -148,7 +148,8 @@ def edit_user_days(message, uuid):
     if not status:
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=main_menu_keyboard_markup())
         return
-    bot.send_message(message.chat.id, f"{MESSAGES['SUCCESS_USER_DAYS_EDITED']} {message.text} {MESSAGES['DAY_EXPIRE']} ",
+    bot.send_message(message.chat.id,
+                     f"{MESSAGES['SUCCESS_USER_DAYS_EDITED']} {message.text} {MESSAGES['DAY_EXPIRE']} ",
                      reply_markup=main_menu_keyboard_markup())
 
 
@@ -240,7 +241,7 @@ def callback_query(call):
 
     # Next Page Callback
     elif key == "next":
-        users_list = api.users_list()
+        users_list = api.dict_process(api.users_to_dict(DB.select_users()))
         if not users_list:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'])
             return
@@ -321,6 +322,9 @@ def callback_query(call):
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
             return
         configs = api.sub_parse(sub['sub_link'])
+        if not configs:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_CONFIG_NOT_FOUND'])
+            return
         if not configs['vless']:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_CONFIG_NOT_FOUND'])
             return
@@ -337,6 +341,9 @@ def callback_query(call):
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
             return
         configs = api.sub_parse(sub['sub_link'])
+        if not configs:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_CONFIG_NOT_FOUND'])
+            return
         if not configs['vmess']:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_CONFIG_NOT_FOUND'])
             return
@@ -353,6 +360,9 @@ def callback_query(call):
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
             return
         configs = api.sub_parse(sub['sub_link'])
+        if not configs:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_CONFIG_NOT_FOUND'])
+            return
         if not configs['trojan']:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_CONFIG_NOT_FOUND'])
             return
@@ -439,7 +449,7 @@ def send_welcome(message):
 # Send users list Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['USERS_LIST'])
 def all_users_list(message):
-    users_list = api.users_list()
+    users_list = api.dict_process(api.users_to_dict(DB.select_users()))
     if not users_list:
         bot.send_message(message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'])
         return
