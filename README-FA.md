@@ -68,7 +68,7 @@ sudo bash -c "$(curl -Lfo- https://raw.githubusercontent.com/B3H1Z/Hiddify-Teleg
       cd /opt/Hiddify-Telegram-Bot/ && chmod +x restart.sh && ./restart.sh
  متوقف کردن ربات
 
-      pkill -9 -f hiddifyTelegramBot.py
+      pkill -9 -f hidyBot.py
  دریافت لاگ های ربات
 
       cat /opt/Hiddify-Telegram-Bot/hiddify-telegram-bot.log
@@ -81,12 +81,12 @@ sudo bash -c "$(curl -Lfo- https://raw.githubusercontent.com/B3H1Z/Hiddify-Teleg
       cd /opt/Hiddify-Telegram-Bot/ && python3 config.py && ./restart.sh
 
 ## اسکرین شات‌ها
-- <img src="https://github.com/B3H1Z/Hiddify-Telegram-Bot/blob/main/screenshots/Keyboard.PNG?raw=True" width=50% height=50%>
-- <img src="https://github.com/B3H1Z/Hiddify-Telegram-Bot/blob/main/screenshots/UsersList.PNG?raw=True" width=50% height=50%>
-- <img src="https://github.com/B3H1Z/Hiddify-Telegram-Bot/blob/main/screenshots/UserInfo.PNG?raw=True" width=50% height=50%>
-- <img src="https://github.com/B3H1Z/Hiddify-Telegram-Bot/blob/main/screenshots/EditUser.PNG?raw=True" width=50% height=50%>
-- <img src="https://github.com/B3H1Z/Hiddify-Telegram-Bot/blob/main/screenshots/ConfigAndSub.PNG?raw=True" width=50% height=50%>
-- <img src="https://github.com/B3H1Z/Hiddify-Telegram-Bot/blob/main/screenshots/Search.PNG?raw=True" width=50% height=50%>
-- <img src="https://github.com/B3H1Z/Hiddify-Telegram-Bot/blob/main/screenshots/AddUser.PNG?raw=True" width=50% height=50%>
-- <img src="https://github.com/B3H1Z/Hiddify-Telegram-Bot/blob/main/screenshots/BackupAndStartus.PNG?raw=True" width=50% height=50%>
+- <img src="https://github.com/B3H1Z/Hiddify-Telegram-Bot/blob/main/Screenshots/Keyboard.PNG?raw=True" width=50% height=50%>
+- <img src="https://github.com/B3H1Z/Hiddify-Telegram-Bot/blob/main/Screenshots/UsersList.PNG?raw=True" width=50% height=50%>
+- <img src="https://github.com/B3H1Z/Hiddify-Telegram-Bot/blob/main/Screenshots/UserInfo.PNG?raw=True" width=50% height=50%>
+- <img src="https://github.com/B3H1Z/Hiddify-Telegram-Bot/blob/main/Screenshots/EditUser.PNG?raw=True" width=50% height=50%>
+- <img src="https://github.com/B3H1Z/Hiddify-Telegram-Bot/blob/main/Screenshots/ConfigAndSub.PNG?raw=True" width=50% height=50%>
+- <img src="https://github.com/B3H1Z/Hiddify-Telegram-Bot/blob/main/Screenshots/Search.PNG?raw=True" width=50% height=50%>
+- <img src="https://github.com/B3H1Z/Hiddify-Telegram-Bot/blob/main/Screenshots/AddUser.PNG?raw=True" width=50% height=50%>
+- <img src="https://github.com/B3H1Z/Hiddify-Telegram-Bot/blob/main/Screenshots/BackupAndStartus.PNG?raw=True" width=50% height=50%>
 
