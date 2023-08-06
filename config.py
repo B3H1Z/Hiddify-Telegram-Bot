@@ -6,13 +6,19 @@ from urllib.parse import urlparse
 import requests
 from termcolor import colored
 from db import DBManager
+from UserBot.telegramDB import TelegramDBManager
 
-logging.basicConfig(handlers=[logging.FileHandler(filename="hiddify-telegram-bot.log",
+DB_LOC = "/opt/hiddify-config/hiddify-panel/hiddifypanel.db"
+# DB_LOC = os.path.join(os.getcwd(), "hiddifypanel.db")
+TELEGRAM_DB_LOC = os.path.join(os.getcwd(), "UserBot", "telegram.db")
+CONF_LOC = os.path.join(os.getcwd(), "config.json")
+LOG_LOC = os.path.join(os.getcwd(), "hiddify-telegram-bot.log")
+
+logging.basicConfig(handlers=[logging.FileHandler(filename=LOG_LOC,
                                                   encoding='utf-8', mode='w')],
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
-DB_LOC = "/opt/hiddify-config/hiddify-panel/hiddifypanel.db"
-# DB_LOC = "hiddifypanel.db"
+
 try:
     # Check is database file exists
     if not os.path.exists(DB_LOC):
@@ -23,40 +29,66 @@ except Exception as e:
     logging.error(f"Error while connecting to database \n Error:{e}")
     raise Exception("Error while connecting to database")
 
+TELEGRAM_DB = None
+
+
+def setup_telegram_db():
+    global TELEGRAM_DB
+    try:
+        if not os.path.exists(TELEGRAM_DB_LOC):
+            logging.error(f"Database file not found in {TELEGRAM_DB_LOC} directory!")
+            # Create database file
+            with open(TELEGRAM_DB_LOC, "w") as f:
+                pass
+        TELEGRAM_DB = TelegramDBManager(TELEGRAM_DB_LOC)
+        TELEGRAM_DB.create_user_table()
+    except Exception as e:
+        logging.error(f"Error while connecting to database \n Error:{e}")
+        raise Exception("Error while connecting to database")
+    return TELEGRAM_DB
+
 
 def is_config_exists():
     try:
-        with open("config.json", "r") as f:
+        with open(CONF_LOC, "r") as f:
             return True
     except FileNotFoundError:
         return False
 
 
-def create_config_file(admin_id, token, url, lang):
-    with open("config.json", "w") as f:
+def create_config_file(admin_id, token, url, lang, client_token):
+    with open(CONF_LOC, "w") as f:
         json.dump({
             "admin_id": admin_id,
             "token": token,
             "url": url,
-            "lang": lang
+            "lang": lang,
+            "client_token": client_token
         }, f, indent=4)
 
 
 def read_config_file():
     if not is_config_exists():
         print(colored("Config file not found! Please run config.py script first!", "red"))
-        raise FileNotFoundError("config.json file not found!")
-    with open("config.json", "r") as f:
+        raise FileNotFoundError(f"{CONF_LOC} file not found!")
+    with open(CONF_LOC, "r") as f:
         return json.load(f)
 
 
-ADMINS_ID, TELEGRAM_TOKEN, PANEL_URL, LANG, PANEL_ADMIN_ID = None, None, None, None, None
+ADMINS_ID, TELEGRAM_TOKEN, CLIENT_TOKEN, PANEL_URL, LANG, PANEL_ADMIN_ID = None, None, None, None, None, None
 
 
 def set_variables(json):
-    global ADMINS_ID, TELEGRAM_TOKEN, PANEL_URL, LANG, PANEL_ADMIN_ID
+    global ADMINS_ID, TELEGRAM_TOKEN, PANEL_URL, LANG, PANEL_ADMIN_ID, CLIENT_TOKEN
     ADMINS_ID = json["admin_id"]
     TELEGRAM_TOKEN = json["token"]
+    try:
+        CLIENT_TOKEN = json["client_token"]
+    except KeyError:
+        CLIENT_TOKEN = None
+
+    if CLIENT_TOKEN:
+        setup_telegram_db()
     PANEL_URL = json["url"]
     LANG = json["lang"]
     PANEL_ADMIN_ID = DB.find_admins(uuid=urlparse(PANEL_URL).path.split('/')[2])[0][0]
@@ -106,7 +138,7 @@ def set_by_user():
 
     print(colored("Example: 123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ\n[get it from @BotFather]", "yellow"))
     while True:
-        token = input("Enter your bot token: ")
+        token = input("Enter your Admin bot token: ")
         if not token:
             print(colored("Token is required!", "red"))
             continue
@@ -134,7 +166,28 @@ def set_by_user():
             continue
         break
 
-    return admin_ids, token, url, lang
+    print(colored("You can use the bot as a userbot for your clients!", "yellow"))
+    while True:
+        userbot = input("Do you want a  Bot for your users? (y/n): ").lower()
+        if userbot not in ["y", "n"]:
+            print(colored("Please enter y or n!", "red"))
+            continue
+        break
+    if userbot == "y":
+        print(colored("Example: 123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ\n[get it from @BotFather]", "yellow"))
+        while True:
+            client_token = input("Enter your client (For Users) bot token: ")
+            if not client_token:
+                print(colored("Token is required!", "red"))
+                continue
+            if client_token == token:
+                print(colored("Client token must be different from Admin token!", "red"))
+                continue
+            break
+    else:
+        client_token = None
+
+    return admin_ids, token, url, lang, client_token
 
 
 if __name__ == '__main__':

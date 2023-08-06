@@ -27,7 +27,7 @@ class DBManager:
             logging.error(f"Error while selecting all users \n Error:{e}")
             return None
 
-    def find_user(self, **kwargs):
+    def find_user(self, only_one=False, **kwargs):
         if len(kwargs) != 1:
             logging.warning("You can only use one key to find user!")
             return None
@@ -40,6 +40,8 @@ class DBManager:
             if len(rows) == 0:
                 logging.info(f"User {kwargs} not found!")
                 return None
+            if only_one:
+                return rows[0]
             return rows
         except Error as e:
             logging.error(f"Error while finding user {kwargs} \n Error:{e}")

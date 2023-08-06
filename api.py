@@ -1,7 +1,7 @@
 # Description: API for connecting to the panel
 
 from config import *
-import template
+import AdminBot.template
 import re
 from datetime import datetime
 import psutil
@@ -60,6 +60,8 @@ def post_request(url, data):
 
 
 def users_to_dict(users_dict):
+    if not users_dict:
+        return False
     users_array = []
     for user in users_dict:
         users_array.append({'id': user[0], 'uuid': user[1], 'name': user[2], 'last_online': user[3],
@@ -88,20 +90,20 @@ def calculate_remaining_usage(usage_limit_GB, current_usage_GB):
 def calculate_remaining_last_online(last_online_date_time):
     import datetime
     if last_online_date_time == "0001-01-01 00:00:00.000000":
-        return template.MESSAGES['NEVER']
+        return AdminBot.template.MESSAGES['NEVER']
     last_online_date_time = datetime.datetime.strptime(last_online_date_time, "%Y-%m-%d %H:%M:%S.%f")
     last_online_time = (datetime.datetime.now() - last_online_date_time)
-    last_online = template.last_online_time_template(last_online_time)
+    last_online = AdminBot.template.last_online_time_template(last_online_time)
     return last_online
 
 
 # List users - return list of all users
-def users_list():
+def dict_process(users_dict):
     logging.info(f"Parse users page")
+    if not users_dict:
+        return False
     users_list = []
-    users = DB.select_users()
-    users = users_to_dict(users)
-    for user in users:
+    for user in users_dict:
         users_list.append({
             "name": user['name'],
             "usage": {
@@ -124,7 +126,7 @@ def users_list():
 # Get single user info - return dict of user info
 def user_info(uuid):
     logging.info(f"Get info of user single user - {uuid}")
-    lu = users_list()
+    lu = dict_process(users_to_dict(DB.select_users()))
     if not lu:
         return False
     for user in lu:
@@ -191,8 +193,8 @@ def backup_panel():
     now = datetime.now()
     dt_string = now.strftime("%d-%m-%Y_%H-%M-%S")
 
-    folder_name = "backup"
-    file_name = f"backup_{dt_string}.json"
+    folder_name = "Backup"
+    file_name = f"Backup_{dt_string}.json"
 
     file_name = os.path.join(folder_name, file_name)
     if not os.path.exists(folder_name):
@@ -229,7 +231,7 @@ def system_status():
 
 # Search user by name
 def search_user_by_name(name):
-    users = users_list()
+    users = dict_process(users_to_dict(DB.select_users()))
     if not users:
         return False
     res = []
@@ -243,7 +245,7 @@ def search_user_by_name(name):
 
 # Search user by uuid
 def search_user_by_uuid(uuid):
-    users = users_list()
+    users = dict_process(users_to_dict(DB.select_users()))
     if not users:
         return False
     for user in users:
