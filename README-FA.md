@@ -79,6 +79,10 @@ sudo bash -c "$(curl -Lfo- https://raw.githubusercontent.com/B3H1Z/Hiddify-Teleg
  تغییر پیکربندی ربات
 
       cd /opt/Hiddify-Telegram-Bot/ && python3 config.py && ./restart.sh
+ 
+ نصب مجدد ربات
+
+      rm -rf /opt/Hiddify-Telegram-Bot/ && sudo bash -c "$(curl -Lfo- https://raw.githubusercontent.com/B3H1Z/Hiddify-Telegram-Bot/main/install.sh)"
 
 ## اسکرین شات‌ها
 - <img src="https://github.com/B3H1Z/Hiddify-Telegram-Bot/blob/main/Screenshots/Keyboard.PNG?raw=True" width=50% height=50%>
