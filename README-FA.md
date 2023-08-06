@@ -68,7 +68,7 @@ sudo bash -c "$(curl -Lfo- https://raw.githubusercontent.com/B3H1Z/Hiddify-Teleg
       cd /opt/Hiddify-Telegram-Bot/ && chmod +x restart.sh && ./restart.sh
  متوقف کردن ربات
 
-      pkill -9 -f hidyBot.py
+      pkill -9 -f hiddifyTelegramBot.py
  دریافت لاگ های ربات
 
       cat /opt/Hiddify-Telegram-Bot/hiddify-telegram-bot.log
