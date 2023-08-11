@@ -9,4 +9,4 @@ if __name__ == '__main__':
     file_name = backup_panel()
     if file_name:
         for admin_id in ADMINS_ID:
-            bot.send_document(admin_id, open(file_name, 'rb'), caption='Auto Backup')
+            bot.send_document(admin_id, open(file_name, 'rb'))
