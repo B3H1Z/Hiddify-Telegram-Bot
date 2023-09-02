@@ -45,11 +45,11 @@ else
   mkdir -p /opt/Hiddify-Telegram-Bot/Backup/DB
 fi
 
-if [ -d "/opt/Hiddify-Telegram-Bot/Logs/" ]; then
-  echo "Directory /opt/Hiddify-Telegram-Bot/Backup/DB exists."
+if [ -d "/opt/Hiddify-Telegram-Bot/Logs" ]; then
+  echo "Directory /opt/Hiddify-Telegram-Bot/Logs exists."
 else
-  echo "Creating directory /opt/Hiddify-Telegram-Bot/Backup/DB"
-  mkdir -p /opt/Hiddify-Telegram-Bot/Logs/
+  echo "Creating directory /opt/Hiddify-Telegram-Bot/Logs"
+  mkdir -p /opt/Hiddify-Telegram-Bot/Logs
 fi
 
 cp /opt/hiddify-config/hiddify-panel/hiddifypanel.db /opt/Hiddify-Telegram-Bot/Backup/DB/hiddifypanel.db
