@@ -1,4 +1,6 @@
 # Description: API for connecting to the panel
+import random
+from io import BytesIO
 
 from config import *
 import AdminBot.templates
@@ -6,6 +8,7 @@ import re
 from datetime import datetime
 import psutil
 import logging
+import qrcode
 
 # Global variables
 # Make Session for requests
@@ -79,6 +82,8 @@ def calculate_remaining_days(start_date, package_days):
         return package_days
     start_date = datetime.datetime.strptime(start_date, "%Y-%m-%d")
     remaining_days = package_days - (datetime.datetime.now() - start_date).days
+    if remaining_days < 0:
+        return 0
     return remaining_days
 
 
@@ -98,7 +103,7 @@ def calculate_remaining_last_online(last_online_date_time):
 
 
 # List users - return list of all users
-def dict_process(users_dict):
+def dict_process(users_dict, sub_id=None):
     logging.info(f"Parse users page")
     if not users_dict:
         return False
@@ -118,6 +123,7 @@ def dict_process(users_dict):
             "link": f"{BASE_URL}/{urlparse(PANEL_URL).path.split('/')[1]}/{user['uuid']}/",
             "mode": user['mode'],
             "enable": user['enable'],
+            "sub_id": sub_id
         })
 
     return users_list
@@ -196,8 +202,6 @@ def backup_panel():
     file_name = f"Backup_{dt_string}.json"
 
     file_name = os.path.join(BACKUP_LOC, file_name)
-    print(BACKUP_LOC)
-    print(file_name)
     if not os.path.exists(BACKUP_LOC):
         os.makedirs(BACKUP_LOC)
     with open(file_name, 'w+') as f:
@@ -285,33 +289,96 @@ def search_user_by_config(config):
     return False
 
 
+def is_it_config_or_sub(config):
+    if config.startswith("vmess://"):
+        config = config.replace("vmess://", "")
+        config = base64decoder(config)
+        if config:
+            return config['id']
+    uuid = extract_uuid_from_config(config)
+    if uuid:
+        return uuid
+
+
 # Users bot add plan
 def users_bot_add_plan(size, days, price):
     if not CLIENT_TOKEN:
         return False
-    plan_status = USERS_DB.add_plan(size, days, price)
+    # randon 4 digit number
+    plan_id = random.randint(10000, 99999)
+    plan_status = USERS_DB.add_plan(plan_id, size, days, price)
     if not plan_status:
         return False
     return True
 
-def plans_to_dict(db_select):
-    if not db_select:
-        return False
-    res = []
-    print(db_select)
-    for plan in db_select:
-        res.append({
-            'id': plan[0],
-            'size': plan[1],
-            'days': plan[2],
-            'price': plan[3],
-            'description': plan[4],
-            'status': plan[5]
-        })
-    return res
 
 # Privacy-friendly logging - replace your panel url with panel.private.com
 def privacy_friendly_logging_request(url):
     url = urlparse(url)
     url = url.scheme + "://" + "panel.private.com" + url.path
     return url
+
+
+def is_user_expired(user):
+    if user['remaining_day'] == 0:
+        return True
+    return False
+
+
+def expired_users_list(users):
+    expired_users = []
+    for user in users:
+        if is_user_expired(user):
+            expired_users.append(user)
+    return expired_users
+
+
+def txt_to_qr(txt):
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=10,
+        border=1,
+    )
+    qr.add_data(txt)
+    qr.make(fit=True, )
+    img_qr = qr.make_image(fill_color="black", back_color="white")
+    stream = BytesIO()
+    img_qr.save(stream)
+    img = stream.getvalue()
+
+    return img
+
+
+def non_order_user_info(telegram_id):
+    users_list = []
+    non_ordered_subscriptions = USERS_DB.find_non_order_subscriptions(telegram_id=telegram_id)
+    if non_ordered_subscriptions:
+        for subscription in non_ordered_subscriptions:
+            non_order_user = ADMIN_DB.find_user(uuid=subscription['uuid'])
+            if non_order_user:
+                non_order_user = users_to_dict(non_order_user)
+                non_order_user = dict_process(non_order_user, subscription['id'])
+                if non_order_user:
+                    non_order_user = non_order_user[0]
+                    users_list.append(non_order_user)
+    return users_list
+
+
+def order_user_info(telegram_id):
+    users_list = []
+    orders = USERS_DB.find_order(telegram_id=telegram_id)
+    if orders:
+        for order in orders:
+            if order['approved'] == 1:
+                ordered_subscriptions = USERS_DB.find_order_subscription(order_id=order['id'])
+                if ordered_subscriptions:
+                    for subscription in ordered_subscriptions:
+                        order_user = ADMIN_DB.find_user(uuid=subscription['uuid'])
+                        if order_user:
+                            order_user = users_to_dict(order_user)
+                            order_user = dict_process(order_user, subscription['id'])
+                            if order_user:
+                                order_user = order_user[0]
+                                users_list.append(order_user)
+    return users_list

@@ -5,14 +5,21 @@ import os
 from urllib.parse import urlparse
 import requests
 from termcolor import colored
-from db import DBManager
-from UserBot.telegramDB import TelegramDBManager
+from Database.dbManager import AdminDBManager
+from Database.dbManager import UserDBManager
+from version import __version__
 
-DB_LOC = "/opt/hiddify-config/hiddify-panel/hiddifypanel.db"
-# DB_LOC = os.path.join(os.getcwd(), "hiddifypanel.db")
-TELEGRAM_DB_LOC = os.path.join(os.getcwd(), "UserBot", "telegram.db")
+# Bypass proxy
+os.environ['no_proxy'] = '*'
+
+VERSION = __version__
+# DB_LOC = "/opt/hiddify-config/hiddify-panel/hiddifypanel.db"
+MAIN_DB_LOC = os.path.join(os.getcwd(), "hiddifypanel.db")
+USERS_DB_LOC = os.path.join(os.getcwd(), "Database", "hidyBot.db")
 CONF_LOC = os.path.join(os.getcwd(), "config.json")
-LOG_LOC = os.path.join(os.getcwd(), "hiddify-telegram-bot.log")
+LOG_LOC = os.path.join(os.getcwd(), "Logs", "hidyBot.log")
+BACKUP_LOC = os.path.join(os.getcwd(), "Backup")
+API_PATH = "/api/v1"
 
 logging.basicConfig(handlers=[logging.FileHandler(filename=LOG_LOC,
                                                   encoding='utf-8', mode='w')],
@@ -21,31 +28,30 @@ logging.basicConfig(handlers=[logging.FileHandler(filename=LOG_LOC,
 
 try:
     # Check is database file exists
-    if not os.path.exists(DB_LOC):
-        logging.error(f"Database file not found in {DB_LOC} directory!")
+    if not os.path.exists(MAIN_DB_LOC):
+        logging.error(f"Database file not found in {MAIN_DB_LOC} directory!")
         raise FileNotFoundError("Database file not found!")
-    DB = DBManager(DB_LOC)
+    ADMIN_DB = AdminDBManager(MAIN_DB_LOC)
 except Exception as e:
     logging.error(f"Error while connecting to database \n Error:{e}")
     raise Exception("Error while connecting to database")
 
-TELEGRAM_DB = None
+USERS_DB = None
 
 
-def setup_telegram_db():
-    global TELEGRAM_DB
+def setup_users_db():
+    global USERS_DB
     try:
-        if not os.path.exists(TELEGRAM_DB_LOC):
-            logging.error(f"Database file not found in {TELEGRAM_DB_LOC} directory!")
+        if not os.path.exists(USERS_DB_LOC):
+            logging.error(f"Database file not found in {USERS_DB_LOC} directory!")
             # Create database file
-            with open(TELEGRAM_DB_LOC, "w") as f:
+            with open(USERS_DB_LOC, "w") as f:
                 pass
-        TELEGRAM_DB = TelegramDBManager(TELEGRAM_DB_LOC)
-        TELEGRAM_DB.create_user_table()
+        USERS_DB = UserDBManager(USERS_DB_LOC)
     except Exception as e:
         logging.error(f"Error while connecting to database \n Error:{e}")
         raise Exception("Error while connecting to database")
-    return TELEGRAM_DB
+    return USERS_DB
 
 
 def is_config_exists():
@@ -88,13 +94,14 @@ def set_variables(json):
         CLIENT_TOKEN = None
 
     if CLIENT_TOKEN:
-        setup_telegram_db()
+        setup_users_db()
     PANEL_URL = json["url"]
     LANG = json["lang"]
-    PANEL_ADMIN_ID = DB.find_admins(uuid=urlparse(PANEL_URL).path.split('/')[2])[0][0]
+    PANEL_ADMIN_ID = ADMIN_DB.find_admins(uuid=urlparse(PANEL_URL).path.split('/')[2])
     if not PANEL_ADMIN_ID:
         print(colored("Admin panel UUID is not valid!", "red"))
         raise Exception("Admin panel UUID is not valid!")
+    PANEL_ADMIN_ID = PANEL_ADMIN_ID[0][0]
 
 
 def panel_url_validator(url):
@@ -115,7 +122,7 @@ def panel_url_validator(url):
     elif request.status_code == 200:
         print(colored("URL is valid!", "green"))
     admin_url_uuid = urlparse(url).path.split('/')[2]
-    status = DB.find_admins(uuid=admin_url_uuid)
+    status = ADMIN_DB.find_admins(uuid=admin_url_uuid)
     if not status:
         print(colored("Admin URL UUID is not valid!", "red"))
         return False

@@ -62,10 +62,10 @@ if ! crontab -l | grep "@reboot cd /opt/Hiddify-Telegram-Bot && ./restart.sh"; t
   ) | crontab -
 fi
 
-if ! crontab -l | grep "0 */6 * * * cd /opt/Hiddify-Telegram-Bot && python3 backup.py"; then
+if ! crontab -l | grep "0 */6 * * * cd /opt/Hiddify-Telegram-Bot/Cronjob && python3 backup.py"; then
 (
   crontab -l 2>/dev/null
-  echo "0 */6 * * * cd /opt/Hiddify-Telegram-Bot && python3 backup.py"
+  echo "0 */6 * * * cd /opt/Hiddify-Telegram-Bot/Cronjob && python3 backup.py"
 ) | crontab -
 fi
 

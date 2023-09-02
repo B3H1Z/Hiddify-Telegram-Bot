@@ -1,0 +1,12 @@
+/Database/hidyBot.db
+/Logs
+/Backup
+/UserBot/Receiptions
+/.idea
+
+/.handler-saves
+hiddifypanel.db
+config.json
+
+*.pyc
+*.pyo

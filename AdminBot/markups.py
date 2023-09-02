@@ -1,18 +1,21 @@
 # Description: This file contains all the reply and inline keyboard markups used in the bot.
 from telebot.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
-from AdminBot.template import KEY_MARKUP
+from AdminBot.buttons import KEY_MARKUP
+from AdminBot.messages import MESSAGES
 from config import CLIENT_TOKEN
 
 
 # Main Menu Reply Keyboard Markup
 def main_menu_keyboard_markup():
-    markup = ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
+    markup = ReplyKeyboardMarkup(row_width=3, resize_keyboard=True)
     markup.add(KeyboardButton(KEY_MARKUP['USERS_LIST']))
-    markup.add(KeyboardButton(KEY_MARKUP['USERS_SEARCH']))
-    markup.add(KeyboardButton(KEY_MARKUP['ADD_USER']))
-    markup.add(KeyboardButton(KEY_MARKUP['SERVER_STATUS']), KeyboardButton(KEY_MARKUP['SERVER_BACKUP']))
+    markup.add(KeyboardButton(KEY_MARKUP['USERS_SEARCH']), KeyboardButton(KEY_MARKUP['ADD_USER']))
     if CLIENT_TOKEN:
         markup.add(KeyboardButton(KEY_MARKUP['USERS_BOT_MANAGEMENT']))
+    markup.add()
+    markup.add(KeyboardButton(KEY_MARKUP['SERVER_STATUS']), KeyboardButton(KEY_MARKUP['ABOUT_BOT']),
+               KeyboardButton(KEY_MARKUP['SERVER_BACKUP']))
+
     return markup
 
 
@@ -112,23 +115,55 @@ def search_user_markup():
     markup.add(InlineKeyboardButton(KEY_MARKUP['SEARCH_USER_NAME'], callback_data=f"search_name:name"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['SEARCH_USER_UUID'], callback_data=f"search_uuid:uuid"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['SEARCH_USER_CONFIG'], callback_data=f"search_config:config"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['SEARCH_EXPIRED_USERS'], callback_data=f"search_expired:expired"))
     return markup
 
 
 # Users Bot Management Inline Keyboard Markup
-def users_bot_management_markup():
+def users_bot_management_markup(value=None):
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 2
+    markup.add(
+        InlineKeyboardButton(KEY_MARKUP['USERS_BOT_ORDERS_STATUS'], callback_data=f"users_bot_orders_status:None"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_ADD_PLAN'], callback_data=f"users_bot_add_plan:None"),
+               InlineKeyboardButton(KEY_MARKUP['USERS_BOT_DEL_PLAN'], callback_data=f"users_bot_list_plans:None"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SEND_MESSAGE_TO_USERS'],
+                                    callback_data=f"users_bot_send_msg_users:None"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_OWNER_INFO'], callback_data=f"users_bot_owner_info:None"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS'], callback_data=f"users_bot_settings:None"))
+    return markup
+
+
+def users_bot_management_settings_markup(settings):
     markup = InlineKeyboardMarkup()
     markup.row_width = 1
-    markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_ORDERS_STATUS'], callback_data=f"users_bot_orders_status:None"))
-    markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_ADD_PLAN'], callback_data=f"users_bot_add_plan:None"))
-    markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_OWNER_INFO'], callback_data=f"users_bot_owner_info:None"))
+    status_hyperlink = "✅" if settings['visible_hiddify_hyperlink'] else "❌"
+    markup.add(InlineKeyboardButton(f"{KEY_MARKUP['USERS_BOT_SETTINGS_SHOW_HIDI_LINK']} | {status_hyperlink}",
+                                    callback_data=f"users_bot_settings_hyperlink:{settings['visible_hiddify_hyperlink']}"))
     return markup
 
 
 def users_bot_edit_owner_info_markup():
     markup = InlineKeyboardMarkup()
     markup.row_width = 1
-    markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_OWNER_INFO_EDIT_USERNAME'], callback_data=f"users_bot_owner_info_edit_username:None"))
-    markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_OWNER_INFO_EDIT_CARD_NUMBER'], callback_data=f"users_bot_owner_info_edit_card_number:None"))
-    markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_OWNER_INFO_EDIT_CARD_NAME'], callback_data=f"users_bot_owner_info_edit_card_name:None"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_OWNER_INFO_EDIT_USERNAME'],
+                                    callback_data=f"users_bot_owner_info_edit_username:None"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_OWNER_INFO_EDIT_CARD_NUMBER'],
+                                    callback_data=f"users_bot_owner_info_edit_card_number:None"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_OWNER_INFO_EDIT_CARD_NAME'],
+                                    callback_data=f"users_bot_owner_info_edit_card_name:None"))
+    return markup
+
+
+def plans_list_markup(plans):
+    markup = InlineKeyboardMarkup(row_width=1)
+    keys = []
+    for plan in plans:
+        if plan['status']:
+            keys.append(InlineKeyboardButton(
+                f"{plan['size_gb']}{MESSAGES['GB']} | {plan['days']}{MESSAGES['DAY']} | {plan['price']}{MESSAGES['TOMAN']}",
+                callback_data=f"users_bot_del_plan:{plan['id']}"))
+    if len(keys) == 0:
+        return None
+    markup.add(*keys)
     return markup

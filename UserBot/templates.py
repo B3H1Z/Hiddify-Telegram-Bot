@@ -1,128 +1,31 @@
 # Description: This file contains all the templates used in the bot.
 import random
 import string
-
-from config import LANG
-
-KEY_MARKUP = {
-    'EN': {
-        'BACK': '🔙Back',
-        'SUBSCRIPTION_STATUS': '📊Subscription Status',
-        'YES': '✅Yes',
-        'NO': '❌No',
-        'UNLINK_SUBSCRIPTION': '🔗Unlink Subscription',
-        'BUY_SUBSCRIPTION': '🔗Buy Subscription',
-        'BUY_PLAN': '🔗Buy',
-        'SEND_SCREENSHOT': '✅I paid, send receipt',
-        'CANCEL': '❌Cancel',
-
-    },
-    'FA': {
-        'BACK': '🔙بازگشت',
-        'SUBSCRIPTION_STATUS': '📊وضعیت اشتراک',
-        'YES': '✅بله',
-        'NO': '❌خیر',
-        'UNLINK_SUBSCRIPTION': '🔗لغو اشتراک',
-        'BUY_SUBSCRIPTION': '🔗خرید اشتراک',
-        'BUY_PLAN': '🔗خرید',
-        'SEND_SCREENSHOT': '✅پرداخت کردم، ارسال رسید',
-        'CANCEL': '❌لغو',
-    }
-}
-
-# Response Messages Template
-MESSAGES = {
-    'EN': {
-        'WELCOME': "Welcome to Users Bot",
-        'INFO_USER': '📄Your Subscription Info',
-        'INFO_USAGE': '📊Usage:',
-        'INFO_REMAINING_DAYS': '⏳Remaining Days:',
-        'OF': 'of',
-        'GB': 'GB',
-        'DAY_EXPIRE': 'Days',
-        'CONFIRM_SUBSCRIPTION_QUESTION': 'Is this your subscription?',
-        'NAME': 'Name:',
-        'CANCEL_SUBSCRIPTION': 'Subscription not confirmed',
-        'SUBSCRIPTION_CONFIRMED': 'Your subscription has been confirmed. Now you can get your subscription status.',
-        'WAIT': 'Please wait...',
-        'UNKNOWN_ERROR': 'Unknown error! Contact the bot developer.',
-        'ENTER_SUBSCRIPTION_INFO': 'Please enter your subscription info\n One of the configs, uuid or subscription link',
-        'SUBSCRIPTION_INFO_NOT_FOUND': 'Subscription info not found!',
-        'SUBSCRIPTION_UNLINKED': 'Subscription unlinked!',
-        'USER_NAME': '👤Name:',
-        'PLANS_LIST': '📋Plans List:',
-        'PLANS_NOT_FOUND': 'Plans not found!',
-        'PLAN_ADD_NAME': 'Please enter your name:',
-        'SUBSCRIPTION_SUCCESS_ADDED': 'Your subscription has been successfully added.',
-        'PLAN_INFO': '📄Plan Info:',
-        'PLAN_SIZE': 'Size:',
-        'PLAN_DAYS': 'Days:',
-        'PLAN_PRICE': 'Price:',
-        'TOMAN': 'T',
-        'REQUEST_SEND_SCREENSHOT': 'Please send your payment receipt.',
-        'ERROR_TYPE_SEND_SCREENSHOT': 'Please send your payment receipt as a photo!',
-        'REQUEST_SEND_NAME': 'Please send your name.',
-        'NO_SUBSCRIPTION': 'You have no subscription!',
-
-    },
-    'FA': {
-        'WELCOME': "به ربات کاربران خوش آمدید",
-        'INFO_USER': '📄اطلاعات اشتراک شما',
-        'INFO_USAGE': '📊میزان استفاده:',
-        'INFO_REMAINING_DAYS': '⏳زمان باقی مانده:',
-        'OF': 'از',
-        'GB': 'گیگابایت',
-        'DAY_EXPIRE': 'روز',
-        'CONFIRM_SUBSCRIPTION_QUESTION': 'آیا این اشتراک شماست؟',
-        'NAME': 'نام:',
-        'CANCEL_SUBSCRIPTION': 'اشتراک تایید نشد',
-        'SUBSCRIPTION_CONFIRMED': 'اشتراک شما تایید شد. حالا میتوانید وضعیت اشتراک خود را دریافت کنید.',
-        'WAIT': 'لطفا صبر کنید...',
-        'UNKNOWN_ERROR': 'خطای ناشناخته! با توسعه دهنده ربات در تماس باشید.',
-        'ENTER_SUBSCRIPTION_INFO': 'لطفا اطلاعات اشتراک خود را وارد کنید\n یکی از کانفیگ ها، uuid یا لینک اشتراک',
-        'SUBSCRIPTION_INFO_NOT_FOUND': 'اطلاعات اشتراک یافت نشد!',
-        'USER_NOT_FOUND': 'کاربر یافت نشد.',
-        'SUBSCRIPTION_UNLINKED': 'اشتراک لغو شد!',
-        'USER_NAME': '👤نام:',
-        'PLANS_LIST': '📋لیست پلن ها:',
-        'PLANS_NOT_FOUND': 'پلنی یافت نشد!',
-        'PLAN_ADD_NAME': 'لطفا نام خود را وارد کنید:',
-        'SUBSCRIPTION_SUCCESS_ADDED': 'اشتراک شما با موفقیت اضافه شد.',
-        'PLAN_INFO': '📋اطلاعات پلن انتخاب شده',
-        'PLAN_INFO_SIZE': 'حجم پلن:',
-        'PLAN_INFO_PRICE': 'قیمت پلن:',
-        'PLAN_INFO_DAYS': 'زمان پلن:',
-        'TOMAN': 'تومان',
-        'REQUEST_SEND_SCREENSHOT': 'لطفا رسید پرداخت خود را در زیر این پیام ارسال کنید.',
-        'ERROR_TYPE_SEND_SCREENSHOT': 'لطفا رسید پرداخت خود را به صورت عکس ارسال کنید!',
-        'REQUEST_SEND_NAME': 'لطفا نام خود را ارسال کنید.',
-        'NO_SUBSCRIPTION': 'شما هیچ اشتراکی ندارید.',
-    }
-
-}
-BOT_COMMANDS = {
-    'EN': {
-        'START': 'start',
-    },
-    'FA': {
-        'START': 'شروع',
-    }
-}
-
-# Set Language of Messages
-KEY_MARKUP = KEY_MARKUP[LANG]
-MESSAGES = MESSAGES[LANG]
-BOT_COMMANDS = BOT_COMMANDS[LANG]
+from config import LANG, USERS_DB
+from UserBot.messages import MESSAGES
+from Utils import utils
 
 
-def user_info_template(usr, header=""):
+def user_info_template(sub_id, usr, header=""):
+    settings = USERS_DB.select_settings()
+    if settings:
+        settings = settings[0]
+        if settings['visible_hiddify_hyperlink']:
+            user_name = f"<a href='{usr['link']}'> {usr['name']} </a>"
+        else:
+            user_name = usr['name']
+    else:
+        user_name = usr['name']
+
     return f"""
 {header}
 
-{MESSAGES['USER_NAME']} <a href='{usr['link']}'> {usr['name']} </a>
+{MESSAGES['USER_NAME']} {user_name}
 {MESSAGES['INFO_USAGE']} {usr['usage']['current_usage_GB']} {MESSAGES['OF']} {usr['usage']['usage_limit_GB']} {MESSAGES['GB']}
 {MESSAGES['INFO_REMAINING_DAYS']} {usr['remaining_day']} {MESSAGES['DAY_EXPIRE']}
-            """
+
+{MESSAGES['INFO_ID']} <code>{sub_id}</code>
+"""
 
 
 def plan_info_template(plan, header=""):
@@ -130,7 +33,7 @@ def plan_info_template(plan, header=""):
 {header}
 {MESSAGES['PLAN_INFO']}
 
-{MESSAGES['PLAN_INFO_SIZE']} {plan['size']} {MESSAGES['GB']}
+{MESSAGES['PLAN_INFO_SIZE']} {plan['size_gb']} {MESSAGES['GB']}
 {MESSAGES['PLAN_INFO_DAYS']} {plan['days']} {MESSAGES['DAY_EXPIRE']}
 {MESSAGES['PLAN_INFO_PRICE']} {plan['price']} {MESSAGES['TOMAN']}
 """
@@ -145,8 +48,10 @@ def replace_last_three_with_random(input_string):
     return modified_string
 
 
-def owner_info_template(plan, card_number, card_holder_name, header=""):
-    price = replace_last_three_with_random(str(plan['price']))
+def owner_info_template(plan, card_number, card_holder_name, price, header=""):
+    card_number = card_number if card_number else "-"
+    card_holder_name = card_holder_name if card_holder_name else "-"
+
     if LANG == 'FA':
         return f"""
 {header}
@@ -166,4 +71,142 @@ def owner_info_template(plan, card_number, card_holder_name, header=""):
 Card owner <b>{card_holder_name}</b>
 
 ❗️After paying the amount, send us a screenshot of the transaction.
+"""
+
+
+def payment_received_template(plan, name, paid_amount, order_id, header="", footer=""):
+    if LANG == 'FA':
+        return f"""
+{header}
+
+شماره سفارش: <code>{order_id}</code>
+نام ثبت شده: <b>{name}</b>
+هزینه پرداخت شده: <b>{paid_amount}</b> {MESSAGES['TOMAN']}
+---------------------
+اطلاعات پلن خریداری شده
+شناسه پلن: <b>{plan['id']}</b>
+حجم پلن: <b>{plan['size_gb']}</b> {MESSAGES['GB']}
+مدت اعتبار پلن: <b>{plan['days']}</b> {MESSAGES['DAY_EXPIRE']}
+هزینه پلن: <b>{plan['price']}</b> {MESSAGES['TOMAN']}
+
+{footer}
+"""
+    elif LANG == 'EN':
+        return f"""
+{header}
+
+Order number: <b>{plan['id']}</b>
+Registered name: <b>{name}</b>
+Paid amount: <b>{paid_amount}</b> {MESSAGES['TOMAN']}
+---------------------
+⬇️Purchased plan information⬇️
+Plan ID: <b>{plan['id']}</b>
+Plan size: <b>{plan['size_gb']}</b> {MESSAGES['GB']}
+Plan validity period: <b>{plan['days']}</b> {MESSAGES['DAY_EXPIRE']}
+Plan price: <b>{plan['price']}</b> {MESSAGES['TOMAN']}
+
+{footer}
+"""
+
+
+def connection_help_template(header=""):
+    if LANG == 'FA':
+        return f"""
+{header}
+
+⭕️ نرم افزار های مورد نیاز برای اتصال به کانفیگ
+    
+📥اندروید:
+<a href='https://play.google.com/store/apps/details?id=com.v2ray.ang'>V2RayNG</a>
+<a href='https://play.google.com/store/apps/details?id=ang.hiddify.com'>HiddifyNG</a>
+
+📥آی او اس:
+<a href='https://apps.apple.com/us/app/streisand/id6450534064'>Streisand</a>
+<a href='https://apps.apple.com/us/app/foxray/id6448898396'>Foxray</a>
+<a href='https://apps.apple.com/us/app/v2box-v2ray-client/id6446814690'>V2box</a>
+
+📥ویندوز:
+<a href='https://github.com/MatsuriDayo/nekoray/releases'>Nekoray</a>
+<a href='https://github.com/2dust/v2rayN/releases'>V2rayN</a>
+<a href='https://github.com/hiddify/HiddifyN/releases'>HiddifyN</a>
+
+📥مک و لینوکس:
+<a href='https://github.com/MatsuriDayo/nekoray/releases'>Nekoray</a>
+"""
+
+    elif LANG == 'EN':
+        return f"""
+{header}
+
+⭕️Required software for connecting to config
+
+📥Android:
+<a href='https://play.google.com/store/apps/details?id=com.v2ray.ang'>V2RayNG</a>
+<a href='https://play.google.com/store/apps/details?id=ang.hiddify.com'>HiddifyNG</a>
+
+📥iOS:
+<a href='https://apps.apple.com/us/app/streisand/id6450534064'>Streisand</a>
+<a href='https://apps.apple.com/us/app/foxray/id6448898396'>Foxray</a>
+<a href='https://apps.apple.com/us/app/v2box-v2ray-client/id6446814690'>V2box</a>
+
+📥Windows:
+<a href='https://github.com/MatsuriDayo/nekoray/releases'>Nekoray</a>
+<a href='https://github.com/2dust/v2rayN/releases'>V2rayN</a>
+<a href='https://github.com/hiddify/HiddifyN/releases'>HiddifyN</a>
+
+📥Mac and Linux:
+<a href='https://github.com/MatsuriDayo/nekoray/releases'>Nekoray</a>
+"""
+
+
+def support_template(owner_info, header=""):
+    username = None
+    if owner_info:
+        username = owner_info['telegram_username'] if owner_info['telegram_username'] else "-"
+    else:
+        username = "-"
+
+    if LANG == 'FA':
+        return f"""
+{header}
+
+📞پشتیبان: {username}
+"""
+
+    elif LANG == 'EN':
+        return f"""
+{header}
+
+📞Support: {username}
+"""
+
+
+def package_days_expire_soon_template(sub_id, remaining_days):
+    if LANG == 'FA':
+        return f"""
+تنها {remaining_days} روز تا اتمام اعتبار پکیج شما باقی مانده است.
+لطفا برای خرید پکیج جدید اقدام کنید.
+شناسه پکیج شما: <code>{sub_id}</code>
+"""
+    elif LANG == 'EN':
+        return f"""
+Only {remaining_days} days left until your package expires.
+Please purchase a new package.
+Your package ID: <code>{sub_id}</code>
+"""
+
+
+def package_size_end_soon_template(sub_id, remaining_size):
+    if LANG == 'FA':
+        return f"""
+تنها {remaining_size} گیگابایت تا اتمام اعتبار پکیج شما باقی مانده است.
+لطفا برای خرید پکیج جدید اقدام کنید.
+
+شناسه پکیج شما: <code>{sub_id}</code>
+"""
+    elif LANG == 'EN':
+        return f"""
+Only {remaining_size} GB left until your package expires.
+Please purchase a new package.
+Your package ID: <code>{sub_id}</code>
 """
