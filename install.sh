@@ -44,6 +44,14 @@ else
   echo "Creating directory /opt/Hiddify-Telegram-Bot/Backup/DB"
   mkdir -p /opt/Hiddify-Telegram-Bot/Backup/DB
 fi
+
+if [ -d "/opt/Hiddify-Telegram-Bot/Logs/" ]; then
+  echo "Directory /opt/Hiddify-Telegram-Bot/Backup/DB exists."
+else
+  echo "Creating directory /opt/Hiddify-Telegram-Bot/Backup/DB"
+  mkdir -p /opt/Hiddify-Telegram-Bot/Logs/
+fi
+
 cp /opt/hiddify-config/hiddify-panel/hiddifypanel.db /opt/Hiddify-Telegram-Bot/Backup/DB/hiddifypanel.db
 
 # Step 4: Run the bot in the background using nohup
