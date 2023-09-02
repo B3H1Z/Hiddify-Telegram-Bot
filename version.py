@@ -6,7 +6,7 @@ __version__ = "4.0.0"
 
 def version():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
+    parser.add_argument("--version", action="version", version=f"{__version__}")
     args = parser.parse_args()
     return args
 
