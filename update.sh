@@ -15,6 +15,8 @@ if [ ! -f /opt/Hiddify-Telegram-Bot/version.py ]; then
   read -r -p "Do you want to reinstall the bot? [y/N] " response
   case "$response" in
     [yY][eE][sS]|[yY])
+      # shellcheck disable=SC2164
+      cd /opt || exit
       # Remove the old bot
       rm -rf /opt/Hiddify-Telegram-Bot
       # run install.sh
