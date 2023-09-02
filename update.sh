@@ -29,7 +29,8 @@ if [ ! -f /opt/Hiddify-Telegram-Bot/version.py ]; then
   esac
 else
   echo "Updating the bot..."
-  if git pull; then
+  git stash
+  if git git pull origin main; then
     nohup python3 hiddifyTelegramBot.py >>bot.log 2>&1 &
     echo "Bot has been updated and restarted."
   else
