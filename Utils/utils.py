@@ -1,7 +1,7 @@
 # Description: API for connecting to the panel
 
 from config import *
-import AdminBot.template
+import AdminBot.templates
 import re
 from datetime import datetime
 import psutil
@@ -90,10 +90,10 @@ def calculate_remaining_usage(usage_limit_GB, current_usage_GB):
 def calculate_remaining_last_online(last_online_date_time):
     import datetime
     if last_online_date_time == "0001-01-01 00:00:00.000000":
-        return AdminBot.template.MESSAGES['NEVER']
+        return AdminBot.messages.MESSAGES['NEVER']
     last_online_date_time = datetime.datetime.strptime(last_online_date_time, "%Y-%m-%d %H:%M:%S.%f")
     last_online_time = (datetime.datetime.now() - last_online_date_time)
-    last_online = AdminBot.template.last_online_time_template(last_online_time)
+    last_online = AdminBot.templates.last_online_time_template(last_online_time)
     return last_online
 
 
@@ -126,7 +126,7 @@ def dict_process(users_dict):
 # Get single user info - return dict of user info
 def user_info(uuid):
     logging.info(f"Get info of user single user - {uuid}")
-    lu = dict_process(users_to_dict(DB.select_users()))
+    lu = dict_process(users_to_dict(ADMIN_DB.select_users()))
     if not lu:
         return False
     for user in lu:
@@ -193,12 +193,13 @@ def backup_panel():
     now = datetime.now()
     dt_string = now.strftime("%d-%m-%Y_%H-%M-%S")
 
-    folder_name = "Backup"
     file_name = f"Backup_{dt_string}.json"
 
-    file_name = os.path.join(folder_name, file_name)
-    if not os.path.exists(folder_name):
-        os.makedirs(folder_name)
+    file_name = os.path.join(BACKUP_LOC, file_name)
+    print(BACKUP_LOC)
+    print(file_name)
+    if not os.path.exists(BACKUP_LOC):
+        os.makedirs(BACKUP_LOC)
     with open(file_name, 'w+') as f:
         f.write(backup_req.text)
     return file_name
@@ -231,7 +232,7 @@ def system_status():
 
 # Search user by name
 def search_user_by_name(name):
-    users = dict_process(users_to_dict(DB.select_users()))
+    users = dict_process(users_to_dict(ADMIN_DB.select_users()))
     if not users:
         return False
     res = []
@@ -245,7 +246,7 @@ def search_user_by_name(name):
 
 # Search user by uuid
 def search_user_by_uuid(uuid):
-    users = dict_process(users_to_dict(DB.select_users()))
+    users = dict_process(users_to_dict(ADMIN_DB.select_users()))
     if not users:
         return False
     for user in users:
@@ -283,6 +284,31 @@ def search_user_by_config(config):
             return user
     return False
 
+
+# Users bot add plan
+def users_bot_add_plan(size, days, price):
+    if not CLIENT_TOKEN:
+        return False
+    plan_status = USERS_DB.add_plan(size, days, price)
+    if not plan_status:
+        return False
+    return True
+
+def plans_to_dict(db_select):
+    if not db_select:
+        return False
+    res = []
+    print(db_select)
+    for plan in db_select:
+        res.append({
+            'id': plan[0],
+            'size': plan[1],
+            'days': plan[2],
+            'price': plan[3],
+            'description': plan[4],
+            'status': plan[5]
+        })
+    return res
 
 # Privacy-friendly logging - replace your panel url with panel.private.com
 def privacy_friendly_logging_request(url):

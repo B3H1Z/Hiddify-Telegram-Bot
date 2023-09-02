@@ -10,6 +10,7 @@ KEY_MARKUP = {
         'ADD_USER': '➕Add User',
         'SERVER_BACKUP': '📥Panel Backup',
         'SERVER_STATUS': '📈Server Status',
+        'USERS_BOT_MANAGEMENT': '🤖Users Bot Management',
         'NEXT_PAGE': '➡️',
         'PREV_PAGE': '⬅️',
         'CONFIGS_USER': 'Configs',
@@ -31,6 +32,10 @@ KEY_MARKUP = {
         'SEARCH_USER_NAME': 'Search by Name',
         'SEARCH_USER_UUID': 'Search by UUID',
         'SEARCH_USER_CONFIG': 'Search by Config',
+        'USERS_BOT_ADD_PLAN': '➕Add Plan',
+        'USERS_BOT_OWNER_INFO': '👤Owner Info',
+        'USERS_BOT_OWNER_INFO_EDIT': '👤Edit Owner Info',
+        'USERS_BOT_ORDERS_STATUS': '📊Orders Status',
 
     },
     'FA': {
@@ -41,6 +46,7 @@ KEY_MARKUP = {
         'ADD_USER': '➕افزودن کاربر',
         'SERVER_BACKUP': '📥بکاپ پنل',
         'SERVER_STATUS': '📈وضعیت سرور',
+        'USERS_BOT_MANAGEMENT': '🤖مدیریت ربات کاربران',
         'NEXT_PAGE': '➡️',
         'PREV_PAGE': '⬅️',
         'CONFIGS_USER': 'کانفیگ ها',
@@ -62,6 +68,14 @@ KEY_MARKUP = {
         'SEARCH_USER_NAME': 'جستجو با نام',
         'SEARCH_USER_UUID': 'جستجو با UUID',
         'SEARCH_USER_CONFIG': 'جستجو با کانفیگ',
+        'USERS_BOT_ADD_PLAN': '➕افزودن پلن',
+        'USERS_BOT_OWNER_INFO': '👤اطلاعات مالک',
+        'USERS_BOT_OWNER_INFO_EDIT': 'ویرایش اطلاعات مالک',
+        'USERS_BOT_ORDERS_STATUS': '📊وضعیت سفارشات',
+        'USERS_BOT_OWNER_INFO_EDIT_USERNAME': 'ویرایش نام کاربری پشتیبان',
+        'USERS_BOT_OWNER_INFO_EDIT_CARD_NUMBER': 'ویرایش شماره کارت',
+        'USERS_BOT_OWNER_INFO_EDIT_CARD_NAME': 'ویرایش نام صاحب کارت',
+
     }
 }
 
@@ -125,7 +139,20 @@ MESSAGES = {
         'ONLINE': 'Online',
         'AGO': "ago",
         'NEVER': 'Never',
-
+        'ERROR_CLIENT_TOKEN': '❌Client bot is not set!',
+        'USERS_BOT_ADD_PLAN': 'Please complete the following information to add a plan',
+        'USERS_BOT_ADD_PLAN_DAYS': 'Please enter the days of Plan: ',
+        'USERS_BOT_ADD_PLAN_USAGE': 'Please enter the usage limit(GB) of the Plan: ',
+        'USERS_BOT_ADD_PLAN_PRICE': 'Please enter the price(TOMAN) of the Plan: ',
+        'USERS_BOT_ADD_PLAN_CONFIRM': 'Please confirm the information:',
+        'USERS_BOT_ADD_PLAN_SUCCESS': '✅Plan added',
+        'USERS_BOT_OWNER_INFO_NOT_FOUND': 'Owner info not found!\nPlease set it first.',
+        'USERS_BOT_OWNER_INFO_ADD_USERNAME': 'Please enter the username of the support bot: ',
+        'USERS_BOT_OWNER_INFO_ADD_CARD_NUMBER': 'Please enter the card number: ',
+        'USERS_BOT_OWNER_INFO_ADD_CARD_NAME': 'Please enter the name of the card owner: ',
+        'SUCCESS_UPDATE_DATA': '✅Data updated',
+        'ERROR_INVALID_USERNAME': '❌Invalid username\nUsername must start with @',
+        'ERROR_INVALID_CARD_NUMBER': '❌Invalid card number',
     },
     'FA': {
         'WELCOME': "به ربات مدیریت هیدیفای خوش آمدید.",
@@ -185,6 +212,20 @@ MESSAGES = {
         'ONLINE': 'آنلاین',
         'AGO': 'پیش',
         'NEVER': 'هرگز',
+        'ERROR_CLIENT_TOKEN': '❌ربات کاربران تنظیم نشده',
+        'USERS_BOT_ADD_PLAN': 'لطفا اطلاعات زیر را برای افزودن پلن وارد کنید',
+        'USERS_BOT_ADD_PLAN_DAYS': 'لطفا زمان(تعداد روزهای) پلن را وارد کنید',
+        'USERS_BOT_ADD_PLAN_USAGE': 'لطفا محدودیت استفاده(گیگابایت) پلن را وارد کنید',
+        'USERS_BOT_ADD_PLAN_PRICE': 'لطفا قیمت(تومان) پلن را وارد کنید',
+        'USERS_BOT_ADD_PLAN_CONFIRM': 'لطفا اطلاعات زیر را تایید کنید',
+        'USERS_BOT_ADD_PLAN_SUCCESS': '✅پلن با موفقیت افزوده شد',
+        'USERS_BOT_OWNER_INFO_NOT_FOUND': '❌اطلاعات مالک یافت نشد \n لطفا ابتدا آن را تنظیم کنید.',
+        'USERS_BOT_OWNER_INFO_ADD_USERNAME': 'لطفا نام کاربری تلگرام پشتیبان را وارد کنید\nلظفا همراه با @ وارد کنید\nمثال: @example',
+        'USERS_BOT_OWNER_INFO_ADD_CARD_NUMBER': 'لطفا شماره 16 رقمی کارت بانکی جهت واریز را وارد کنید',
+        'USERS_BOT_OWNER_INFO_ADD_CARD_NAME': 'لطفا نام صاحب حساب بانکی جهت واریز را وارد کنید',
+        'SUCCESS_UPDATE_DATA': '✅اطلاعات با موفقیت به روز شد',
+        'ERROR_INVALID_USERNAME': '❌نام کاربری نامعتبر است\n نام کاربری باید با @ شروع شود',
+        'ERROR_INVALID_CARD_NUMBER': '❌شماره کارت نامعتبر است\nشماره کارت باید 16 رقمی باشد',
 
     }
 
@@ -275,3 +316,25 @@ def last_online_time_template(last_online_time):
         return f"{last_online_time.seconds // 60} {MESSAGES['MINUTE']} {MESSAGES['AGO']}"
     else:
         return MESSAGES['NEVER']
+
+
+def owner_info_template(username, card_number_card, card_name):
+    username = username if username else "-"
+    card_number_card = card_number_card if card_number_card else "-"
+    card_name = card_name if card_name else "-"
+    if LANG == 'FA':
+        return f"""
+<b> اطلاعات مالک </b>
+--------------------------------
+<b> نام کاربری پشتیبان: </b> {username}
+<b> شماره کارت بانکی: </b> {card_number_card}
+<b> نام صاحب حساب بانکی: </b> {card_name}
+"""
+    elif LANG == 'EN':
+        return f"""
+<b> Owner Info </b>
+--------------------------------
+<b> Telegram Support Username: </b> {username} 
+<b> Bank Card Number: </b> {card_number_card}
+<b> Bank Card Name: </b> {card_name}
+"""
