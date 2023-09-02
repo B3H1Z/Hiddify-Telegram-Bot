@@ -26,8 +26,6 @@ echo "Step 2: Installing requirements..."
 pip install -r requirements.txt || display_error_and_exit "Failed to install requirements."
 
 # Step 3: Run config.py to generate config.json
-echo "Step 3: Running config.py to generate config.json..."
-python3 config.py || display_error_and_exit "Failed to run config.py."
 
 echo "Making a copy of /opt/hiddify-config/hiddify-panel/hiddifypanel.db"
 if [ -f "/opt/hiddify-config/hiddify-panel/hiddifypanel.db" ]; then
@@ -53,6 +51,9 @@ else
 fi
 
 cp /opt/hiddify-config/hiddify-panel/hiddifypanel.db /opt/Hiddify-Telegram-Bot/Backup/DB/hiddifypanel.db
+
+echo "Step 3: Running config.py to generate config.json..."
+python3 config.py || display_error_and_exit "Failed to run config.py."
 
 # Step 4: Run the bot in the background using nohup
 echo "Step 4: Running the bot in the background..."
