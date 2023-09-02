@@ -50,6 +50,13 @@ else
   mkdir -p /opt/Hiddify-Telegram-Bot/Logs
 fi
 
+if [ -d "/opt/Hiddify-Telegram-Bot/UserBot/Receiptions" ]; then
+  echo "Directory /opt/Hiddify-Telegram-Bot/UserBot/Receiptions exists."
+else
+  echo "Creating directory /opt/Hiddify-Telegram-Bot/UserBot/Receiptions"
+  mkdir -p /opt/Hiddify-Telegram-Bot/UserBot/Receiptions
+fi
+
 cp /opt/hiddify-config/hiddify-panel/hiddifypanel.db /opt/Hiddify-Telegram-Bot/Backup/DB/hiddifypanel.db
 
 echo "Step 3: Running config.py to generate config.json..."
@@ -72,10 +79,10 @@ if ! crontab -l | grep "@reboot cd /opt/Hiddify-Telegram-Bot && ./restart.sh"; t
 fi
 
 if ! crontab -l | grep "0 */6 * * * cd /opt/Hiddify-Telegram-Bot/Cronjob && python3 backup.py"; then
-(
-  crontab -l 2>/dev/null
-  echo "0 */6 * * * cd /opt/Hiddify-Telegram-Bot/Cronjob && python3 backup.py"
-) | crontab -
+  (
+    crontab -l 2>/dev/null
+    echo "0 */6 * * * cd /opt/Hiddify-Telegram-Bot/Cronjob && python3 backup.py"
+  ) | crontab -
 fi
 
 # Wait for a few seconds to check if the bot started successfully
