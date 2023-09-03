@@ -631,15 +631,16 @@ class UserDBManager:
             logging.error(f"Error while finding order {kwargs} \n Error:{e}")
             return None
 
-    def delete_non_order_subscriptions(self, telegram_id):
+    def delete_non_order_subscriptions(self,  **kwargs):
         cur = self.conn.cursor()
         try:
-            cur.execute("DELETE FROM non_order_subscriptions WHERE telegram_id=?", (telegram_id,))
-            self.conn.commit()
-            logging.info(f"Order [{telegram_id}] deleted successfully!")
+            for key, value in kwargs.items():
+                cur.execute(f"DELETE FROM non_order_subscriptions WHERE {key}=?", (value,))
+                self.conn.commit()
+                logging.info(f"Order [{value}] deleted successfully!")
             return True
         except Error as e:
-            logging.error(f"Error while deleting order [{telegram_id}] \n Error: {e}")
+            logging.error(f"Error while deleting order [{kwargs}] \n Error: {e}")
             return False
 
     def select_settings(self):
