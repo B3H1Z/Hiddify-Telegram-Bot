@@ -85,7 +85,7 @@ cat /opt/Hiddify-Telegram-Bot/config.json
 ```
  تغییر پیکربندی ربات
 ```bash
-cd /opt/Hiddify-Telegram-Bot/ && python3 config.py && ./restart.sh
+cd /opt/Hiddify-Telegram-Bot/ && python3 config.py && chmod +x restart.sh && ./restart.sh
 ```
  نصب مجدد ربات
 ```bash
