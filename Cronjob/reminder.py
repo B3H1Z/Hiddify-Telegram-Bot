@@ -19,6 +19,7 @@ def alert_package_days(package_remaining_days):
     return False
 
 
+# Send a reminder to users about their packages
 def cron_reminder():
     if not CLIENT_TOKEN:
         return

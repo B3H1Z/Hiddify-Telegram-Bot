@@ -2,9 +2,7 @@ from Utils.utils import backup_panel
 from AdminBot.bot import bot
 from config import ADMINS_ID
 
-# This file is run by cronjob every 6 hours
-# It will backup the panel and send it to the admin
-
+# Send backup file to admins
 def cron_backup():
     file_name = backup_panel()
     if file_name:

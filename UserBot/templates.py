@@ -1,11 +1,9 @@
 # Description: This file contains all the templates used in the bot.
-import random
-import string
 from config import LANG, USERS_DB
 from UserBot.messages import MESSAGES
-from Utils import utils
 
 
+# User Subscription Info Template
 def user_info_template(sub_id, usr, header=""):
     settings = USERS_DB.select_settings()
     if settings:
@@ -28,6 +26,7 @@ def user_info_template(sub_id, usr, header=""):
 """
 
 
+# Plan Info Template
 def plan_info_template(plan, header=""):
     return f"""
 {header}
@@ -39,15 +38,7 @@ def plan_info_template(plan, header=""):
 """
 
 
-def replace_last_three_with_random(input_string):
-    if len(input_string) < 3:
-        return input_string  # Not enough characters to replace
-
-    random_numbers = ''.join(random.choice(string.digits) for _ in range(3))
-    modified_string = input_string[:-3] + random_numbers
-    return modified_string
-
-
+# Owner Info Template (For Payment)
 def owner_info_template(plan, card_number, card_holder_name, price, header=""):
     card_number = card_number if card_number else "-"
     card_holder_name = card_holder_name if card_holder_name else "-"
@@ -74,6 +65,7 @@ Card owner <b>{card_holder_name}</b>
 """
 
 
+# Payment Received Template - Send to Admin
 def payment_received_template(plan, name, paid_amount, order_id, header="", footer=""):
     if LANG == 'FA':
         return f"""
@@ -109,6 +101,7 @@ Plan price: <b>{plan['price']}</b> {MESSAGES['TOMAN']}
 """
 
 
+# Help Guide Template
 def connection_help_template(header=""):
     if LANG == 'FA':
         return f"""
@@ -159,6 +152,7 @@ def connection_help_template(header=""):
 """
 
 
+# Support Info Template
 def support_template(owner_info, header=""):
     username = None
     if owner_info:
@@ -170,17 +164,18 @@ def support_template(owner_info, header=""):
         return f"""
 {header}
 
-📞پشتیبان: {username}
+📞پشتیبانی: {username}
 """
 
     elif LANG == 'EN':
         return f"""
 {header}
 
-📞Support: {username}
+📞Supporter: {username}
 """
 
 
+# Alert Package Days Template
 def package_days_expire_soon_template(sub_id, remaining_days):
     if LANG == 'FA':
         return f"""
@@ -196,6 +191,7 @@ Your package ID: <code>{sub_id}</code>
 """
 
 
+# Alert Package Size Template
 def package_size_end_soon_template(sub_id, remaining_size):
     if LANG == 'FA':
         return f"""

@@ -1,8 +1,13 @@
 #!/bin/bash
 
+# Define text colors
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+RESET='\033[0m' # Reset text color
+
 # Function to display error messages and exit
 function display_error_and_exit() {
-  echo "Error: $1"
+  echo -e "${RED}Error: $1${RESET}"
   exit 1
 }
 
@@ -16,89 +21,57 @@ if ! command -v python3 &>/dev/null || ! command -v pip &>/dev/null; then
   display_error_and_exit "Python 3 and pip are required. Please install them and try again."
 fi
 
-Step 1: Clone the repository and change directory
-echo "Step 1: Cloning the repository and changing directory..."
-git clone https://github.com/B3H1Z/Hiddify-Telegram-Bot.git /opt/Hiddify-Telegram-Bot || display_error_and_exit "Failed to clone the repository."
-cd /opt/Hiddify-Telegram-Bot || display_error_and_exit "Failed to change directory."
+echo -e "${GREEN}Step 1: Cloning the repository and changing directory...${RESET}"
+repository_url="https://github.com/B3H1Z/Hiddify-Telegram-Bot.git"
+install_dir="/opt/Hiddify-Telegram-Bot"
 
-# Step 2: Install requirements
-echo "Step 2: Installing requirements..."
+if [ -d "$install_dir" ]; then
+  echo "Directory $install_dir exists."
+else
+  git clone "$repository_url" "$install_dir" || display_error_and_exit "Failed to clone the repository."
+fi
+
+cd "$install_dir" || display_error_and_exit "Failed to change directory."
+
+echo -e "${GREEN}Step 2: Installing requirements...${RESET}"
 pip install -r requirements.txt || display_error_and_exit "Failed to install requirements."
 
-# Step 3: Run config.py to generate config.json
+echo -e "${GREEN}Step 3: Preparing ...${RESET}"
+db_backup_dir="$install_dir/Backup/DB"
+logs_dir="$install_dir/Logs"
+receiptions_dir="$install_dir/UserBot/Receiptions"
 
-echo "Making a copy of /opt/hiddify-config/hiddify-panel/hiddifypanel.db"
-if [ -f "/opt/hiddify-config/hiddify-panel/hiddifypanel.db" ]; then
-  echo "File /opt/hiddify-config/hiddify-panel/hiddifypanel.db exists."
-else
-  echo "Error: File /opt/hiddify-config/hiddify-panel/hiddifypanel.db does not exists."
-  echo "Please install hiddify-panel and try again."
-  exit 1
-fi
+create_directory_if_not_exists() {
+  if [ ! -d "$1" ]; then
+    echo "Creating directory $1"
+    mkdir -p "$1"
+  fi
+}
 
-if [ -d "/opt/Hiddify-Telegram-Bot/Backup/DB" ]; then
-  echo "Directory /opt/Hiddify-Telegram-Bot/Backup/DB exists."
-else
-  echo "Creating directory /opt/Hiddify-Telegram-Bot/Backup/DB"
-  mkdir -p /opt/Hiddify-Telegram-Bot/Backup/DB
-fi
+create_directory_if_not_exists "$db_backup_dir"
+create_directory_if_not_exists "$logs_dir"
+create_directory_if_not_exists "$receiptions_dir"
 
-if [ -d "/opt/Hiddify-Telegram-Bot/Logs" ]; then
-  echo "Directory /opt/Hiddify-Telegram-Bot/Logs exists."
-else
-  echo "Creating directory /opt/Hiddify-Telegram-Bot/Logs"
-  mkdir -p /opt/Hiddify-Telegram-Bot/Logs
-fi
+chmod +x "$install_dir/restart.sh"
+chmod +x "$install_dir/update.sh"
 
-if [ -d "/opt/Hiddify-Telegram-Bot/UserBot/Receiptions" ]; then
-  echo "Directory /opt/Hiddify-Telegram-Bot/UserBot/Receiptions exists."
-else
-  echo "Creating directory /opt/Hiddify-Telegram-Bot/UserBot/Receiptions"
-  mkdir -p /opt/Hiddify-Telegram-Bot/UserBot/Receiptions
-fi
-
-cp /opt/hiddify-config/hiddify-panel/hiddifypanel.db /opt/Hiddify-Telegram-Bot/Backup/DB/hiddifypanel.db
-
-echo "Step 3: Running config.py to generate config.json..."
+echo -e "${GREEN}Step 4: Running config.py to generate config.json...${RESET}"
 python3 config.py || display_error_and_exit "Failed to run config.py."
 
-# Step 4: Run the bot in the background using nohup
-echo "Step 4: Running the bot in the background..."
-nohup python3 hiddifyTelegramBot.py >/dev/null 2>&1 &
+echo -e "${GREEN}Step 5: Running the bot in the background...${RESET}"
+nohup python3 hiddifyTelegramBot.py >> /opt/Hiddify-Telegram-Bot/bot.log 2>&1 &
 
-# Step 5: Add cron job to start the bot on reboot
-echo "Step 5: Adding cron job to start the bot on reboot..."
-chmod +x /opt/Hiddify-Telegram-Bot/restart.sh
-chmod +x /opt/Hiddify-Telegram-Bot/update.sh
+echo -e "${GREEN}Step 6: Adding cron jobs...${RESET}"
+(crontab -l 2>/dev/null; echo "@reboot cd $install_dir && ./restart.sh") | crontab -
+(crontab -l 2>/dev/null; echo "0 */6 * * * cd $install_dir && python3 crontab.py --backup") | crontab -
+(crontab -l 2>/dev/null; echo "0 12 * * * cd $install_dir && python3 crontab.py --reminder") | crontab -
 
-if ! crontab -l | grep "@reboot cd /opt/Hiddify-Telegram-Bot && ./restart.sh"; then
-  (
-    crontab -l 2>/dev/null
-    echo "@reboot cd /opt/Hiddify-Telegram-Bot && ./restart.sh"
-  ) | crontab -
-fi
-
-if ! crontab -l | grep "0 */6 * * * cd /opt/Hiddify-Telegram-Bot && python3 crontab.py --backup"; then
-  (
-    crontab -l 2>/dev/null
-    echo "0 */6 * * * cd /opt/Hiddify-Telegram-Bot && python3 crontab.py --backup"
-  ) | crontab -
-fi
-
-if ! crontab -l | grep "0 12 * * * cd /opt/Hiddify-Telegram-Bot && python3 crontab.py --reminder"; then
-  (
-    crontab -l 2>/dev/null
-    echo "0 12 * * * cd /opt/Hiddify-Telegram-Bot && python3 crontab.py --reminder"
-  ) | crontab -
-fi
-
-# Wait for a few seconds to check if the bot started successfully
+echo -e "${GREEN}Waiting for a few seconds...${RESET}"
 sleep 5
 
-# Check if the bot process is running
 if pgrep -f "python3 hiddifyTelegramBot.py" >/dev/null; then
-  echo "Bot setup completed successfully!"
-  echo "Send [/start] in telegram bot"
+  echo -e "${GREEN}The bot has been started successfully.${RESET}"
+  echo -e "${GREEN}Send [/start] in Telegram bot.${RESET}"
 else
   display_error_and_exit "Failed to start the bot. Please check for errors and try again."
 fi

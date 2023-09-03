@@ -587,12 +587,12 @@ class UserDBManager:
             logging.error(f"Error while deleting order [{order_id}] \n Error: {e}")
             return False
 
-    def add_non_order_subscriptions(self,non_sub_id, telegram_id, uuid):
+    def add_non_order_subscriptions(self, non_sub_id, telegram_id, uuid):
         cur = self.conn.cursor()
         try:
             cur.execute(
                 "INSERT INTO non_order_subscriptions(id,telegram_id,uuid) VALUES(?,?,?)",
-                (non_sub_id,telegram_id, uuid))
+                (non_sub_id, telegram_id, uuid))
             self.conn.commit()
             logging.info(f"Order [{telegram_id}] added successfully!")
             return True
@@ -631,7 +631,7 @@ class UserDBManager:
             logging.error(f"Error while finding order {kwargs} \n Error:{e}")
             return None
 
-    def delete_non_order_subscriptions(self,  **kwargs):
+    def delete_non_order_subscriptions(self, **kwargs):
         cur = self.conn.cursor()
         try:
             for key, value in kwargs.items():

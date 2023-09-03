@@ -119,7 +119,7 @@ def search_user_markup():
     return markup
 
 
-# Users Bot Management Inline Keyboard Markup
+# Users Bot Management - Inline Keyboard Markup
 def users_bot_management_markup(value=None):
     markup = InlineKeyboardMarkup()
     markup.row_width = 2
@@ -134,6 +134,7 @@ def users_bot_management_markup(value=None):
     return markup
 
 
+# Users Bot Management - Settings - Inline Keyboard Markup
 def users_bot_management_settings_markup(settings):
     markup = InlineKeyboardMarkup()
     markup.row_width = 1
@@ -143,6 +144,7 @@ def users_bot_management_settings_markup(settings):
     return markup
 
 
+# Users Bot Management - Edit Owner Info - Inline Keyboard Markup
 def users_bot_edit_owner_info_markup():
     markup = InlineKeyboardMarkup()
     markup.row_width = 1
@@ -154,7 +156,7 @@ def users_bot_edit_owner_info_markup():
                                     callback_data=f"users_bot_owner_info_edit_card_name:None"))
     return markup
 
-
+# Users Bot Management - Plans List - Inline Keyboard Markup
 def plans_list_markup(plans):
     markup = InlineKeyboardMarkup(row_width=1)
     keys = []

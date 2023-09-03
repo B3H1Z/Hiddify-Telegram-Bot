@@ -13,8 +13,8 @@ from version import __version__
 os.environ['no_proxy'] = '*'
 
 VERSION = __version__
-MAIN_DB_LOC = "/opt/hiddify-config/hiddify-panel/hiddifypanel.db"
-# MAIN_DB_LOC = os.path.join(os.getcwd(), "hiddifypanel.db")
+# MAIN_DB_LOC = "/opt/hiddify-config/hiddify-panel/hiddifypanel.db"
+MAIN_DB_LOC = os.path.join(os.getcwd(), "hiddifypanel.db")
 USERS_DB_LOC = os.path.join(os.getcwd(), "Database", "hidyBot.db")
 CONF_LOC = os.path.join(os.getcwd(), "config.json")
 LOG_LOC = os.path.join(os.getcwd(), "Logs", "hidyBot.log")

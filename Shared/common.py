@@ -1,3 +1,5 @@
+# Common file for avoiding circular import.
+
 def admin_bot():
     from AdminBot.bot import bot as admin_bot
     return admin_bot

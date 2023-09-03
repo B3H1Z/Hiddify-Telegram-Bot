@@ -40,6 +40,7 @@ def users_list_template(users, heder=""):
 """
 
 
+# Configs List Message Template
 def configs_template(configs):
     messages = []
     result = []
@@ -54,6 +55,7 @@ def configs_template(configs):
     return result
 
 
+# System Status Message Template
 def system_status_template(status):
     return f"""
 <b> System Status </b>
@@ -64,6 +66,7 @@ def system_status_template(status):
 """
 
 
+# Last Online Time Template
 def last_online_time_template(last_online_time):
     if last_online_time.days >= 30:
         return f"{last_online_time.days // 30} {MESSAGES['MONTH']} {MESSAGES['AGO']} "
@@ -81,6 +84,7 @@ def last_online_time_template(last_online_time):
         return MESSAGES['NEVER']
 
 
+# Owner Info Message Template
 def owner_info_template(username, card_number_card, card_name):
     username = username if username else "-"
     card_number_card = card_number_card if card_number_card else "-"
@@ -103,6 +107,7 @@ def owner_info_template(username, card_number_card, card_name):
 """
 
 
+# About Bot Message Template
 def about_template():
     if LANG == 'FA':
         return f"""
@@ -136,7 +141,3 @@ BNB: <code>bnb13fevgfzjp4am2ejvk7ly2xdpdldhz5xwd350a2</code>
 
 Version: {VERSION}
 """
-
-
-
-

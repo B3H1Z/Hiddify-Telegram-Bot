@@ -1,39 +1,75 @@
 #!/bin/bash
 
-pkill -15 -f hiddifyTelegramBot.py
+# Define text colors
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+YELLOW='\033[0;33m'
+RESET='\033[0m' # Reset text color
 
-sleep 5
+# Function to display colored messages
+function display_message() {
+  echo -e "$1"
+}
 
-#If version.py is not exist, reinstall the bot
-if [ ! -f /opt/Hiddify-Telegram-Bot/version.py ]; then
-  # This version is deprecated
-  # do you want to reinstall the bot?
+# Function to gracefully stop the bot
+function stop_bot() {
+  display_message "${GREEN}Stopping the bot gracefully...${RESET}"
+  pkill -15 -f hiddifyTelegramBot.py
+}
 
+# Function to reinstall the bot
+function reinstall_bot() {
+  display_message "${YELLOW}This version is deprecated, and you need to reinstall the bot.${RESET}"
 
-  #ask for confirmation
-  echo "This version is deprecated, you need to reinstall the bot."
+  # Ask for confirmation
   read -r -p "Do you want to reinstall the bot? [y/N] " response
   case "$response" in
     [yY][eE][sS]|[yY])
-      # shellcheck disable=SC2164
-      cd /opt || exit
+      display_message "Reinstalling the bot..."
+
+      # Change to the installation directory
+      cd /opt || {
+        display_message "${RED}Failed to change directory to /opt.${RESET}"
+        exit 1
+      }
+
       # Remove the old bot
       rm -rf /opt/Hiddify-Telegram-Bot
-      # run install.sh
+
+      # Run the installation script
       bash -c "$(curl -Lfo- https://raw.githubusercontent.com/B3H1Z/Hiddify-Telegram-Bot/main/install.sh)"
-      echo "Bot has been reinstalled."
+
+      display_message "${GREEN}Bot has been reinstalled.${RESET}"
       ;;
     *)
-      echo "Bot has not been reinstalled."
+      display_message "Bot has not been reinstalled."
       ;;
   esac
-else
-  echo "Updating the bot..."
+}
+
+# Function to update and restart the bot
+function update_bot() {
+  display_message "${GREEN}Updating the bot...${RESET}"
   git stash
   if git pull origin main; then
     nohup python3 hiddifyTelegramBot.py >>bot.log 2>&1 &
-    echo "Bot has been updated and restarted."
+    display_message "${GREEN}Bot has been updated and restarted.${RESET}"
   else
-    echo "Failed to update the bot. Check the Git repository for errors."
+    display_message "${RED}Failed to update the bot. Check the Git repository for errors.${RESET}"
+    exit 1
   fi
+}
+
+# Stop the bot gracefully before proceeding
+stop_bot
+
+# Wait for a few seconds
+display_message "Please wait for 5 seconds ..."
+sleep 5
+
+# If version.py does not exist, offer to reinstall the bot; otherwise, update it
+if [ ! -f /opt/Hiddify-Telegram-Bot/version.py ]; then
+  reinstall_bot
+else
+  update_bot
 fi
