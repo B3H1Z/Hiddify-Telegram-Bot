@@ -16,9 +16,9 @@ DEBUG = False
 VERSION = __version__
 
 if DEBUG:
-    MAIN_DB_LOC = "/opt/hiddify-config/hiddify-panel/hiddifypanel.db"
-else:
     MAIN_DB_LOC = os.path.join(os.getcwd(), "hiddifypanel.db")
+else:
+    MAIN_DB_LOC = "/opt/hiddify-config/hiddify-panel/hiddifypanel.db"
 
 USERS_DB_LOC = os.path.join(os.getcwd(), "Database", "hidyBot.db")
 CONF_LOC = os.path.join(os.getcwd(), "config.json")
