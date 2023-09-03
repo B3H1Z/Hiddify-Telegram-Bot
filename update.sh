@@ -55,6 +55,13 @@ function update_bot() {
     nohup python3 hiddifyTelegramBot.py >>bot.log 2>&1 &
     display_message "${GREEN}Bot has been updated and restarted.${RESET}"
   else
+    if git pull --rebase origin main; then
+      nohup python3 hiddifyTelegramBot.py >>bot.log 2>&1 &
+      display_message "${GREEN}Bot has been updated and restarted.${RESET}"
+    else
+      display_message "${RED}Failed to update the bot. Check the Git repository for errors.${RESET}"
+      exit 1
+    fi
     display_message "${RED}Failed to update the bot. Check the Git repository for errors.${RESET}"
     exit 1
   fi
