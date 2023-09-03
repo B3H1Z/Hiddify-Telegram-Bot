@@ -45,6 +45,12 @@ def is_it_cancel(message, response=MESSAGES['CANCELED']):
         return True
     return False
 
+# Check if message is command
+def is_it_command(message):
+    if message.text.startswith("/"):
+        return True
+    return False
+
 
 # Check is it UUID, Config or Subscription Link
 def type_of_subscription(text):
@@ -128,6 +134,10 @@ def next_step_send_name(message, plan, path, order_id):
                          reply_markup=main_menu_keyboard_markup())
         return
     name = message.text
+    while is_it_command(message):
+        message = bot.send_message(message.chat.id, MESSAGES['REQUEST_SEND_NAME'])
+        bot.register_next_step_handler(message, next_step_send_name, plan, path, order_id)
+        return
     # send it for admin bot
 
     created_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
