@@ -119,8 +119,11 @@ def about_template():
 
 📌حمایت مالی:
 TRX: <code>TUzbUNUfyJHyyGJwajbcXjtTiTcmWubsRx</code>
+
 DOGE: <code>D7EUG19m6SUM3UKLQEVm6Eq8gtJs6mHuS9</code>
+
 USDT: <code>0x922C0497D0967f6F57045e2dC5B3a3Da832f35E6</code>
+
 BNB: <code>bnb12fset49pulpzvs6x6t5p32xzd95qzcmvaslla5</code>
 
 نسخه: {VERSION}
