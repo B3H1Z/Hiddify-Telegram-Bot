@@ -55,7 +55,7 @@ sudo bash -c "$(curl -Lfo- https://raw.githubusercontent.com/B3H1Z/Hiddify-Teleg
 3. `آدرس پنل هیدیفای` : آدرس پنل هیدیفای خود را وارد کنید (
    مثال: `https://panel.example.com/7frgemkvtE0/78854985-68dp-425c-989b-7ap0c6kr9bd4`) <b>دقیقاً مانند این الگو!</b>
 4. `زبان ربات` : گزینه‌ها `en` و `fa` می‌باشند [پیش‌فرض `fa`]
-5. ا`توکن ربات کاربران(اختیاری)` : آن را از ربات [BotFather](https://t.me/BotFather) بگیرید (
+5. `توکن ربات کاربران(اختیاری)` : آن را از ربات [BotFather](https://t.me/BotFather) بگیرید (
    مثال: `1234567890:ABCdEfGhIjKlMnOpQrStUvWxYz`)
 
 حالا می‌توانید با ارسال دستور `/start` از ربات در تلگرام استفاده کنید.
