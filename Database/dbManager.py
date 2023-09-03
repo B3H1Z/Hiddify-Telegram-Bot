@@ -612,7 +612,7 @@ class UserDBManager:
             logging.error(f"Error while selecting all orders \n Error:{e}")
             return None
 
-    def find_non_order_subscriptions(self, **kwargs):
+    def find_non_order_subscription(self, **kwargs):
         if len(kwargs) != 1:
             logging.warning("You can only use one key to find order!")
             return None

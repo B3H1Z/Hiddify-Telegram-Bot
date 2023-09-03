@@ -113,7 +113,7 @@ def about_template():
         return f"""
 🤖هیدی بات، راحت تر از همیشه!
 
-<a href='https://github.com/B3H1Z/Hiddify-Telegram-Bot'> لینک پروژه </a>|<a href='https://t.me/HiddyBotSupport'> گروه پشتیبانی </a>
+<a href='https://github.com/B3H1Z/Hiddify-Telegram-Bot'> لینک پروژه </a>|<a href='https://t.me/HidyBotGroup'> گروه پشتیبانی </a>
 
 این پروژه به صورت رایگان توسعه داده شده و جهت ادامه توسعه، حمایت مالی شما میتواند انگیزه بخش باشد❤️
 
@@ -129,7 +129,7 @@ BNB: <code>bnb12fset49pulpzvs6x6t5p32xzd95qzcmvaslla5</code>
         return f"""
 🤖Hiddify Bot, Easier than ever!
 
-<a href='https://github.com/B3H1Z/Hiddify-Telegram-Bot'> Project </a>|<a href='https://t.me/HiddyBotSupport'> Support Group </a>
+<a href='https://github.com/B3H1Z/Hiddify-Telegram-Bot'> Project </a>|<a href='https://t.me/HidyBotGroup'> Support Group </a>
 
 This project is developed for free and your financial support can be motivating for further development❤️
 

@@ -189,7 +189,7 @@ def next_step_link_subscription(message):
     uuid = utils.is_it_config_or_sub(message.text)
     if uuid:
         # check is it already subscribed
-        is_it_subscribed = USERS_DB.find_non_order_subscriptions(uuid=uuid)
+        is_it_subscribed = USERS_DB.find_non_order_subscription(uuid=uuid)
         if is_it_subscribed:
             bot.send_message(message.chat.id, MESSAGES['ALREADY_SUBSCRIBED'],
                              reply_markup=main_menu_keyboard_markup())

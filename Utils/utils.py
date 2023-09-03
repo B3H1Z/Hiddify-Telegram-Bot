@@ -349,7 +349,7 @@ def txt_to_qr(txt):
 # List of users who not ordered from bot (Link Subscription)
 def non_order_user_info(telegram_id):
     users_list = []
-    non_ordered_subscriptions = USERS_DB.find_non_order_subscriptions(telegram_id=telegram_id)
+    non_ordered_subscriptions = USERS_DB.find_non_order_subscription(telegram_id=telegram_id)
     if non_ordered_subscriptions:
         for subscription in non_ordered_subscriptions:
             non_order_user = ADMIN_DB.find_user(uuid=subscription['uuid'])
