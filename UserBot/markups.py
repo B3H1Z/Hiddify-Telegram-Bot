@@ -23,6 +23,14 @@ def user_info_markup(uuid):
     return markup
 
 
+def user_info_non_sub_markup(uuid):
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 2
+    markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_LIST'], callback_data=f"configs_list:{uuid}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['UNLINK_SUBSCRIPTION'], callback_data=f"unlink_subscription:{uuid}"))
+    return markup
+
+
 def confirm_subscription_markup(uuid):
     markup = InlineKeyboardMarkup()
     markup.row_width = 1

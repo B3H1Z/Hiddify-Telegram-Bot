@@ -34,7 +34,7 @@ KEY_MARKUP = {
         'CONFIGS_SUB_B64': 'لینک اشتراک b64',
         'CONFIGS_CLASH': 'اشتراک Clash',
         'CONFIGS_HIDDIFY': 'اشتراک Hiddify',
-        'UNLINK_SUBSCRIPTION': '⭕️لغو اشتراک',
+        'UNLINK_SUBSCRIPTION': '⭕️جداسازی اشتراک',
         'BUY_SUBSCRIPTION': '💳خرید اشتراک',
         'BUY_PLAN': '💳خرید',
         'SEND_SCREENSHOT': '✅پرداخت کردم، ارسال رسید',

@@ -221,7 +221,7 @@ def callback_query(call):
                          reply_markup=main_menu_keyboard_markup())
 
     elif key == 'unlink_subscription':
-        delete_status = USERS_DB.delete_non_order_subscriptions(telegram_id=call.message.chat.id)
+        delete_status = USERS_DB.delete_non_order_subscriptions(uuid=value)
         if delete_status:
             bot.delete_message(call.message.chat.id, call.message.message_id)
             bot.send_message(call.message.chat.id, MESSAGES['SUBSCRIPTION_UNLINKED'],
@@ -348,13 +348,13 @@ def callback_query(call):
                                       reply_markup=user_info_markup(value))
     elif key == "del_msg":
         bot.delete_message(call.message.chat.id, call.message.message_id)
+
     elif key == "back_to_plans":
         bot.delete_message(call.message.chat.id, call.message.message_id)
         buy_subscription(call.message)
+
     else:
         bot.answer_callback_query(call.id, MESSAGES['ERROR_INVALID_COMMAND'])
-
-
 
 
 # Bot Start Message
@@ -374,51 +374,25 @@ def start(message):
 
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['SUBSCRIPTION_STATUS'])
 def subscription_status(message):
-    user_telegram_data = USERS_DB.find_user(telegram_id=message.chat.id)
-    if user_telegram_data:
-        user_telegram_data = user_telegram_data[0]
-        user_non_order_datas = USERS_DB.find_non_order_subscriptions(telegram_id=user_telegram_data['telegram_id'])
-        user_payment_datas = USERS_DB.find_order(telegram_id=user_telegram_data['telegram_id'])
+    non_order_subs = utils.non_order_user_info(message.chat.id)
+    order_subs = utils.order_user_info(message.chat.id)
 
-        if user_non_order_datas:
-            # user_non_order_datas = user_non_order_datas[0]
-            for user_non_order_data in user_non_order_datas:
-                sub_id = user_non_order_data['id']
-                user_info = ADMIN_DB.find_user(uuid=user_non_order_data['uuid'])
-                if user_info:
-                    # user_info = user_info[0]
-                    user_non_order_data = utils.users_to_dict(user_info)
-                    user_non_order_data = utils.dict_process(user_non_order_data)
-                    user_non_order_data = user_non_order_data[0]
-                    if user_non_order_data:
-                        api_user_data = user_info_template(sub_id, user_non_order_data, MESSAGES['INFO_USER'])
-                        bot.send_message(message.chat.id, api_user_data,
-                                         reply_markup=user_info_markup(user_non_order_data['uuid']))
-
-        if user_payment_datas:
-            for user_payment_data in user_payment_datas:
-                if user_payment_data:
-                    if user_payment_data['approved']:
-                        order_info = USERS_DB.find_order_subscription(order_id=user_payment_data['id'])
-                        if order_info:
-                            order_info = order_info[0]
-                            non_sub_id = order_info['id']
-                            user_info = ADMIN_DB.find_user(uuid=order_info['uuid'])
-                            if user_info:
-                                user_info = utils.users_to_dict(user_info)
-                                user_info = utils.dict_process(user_info)
-                                user_info = user_info[0]
-                                if user_info:
-                                    api_user_data = user_info_template(non_sub_id, user_info, MESSAGES['INFO_USER'])
-                                    bot.send_message(message.chat.id, api_user_data,
-                                                     reply_markup=user_info_markup(user_info['uuid']))
-
-            return
-
+    if not non_order_subs and not order_subs:
         bot.send_message(message.chat.id, MESSAGES['SUBSCRIPTION_NOT_FOUND'], reply_markup=main_menu_keyboard_markup())
+        return
 
-    else:
-        bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'], reply_markup=main_menu_keyboard_markup())
+    if non_order_subs:
+        for non_order_sub in non_order_subs:
+            if non_order_sub:
+                api_user_data = user_info_template(non_order_sub['sub_id'], non_order_sub, MESSAGES['INFO_USER'])
+                bot.send_message(message.chat.id, api_user_data,
+                                 reply_markup=user_info_non_sub_markup(non_order_sub['uuid']))
+    if order_subs:
+        for order_sub in order_subs:
+            if order_sub:
+                api_user_data = user_info_template(order_sub['sub_id'], order_sub, MESSAGES['INFO_USER'])
+                bot.send_message(message.chat.id, api_user_data,
+                                 reply_markup=user_info_markup(order_sub['uuid']))
 
 
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['BUY_SUBSCRIPTION'])
