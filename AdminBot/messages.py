@@ -10,6 +10,7 @@ MESSAGES = {
         'ERROR_UNKNOWN': "❌Unknown error",
         'ERROR_CONFIG_NOT_FOUND': '❌Config not found',
         'ERROR_PLAN_NOT_FOUND': '❌Plan not found',
+        'ERROR_SUB_NOT_FOUND': '❌Subscription not found',
         'SUCCESS_USER_DELETED': "✅User deleted",
         'SUCCESS_USER_EDITED': "✅User edited",
         'SUCCESS_USER_ADDED': "✅User added",
@@ -83,6 +84,7 @@ MESSAGES = {
         'USERS_BOT_SETTINGS': '⚙️Users Bot Settings',
         'USERS_BOT_SETTINGS_HYPERLINK': 'Set Hyperlink visibility when user request subscription info',
         'USERS_BOT_ORDER_NUMBER_REQUEST': 'Please enter the order number:',
+        'USERS_BOT_SUB_ID_REQUEST': 'Please enter the subscription ID:',
         'ERROR_INVALID_USERNAME': '❌Invalid username\nUsername must start with @',
         'ERROR_INVALID_CARD_NUMBER': '❌Invalid card number',
         'PAYMENT_CONFIRMED': '✅Payment confirmed',
@@ -94,6 +96,7 @@ MESSAGES = {
         'ERROR_PAYMENT_NOT_FOUND': '❌Payment not found',
         'ERROR_ORDER_NOT_FOUND': '❌Order not found',
         'ORDER_ID': 'Order number:',
+        'SUB_ID': 'Subscription ID:',
         'USER_TIME_EXPIRED': '⚠️EXPIRED',
         'PAYMENT_ASK_CHANGE_STATUS': 'Do you want to change the status of the payment?',
         'PAYMENT_ACCEPT_STATUS_CONFIRMED': '🟢Confirmed',
@@ -112,6 +115,7 @@ MESSAGES = {
         'ERROR_UNKNOWN': "❌خطای ناشناخته",
         'ERROR_CONFIG_NOT_FOUND': '❌کانفیگ یافت نشد',
         'ERROR_PLAN_NOT_FOUND': '❌پلن یافت نشد',
+        'ERROR_SUB_NOT_FOUND': '❌اشتراکی با این شناسه یافت نشد',
         'SUCCESS_USER_DELETED': "✅کاربر حذف شد",
         'SUCCESS_USER_EDITED': "✅کاربر ویرایش شد",
         'SUCCESS_USER_ADDED': "✅کاربر اضافه شد",
@@ -184,6 +188,7 @@ MESSAGES = {
         'USERS_BOT_SETTINGS': '⚙️تنظیمات ربات کاربران',
         'USERS_BOT_SETTINGS_HYPERLINK': 'تنظیم نمایش Hyperlink صفحه هیدیفای روی نام کاربر هنگام دریافت اطلاعات اشتراک',
         'USERS_BOT_ORDER_NUMBER_REQUEST': 'لطفا شماره سفارش را وارد کنید:',
+        'USERS_BOT_SUB_ID_REQUEST': 'لطفا شناسه اشتراک را وارد کنید:',
         'SUCCESS_UPDATE_DATA': '✅اطلاعات با موفقیت به روز شد',
         'ERROR_INVALID_USERNAME': '❌نام کاربری نامعتبر است\n نام کاربری باید با @ شروع شود',
         'ERROR_INVALID_CARD_NUMBER': '❌شماره کارت نامعتبر است\nشماره کارت باید 16 رقمی باشد',
@@ -196,6 +201,7 @@ MESSAGES = {
         'ERROR_ORDER_NOT_FOUND': '❌سفارش یافت نشد',
         'ERROR_PAYMENT_NOT_FOUND': '❌پرداخت یافت نشد',
         'ORDER_ID': 'شماره سفارش',
+        'SUB_ID': 'شناسه اشتراک',
         'USER_TIME_EXPIRED': '⚠️منقضی',
         'PAYMENT_ASK_CHANGE_STATUS': 'آیا میخواهید وضعیت سفارش را تغییر دهید؟',
         'PAYMENT_ACCEPT_STATUS_CONFIRMED': '🟢تایید شده',

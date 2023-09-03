@@ -120,7 +120,12 @@ def panel_url_validator(url):
     if url.endswith("admin/user"):
         url = url.replace("/admin/user", "")
     print(colored("Checking URL...", "yellow"))
-    request = requests.get(f"{url}/admin/")
+    try:
+        request = requests.get(f"{url}/admin/")
+    except requests.exceptions.ConnectionError:
+        print(colored("URL is not valid! Error in connection", "red"))
+
+        return False
     if request.status_code != 200:
         print(colored("URL is not valid!", "red"))
         return False
@@ -135,6 +140,7 @@ def panel_url_validator(url):
 
 
 def set_by_user():
+    print()
     print(
         colored("Example: 123456789\nIf you have more than one admin, split with comma(,)\n[get it from @userinfobot]",
                 "yellow"))
@@ -147,7 +153,7 @@ def set_by_user():
             continue
         admin_ids = [int(admin_id) for admin_id in admin_ids]
         break
-
+    print()
     print(colored("Example: 123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ\n[get it from @BotFather]", "yellow"))
     while True:
         token = input("Enter your Admin bot token: ")
@@ -155,7 +161,29 @@ def set_by_user():
             print(colored("Token is required!", "red"))
             continue
         break
-
+    print()
+    print(colored("You can use the bot as a userbot for your clients!", "yellow"))
+    while True:
+        userbot = input("Do you want a  Bot for your users? (y/n): ").lower()
+        if userbot not in ["y", "n"]:
+            print(colored("Please enter y or n!", "red"))
+            continue
+        break
+    if userbot == "y":
+        print()
+        print(colored("Example: 123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ\n[get it from @BotFather]", "yellow"))
+        while True:
+            client_token = input("Enter your client (For Users) bot token: ")
+            if not client_token:
+                print(colored("Token is required!", "red"))
+                continue
+            if client_token == token:
+                print(colored("Client token must be different from Admin token!", "red"))
+                continue
+            break
+    else:
+        client_token = None
+    print()
     print(colored(
         "Example: https://panel.example.com/7frgemkvtE0/78854985-68dp-425c-989b-7ap0c6kr9bd4\n[exactly like this!]",
         "yellow"))
@@ -178,27 +206,6 @@ def set_by_user():
             continue
         break
 
-    print(colored("You can use the bot as a userbot for your clients!", "yellow"))
-    while True:
-        userbot = input("Do you want a  Bot for your users? (y/n): ").lower()
-        if userbot not in ["y", "n"]:
-            print(colored("Please enter y or n!", "red"))
-            continue
-        break
-    if userbot == "y":
-        print(colored("Example: 123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ\n[get it from @BotFather]", "yellow"))
-        while True:
-            client_token = input("Enter your client (For Users) bot token: ")
-            if not client_token:
-                print(colored("Token is required!", "red"))
-                continue
-            if client_token == token:
-                print(colored("Client token must be different from Admin token!", "red"))
-                continue
-            break
-    else:
-        client_token = None
-
     return admin_ids, token, url, lang, client_token
 
 
@@ -213,6 +220,16 @@ if __name__ == '__main__':
     else:
         logging.info("Config file found!")
         print(colored("Config file is exist!", "green"))
+        set_variables(read_config_file())
+        # Show current configration data
+        print()
+        print(colored("Current configration data:", "yellow"))
+        print(f"Admin IDs: {ADMINS_ID}")
+        print(f"Admin Bot Token: {TELEGRAM_TOKEN}")
+        print(f"Client Bot Token: {CLIENT_TOKEN}")
+        print(f"Panel URL: {PANEL_URL}")
+        print(f"Language: {LANG}")
+        print()
         if input("Do you want to change config? (y/n): ").lower() == "y":
             # Create config file
             create_config_file(*set_by_user())

@@ -37,6 +37,7 @@ KEY_MARKUP = {
         'USERS_BOT_OWNER_INFO': '👤Owner Info',
         'USERS_BOT_OWNER_INFO_EDIT': '👤Edit Owner Info',
         'USERS_BOT_ORDERS_STATUS': '📈Order Status',
+        'USERS_BOT_SUB_STATUS': '📈Subscription Status',
         'USERS_BOT_OWNER_INFO_EDIT_CARD_NAME': 'Edit Card Holder Name',
         'USERS_BOT_OWNER_INFO_EDIT_CARD_NUMBER': 'Edit Card Number',
         'USERS_BOT_OWNER_INFO_EDIT_USERNAME': 'Edit Support Username',
@@ -83,6 +84,7 @@ KEY_MARKUP = {
         'USERS_BOT_OWNER_INFO': '👤اطلاعات مالک',
         'USERS_BOT_OWNER_INFO_EDIT': 'ویرایش اطلاعات مالک',
         'USERS_BOT_ORDERS_STATUS': '📊پیگیری سفارش',
+        'USERS_BOT_SUB_STATUS': '📊پیگیری اشتراک',
         'USERS_BOT_OWNER_INFO_EDIT_USERNAME': 'ویرایش نام کاربری پشتیبان',
         'USERS_BOT_OWNER_INFO_EDIT_CARD_NUMBER': 'ویرایش شماره کارت',
         'USERS_BOT_OWNER_INFO_EDIT_CARD_NAME': 'ویرایش نام صاحب کارت',

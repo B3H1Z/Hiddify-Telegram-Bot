@@ -365,6 +365,34 @@ def users_bot_order_status(message):
                    reply_markup=main_menu_keyboard_markup())
 
 
+def users_bot_sub_status(message):
+    if is_it_cancel(message):
+        return
+    if not is_it_digit(message):
+        return
+
+    if len(message.text) == 7:
+        user = USERS_DB.find_order_subscription(id=int(message.text))
+    elif len(message.text) == 8:
+        user = USERS_DB.find_non_order_subscription(id=int(message.text))
+    else:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_SUB_NOT_FOUND'], reply_markup=main_menu_keyboard_markup())
+        return
+
+    if not user:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_SUB_NOT_FOUND'], reply_markup=main_menu_keyboard_markup())
+        return
+    user_uuid = user[0]['uuid']
+
+    usr = utils.user_info(user_uuid)
+    if not usr:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'])
+        return
+    msg = user_info_template(usr)
+    bot.send_message(message.chat.id, msg,
+                     reply_markup=user_info_markup(usr['uuid']))
+
+
 # ----------------------------------- Callbacks -----------------------------------
 # Callback Handler for Inline Buttons
 @bot.callback_query_handler(func=lambda call: True)
@@ -664,6 +692,10 @@ def callback_query(call):
     elif key == "users_bot_orders_status":
         bot.send_message(call.message.chat.id, f"{MESSAGES['USERS_BOT_ORDER_NUMBER_REQUEST']}")
         bot.register_next_step_handler(call.message, users_bot_order_status)
+
+    elif key == "users_bot_sub_status":
+        bot.send_message(call.message.chat.id, f"{MESSAGES['USERS_BOT_SUB_ID_REQUEST']}")
+        bot.register_next_step_handler(call.message, users_bot_sub_status)
 
     # ----------------------------------- Payment Callbacks -----------------------------------
     # Payment - Confirm Payment Callback
