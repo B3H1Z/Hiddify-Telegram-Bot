@@ -1,7 +1,7 @@
 from Utils.utils import *
 from UserBot.bot import bot
 from config import CLIENT_TOKEN
-from UserBot.templates import package_size_end_soon_template,package_days_expire_soon_template
+from UserBot.templates import package_size_end_soon_template, package_days_expire_soon_template
 
 ALERT_PACKAGE_GB = 3
 ALERT_PACKAGE_DAYS = 3
@@ -19,9 +19,9 @@ def alert_package_days(package_remaining_days):
     return False
 
 
-if __name__ == '__main__':
+def cron_reminder():
     if not CLIENT_TOKEN:
-        exit(1)
+        return
 
     telegram_users = USERS_DB.select_users()
     if telegram_users:

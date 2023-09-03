@@ -16,29 +16,6 @@ def main_menu_keyboard_markup():
     return markup
 
 
-# Single User Inline Keyboard Markup
-# def user_config_list_markup(uuid):
-#     markup = InlineKeyboardMarkup()
-#     markup.row_width = 2
-#     markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_DIR'], callback_data=f"conf_dir:{uuid}"))
-#     markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_SUB'], callback_data=f"conf_sub_url:{uuid}"),
-#                InlineKeyboardButton(KEY_MARKUP['CONFIGS_SUB_B64'], callback_data=f"conf_sub_url_b64:{uuid}"))
-#     markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_CLASH'], callback_data=f"conf_clash:{uuid}"),
-#                InlineKeyboardButton(KEY_MARKUP['CONFIGS_HIDDIFY'], callback_data=f"conf_hiddify:{uuid}"))
-#     markup.add(InlineKeyboardButton(KEY_MARKUP['UNLINK_SUBSCRIPTION'], callback_data=f"unlink_subscription:None"))
-#     return markup
-#
-#
-# def sub_user_list_markup(uuid):
-#     markup = InlineKeyboardMarkup()
-#     markup.row_width = 1
-#     markup.add(InlineKeyboardButton('Vless', callback_data=f"conf_dir_vless:{uuid}"))
-#     markup.add(InlineKeyboardButton('Vmess', callback_data=f"conf_dir_vmess:{uuid}"))
-#     markup.add(InlineKeyboardButton('Trojan', callback_data=f"conf_dir_trojan:{uuid}"))
-#     markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_user_panel:{uuid}"))
-#     return markup
-
-
 def user_info_markup(uuid):
     markup = InlineKeyboardMarkup()
     markup.row_width = 2
@@ -58,6 +35,7 @@ def confirm_buy_plan_markup(plan_id):
     markup = InlineKeyboardMarkup()
     markup.row_width = 1
     markup.add(InlineKeyboardButton(KEY_MARKUP['BUY_PLAN'], callback_data=f"confirm_buy_plan:{plan_id}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_plans:None"))
     return markup
 
 
@@ -65,7 +43,7 @@ def send_screenshot_markup(plan_id):
     markup = InlineKeyboardMarkup()
     markup.row_width = 1
     markup.add(InlineKeyboardButton(KEY_MARKUP['SEND_SCREENSHOT'], callback_data=f"send_screenshot:{plan_id}"))
-    markup.add(InlineKeyboardButton(KEY_MARKUP['CANCEL'], callback_data=f"cancel_buy_plan:{plan_id}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['CANCEL'], callback_data=f"del_msg:{plan_id}"))
     return markup
 
 

@@ -5,7 +5,7 @@ from config import ADMINS_ID
 # This file is run by cronjob every 6 hours
 # It will backup the panel and send it to the admin
 
-if __name__ == '__main__':
+def cron_backup():
     file_name = backup_panel()
     if file_name:
         for admin_id in ADMINS_ID:

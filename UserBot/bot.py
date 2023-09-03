@@ -79,7 +79,9 @@ def buy_plan_info(message, plan):
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
         return
-    bot.send_message(message.chat.id, plan_info_template(plan), reply_markup=confirm_buy_plan_markup(plan['id']))
+    # bot.send_message(message.chat.id, plan_info_template(plan), reply_markup=confirm_buy_plan_markup(plan['id']))
+    bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id, text=plan_info_template(plan),
+                          reply_markup=confirm_buy_plan_markup(plan['id']))
 
 
 order_info = {}
@@ -97,9 +99,9 @@ def buy_plan_confirm(message, plan):
         return
     price = replace_last_three_with_random(str(plan['price']))
     order_info['price'] = price
-    bot.send_message(message.chat.id,
-                     owner_info_template(plan, owner_info['card_number'], owner_info['card_owner'], price),
-                     reply_markup=send_screenshot_markup(plan_id=plan['id']))
+    bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id,
+                          text=owner_info_template(plan, owner_info['card_number'], owner_info['card_owner'], price),
+                          reply_markup=send_screenshot_markup(plan_id=plan['id']))
 
 
 def next_step_send_screenshot(message, plan):
@@ -174,8 +176,6 @@ def next_step_link_subscription_1(message):
                          reply_markup=main_menu_keyboard_markup())
         return
     if is_it_cancel(message):
-        bot.send_message(message.chat.id, MESSAGES['CANCELLED'],
-                         reply_markup=main_menu_keyboard_markup())
         return
     uuid = utils.is_it_config_or_sub(message.text)
     if uuid:
@@ -186,7 +186,7 @@ def next_step_link_subscription_1(message):
                              reply_markup=main_menu_keyboard_markup())
             return
         non_sub_id = random.randint(10000000, 99999999)
-        status = USERS_DB.add_non_order_subscriptions(non_sub_id,message.chat.id, uuid)
+        status = USERS_DB.add_non_order_subscriptions(non_sub_id, message.chat.id, uuid)
         if status:
             bot.send_message(message.chat.id, MESSAGES['SUBSCRIPTION_CONFIRMED'],
                              reply_markup=main_menu_keyboard_markup())
@@ -309,6 +309,7 @@ def callback_query(call):
                 bot.send_message(call.message.chat.id, f"{message}",
                                  reply_markup=main_menu_keyboard_markup())
 
+
     # User Configs - Subscription Configs Callback
     elif key == "conf_sub_url":
         sub = utils.sub_links(value)
@@ -345,9 +346,15 @@ def callback_query(call):
     elif key == "back_to_user_panel":
         bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,
                                       reply_markup=user_info_markup(value))
-
+    elif key == "del_msg":
+        bot.delete_message(call.message.chat.id, call.message.message_id)
+    elif key == "back_to_plans":
+        bot.delete_message(call.message.chat.id, call.message.message_id)
+        buy_subscription(call.message)
     else:
         bot.answer_callback_query(call.id, MESSAGES['ERROR_INVALID_COMMAND'])
+
+
 
 
 # Bot Start Message
@@ -384,7 +391,7 @@ def subscription_status(message):
                     user_non_order_data = utils.dict_process(user_non_order_data)
                     user_non_order_data = user_non_order_data[0]
                     if user_non_order_data:
-                        api_user_data = user_info_template(sub_id,user_non_order_data, MESSAGES['INFO_USER'])
+                        api_user_data = user_info_template(sub_id, user_non_order_data, MESSAGES['INFO_USER'])
                         bot.send_message(message.chat.id, api_user_data,
                                          reply_markup=user_info_markup(user_non_order_data['uuid']))
 
@@ -402,14 +409,13 @@ def subscription_status(message):
                                 user_info = utils.dict_process(user_info)
                                 user_info = user_info[0]
                                 if user_info:
-                                    api_user_data = user_info_template(non_sub_id,user_info, MESSAGES['INFO_USER'])
+                                    api_user_data = user_info_template(non_sub_id, user_info, MESSAGES['INFO_USER'])
                                     bot.send_message(message.chat.id, api_user_data,
                                                      reply_markup=user_info_markup(user_info['uuid']))
 
             return
 
-        bot.send_message(message.chat.id, MESSAGES['ENTER_SUBSCRIPTION_INFO'])
-        bot.register_next_step_handler(message, next_step_subscription_status_1)
+        bot.send_message(message.chat.id, MESSAGES['SUBSCRIPTION_NOT_FOUND'], reply_markup=main_menu_keyboard_markup())
 
     else:
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'], reply_markup=main_menu_keyboard_markup())
