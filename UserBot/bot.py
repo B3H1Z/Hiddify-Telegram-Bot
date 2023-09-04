@@ -463,7 +463,8 @@ def link_subscription(message):
 # User Buy Subscription Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['WALLET'])
 def wallet_ballance(message):
-    user = USERS_DB.find_user(telegram_id=message.chat.id)
+    users = USERS_DB.find_user(telegram_id=message.chat.id)
+    user = users[0]
     if user:
         telegram_user_data = wallet_info_template(int(user['wallet_balance']))
         bot.send_message(message.chat.id, telegram_user_data,
