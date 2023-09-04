@@ -87,5 +87,5 @@ def cancel_markup():
 def wallet_info_markup():
     markup = InlineKeyboardMarkup()
     markup.row_width = 1
-    markup.add(InlineKeyboardButton(KEY_MARKUP['UNLINK_SUBSCRIPTION']))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['INCREASE_WALLET_BALANCE'], callback_data=f"INCREASE_WALLET_BALANCE:wallet"))
     return markup
