@@ -465,14 +465,17 @@ def link_subscription(message):
 def wallet_ballance(message):
     user = USERS_DB.find_user(telegram_id=message.chat.id)
     if user:
-        telegram_user = utils.Telegram_users_to_dict(user)
-        if telegram_user:
-            telegram_user_data = wallet_info_template(telegram_user['wallet_balance'])
-            bot.send_message(message.chat.id, telegram_user_data,
-                            reply_markup=wallet_info_markup())
-        else:
-            bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
-                         reply_markup=main_menu_keyboard_markup())
+        telegram_user_data = wallet_info_template(user['wallet_balance'])
+        bot.send_message(message.chat.id, telegram_user_data,
+                           reply_markup=wallet_info_markup())
+        #telegram_user = utils.Telegram_users_to_dict(user)
+        #if telegram_user:
+            #telegram_user_data = wallet_info_template(telegram_user['wallet_balance'])
+            #bot.send_message(message.chat.id, telegram_user_data,
+            #               reply_markup=wallet_info_markup())
+        #else:
+        #   bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+        #                 reply_markup=main_menu_keyboard_markup())
     else:
         bot.send_message(message.chat.id, MESSAGES['ERROR_CONFIG_NOT_FOUND'])
             
