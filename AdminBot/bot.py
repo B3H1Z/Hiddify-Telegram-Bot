@@ -12,6 +12,8 @@ from Shared.common import user_bot
 
 # Initialize Bot
 bot = telebot.TeleBot(TELEGRAM_TOKEN, parse_mode="HTML")
+bot.delete_webhook()
+
 user_bot = user_bot()
 # Bot Start Commands
 try:

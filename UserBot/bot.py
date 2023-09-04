@@ -17,6 +17,7 @@ from Shared.common import admin_bot
 # TELEGRAM_DB.create_user_table()
 # Initialize Bot
 bot = telebot.TeleBot(CLIENT_TOKEN, parse_mode="HTML")
+bot.remove_webhook()
 admin_bot = admin_bot()
 
 # Bot Start Commands
