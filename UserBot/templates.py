@@ -32,7 +32,7 @@ def user_info_template(sub_id, usr, header=""):
 # Wallet Info Template
 def wallet_info_template(ballance):
     
-    if ballance == 0:
+    if ballance == "0":
         return MESSAGES['ZERO_BALANCE']
     else:
        return f"""
