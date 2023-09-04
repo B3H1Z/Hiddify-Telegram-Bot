@@ -16,6 +16,8 @@
 	<a href="./README-FA.md">
 	فارسی
 	</a>
+<br>
+  <a href="https://t.me/HidyBotGroup">گروه تلگرام</a>
 
 </p>
 
