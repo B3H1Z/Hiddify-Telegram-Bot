@@ -3,7 +3,7 @@ from config import LANG
 # Response Messages Template
 MESSAGES = {
     'EN': {
-        'WELCOME': "Welcome to Users Bot",
+        'WELCOME': 'Welcome to users bot',
         'INFO_USER': '📄Your Subscription Info',
         'INFO_USAGE': '📊Usage:',
         'INFO_REMAINING_DAYS': '⏳Remaining Days:',

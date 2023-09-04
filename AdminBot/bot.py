@@ -14,7 +14,8 @@ from Shared.common import user_bot
 bot = telebot.TeleBot(TELEGRAM_TOKEN, parse_mode="HTML")
 bot.delete_webhook()
 
-user_bot = user_bot()
+if CLIENT_TOKEN:
+    user_bot = user_bot()
 # Bot Start Commands
 try:
     bot.set_my_commands([
@@ -308,6 +309,9 @@ def users_bot_edit_owner_info_card_name(message):
 # Users Bot - Send Message - All Users
 def users_bot_send_msg_users(message):
     if is_it_cancel(message):
+        return
+    if not CLIENT_TOKEN:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_CLIENT_TOKEN'], reply_markup=main_menu_keyboard_markup())
         return
     msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=while_edit_user_markup())
     users_number_id = USERS_DB.select_users()
@@ -702,6 +706,9 @@ def callback_query(call):
     # ----------------------------------- Payment Callbacks -----------------------------------
     # Payment - Confirm Payment Callback
     elif key == "confirm_payment_by_admin":
+        if not CLIENT_TOKEN:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_CLIENT_TOKEN'])
+            return
         payment_id = value
         order_info = USERS_DB.find_order(id=value)
         if not order_info:
@@ -743,6 +750,9 @@ def callback_query(call):
 
     # Payment - Reject Payment Callback
     elif key == 'cancel_payment_by_admin':
+        if not CLIENT_TOKEN:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_CLIENT_TOKEN'])
+            return
         payment_id = value
         payment_info = USERS_DB.select_orders()
         if not payment_info:

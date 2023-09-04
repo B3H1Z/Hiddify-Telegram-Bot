@@ -209,8 +209,6 @@ MESSAGES = {
         'PAYMENT_ACCEPT_STATUS_WAITING': '🟡در انتظار تایید',
         'PAYMENT_ACCEPT_STATUS': 'وضعیت:',
         'CREATED_AT': 'تاریخ ایجاد:',
-
-
     }
 
 }
