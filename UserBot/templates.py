@@ -14,11 +14,15 @@ def user_info_template(sub_id, usr, header=""):
             user_name = usr['name']
     else:
         user_name = usr['name']
-
+    if usr['enable'] == 1:
+        status = MESSAGES['ACTIVE_SUBSCRIPTION_STATUS']
+    else:
+        status = MESSAGES['DEACTIVE_SUBSCRIPTION_STATUS']
     return f"""
 {header}
 
 {MESSAGES['USER_NAME']} {user_name}
+{MESSAGES['SUBSCRIPTION_STATUS']} {status}
 {MESSAGES['INFO_USAGE']} {usr['usage']['current_usage_GB']} {MESSAGES['OF']} {usr['usage']['usage_limit_GB']} {MESSAGES['GB']}
 {MESSAGES['INFO_REMAINING_DAYS']} {usr['remaining_day']} {MESSAGES['DAY_EXPIRE']}
 

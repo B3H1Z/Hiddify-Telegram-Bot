@@ -5,6 +5,9 @@ MESSAGES = {
     'EN': {
         'WELCOME': 'Welcome to users bot',
         'INFO_USER': '📄Your Subscription Info',
+        'SUBSCRIPTION_STATUS': '❔Status:',
+        'ACTIVE_SUBSCRIPTION_STATUS': '🟢 Active',
+        'DEACTIVE_SUBSCRIPTION_STATUS': '🔴 Deactive',
         'INFO_USAGE': '📊Usage:',
         'INFO_REMAINING_DAYS': '⏳Remaining Days:',
         'INFO_ID': '🔑UUID:',
@@ -53,6 +56,9 @@ MESSAGES = {
     'FA': {
         'WELCOME': "به ربات کاربران خوش آمدید",
         'INFO_USER': '📄اطلاعات اشتراک شما',
+        'SUBSCRIPTION_STATUS': '❔وضعیت:',
+        'ACTIVE_SUBSCRIPTION_STATUS': '🟢 فعال',
+        'DEACTIVE_SUBSCRIPTION_STATUS': '🔴 غیر فعال',
         'INFO_USAGE': '📊میزان استفاده:',
         'INFO_REMAINING_DAYS': '⏳زمان باقی مانده:',
         'INFO_ID': '🔑شناسه:',
