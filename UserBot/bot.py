@@ -392,7 +392,8 @@ def start(message):
         bot.send_message(message.chat.id, MESSAGES['WELCOME'], reply_markup=main_menu_keyboard_markup())
         return
     created_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    status = USERS_DB.add_user(telegram_id=message.chat.id, created_at=created_at)
+    wallet_balance = 0
+    status = USERS_DB.add_user(telegram_id=message.chat.id, wallet_balance=wallet_balance, created_at=created_at)
     if not status:
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
@@ -457,6 +458,25 @@ def send_ticket(message):
 def link_subscription(message):
     bot.send_message(message.chat.id, MESSAGES['ENTER_SUBSCRIPTION_INFO'], reply_markup=cancel_markup())
     bot.register_next_step_handler(message, next_step_link_subscription)
+
+
+# User Buy Subscription Message Handler
+@bot.message_handler(func=lambda message: message.text == KEY_MARKUP['WALLET'])
+def wallet_ballance(message):
+    user = USERS_DB.find_user(telegram_id=message.chat.id)
+    if user:
+        telegram_user = utils.Telegram_users_to_dict(user)
+        if telegram_user:
+            telegram_user_data = wallet_info_template(telegram_user['wallet_balance'])
+            bot.send_message(message.chat.id, telegram_user_data,
+                            reply_markup=wallet_info_markup())
+        else:
+            bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                         reply_markup=main_menu_keyboard_markup())
+    else:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_CONFIG_NOT_FOUND'])
+            
+            
 
 # Start
 def start():

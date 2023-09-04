@@ -207,6 +207,7 @@ class UserDBManager:
             cur.execute("CREATE TABLE IF NOT EXISTS users ("
                         "id INTEGER PRIMARY KEY AUTOINCREMENT,"
                         "telegram_id INTEGER NOT NULL UNIQUE,"
+                        "wallet_balance INTEGER NOT NULL UNIQUE,"
                         "created_at TEXT NOT NULL)")
             self.conn.commit()
             logging.info("User table created successfully!")
@@ -330,10 +331,11 @@ class UserDBManager:
 
         return True
 
-    def add_user(self, telegram_id, created_at):
+    def add_user(self, telegram_id, wallet_balance, created_at):
         cur = self.conn.cursor()
         try:
-            cur.execute("INSERT INTO users(telegram_id,created_at) VALUES(?,?)", (telegram_id, created_at))
+            cur.execute("INSERT INTO users(telegram_id,created_at) VALUES(?,?,?)",
+                        (telegram_id, wallet_balance, created_at))
             self.conn.commit()
             logging.info(f"User [{telegram_id}] added successfully!")
             return True

@@ -10,7 +10,8 @@ from AdminBot.markups import sub_url_user_list_markup, sub_user_list_markup
 def main_menu_keyboard_markup():
     markup = ReplyKeyboardMarkup(row_width=3, resize_keyboard=True)
     markup.add(KeyboardButton(KEY_MARKUP['SUBSCRIPTION_STATUS']))
-    markup.add(KeyboardButton(KEY_MARKUP['LINK_SUBSCRIPTION']), KeyboardButton(KEY_MARKUP['BUY_SUBSCRIPTION']))
+    markup.add(KeyboardButton(KEY_MARKUP['LINK_SUBSCRIPTION']), KeyboardButton(KEY_MARKUP['WALLET']))
+    markup.add(KeyboardButton(KEY_MARKUP['BUY_SUBSCRIPTION']))
     markup.add(KeyboardButton(KEY_MARKUP['TO_QR']), KeyboardButton(KEY_MARKUP['SEND_TICKET']),
                KeyboardButton(KEY_MARKUP['HELP_GUIDE']))
     return markup
@@ -81,4 +82,10 @@ def confirm_payment_by_admin(order_id):
 def cancel_markup():
     markup = ReplyKeyboardMarkup(row_width=3, resize_keyboard=True)
     markup.add(KeyboardButton(KEY_MARKUP['CANCEL']))
+    return markup
+
+def wallet_info_markup():
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 1
+    markup.add(InlineKeyboardButton(KEY_MARKUP['INCREASE_WALLET_BALANCE']))
     return markup

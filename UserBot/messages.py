@@ -51,6 +51,9 @@ MESSAGES = {
         'ERROR_INVALID_NUMBER': 'Invalid number!',
         'CANCELED': 'Cancelled!',
         'SUBSCRIPTION_NOT_FOUND': 'Subscription not found!',
+        'ZERO_BALANCE': '🔻Your wallet balance is zero',
+        'WALLET_INFO_PART_1': '🔻Your wallet balance is',
+        'WALLET_INFO_PART_2': '',
 
     },
     'FA': {
@@ -102,6 +105,9 @@ MESSAGES = {
         'ERROR_INVALID_NUMBER': '❌لطفا مقداری عددی وارد کنید!',
         'CANCELED': '❌لغو شد',
         'SUBSCRIPTION_NOT_FOUND': '❌شما اشتراک فعالی ندارید!',
+        'ZERO_BALANCE': '🔻موجودی کیف پول شما صفر می‌باشد',
+        'WALLET_INFO_PART_1': '🔻موجودی کیف پول شما',
+        'WALLET_INFO_PART_2': 'تومان می‌باشد',
     }
 
 }

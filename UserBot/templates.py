@@ -29,6 +29,16 @@ def user_info_template(sub_id, usr, header=""):
 {MESSAGES['INFO_ID']} <code>{sub_id}</code>
 """
 
+# Wallet Info Template
+def wallet_info_template(ballance):
+    
+    if ballance == 0:
+        return MESSAGES['ZERO_BALANCE']
+    else:
+       return f"""
+         {MESSAGES['WALLET_INFO_PART_1']} {ballance} {MESSAGES['WALLET_INFO_PART_2']}
+         """
+
 
 # Plan Info Template
 def plan_info_template(plan, header=""):
