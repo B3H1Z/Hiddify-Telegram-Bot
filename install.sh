@@ -22,7 +22,7 @@ if ! command -v python3 &>/dev/null || ! command -v pip &>/dev/null; then
 fi
 
 echo -e "${GREEN}Step 1: Cloning the repository and changing directory...${RESET}"
-repository_url="https://github.com/B3H1Z/Hiddify-Telegram-Bot.git"
+repository_url="https://github.com/mtashani/Hiddify-Telegram-Bot.git"
 install_dir="/opt/Hiddify-Telegram-Bot"
 
 if [ -d "$install_dir" ]; then
