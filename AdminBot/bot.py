@@ -748,7 +748,7 @@ def callback_query(call):
                      users= USERS_DB.find_user(telegram_id=order_info['telegram_id'])
                      user = users[0]
                      if user:
-                        wallet_balance = user['wallet_balance'] + order_info['paid_amount']
+                        wallet_balance = int(user['wallet_balance']) + int(order_info['paid_amount'])
                         user_info = USERS_DB.edit_user(order_info['telegram_id'],wallet_balance=wallet_balance)
                         if user_info:
                             user_bot.send_message(int(order_info['telegram_id']),
