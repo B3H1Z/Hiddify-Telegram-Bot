@@ -743,7 +743,21 @@ def callback_query(call):
                                  f"{MESSAGES['PAYMENT_CONFIRMED_ADMIN']}\n{MESSAGES['ORDER_ID']} {payment_id}")
                 bot.delete_message(call.message.chat.id, call.message.message_id)
             else:
-                bot.send_message(call.message.chat.id,
+                #for wallet balance charge
+                if order_info['plan_id'] == 0:
+                     users= USERS_DB.find_user(telegram_id=order_info['telegram_id'])
+                     user = users[0]
+                     if user:
+                        wallet_balance = user['wallet_balance'] + order_info['paid_amount']
+                        user_info = USERS_DB.edit_user(order_info['telegram_id'],wallet_balance=wallet_balance)
+                        if user_info:
+                            user_bot.send_message(int(order_info['telegram_id']),
+                                      f"{MESSAGES['WALLET_PAYMENT_CONFIRMED']}\n{MESSAGES['ORDER_ID']} {payment_id}")
+                            bot.send_message(call.message.chat.id,
+                                 f"{MESSAGES['PAYMENT_CONFIRMED_ADMIN']}\n{MESSAGES['ORDER_ID']} {payment_id}")
+                            bot.delete_message(call.message.chat.id, call.message.message_id)
+                else:
+                    bot.send_message(call.message.chat.id,
                                  f"{MESSAGES['ERROR_UNKNOWN']}\n{MESSAGES['ORDER_ID']} {payment_id}")
         else:
             bot.send_message(call.message.chat.id, f"{MESSAGES['ERROR_UNKNOWN']}\n{MESSAGES['ORDER_ID']} {payment_id}")

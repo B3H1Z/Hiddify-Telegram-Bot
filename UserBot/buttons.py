@@ -48,7 +48,7 @@ KEY_MARKUP = {
         'TO_QR': 'ً🖼کیوآر',
         'CONFIGS_LIST': '📝کانفیگ ها',
         'WALLET' : '💰کیف پول',
-        'INCREASE_WALLET_BALANCE' : '💵افزایش موچودی'
+        'INCREASE_WALLET_BALANCE' : '💵افزایش موجودی'
 
 
     }

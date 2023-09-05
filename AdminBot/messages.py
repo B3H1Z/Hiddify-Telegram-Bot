@@ -104,6 +104,7 @@ MESSAGES = {
         'PAYMENT_ACCEPT_STATUS_WAITING': '🟡Waiting',
         'PAYMENT_ACCEPT_STATUS': 'Status:',
         'CREATED_AT': 'Created:',
+         'WALLET_PAYMENT_CONFIRMED':'✅Payment confirmed\nYour wallet balance has increased.',
 
 
     },
@@ -209,6 +210,7 @@ MESSAGES = {
         'PAYMENT_ACCEPT_STATUS_WAITING': '🟡در انتظار تایید',
         'PAYMENT_ACCEPT_STATUS': 'وضعیت:',
         'CREATED_AT': 'تاریخ ایجاد:',
+        'WALLET_PAYMENT_CONFIRMED': '✅پرداخت شما تایید شد\n از طریق دکمه [💰کیف پول] میتوانید به موجودی کیف پول خود دسترسی داشته باشید.',
     }
 
 }
