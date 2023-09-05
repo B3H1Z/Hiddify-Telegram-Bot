@@ -82,7 +82,7 @@ Card owner <b>{card_holder_name}</b>
 # Payment Received Template - Send to Admin
 def payment_received_template(plan, name, paid_amount, order_id, header="", footer=""):
 
-    if plan['id'] == '0':
+    if plan['id'] == 0:
         if LANG == 'FA':
             return f"""
 {header}

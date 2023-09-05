@@ -148,7 +148,7 @@ def next_step_send_name(message, plan, path, order_id):
     created_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
     payment_method = "Card"
-    if plan['id'] == '0':
+    if plan['id'] == 0:
         paid_amount = plan['price']
     else:
         paid_amount = order_info['price']
@@ -234,7 +234,7 @@ def next_step_increase_wallet_balance(message):
                          reply_markup=main_menu_keyboard_markup())
         return
     price = utils.replace_last_three_with_random(str(amount))
-    order_info['price'] = price
+    #order_info['price'] = price
     chargePlan['price'] = price
     chargePlan['id']= 0
     #Send 0 to identify wallet balance charge
