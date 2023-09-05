@@ -118,13 +118,13 @@ def about_template():
 این پروژه به صورت رایگان توسعه داده شده و جهت ادامه توسعه رایگان، حمایت مالی شما میتواند انگیزه بخش باشد❤️
 
 📌حمایت مالی:
-TRX: <code>TUzbUNUfyJHyyGJwajbcXjtTiTcmWubsRx</code>
+TRX: <code>TSTtpPFgzNhXgDRpZLKkjHvoHC6CtQA8V9</code>
 
-DOGE: <code>D7EUG19m6SUM3UKLQEVm6Eq8gtJs6mHuS9</code>
+DOGE: <code>DGfd18UX9vazdyMj1bTsVSufSbQvEMvT56</code>
 
-USDT: <code>0x922C0497D0967f6F57045e2dC5B3a3Da832f35E6</code>
+USDT: <code>0xB1120148eB1c34C4Dd4c531f558B6D5708c40623</code>
 
-BNB: <code>bnb12fset49pulpzvs6x6t5p32xzd95qzcmvaslla5</code>
+BNB: <code>bnb13fevgfzjp4am2ejvk7ly2xdpdldhz5xwd350a2</code>
 
 نسخه: {VERSION}
 """
@@ -138,8 +138,11 @@ This project is developed for free and your financial support can be motivating 
 
 📌Financial Support:
 TRX: <code>TSTtpPFgzNhXgDRpZLKkjHvoHC6CtQA8V9</code>
+
 DOGE: <code>DGfd18UX9vazdyMj1bTsVSufSbQvEMvT56</code>
+
 USDT: <code>0xB1120148eB1c34C4Dd4c531f558B6D5708c40623</code>
+
 BNB: <code>bnb13fevgfzjp4am2ejvk7ly2xdpdldhz5xwd350a2</code>
 
 Version: {VERSION}
