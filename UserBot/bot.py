@@ -115,7 +115,8 @@ def next_step_send_screenshot(message, plan):
         return
 
     if message.content_type != 'photo':
-        bot.send_message(message.chat.id, MESSAGES['ERROR_TYPE_SEND_SCREENSHOT'])
+        bot.send_message(message.chat.id, MESSAGES['ERROR_TYPE_SEND_SCREENSHOT'], reply_markup=cancel_markup())
+        bot.register_next_step_handler(message.chat.id, next_step_send_screenshot, plan)
         return
 
     bot.send_message(message.chat.id, MESSAGES['REQUEST_SEND_NAME'])
@@ -221,12 +222,14 @@ def next_step_link_subscription(message):
 def next_step_increase_wallet_balance(message):
     if is_it_cancel(message):
         return
-    if not is_it_digit(message):
+    if not is_it_digit(message,markup=cancel_markup()):
+        bot.register_next_step_handler(message.chat.id, next_step_increase_wallet_balance)
         return
     amount = int(message.text)
     #تنظیمات
     if amount < 30000:
         bot.send_message(message.chat.id, MESSAGES['MINIMUM_DEPOSIT_AMOUNT'], reply_markup=cancel_markup())
+        bot.register_next_step_handler(message.chat.id, next_step_increase_wallet_balance)
         return
     owner_info = USERS_DB.select_owner_info()[0]
     if not owner_info:
