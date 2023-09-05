@@ -76,6 +76,14 @@ def users_to_dict(users_dict):
                             'added_by': user[14], 'max_ips': user[15], 'enable': user[16]})
     return users_array
 
+# Change telegram user data format
+def Telegram_users_to_dict(Tel_users_dict):
+    if not Tel_users_dict:
+        return False
+    users_array = []
+    for user in Tel_users_dict:
+        users_array.append({'id': user[0], 'telegram_id': user[1], 'wallet_balance': user[2], 'created_at': user[3],})
+    return users_array
 
 # Calculate remaining days
 def calculate_remaining_days(start_date, package_days):
@@ -128,6 +136,7 @@ def dict_process(users_dict, sub_id=None):
             "mode": user['mode'],
             "enable": user['enable'],
             "sub_id": sub_id
+            #add telegramid
         })
 
     return users_list

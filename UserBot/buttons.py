@@ -21,6 +21,8 @@ KEY_MARKUP = {
         'SEND_TICKET': '📩Supporter',
         'TO_QR': 'ً🖼QR',
         'CONFIGS_LIST': '📝Configs',
+        'WALLET' : '💰Wallet',
+        'INCREASE_WALLET_BALANCE' : '💵Increase wallet balance'
 
 
     },
@@ -45,6 +47,8 @@ KEY_MARKUP = {
         'SEND_TICKET': '📩پشتیبانی',
         'TO_QR': 'ً🖼کیوآر',
         'CONFIGS_LIST': '📝کانفیگ ها',
+        'WALLET' : '💰کیف پول',
+        'INCREASE_WALLET_BALANCE' : '💵افزایش موجودی'
 
 
     }

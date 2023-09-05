@@ -28,6 +28,16 @@ def user_info_template(sub_id, usr, header=""):
 {MESSAGES['INFO_ID']} <code>{sub_id}</code>
 """
 
+# Wallet Info Template
+def wallet_info_template(balance):
+    
+    if balance == 0:
+        return MESSAGES['ZERO_BALANCE']
+    else:
+       return f"""
+         {MESSAGES['WALLET_INFO_PART_1']} {balance} {MESSAGES['WALLET_INFO_PART_2']}
+         """
+
 
 # Plan Info Template
 def plan_info_template(plan, header=""):
@@ -42,7 +52,7 @@ def plan_info_template(plan, header=""):
 
 
 # Owner Info Template (For Payment)
-def owner_info_template(plan, card_number, card_holder_name, price, header=""):
+def owner_info_template(card_number, card_holder_name, price, header=""):
     card_number = card_number if card_number else "-"
     card_holder_name = card_holder_name if card_holder_name else "-"
 
@@ -70,15 +80,42 @@ Card owner <b>{card_holder_name}</b>
 
 # Payment Received Template - Send to Admin
 def payment_received_template(plan, name, paid_amount, order_id, header="", footer=""):
-    if LANG == 'FA':
-        return f"""
+
+    if plan['id'] == 0:
+        if LANG == 'FA':
+            return f"""
 {header}
 
 شماره سفارش: <code>{order_id}</code>
 نام ثبت شده: <b>{name}</b>
 هزینه پرداخت شده: <b>{paid_amount}</b> {MESSAGES['TOMAN']}
 ---------------------
-اطلاعات پلن خریداری شده
+⬇️درخواست افزایش موجودی کیف پول⬇️
+
+{footer}
+"""
+    elif LANG == 'EN':
+        return f"""
+{header}
+
+Order number: <b>{plan['id']}</b>
+Registered name: <b>{name}</b>
+Paid amount: <b>{paid_amount}</b> {MESSAGES['TOMAN']}
+---------------------
+⬇️Request to increase wallet balance⬇️
+
+{footer}
+"""
+    else:
+        if LANG == 'FA':
+            return f"""
+{header}
+
+شماره سفارش: <code>{order_id}</code>
+نام ثبت شده: <b>{name}</b>
+هزینه پرداخت شده: <b>{paid_amount}</b> {MESSAGES['TOMAN']}
+---------------------
+⬇️اطلاعات پلن خریداری شده⬇️
 شناسه پلن: <b>{plan['id']}</b>
 حجم پلن: <b>{plan['size_gb']}</b> {MESSAGES['GB']}
 مدت اعتبار پلن: <b>{plan['days']}</b> {MESSAGES['DAY_EXPIRE']}
@@ -86,8 +123,8 @@ def payment_received_template(plan, name, paid_amount, order_id, header="", foot
 
 {footer}
 """
-    elif LANG == 'EN':
-        return f"""
+        elif LANG == 'EN':
+            return f"""
 {header}
 
 Order number: <b>{plan['id']}</b>
