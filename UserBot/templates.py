@@ -53,7 +53,7 @@ def owner_info_template(plan, card_number, card_holder_name, price, header=""):
 💰لطفا دقیقا مبلغ: <code>{price}</code> {MESSAGES['TOMAN']}
 💳را به شماره کارت: <code>{card_number}</code>
 به نام <b>{card_holder_name}</b> واریز کنید.
-
+مبلغ به ریال:
 ❗️بعد از واریز مبلغ، اسکرین شات از تراکنش را برای ما ارسال کنید.
 """
     elif LANG == 'EN':
