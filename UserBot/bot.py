@@ -2,6 +2,7 @@ import datetime
 import random
 
 import telebot
+from telebot.types import Message, CallbackQuery
 
 from config import *
 from AdminBot.templates import configs_template
@@ -32,7 +33,7 @@ except telebot.apihelper.ApiTelegramException as e:
 
 
 # Check if message is digit
-def is_it_digit(message, response=MESSAGES['ERROR_INVALID_NUMBER'], markup=main_menu_keyboard_markup()):
+def is_it_digit(message: Message, response=MESSAGES['ERROR_INVALID_NUMBER'], markup=main_menu_keyboard_markup()):
     if not message.text.isdigit():
         bot.send_message(message.chat.id, response, reply_markup=markup)
         return False
@@ -40,14 +41,15 @@ def is_it_digit(message, response=MESSAGES['ERROR_INVALID_NUMBER'], markup=main_
 
 
 # Check if message is cancel
-def is_it_cancel(message, response=MESSAGES['CANCELED']):
+def is_it_cancel(message: Message, response=MESSAGES['CANCELED']):
     if message.text == KEY_MARKUP['CANCEL']:
         bot.send_message(message.chat.id, response, reply_markup=main_menu_keyboard_markup())
         return True
     return False
 
+
 # Check if message is command
-def is_it_command(message):
+def is_it_command(message: Message):
     if message.text.startswith("/"):
         return True
     return False
@@ -66,7 +68,7 @@ def type_of_subscription(text):
     return uuid
 
 
-# def next_step_subscription_status_1(message):
+# def next_step_subscription_status_1(message :Message):
 #     uuid = type_of_subscription(message.text)
 #     if not uuid:
 #         bot.send_message(message.chat.id, MESSAGES['SUBSCRIPTION_INFO_NOT_FOUND'])
@@ -88,7 +90,7 @@ order_info = {}
 
 
 # Next Step Buy Plan - Confirm
-def buy_plan_confirm(message, plan):
+def buy_plan_confirm(message: Message, plan):
     if not plan:
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
@@ -106,7 +108,7 @@ def buy_plan_confirm(message, plan):
 
 
 # Next Step Buy Plan - Send Screenshot
-def next_step_send_screenshot(message, plan):
+def next_step_send_screenshot(message: Message, plan):
     if not plan:
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
@@ -129,7 +131,7 @@ def next_step_send_screenshot(message, plan):
 
 
 # Next Step Buy Plan - Send Name
-def next_step_send_name(message, plan, path, order_id):
+def next_step_send_name(message: Message, plan, path, order_id):
     if not plan:
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
@@ -162,7 +164,7 @@ def next_step_send_name(message, plan, path, order_id):
 
 # ----------------------------------- To QR Area -----------------------------------
 # Next Step QR - QR Code
-def next_step_to_qr(message):
+def next_step_to_qr(message: Message):
     if not message.text:
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
@@ -180,7 +182,7 @@ def next_step_to_qr(message):
 
 # ----------------------------------- Link Subscription Area -----------------------------------
 # Next Step Link Subscription to bot
-def next_step_link_subscription(message):
+def next_step_link_subscription(message: Message):
     if not message.text:
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
@@ -210,7 +212,7 @@ def next_step_link_subscription(message):
 
 # ----------------------------------- Callback Query Area -----------------------------------
 @bot.callback_query_handler(func=lambda call: True)
-def callback_query(call):
+def callback_query(call: CallbackQuery):
     bot.answer_callback_query(call.id, MESSAGES['WAIT'])
     # Split Callback Data to Key(Command) and UUID
     data = call.data.split(':')
@@ -387,7 +389,7 @@ def callback_query(call):
 
 # Bot Start Message Handler
 @bot.message_handler(commands=['start'])
-def start(message):
+def start(message: Message):
     if USERS_DB.find_user(telegram_id=message.chat.id):
         bot.send_message(message.chat.id, MESSAGES['WELCOME'], reply_markup=main_menu_keyboard_markup())
         return
@@ -399,9 +401,10 @@ def start(message):
         return
     bot.send_message(message.chat.id, MESSAGES['WELCOME'], reply_markup=main_menu_keyboard_markup())
 
+
 # User Subscription Status Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['SUBSCRIPTION_STATUS'])
-def subscription_status(message):
+def subscription_status(message: Message):
     non_order_subs = utils.non_order_user_info(message.chat.id)
     order_subs = utils.order_user_info(message.chat.id)
 
@@ -422,9 +425,10 @@ def subscription_status(message):
                 bot.send_message(message.chat.id, api_user_data,
                                  reply_markup=user_info_markup(order_sub['uuid']))
 
+
 # User Buy Subscription Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['BUY_SUBSCRIPTION'])
-def buy_subscription(message):
+def buy_subscription(message: Message):
     plans = USERS_DB.select_plans()
     if not plans:
         bot.send_message(message.chat.id, MESSAGES['PLANS_NOT_FOUND'], reply_markup=main_menu_keyboard_markup())
@@ -435,28 +439,33 @@ def buy_subscription(message):
         return
     bot.send_message(message.chat.id, MESSAGES['PLANS_LIST'], reply_markup=plan_markup)
 
+
 # Config To QR Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['TO_QR'])
-def to_qr(message):
+def to_qr(message: Message):
     bot.send_message(message.chat.id, MESSAGES['REQUEST_SEND_TO_QR'])
     bot.register_next_step_handler(message, next_step_to_qr)
 
+
 # Help Guide Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['HELP_GUIDE'])
-def help_guide(message):
+def help_guide(message: Message):
     bot.send_message(message.chat.id, connection_help_template(), reply_markup=main_menu_keyboard_markup())
+
 
 # Ticket To Support Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['SEND_TICKET'])
-def send_ticket(message):
+def send_ticket(message: Message):
     owner_info = USERS_DB.select_owner_info()[0]
     bot.send_message(message.chat.id, support_template(owner_info), reply_markup=main_menu_keyboard_markup())
 
+
 # Link Subscription Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['LINK_SUBSCRIPTION'])
-def link_subscription(message):
+def link_subscription(message: Message):
     bot.send_message(message.chat.id, MESSAGES['ENTER_SUBSCRIPTION_INFO'], reply_markup=cancel_markup())
     bot.register_next_step_handler(message, next_step_link_subscription)
+
 
 # Start
 def start():
