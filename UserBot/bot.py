@@ -279,7 +279,7 @@ def callback_query(call):
     # Ask To Send Screenshot
     elif key == 'send_screenshot':
         bot.send_message(call.message.chat.id, MESSAGES['REQUEST_SEND_SCREENSHOT'])
-        if value == 0:  
+        if int(value) == 0:  
             bot.register_next_step_handler(call.message, next_step_send_screenshot, chargePlan)
         else:
             plan = USERS_DB.find_plan(id=value)[0]
