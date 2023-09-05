@@ -2,6 +2,7 @@
 import random
 import time
 import telebot
+from telebot.types import Message, CallbackQuery
 
 from config import *
 from AdminBot.commands import BOT_COMMANDS
@@ -29,7 +30,7 @@ except telebot.apihelper.ApiTelegramException as e:
 
 # ----------------------------------- Helper Functions -----------------------------------
 # Check if message is digit
-def is_it_digit(message, response=MESSAGES['ERROR_INVALID_NUMBER'], markup=main_menu_keyboard_markup()):
+def is_it_digit(message: Message, response=MESSAGES['ERROR_INVALID_NUMBER'], markup=main_menu_keyboard_markup()):
     if not message.text.isdigit():
         bot.send_message(message.chat.id, response, reply_markup=markup)
         return False
@@ -37,7 +38,7 @@ def is_it_digit(message, response=MESSAGES['ERROR_INVALID_NUMBER'], markup=main_
 
 
 # Check if message is cancel
-def is_it_cancel(message, response=MESSAGES['CANCELED']):
+def is_it_cancel(message: Message, response=MESSAGES['CANCELED']):
     if message.text == KEY_MARKUP['CANCEL']:
         bot.send_message(message.chat.id, response, reply_markup=main_menu_keyboard_markup())
         return True
@@ -50,7 +51,7 @@ add_user_data = {}
 
 
 # Add User - Name
-def add_user_name(message):
+def add_user_name(message: Message):
     if is_it_cancel(message):
         return
     add_user_data['name'] = message.text
@@ -59,7 +60,7 @@ def add_user_name(message):
 
 
 # Add User - Usage Limit
-def add_user_limit(message):
+def add_user_limit(message: Message):
     if is_it_cancel(message):
         return
     if not is_it_digit(message, f"{MESSAGES['ERROR_INVALID_NUMBER']}\n{MESSAGES['ADD_USER_USAGE_LIMIT']}",
@@ -72,7 +73,7 @@ def add_user_limit(message):
 
 
 # Add User - Usage Days
-def add_user_usage_days(message):
+def add_user_usage_days(message: Message):
     if is_it_cancel(message, MESSAGES['CANCEL_ADD_USER']):
         return
     if not is_it_digit(message, f"{MESSAGES['ERROR_INVALID_NUMBER']}\n{MESSAGES['ADD_USER_DAYS']}",
@@ -88,7 +89,7 @@ def add_user_usage_days(message):
 
 
 # Add User - Confirm to add user
-def confirm_add_user(message):
+def confirm_add_user(message: Message):
     if message.text == KEY_MARKUP['CANCEL']:
         bot.send_message(message.chat.id, MESSAGES['CANCEL_ADD_USER'], reply_markup=main_menu_keyboard_markup())
         return
@@ -114,7 +115,7 @@ def confirm_add_user(message):
 
 # ----------------------------------- Edit User Area -----------------------------------
 # Edit User - Name
-def edit_user_name(message, uuid):
+def edit_user_name(message: Message, uuid):
     if is_it_cancel(message):
         return
     msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=while_edit_user_markup())
@@ -128,7 +129,7 @@ def edit_user_name(message, uuid):
 
 
 # Edit User - Usage
-def edit_user_usage(message, uuid):
+def edit_user_usage(message: Message, uuid):
     if is_it_cancel(message):
         return
     if not is_it_digit(message):
@@ -144,7 +145,7 @@ def edit_user_usage(message, uuid):
 
 
 # Edit User - Days
-def edit_user_days(message, uuid):
+def edit_user_days(message: Message, uuid):
     if is_it_cancel(message):
         return
     if not is_it_digit(message):
@@ -161,7 +162,7 @@ def edit_user_days(message, uuid):
 
 
 # Edit User - Comment
-def edit_user_comment(message, uuid):
+def edit_user_comment(message: Message, uuid):
     if is_it_cancel(message):
         return
     msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=while_edit_user_markup())
@@ -176,7 +177,7 @@ def edit_user_comment(message, uuid):
 
 # ----------------------------------- Search User Area -----------------------------------
 # Search User - Name
-def search_user_name(message):
+def search_user_name(message: Message):
     if is_it_cancel(message):
         return
     msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=while_edit_user_markup())
@@ -192,7 +193,7 @@ def search_user_name(message):
 
 
 # Search User - UUID
-def search_user_uuid(message):
+def search_user_uuid(message: Message):
     if is_it_cancel(message):
         return
     msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=while_edit_user_markup())
@@ -207,7 +208,7 @@ def search_user_uuid(message):
 
 
 # Search User - Config
-def search_user_config(message):
+def search_user_config(message: Message):
     if is_it_cancel(message):
         return
     msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=while_edit_user_markup())
@@ -226,7 +227,7 @@ add_plan_data = {}
 
 
 # Add Plan - Size
-def users_bot_add_plan_usage(message):
+def users_bot_add_plan_usage(message: Message):
     if is_it_cancel(message):
         return
     if not is_it_digit(message):
@@ -237,7 +238,7 @@ def users_bot_add_plan_usage(message):
 
 
 # Add Plan - Days
-def users_bot_add_plan_days(message):
+def users_bot_add_plan_days(message: Message):
     if is_it_cancel(message):
         return
     if not is_it_digit(message):
@@ -248,7 +249,7 @@ def users_bot_add_plan_days(message):
 
 
 # Add Plan - Price
-def users_bot_add_plan_price(message):
+def users_bot_add_plan_price(message: Message):
     if is_it_cancel(message):
         return
     if not is_it_digit(message):
@@ -265,7 +266,7 @@ def users_bot_add_plan_price(message):
 
 
 # Users Bot - Edit Owner Info - Username
-def users_bot_edit_owner_info_username(message):
+def users_bot_edit_owner_info_username(message: Message):
     if is_it_cancel(message):
         return
     if not message.text.startswith('@'):
@@ -279,7 +280,7 @@ def users_bot_edit_owner_info_username(message):
 
 
 # Users Bot - Edit Owner Info - Card Number
-def users_bot_edit_owner_info_card_number(message):
+def users_bot_edit_owner_info_card_number(message: Message):
     if is_it_cancel(message):
         return
     if not is_it_digit(message):
@@ -296,7 +297,7 @@ def users_bot_edit_owner_info_card_number(message):
 
 
 # Users Bot - Edit Owner Info - Cardholder Name
-def users_bot_edit_owner_info_card_name(message):
+def users_bot_edit_owner_info_card_name(message: Message):
     if is_it_cancel(message):
         return
     status = USERS_DB.edit_owner_info(card_owner=message.text)
@@ -307,7 +308,7 @@ def users_bot_edit_owner_info_card_name(message):
 
 
 # Users Bot - Send Message - All Users
-def users_bot_send_msg_users(message):
+def users_bot_send_msg_users(message: Message):
     if is_it_cancel(message):
         return
     if not CLIENT_TOKEN:
@@ -330,7 +331,7 @@ def users_bot_send_msg_users(message):
 
 
 # Users Bot - Settings - Update Message
-def users_bot_settings_update_message(message):
+def users_bot_settings_update_message(message: Message):
     settings = USERS_DB.select_settings()
     if not settings:
         return
@@ -341,7 +342,7 @@ def users_bot_settings_update_message(message):
 
 
 # Users Bot - Order Status
-def users_bot_order_status(message):
+def users_bot_order_status(message: Message):
     from UserBot.templates import payment_received_template
     if is_it_cancel(message):
         return
@@ -371,7 +372,7 @@ def users_bot_order_status(message):
                    reply_markup=main_menu_keyboard_markup())
 
 
-def users_bot_sub_status(message):
+def users_bot_sub_status(message: Message):
     if is_it_cancel(message):
         return
     if not is_it_digit(message):
@@ -402,7 +403,7 @@ def users_bot_sub_status(message):
 # ----------------------------------- Callbacks -----------------------------------
 # Callback Handler for Inline Buttons
 @bot.callback_query_handler(func=lambda call: True)
-def callback_query(call):
+def callback_query(call: CallbackQuery):
     bot.answer_callback_query(call.id, MESSAGES['WAIT'])
     # Check if user is not admin
     if call.from_user.id not in ADMINS_ID:
@@ -801,19 +802,19 @@ def callback_query(call):
 
 # Check Admin Permission
 @bot.message_handler(func=lambda message: message.chat.id not in ADMINS_ID)
-def not_admin(message):
+def not_admin(message: Message):
     bot.reply_to(message, MESSAGES['ERROR_NOT_ADMIN'])
 
 
 # Send Welcome Message Handler
 @bot.message_handler(commands=['help', 'start', 'restart'])
-def send_welcome(message):
+def send_welcome(message: Message):
     bot.reply_to(message, MESSAGES['WELCOME'], reply_markup=main_menu_keyboard_markup())
 
 
 # Send users list Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['USERS_LIST'])
-def all_users_list(message):
+def all_users_list(message: Message):
     users_list = utils.dict_process(utils.users_to_dict(ADMIN_DB.select_users()))
     if not users_list:
         bot.send_message(message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'])
@@ -824,7 +825,7 @@ def all_users_list(message):
 
 # Add User Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['ADD_USER'])
-def add_user(message):
+def add_user(message: Message):
     global add_user_data
     bot.send_message(message.chat.id, MESSAGES['ADD_USER_NAME'], reply_markup=while_add_user_markup())
     bot.register_next_step_handler(message, add_user_name)
@@ -832,7 +833,7 @@ def add_user(message):
 
 # Panel Backup Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['SERVER_BACKUP'])
-def server_backup(message):
+def server_backup(message: Message):
     msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'])
     file_name = utils.backup_panel()
     if file_name:
@@ -844,7 +845,7 @@ def server_backup(message):
 
 # Server Status Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['SERVER_STATUS'])
-def server_status(message):
+def server_status(message: Message):
     msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'])
     status = system_status_template(utils.system_status())
 
@@ -857,13 +858,13 @@ def server_status(message):
 
 # Search User Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['USERS_SEARCH'])
-def search_user(message):
+def search_user(message: Message):
     bot.send_message(message.chat.id, MESSAGES['SEARCH_USER'], reply_markup=search_user_markup())
 
 
 # Users Bot Management Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['USERS_BOT_MANAGEMENT'])
-def users_bot_management(message):
+def users_bot_management(message: Message):
     if not CLIENT_TOKEN:
         bot.send_message(message.chat.id, MESSAGES['ERROR_CLIENT_TOKEN'])
         return
@@ -872,7 +873,7 @@ def users_bot_management(message):
 
 # About Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['ABOUT_BOT'])
-def about_bot(message):
+def about_bot(message: Message):
     bot.send_message(message.chat.id, about_template())
 
 
