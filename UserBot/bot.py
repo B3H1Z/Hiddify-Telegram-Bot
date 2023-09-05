@@ -107,6 +107,8 @@ def buy_plan_confirm(message, plan):
 
 # Next Step Buy Plan - Send Screenshot
 def next_step_send_screenshot(message, plan):
+    if is_it_cancel(message):
+        return
     if not plan:
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
@@ -130,6 +132,8 @@ def next_step_send_screenshot(message, plan):
 
 # Next Step Buy Plan - Send Name
 def next_step_send_name(message, plan, path, order_id):
+    if is_it_cancel(message):
+        return
     if not plan:
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
@@ -142,10 +146,12 @@ def next_step_send_name(message, plan, path, order_id):
     # send it for admin bot
 
     created_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    paid_amount = order_info['price']
+    
     payment_method = "Card"
     if plan['id'] == '0':
         paid_amount = plan['price']
+    else:
+        paid_amount = order_info['price']
     
     status = USERS_DB.add_order(order_id, message.chat.id, name, plan['id'], paid_amount, payment_method, path,
                                 created_at)
