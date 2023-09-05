@@ -234,6 +234,7 @@ def next_step_increase_wallet_balance(message):
                          reply_markup=main_menu_keyboard_markup())
         return
     price = utils.replace_last_three_with_random(str(amount))
+    order_info['price'] = price
     chargePlan['price'] = price
     chargePlan['id']= 0
     #Send 0 to identify wallet balance charge
