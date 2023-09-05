@@ -117,6 +117,7 @@ def buy_from_wallet_confirm(message: Message, plan):
         user = users[0]
         if plan['price'] > user['wallet_balance']:
             bot.send_message(message.chat.id, MESSAGES['LACK_OF_WALLET_BALANCE'])
+            #پاک کردن پیام قبلی و یا ریجستر کردن یک متد
             return
     bot.send_message(message.chat.id, MESSAGES['REQUEST_SEND_NAME'])
     bot.register_next_step_handler(message, next_step_send_name_for_buy_from_wallet, plan)
