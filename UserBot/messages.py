@@ -56,6 +56,9 @@ MESSAGES = {
         'WALLET_INFO_PART_2': '',
         'INCREASE_WALLET_BALANCE_AMOUNT': '🔻Please enter the amount that you want to charge your wallet in Tomans',
         'MINIMUM_DEPOSIT_AMOUNT':'🔻Please enter an amount greater than 30000 Tomans',
+        'LACK_OF_WALLET_BALANCE':'❌Your wallet balance is not enough\nplease top up your wallet',
+        'ORDER_ID': 'Order number:',
+        'PAYMENT_CONFIRMED': '✅Payment confirmed',
     },
     'FA': {
         'WELCOME': "به ربات کاربران خوش آمدید",
@@ -111,6 +114,10 @@ MESSAGES = {
         'WALLET_INFO_PART_2': 'تومان می‌باشد',
         'INCREASE_WALLET_BALANCE_AMOUNT': '🔻لطفا مبلغی که قصد شارژ حساب خود دارید را به تومان وارد کنید',
         'MINIMUM_DEPOSIT_AMOUNT':'🔻لطفا مبلغ را به تومان و بیشتر از 30000 تومان وارد کنید',
+        'LACK_OF_WALLET_BALANCE':'❌موجودی کف پول شما کافی نیست\nلطفا از طریق دکمه [💰کیف پول] کیف پول خود را شارژ کنید',
+        'ORDER_ID': 'شماره سفارش',
+        'PAYMENT_CONFIRMED': '✅پرداخت شما تایید شد\n از طریق دکمه [📊وضعیت اشتراک] میتوانید به اطلاعات اشتراک خود دسترسی داشته باشید.',
+        
     }
 
 }

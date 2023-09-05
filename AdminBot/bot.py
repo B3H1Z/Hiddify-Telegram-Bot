@@ -721,6 +721,7 @@ def callback_query(call: CallbackQuery):
             bot.send_message(call.message.chat.id,
                              f"{MESSAGES['ERROR_PAYMENT_ALREADY_CONFIRMED']}\n{MESSAGES['ORDER_ID']} {payment_id}")
             return
+        #بنظر می رسد ابتدا باید کانفیگ ساخته شود سپس سفارش تایید شود
         payment_status = USERS_DB.edit_order(payment_id, approved=True)
         if payment_status:
             plan_info = USERS_DB.find_plan(id=order_info['plan_id'], )
@@ -747,8 +748,8 @@ def callback_query(call: CallbackQuery):
                 #for wallet balance charge
                 if order_info['plan_id'] == 0:
                      users= USERS_DB.find_user(telegram_id=order_info['telegram_id'])
-                     user = users[0]
-                     if user:
+                     if users:
+                        user = users[0]
                         wallet_balance = int(user['wallet_balance']) + int(order_info['paid_amount'])
                         user_info = USERS_DB.edit_user(order_info['telegram_id'],wallet_balance=wallet_balance)
                         if user_info:
