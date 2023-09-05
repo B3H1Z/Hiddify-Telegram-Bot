@@ -5,7 +5,7 @@ MESSAGES = {
     'EN': {
         'WELCOME': 'Welcome to users bot',
         'INFO_USER': '📄Your Subscription Info',
-        'SUBSCRIPTION_STATUS': '❔Status:',
+        'SUBSCRIPTION_STATUS': '☑️Status:',
         'ACTIVE_SUBSCRIPTION_STATUS': '🟢 Active',
         'DEACTIVE_SUBSCRIPTION_STATUS': '🔴 Deactive',
         'INFO_USAGE': '📊Usage:',

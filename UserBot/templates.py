@@ -22,10 +22,9 @@ def user_info_template(sub_id, usr, header=""):
 {header}
 
 {MESSAGES['USER_NAME']} {user_name}
-{MESSAGES['SUBSCRIPTION_STATUS']} {status}
 {MESSAGES['INFO_USAGE']} {usr['usage']['current_usage_GB']} {MESSAGES['OF']} {usr['usage']['usage_limit_GB']} {MESSAGES['GB']}
 {MESSAGES['INFO_REMAINING_DAYS']} {usr['remaining_day']} {MESSAGES['DAY_EXPIRE']}
-
+{MESSAGES['SUBSCRIPTION_STATUS']} {status}
 {MESSAGES['INFO_ID']} <code>{sub_id}</code>
 """
 
