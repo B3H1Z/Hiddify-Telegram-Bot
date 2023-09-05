@@ -226,11 +226,11 @@ def next_step_send_name_for_buy_from_wallet(message: Message, plan):
         bot.send_message(message.chat.id,
                                      f"{MESSAGES['ERROR_UNKNOWN']}\n{MESSAGES['ORDER_ID']} {order_id}")
         return
-    users= USERS_DB.find_user(telegram_id=order_info['telegram_id'])
+    users= USERS_DB.find_user(telegram_id=message.chat.id)
     if users:
         user = users[0]
         wallet_balance = int(user['wallet_balance']) - int(paid_amount)
-        user_info = USERS_DB.edit_user(order_info['telegram_id'],wallet_balance=wallet_balance)
+        user_info = USERS_DB.edit_user(message.chat.id,wallet_balance=wallet_balance)
         if not user_info:
             bot.send_message(message.chat.id,
                                      f"{MESSAGES['ERROR_UNKNOWN']}\n{MESSAGES['ORDER_ID']} {order_id}")
