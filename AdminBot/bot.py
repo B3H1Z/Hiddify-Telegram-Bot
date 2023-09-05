@@ -744,7 +744,7 @@ def callback_query(call):
                 bot.delete_message(call.message.chat.id, call.message.message_id)
             else:
                 #for wallet balance charge
-                if order_info['plan_id'] == '0':
+                if order_info['plan_id'] == 0:
                      users= USERS_DB.find_user(telegram_id=order_info['telegram_id'])
                      user = users[0]
                      if user:
