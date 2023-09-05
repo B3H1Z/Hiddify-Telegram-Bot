@@ -144,7 +144,7 @@ def next_step_send_name(message, plan, path, order_id):
     created_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     paid_amount = order_info['price']
     payment_method = "Card"
-    if plan['id'] == 0:
+    if plan['id'] == '0':
         paid_amount = plan['price']
     
     status = USERS_DB.add_order(order_id, message.chat.id, name, plan['id'], paid_amount, payment_method, path,
@@ -279,7 +279,7 @@ def callback_query(call):
     # Ask To Send Screenshot
     elif key == 'send_screenshot':
         bot.send_message(call.message.chat.id, MESSAGES['REQUEST_SEND_SCREENSHOT'])
-        if int(value) == 0:  
+        if value == '0':  
             bot.register_next_step_handler(call.message, next_step_send_screenshot, chargePlan)
         else:
             plan = USERS_DB.find_plan(id=value)[0]
