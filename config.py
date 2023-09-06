@@ -11,7 +11,7 @@ from version import __version__
 
 # Bypass proxy
 os.environ['no_proxy'] = '*'
-DEBUG = True
+DEBUG = False
 
 VERSION = __version__
 
