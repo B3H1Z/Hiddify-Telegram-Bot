@@ -187,7 +187,8 @@ def next_step_send_name(message: Message, plan, path, order_id):
     else:
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
-        
+
+# ----------------------------------- Buy From Wallet Area -----------------------------------
 # Next Step Buy From Wallet - Send Name
 def next_step_send_name_for_buy_from_wallet(message: Message, plan):
     if is_it_cancel(message):
@@ -238,6 +239,54 @@ def next_step_send_name_for_buy_from_wallet(message: Message, plan):
             return
     bot.send_message(message.chat.id,
                                       f"{MESSAGES['PAYMENT_CONFIRMED']}\n{MESSAGES['ORDER_ID']} {order_id}")
+    
+# ----------------------------------- Get Free Test Area -----------------------------------
+# Next Step Get Free Test - Send Name
+def next_step_send_name_for_get_free_test(message: Message):
+    if is_it_cancel(message):
+        return
+    name = message.text
+    while is_it_command(message):
+        message = bot.send_message(message.chat.id, MESSAGES['REQUEST_SEND_NAME'])
+        bot.register_next_step_handler(message, next_step_send_name_for_get_free_test)
+        return
+    created_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    payment_method = "Free"
+    #بعدا روش بهتری اجرا شود
+    path = 'Get free test'
+    plan_id = 0
+    # تغییر این قسمت با تنظیمات
+    days = 7
+    size_gb = 7
+    paid_amount = 0
+    order_id = random.randint(1000000, 9999999)
+    
+    value = ADMIN_DB.add_default_user(name, days, size_gb,
+                                                  int(PANEL_ADMIN_ID))
+    if not value:
+        bot.send_message(message.chat.id,
+                                     f"{MESSAGES['ERROR_UNKNOWN']}\n{MESSAGES['ORDER_ID']} {order_id}")
+        return
+    sub_id = random.randint(1000000, 9999999)
+    add_sub_status = USERS_DB.add_order_subscription(sub_id, order_id, value)
+    if not add_sub_status:
+        bot.send_message(message.chat.id,
+                                     f"{MESSAGES['ERROR_UNKNOWN']}\n{MESSAGES['ORDER_ID']} {order_id}")
+        return
+    status = USERS_DB.add_order(order_id, message.chat.id, name, plan_id, paid_amount, payment_method, path,
+                                created_at,True)
+    if not status:
+        bot.send_message(message.chat.id,
+                                     f"{MESSAGES['ERROR_UNKNOWN']}\n{MESSAGES['ORDER_ID']} {order_id}")
+        return
+    
+    user_info = USERS_DB.edit_user(message.chat.id,get_free=True)
+    if not user_info:
+        bot.send_message(message.chat.id,
+                                     f"{MESSAGES['ERROR_UNKNOWN']}\n{MESSAGES['ORDER_ID']} {order_id}")
+        return
+    bot.send_message(message.chat.id,
+                                      f"{MESSAGES['GET_FREE_CONFIRMED']}\n{MESSAGES['ORDER_ID']} {order_id}")
 # ----------------------------------- To QR Area -----------------------------------
 # Next Step QR - QR Code
 def next_step_to_qr(message: Message):
@@ -596,8 +645,20 @@ def wallet_balance(message: Message):
                            reply_markup=wallet_info_markup())
     else:
         bot.send_message(message.chat.id, MESSAGES['ERROR_CONFIG_NOT_FOUND'])
-            
-            
+
+
+ # User Buy Subscription Message Handler
+@bot.message_handler(func=lambda message: message.text == KEY_MARKUP['FREE_TEST'])
+def wallet_balance(message: Message):
+    users= USERS_DB.find_user(telegram_id=message.chat.id)
+    if users:
+        user = users[0]
+        if user['get_free'] :
+             bot.send_message(message.chat.id, MESSAGES['ALREADY_RECEIVED_FREE'], reply_markup=main_menu_keyboard_markup())
+        else:
+            bot.send_message(message.chat.id, MESSAGES['REQUEST_SEND_NAME'], reply_markup=cancel_markup())
+        bot.register_next_step_handler(message, next_step_send_name_for_get_free_test)
+
 
 # Start
 def start():

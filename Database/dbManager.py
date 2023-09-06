@@ -207,7 +207,8 @@ class UserDBManager:
             cur.execute("CREATE TABLE IF NOT EXISTS users ("
                         "id INTEGER PRIMARY KEY AUTOINCREMENT,"
                         "telegram_id INTEGER NOT NULL UNIQUE,"
-                        "wallet_balance INTEGER NOT NULL UNIQUE,"
+                        "wallet_balance INTEGER NOT NULL DEFAULT 0,"
+                        "get_free BOOLEAN NOT NULL DEFAULT 0"
                         "created_at TEXT NOT NULL)")
             self.conn.commit()
             logging.info("User table created successfully!")
