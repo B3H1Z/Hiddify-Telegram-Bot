@@ -59,6 +59,8 @@ MESSAGES = {
         'LACK_OF_WALLET_BALANCE':'❌Your wallet balance is not enough\nplease top up your wallet',
         'ORDER_ID': 'Order number:',
         'PAYMENT_CONFIRMED': '✅Payment confirmed',
+        'ALREADY_RECEIVED_FREE': 'You have already received your free test account!',
+        'GET_FREE_CONFIRMED' :  '✅Your free account has been successfully registered',
     },
     'FA': {
         'WELCOME': "به ربات کاربران خوش آمدید",
@@ -117,7 +119,8 @@ MESSAGES = {
         'LACK_OF_WALLET_BALANCE':'❌موجودی کف پول شما کافی نیست\nلطفا از طریق دکمه [💰کیف پول] کیف پول خود را شارژ کنید',
         'ORDER_ID': 'شماره سفارش',
         'PAYMENT_CONFIRMED': '✅پرداخت شما تایید شد\n از طریق دکمه [📊وضعیت اشتراک] میتوانید به اطلاعات اشتراک خود دسترسی داشته باشید.',
-        
+        'ALREADY_RECEIVED_FREE': 'شما قبلا اکانت تست رایگان خود را دریافت نموده‌اید!',
+        'GET_FREE_CONFIRMED' :  '✅اکانت تست رایگان شما با موفقیت ثبت شد\n از طریق دکمه [📊وضعیت اشتراک] میتوانید به اطلاعات اشتراک خود دسترسی داشته باشید.',
     }
 
 }
