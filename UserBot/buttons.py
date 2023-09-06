@@ -23,7 +23,8 @@ KEY_MARKUP = {
         'TO_QR': 'ً🖼QR',
         'CONFIGS_LIST': '📝Configs',
         'WALLET' : '💰Wallet',
-        'INCREASE_WALLET_BALANCE' : '💵Increase wallet balance'
+        'INCREASE_WALLET_BALANCE' : '💵Increase wallet balance',
+        'FREE_TEST' : '🔥Free Test',
 
 
     },
@@ -50,7 +51,8 @@ KEY_MARKUP = {
         'TO_QR': 'ً🖼کیوآر',
         'CONFIGS_LIST': '📝کانفیگ ها',
         'WALLET' : '💰کیف پول',
-        'INCREASE_WALLET_BALANCE' : '💵افزایش موجودی'
+        'INCREASE_WALLET_BALANCE' : '💵افزایش موجودی',
+        'FREE_TEST' : '🔥تست رایگان',
 
 
     }
