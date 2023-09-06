@@ -44,6 +44,7 @@ def confirm_buy_plan_markup(plan_id):
     markup = InlineKeyboardMarkup()
     markup.row_width = 1
     markup.add(InlineKeyboardButton(KEY_MARKUP['BUY_PLAN'], callback_data=f"confirm_buy_plan:{plan_id}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['BUY_FROM_WALLET'], callback_data=f"confirm_buy_from_wallet:{plan_id}"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_plans:None"))
     return markup
 
