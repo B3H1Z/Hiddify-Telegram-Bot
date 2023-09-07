@@ -554,7 +554,7 @@ def callback_query(call: CallbackQuery):
         if not sub:
             bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
             return
-        bot.send_message(call.message.chat.id, f"{KEY_MARKUP['CONFIGS_SUB']}\n{sub['sub_link']}",
+        bot.send_message(call.message.chat.id, f"{KEY_MARKUP['CONFIGS_SUB']}\n<code>{sub['sub_link']}</code>",
                          reply_markup=main_menu_keyboard_markup())
     # User Configs - Base64 Subscription Configs Callback
     elif key == "conf_sub_url_b64":
@@ -562,7 +562,7 @@ def callback_query(call: CallbackQuery):
         if not sub:
             bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
             return
-        bot.send_message(call.message.chat.id, f"{KEY_MARKUP['CONFIGS_SUB_B64']}\n{sub['sub_link_b64']}",
+        bot.send_message(call.message.chat.id, f"{KEY_MARKUP['CONFIGS_SUB_B64']}\n<code>{sub['sub_link_b64']}</code>",
                          reply_markup=main_menu_keyboard_markup())
     # User Configs - Subscription Configs For Clash Callback
     elif key == "conf_clash":
@@ -570,7 +570,7 @@ def callback_query(call: CallbackQuery):
         if not sub:
             bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
             return
-        bot.send_message(call.message.chat.id, f"{KEY_MARKUP['CONFIGS_CLASH']}\n{sub['clash_configs']}",
+        bot.send_message(call.message.chat.id, f"{KEY_MARKUP['CONFIGS_CLASH']}\n<code>{sub['clash_configs']}</code>",
                          reply_markup=main_menu_keyboard_markup())
     # User Configs - Subscription Configs For Hiddify Callback
     elif key == "conf_hiddify":
@@ -578,7 +578,7 @@ def callback_query(call: CallbackQuery):
         if not sub:
             bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
             return
-        bot.send_message(call.message.chat.id, f"{KEY_MARKUP['CONFIGS_HIDDIFY']}\n{sub['hiddify_configs']}",
+        bot.send_message(call.message.chat.id, f"{KEY_MARKUP['CONFIGS_HIDDIFY']}\n<code>{sub['hiddify_configs']}</code>",
                          reply_markup=main_menu_keyboard_markup())
 
     # ----------------------------------- Back Area -----------------------------------
