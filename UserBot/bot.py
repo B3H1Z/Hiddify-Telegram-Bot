@@ -92,7 +92,7 @@ charge_wallet = {}
 
 
 # Next Step Buy From Wallet - Confirm
-def buy_from_wallet_confirm(message: Message, plan):
+def buy_from_wallet_confirm(message: Message, plan, uuid):
     if not plan:
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
@@ -104,8 +104,75 @@ def buy_from_wallet_confirm(message: Message, plan):
             bot.send_message(message.chat.id, MESSAGES['LACK_OF_WALLET_BALANCE'])
             # پاک کردن پیام قبلی و یا ریجستر کردن یک متد
             return
-    bot.send_message(message.chat.id, MESSAGES['REQUEST_SEND_NAME'], reply_markup=cancel_markup())
-    bot.register_next_step_handler(message, next_step_send_name_for_buy_from_wallet, plan)
+    if uuid == 0:
+        bot.send_message(message.chat.id, MESSAGES['REQUEST_SEND_NAME'], reply_markup=cancel_markup())
+        bot.register_next_step_handler(message, next_step_send_name_for_buy_from_wallet, plan)
+    else:
+        usr = utils.user_info(uuid)
+        if not usr:
+            bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'], reply_markup=main_menu_keyboard_markup())
+            return
+        #این شرط چک شود چایگزین remaining_day
+        if not usr['enable']:
+            size_GB =  plan['size_gb']
+            days = plan['days']
+            paid_amount = plan['price']
+            order_id = random.randint(1000000, 9999999)
+            created_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            status = USERS_DB.add_order(order_id, message.chat.id, usr['name'], plan['id'], created_at)
+            if not status:
+                bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'], reply_markup=main_menu_keyboard_markup())
+                return
+            wallet = USERS_DB.find_wallet(telegram_id=message.chat.id)
+            if wallet:
+                wallet = wallet[0]
+                wallet_balance = int(wallet['balance']) - int(paid_amount)
+                user_info = USERS_DB.edit_wallet(message.chat.id, balance=wallet_balance)
+                if not user_info:
+                    bot.send_message(message.chat.id,
+                             f"{MESSAGES['UNKNOWN_ERROR']}\n{MESSAGES['ORDER_ID']} {order_id}",
+                             reply_markup=main_menu_keyboard_markup())
+                    return
+                status = ADMIN_DB.edit_user(uuid=uuid, usage_limit_GB=size_GB, package_days=days)
+                if not status:
+                    bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'], reply_markup=main_menu_keyboard_markup())
+                    return
+            bot.send_message(message.chat.id,
+                     f"{MESSAGES['PAYMENT_CONFIRMED']}\n{MESSAGES['ORDER_ID']} {order_id}",
+                     reply_markup=main_menu_keyboard_markup())
+        else:
+            size_GB =  plan['size_gb'] + usr['usage']['remaining_usage_GB']
+            days = plan['days'] + usr['remaining_day']
+            paid_amount = plan['price']
+            order_id = random.randint(1000000, 9999999)
+            created_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            status = USERS_DB.add_order(order_id, message.chat.id, usr['name'], plan['id'], created_at)
+            if not status:
+                bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'], reply_markup=main_menu_keyboard_markup())
+                return
+            wallet = USERS_DB.find_wallet(telegram_id=message.chat.id)
+            if wallet:
+                wallet = wallet[0]
+                wallet_balance = int(wallet['balance']) - int(paid_amount)
+                user_info = USERS_DB.edit_wallet(message.chat.id, balance=wallet_balance)
+                if not user_info:
+                    bot.send_message(message.chat.id,
+                             f"{MESSAGES['UNKNOWN_ERROR']}\n{MESSAGES['ORDER_ID']} {order_id}",
+                             reply_markup=main_menu_keyboard_markup())
+                    return
+                status = ADMIN_DB.edit_user(uuid=uuid, usage_limit_GB=size_GB, package_days=days)
+                if not status:
+                    bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'], reply_markup=main_menu_keyboard_markup())
+                    return
+            bot.send_message(message.chat.id,
+                     f"{MESSAGES['PAYMENT_CONFIRMED']}\n{MESSAGES['ORDER_ID']} {order_id}",
+                     reply_markup=main_menu_keyboard_markup())
+
+        #bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,
+        #                              reply_markup=sub_url_user_list_markup(value))
+        #msg = user_info_template(usr)
+        #bot.send_message(call.message.chat.id, msg,
+        #                 reply_markup=user_info_markup(usr['uuid']))
 
 
 # Next Step Buy Plan - Send Screenshot
@@ -419,6 +486,9 @@ def callback_query(call: CallbackQuery):
     data = call.data.split(':')
     key = data[0]
     value = data[1]
+    uuid2 = 0
+    if len(data) == 3:
+        uuid2 = data[2]
     # ----------------------------------- Link Subscription Area -----------------------------------
     # Confirm Link Subscription
     if key == 'confirm_subscription':
@@ -446,7 +516,7 @@ def callback_query(call: CallbackQuery):
             return
         bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id,
                               text=plan_info_template(plan),
-                              reply_markup=confirm_buy_plan_markup(plan['id']))
+                              reply_markup=confirm_buy_plan_markup(plan['id'],uuid2))
 
     # Confirm To Buy Plan
     # elif key == 'confirm_buy_plan':
@@ -454,9 +524,9 @@ def callback_query(call: CallbackQuery):
     #     buy_plan_confirm(call.message, plan)
 
     # Confirm To Buy From Wallet
-    elif key == 'confirm_buy_from_wallet':
+    elif key == 'confirm_buy':
         plan = USERS_DB.find_plan(id=value)[0]
-        buy_from_wallet_confirm(call.message, plan)
+        buy_from_wallet_confirm(call.message, plan,uuid2)
     # Ask To Send Screenshot
     elif key == 'send_screenshot':
         bot.send_message(call.message.chat.id, MESSAGES['REQUEST_SEND_SCREENSHOT'])
@@ -580,6 +650,23 @@ def callback_query(call: CallbackQuery):
             return
         bot.send_message(call.message.chat.id, f"{KEY_MARKUP['CONFIGS_HIDDIFY']}\n<code>{sub['hiddify_configs']}</code>",
                          reply_markup=main_menu_keyboard_markup())
+        
+    
+    # ----------------------------------- Renewal Plan Area -----------------------------------
+    # Upgrade Plan - Main Menu
+    elif key == 'upgrade_plan':
+        plans = USERS_DB.select_plans()
+        if not plans:
+            bot.send_message(call.message.chat.id, MESSAGES['PLANS_NOT_FOUND'], reply_markup=main_menu_keyboard_markup())
+            return
+        plan_markup = plans_list_markup(plans,value)
+        if not plan_markup:
+            bot.send_message(call.message.chat.id, MESSAGES['PLANS_NOT_FOUND'], reply_markup=main_menu_keyboard_markup())
+            return
+        bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,
+                                      reply_markup=plan_markup)
+        #bot.send_message(call.message.chat.id, MESSAGES['PLANS_LIST'], reply_markup=plan_markup)
+        
 
     # ----------------------------------- Back Area -----------------------------------
     # Back To User Menu
@@ -591,7 +678,7 @@ def callback_query(call: CallbackQuery):
     elif key == "back_to_plans":
         bot.delete_message(call.message.chat.id, call.message.message_id)
         buy_subscription(call.message)
-
+        
     # Delete Message
     elif key == "del_msg":
         bot.delete_message(call.message.chat.id, call.message.message_id)
@@ -693,7 +780,10 @@ def wallet_balance(message: Message):
             if not status:
                 bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'])
                 return
-
+        #--------------- for test only
+        #wallet_balance = 100000
+        #user_info = USERS_DB.edit_wallet(message.chat.id, balance=wallet_balance)
+        #-----------
         wallet = USERS_DB.find_wallet(telegram_id=message.chat.id)
         wallet = wallet[0]
 
