@@ -10,8 +10,8 @@ from AdminBot.markups import sub_url_user_list_markup, sub_user_list_markup
 def main_menu_keyboard_markup():
     markup = ReplyKeyboardMarkup(row_width=3, resize_keyboard=True)
     markup.add(KeyboardButton(KEY_MARKUP['SUBSCRIPTION_STATUS']))
-    markup.add(KeyboardButton(KEY_MARKUP['LINK_SUBSCRIPTION']), KeyboardButton(KEY_MARKUP['WALLET']))
-    markup.add(KeyboardButton(KEY_MARKUP['BUY_SUBSCRIPTION']), KeyboardButton(KEY_MARKUP['FREE_TEST']))
+    markup.add(KeyboardButton(KEY_MARKUP['LINK_SUBSCRIPTION']), KeyboardButton(KEY_MARKUP['BUY_SUBSCRIPTION']))
+    markup.add(KeyboardButton(KEY_MARKUP['FREE_TEST']), KeyboardButton(KEY_MARKUP['WALLET']))
     markup.add(KeyboardButton(KEY_MARKUP['TO_QR']), KeyboardButton(KEY_MARKUP['SEND_TICKET']),
                KeyboardButton(KEY_MARKUP['HELP_GUIDE']))
     return markup
@@ -43,7 +43,6 @@ def confirm_subscription_markup(uuid):
 def confirm_buy_plan_markup(plan_id):
     markup = InlineKeyboardMarkup()
     markup.row_width = 1
-    markup.add(InlineKeyboardButton(KEY_MARKUP['BUY_PLAN'], callback_data=f"confirm_buy_plan:{plan_id}"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['BUY_FROM_WALLET'], callback_data=f"confirm_buy_from_wallet:{plan_id}"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_plans:None"))
     return markup

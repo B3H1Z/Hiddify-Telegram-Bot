@@ -28,13 +28,13 @@ def user_info_template(sub_id, usr, header=""):
 {MESSAGES['INFO_ID']} <code>{sub_id}</code>
 """
 
+
 # Wallet Info Template
 def wallet_info_template(balance):
-    
     if balance == 0:
         return MESSAGES['ZERO_BALANCE']
     else:
-       return f"""
+        return f"""
          {MESSAGES['WALLET_INFO_PART_1']} {balance} {MESSAGES['WALLET_INFO_PART_2']}
          """
 
@@ -79,16 +79,14 @@ Card owner <b>{card_holder_name}</b>
 
 
 # Payment Received Template - Send to Admin
-def payment_received_template(plan, name, paid_amount, order_id, header="", footer=""):
-
-    if plan['id'] == 0:
-        if LANG == 'FA':
-            return f"""
+def payment_received_template(payment, header="", footer=""):
+    if LANG == 'FA':
+        return f"""
 {header}
 
-شماره سفارش: <code>{order_id}</code>
-نام ثبت شده: <b>{name}</b>
-هزینه پرداخت شده: <b>{paid_amount}</b> {MESSAGES['TOMAN']}
+شماره سفارش: <code>{payment['id']}</code>
+نام کاربر: <b>{payment['user_name']}</b>
+هزینه پرداخت شده: <b>{payment['payment_amount']}</b> {MESSAGES['TOMAN']}
 ---------------------
 ⬇️درخواست افزایش موجودی کیف پول⬇️
 
@@ -98,46 +96,12 @@ def payment_received_template(plan, name, paid_amount, order_id, header="", foot
         return f"""
 {header}
 
-Order number: <b>{plan['id']}</b>
-Registered name: <b>{name}</b>
-Paid amount: <b>{paid_amount}</b> {MESSAGES['TOMAN']}
+Order number: <b>{payment['id']}</b>
+Registered name: <b>{payment['user_name']}</b>
+Paid amount: <b>{payment['payment_amount']}</b> {MESSAGES['TOMAN']}
 ---------------------
 ⬇️Request to increase wallet balance⬇️
 
-{footer}
-"""
-    else:
-        if LANG == 'FA':
-            return f"""
-{header}
-
-شماره سفارش: <code>{order_id}</code>
-نام ثبت شده: <b>{name}</b>
-هزینه پرداخت شده: <b>{paid_amount}</b> {MESSAGES['TOMAN']}
----------------------
-⬇️اطلاعات پلن خریداری شده⬇️
-شناسه پلن: <b>{plan['id']}</b>
-حجم پلن: <b>{plan['size_gb']}</b> {MESSAGES['GB']}
-مدت اعتبار پلن: <b>{plan['days']}</b> {MESSAGES['DAY_EXPIRE']}
-هزینه پلن: <b>{plan['price']}</b> {MESSAGES['TOMAN']}
-
-{footer}
-"""
-        elif LANG == 'EN':
-            return f"""
-{header}
-
-Order number: <b>{plan['id']}</b>
-Registered name: <b>{name}</b>
-Paid amount: <b>{paid_amount}</b> {MESSAGES['TOMAN']}
----------------------
-⬇️Purchased plan information⬇️
-Plan ID: <b>{plan['id']}</b>
-Plan size: <b>{plan['size_gb']}</b> {MESSAGES['GB']}
-Plan validity period: <b>{plan['days']}</b> {MESSAGES['DAY_EXPIRE']}
-Plan price: <b>{plan['price']}</b> {MESSAGES['TOMAN']}
-
-{footer}
 """
 
 

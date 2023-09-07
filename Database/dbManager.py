@@ -207,8 +207,7 @@ class UserDBManager:
             cur.execute("CREATE TABLE IF NOT EXISTS users ("
                         "id INTEGER PRIMARY KEY AUTOINCREMENT,"
                         "telegram_id INTEGER NOT NULL UNIQUE,"
-                        "wallet_balance INTEGER NOT NULL DEFAULT 0,"
-                        "get_free BOOLEAN NOT NULL DEFAULT 0"
+                        "test_account BOOLEAN NOT NULL DEFAULT 0,"
                         "created_at TEXT NOT NULL)")
             self.conn.commit()
             logging.info("User table created successfully!")
@@ -228,10 +227,10 @@ class UserDBManager:
                         "telegram_id INTEGER NOT NULL,"
                         "user_name TEXT NOT NULL,"
                         "plan_id INTEGER NOT NULL,"
-                        "paid_amount TEXT NOT NULL,"
-                        "payment_method TEXT NOT NULL,"
-                        "approved BOOLEAN NULL,"
-                        "payment_image TEXT NOT NULL,"
+                        # "paid_amount TEXT NOT NULL,"
+                        # "payment_method TEXT NOT NULL,"
+                        # "approved BOOLEAN NULL,"
+                        # "payment_image TEXT NOT NULL,"
                         "created_at TEXT NOT NULL,"
                         "FOREIGN KEY (telegram_id) REFERENCES user (telegram_id),"
                         "FOREIGN KEY (plan_id) REFERENCES plans (id))")
@@ -265,6 +264,27 @@ class UserDBManager:
                         "visible_hiddify_hyperlink BOOLEAN NOT NULL DEFAULT 1)")
             self.conn.commit()
             logging.info("Settings table created successfully!")
+
+            cur.execute("CREATE TABLE IF NOT EXISTS wallet ("
+                        "telegram_id INTEGER NOT NULL,"
+                        "balance INTEGER NOT NULL DEFAULT 0,"
+                        "FOREIGN KEY (telegram_id) REFERENCES users (telegram_id))")
+            self.conn.commit()
+            logging.info("Settings table created successfully!")
+
+            cur.execute("CREATE TABLE IF NOT EXISTS payments ("
+                        "id INTEGER PRIMARY KEY,"
+                        "telegram_id INTEGER NOT NULL,"
+                        "payment_amount INTEGER NOT NULL,"
+                        "payment_method TEXT NOT NULL,"
+                        "payment_image TEXT NOT NULL,"
+                        "user_name TEXT NOT NULL,"
+                        "approved BOOLEAN NULL,"
+                        "created_at TEXT NOT NULL,"
+                        "FOREIGN KEY (telegram_id) REFERENCES users (telegram_id))")
+            self.conn.commit()
+            logging.info("Payments table created successfully!")
+
 
 
 
@@ -332,11 +352,11 @@ class UserDBManager:
 
         return True
 
-    def add_user(self, telegram_id, wallet_balance, created_at):
+    def add_user(self, telegram_id, created_at):
         cur = self.conn.cursor()
         try:
-            cur.execute("INSERT INTO users(telegram_id, wallet_balance, created_at) VALUES(?,?,?)",
-                        (telegram_id, wallet_balance, created_at))
+            cur.execute("INSERT INTO users(telegram_id, created_at) VALUES(?,?)",
+                        (telegram_id, created_at))
             self.conn.commit()
             logging.info(f"User [{telegram_id}] added successfully!")
             return True
@@ -461,14 +481,12 @@ class UserDBManager:
             logging.info("Owner info already exists!")
             return False
 
-    def add_order(self, order_id, telegram_id, user_name, plan_id, paid_amount, payment_method, payment_image,
-                  created_at, approved=None):
+    def add_order(self, order_id, telegram_id, user_name, plan_id, created_at):
         cur = self.conn.cursor()
         try:
             cur.execute(
-                "INSERT INTO orders(id,telegram_id,user_name, plan_id,paid_amount,payment_method, approved,payment_image,created_at) VALUES(?,?,?,?,?,?,?,?,?)",
-                (order_id, telegram_id, user_name, plan_id, paid_amount, payment_method, approved, payment_image,
-                 created_at))
+                "INSERT INTO orders(id,telegram_id,user_name, plan_id,created_at) VALUES(?,?,?,?,?)",
+                (order_id, telegram_id, user_name, plan_id, created_at))
             self.conn.commit()
             logging.info(f"Order [{order_id}] added successfully!")
             return True
@@ -590,7 +608,7 @@ class UserDBManager:
             logging.error(f"Error while deleting order [{order_id}] \n Error: {e}")
             return False
 
-    def add_non_order_subscriptions(self, non_sub_id, telegram_id, uuid):
+    def add_non_order_subscription(self, non_sub_id, telegram_id, uuid):
         cur = self.conn.cursor()
         try:
             cur.execute(
@@ -688,3 +706,103 @@ class UserDBManager:
         else:
             logging.info("Settings already exists!")
             return False
+
+    def add_wallet(self, telegram_id):
+        cur = self.conn.cursor()
+        try:
+            cur.execute(
+                "INSERT INTO wallet(telegram_id) VALUES(?)",
+                (telegram_id,))
+            self.conn.commit()
+            logging.info(f"Balance [{telegram_id}] added successfully!")
+            return True
+
+        except Error as e:
+            logging.error(f"Error while adding balance [{telegram_id}] \n Error: {e}")
+            return False
+
+    def select_wallet(self):
+        cur = self.conn.cursor()
+        try:
+            cur.execute("SELECT * FROM wallet")
+            rows = cur.fetchall()
+            rows = [dict(zip([key[0] for key in cur.description], row)) for row in rows]
+            return rows
+        except Error as e:
+            logging.error(f"Error while selecting all balance \n Error:{e}")
+            return None
+
+    def find_wallet(self, **kwargs):
+        if len(kwargs) != 1:
+            logging.warning("You can only use one key to find balance!")
+            return None
+        rows = []
+        cur = self.conn.cursor()
+        try:
+            for key, value in kwargs.items():
+                cur.execute(f"SELECT * FROM wallet WHERE {key}=?", (value,))
+                rows = cur.fetchall()
+            if len(rows) == 0:
+                logging.info(f"Balance {kwargs} not found!")
+                return None
+            rows = [dict(zip([key[0] for key in cur.description], row)) for row in rows]
+            return rows
+        except Error as e:
+            logging.error(f"Error while finding balance {kwargs} \n Error:{e}")
+            return None
+
+    def edit_wallet(self, telegram_id, **kwargs):
+        cur = self.conn.cursor()
+        try:
+            for key, value in kwargs.items():
+                cur.execute(f"UPDATE wallet SET {key}=? WHERE telegram_id=?", (value, telegram_id,))
+                self.conn.commit()
+                logging.info(f"balance successfully update [{key}] to [{value}]")
+            return True
+        except Error as e:
+            logging.error(f"Error while updating balance [{key}] to [{value}] \n Error: {e}")
+            return False
+
+    def add_payment(self, payment_id, telegram_id, payment_amount, payment_method, payment_image,user_name, created_at):
+        cur = self.conn.cursor()
+        try:
+            cur.execute(
+                "INSERT INTO payments(id,telegram_id, payment_amount,payment_method,payment_image,user_name,created_at) VALUES(?,?,?,?,?,?,?)",
+                (payment_id, telegram_id, payment_amount, payment_method, payment_image,user_name, created_at))
+            self.conn.commit()
+            logging.info(f"Payment [{payment_id}] added successfully!")
+            return True
+
+        except Error as e:
+            logging.error(f"Error while adding payment [{payment_id}] \n Error: {e}")
+            return False
+
+    def edit_payment(self, payment_id, **kwargs):
+        cur = self.conn.cursor()
+        try:
+            for key, value in kwargs.items():
+                cur.execute(f"UPDATE payments SET {key}=? WHERE id=?", (value, payment_id))
+                self.conn.commit()
+                logging.info(f"payment successfully update [{key}] to [{value}]")
+            return True
+        except Error as e:
+            logging.error(f"Error while updating payment [{key}] to [{value}] \n Error: {e}")
+            return False
+    def find_payment(self, **kwargs):
+        if len(kwargs) != 1:
+            logging.warning("You can only use one key to find payment!")
+            return None
+        rows = []
+        cur = self.conn.cursor()
+        try:
+            for key, value in kwargs.items():
+                cur.execute(f"SELECT * FROM payments WHERE {key}=?", (value,))
+                rows = cur.fetchall()
+            if len(rows) == 0:
+                logging.info(f"Payment {kwargs} not found!")
+                return None
+            rows = [dict(zip([key[0] for key in cur.description], row)) for row in rows]
+            return rows
+        except Error as e:
+            logging.error(f"Error while finding payment {kwargs} \n Error:{e}")
+            return None

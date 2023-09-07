@@ -41,7 +41,7 @@ KEY_MARKUP = {
         'UNLINK_SUBSCRIPTION': '⭕️جداسازی اشتراک',
         'BUY_SUBSCRIPTION': '💳خرید اشتراک',
         'BUY_PLAN': '💳کارت به کارت',
-        'BUY_FROM_WALLET': '💰پرداخت با کیف پول',
+        'BUY_FROM_WALLET': '💰پرداخت از کیف پول',
         'SEND_SCREENSHOT': '✅پرداخت کردم، ارسال رسید',
         'CANCEL': '❌لغو',
         'CONFIRM_PAYMENT': '✅تایید پرداخت',

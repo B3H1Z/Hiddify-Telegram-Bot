@@ -15,6 +15,8 @@ import AdminBot.templates
 session = requests.session()
 # Base panel URL - example: https://panel.example.com
 BASE_URL = urlparse(PANEL_URL).scheme + "://" + urlparse(PANEL_URL).netloc
+
+
 # Users directory in panel
 # USERS_DIR = "/admin/user/"
 
@@ -76,14 +78,16 @@ def users_to_dict(users_dict):
                             'added_by': user[14], 'max_ips': user[15], 'enable': user[16]})
     return users_array
 
+
 # Change telegram user data format
 def Telegram_users_to_dict(Tel_users_dict):
     if not Tel_users_dict:
         return False
     users_array = []
     for user in Tel_users_dict:
-        users_array.append({'id': user[0], 'telegram_id': user[1], 'wallet_balance': user[2], 'created_at': user[3],})
+        users_array.append({'id': user[0], 'telegram_id': user[1], 'created_at': user[3], })
     return users_array
+
 
 # Calculate remaining days
 def calculate_remaining_days(start_date, package_days):
@@ -136,7 +140,7 @@ def dict_process(users_dict, sub_id=None):
             "mode": user['mode'],
             "enable": user['enable'],
             "sub_id": sub_id
-            #add telegramid
+            # add telegramid
         })
 
     return users_list
@@ -152,6 +156,7 @@ def user_info(uuid):
         if user['uuid'] == uuid:
             return user
     return False
+
 
 # Get sub links - return dict of sub links
 def sub_links(uuid):
@@ -301,6 +306,7 @@ def search_user_by_config(config):
             return user
     return False
 
+
 # Check text is it config or sub
 def is_it_config_or_sub(config):
     if config.startswith("vmess://"):
@@ -324,11 +330,13 @@ def users_bot_add_plan(size, days, price):
         return False
     return True
 
+
 # Check user is expired
 def is_user_expired(user):
     if user['remaining_day'] == 0:
         return True
     return False
+
 
 # Expired users list
 def expired_users_list(users):
@@ -337,6 +345,7 @@ def expired_users_list(users):
         if is_user_expired(user):
             expired_users.append(user)
     return expired_users
+
 
 # Text to QR code
 def txt_to_qr(txt):
@@ -355,6 +364,7 @@ def txt_to_qr(txt):
 
     return img
 
+
 # List of users who not ordered from bot (Link Subscription)
 def non_order_user_info(telegram_id):
     users_list = []
@@ -370,23 +380,23 @@ def non_order_user_info(telegram_id):
                     users_list.append(non_order_user)
     return users_list
 
+
 # List of users who ordered from bot and made payment
 def order_user_info(telegram_id):
     users_list = []
     orders = USERS_DB.find_order(telegram_id=telegram_id)
     if orders:
         for order in orders:
-            if order['approved'] == 1:
-                ordered_subscriptions = USERS_DB.find_order_subscription(order_id=order['id'])
-                if ordered_subscriptions:
-                    for subscription in ordered_subscriptions:
-                        order_user = ADMIN_DB.find_user(uuid=subscription['uuid'])
+            ordered_subscriptions = USERS_DB.find_order_subscription(order_id=order['id'])
+            if ordered_subscriptions:
+                for subscription in ordered_subscriptions:
+                    order_user = ADMIN_DB.find_user(uuid=subscription['uuid'])
+                    if order_user:
+                        order_user = users_to_dict(order_user)
+                        order_user = dict_process(order_user, subscription['id'])
                         if order_user:
-                            order_user = users_to_dict(order_user)
-                            order_user = dict_process(order_user, subscription['id'])
-                            if order_user:
-                                order_user = order_user[0]
-                                users_list.append(order_user)
+                            order_user = order_user[0]
+                            users_list.append(order_user)
     return users_list
 
 
@@ -398,6 +408,7 @@ def replace_last_three_with_random(input_string):
     random_numbers = ''.join(random.choice(string.digits) for _ in range(3))
     modified_string = input_string[:-3] + random_numbers
     return modified_string
+
 
 # Privacy-friendly logging - replace your panel url with panel.private.com
 def privacy_friendly_logging_request(url):

@@ -349,26 +349,27 @@ def users_bot_order_status(message: Message):
     if not is_it_digit(message):
         return
 
-    order = USERS_DB.find_order(id=int(message.text))
-    if not order:
+    payment = USERS_DB.find_payment(id=int(message.text))
+    if not payment:
         bot.send_message(message.chat.id, MESSAGES['ERROR_ORDER_NOT_FOUND'], reply_markup=main_menu_keyboard_markup())
         return
-    plan = USERS_DB.find_plan(id=order[0]['plan_id'])
-    if not order:
-        bot.send_message(message.chat.id, MESSAGES['ERROR_ORDER_NOT_FOUND'], reply_markup=main_menu_keyboard_markup())
-        return
-    order = order[0]
+
+    # plan = USERS_DB.find_plan(id=payment[0]['plan_id'])
+    # if not payment:
+    #     bot.send_message(message.chat.id, MESSAGES['ERROR_ORDER_NOT_FOUND'], reply_markup=main_menu_keyboard_markup())
+    #     return
+    payment = payment[0]
     is_it_accepted = None
-    if order['approved'] == 0:
+    if payment['approved'] == 0:
         is_it_accepted = MESSAGES['PAYMENT_ACCEPT_STATUS_NOT_CONFIRMED']
-    elif order['approved'] == 1:
+    elif payment['approved'] == 1:
         is_it_accepted = MESSAGES['PAYMENT_ACCEPT_STATUS_CONFIRMED']
     else:
         is_it_accepted = MESSAGES['PAYMENT_ACCEPT_STATUS_WAITING']
 
-    bot.send_photo(message.chat.id, photo=open(order['payment_image'], 'rb'),
-                   caption=payment_received_template(plan[0], order['user_name'], order['paid_amount'], order['id'],
-                                                     footer=f"{MESSAGES['PAYMENT_ACCEPT_STATUS']} {is_it_accepted}\n{MESSAGES['CREATED_AT']} {order['created_at']}"),
+    bot.send_photo(message.chat.id, photo=open(payment['payment_image'], 'rb'),
+                   caption=payment_received_template(payment,
+                                                     footer=f"{MESSAGES['PAYMENT_ACCEPT_STATUS']} {is_it_accepted}\n{MESSAGES['CREATED_AT']} {payment['created_at']}"),
                    reply_markup=main_menu_keyboard_markup())
 
 
@@ -711,58 +712,76 @@ def callback_query(call: CallbackQuery):
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_CLIENT_TOKEN'])
             return
         payment_id = value
-        order_info = USERS_DB.find_order(id=value)
-        if not order_info:
+        payment_info = USERS_DB.find_payment(id=payment_id)
+        if not payment_info:
             bot.send_message(call.message.chat.id,
                              f"{MESSAGES['ERROR_PAYMENT_NOT_FOUND']}\n{MESSAGES['ORDER_ID']} {payment_id}")
             return
-        order_info = order_info[0]
-        if order_info['approved'] == '1':
+        payment_info = payment_info[0]
+        if payment_info['approved'] == 1:
             bot.send_message(call.message.chat.id,
                              f"{MESSAGES['ERROR_PAYMENT_ALREADY_CONFIRMED']}\n{MESSAGES['ORDER_ID']} {payment_id}")
             return
-        #بنظر می رسد ابتدا باید کانفیگ ساخته شود سپس سفارش تایید شود
-        payment_status = USERS_DB.edit_order(payment_id, approved=True)
+
+        payment_status = USERS_DB.edit_payment(payment_id, approved=True)
         if payment_status:
-            plan_info = USERS_DB.find_plan(id=order_info['plan_id'], )
-            if plan_info:
-                plan_info = plan_info[0]
-                value = ADMIN_DB.add_default_user(order_info['user_name'], plan_info['days'], plan_info['size_gb'],
-                                                  int(PANEL_ADMIN_ID))
-                if not value:
-                    bot.send_message(call.message.chat.id,
-                                     f"{MESSAGES['ERROR_UNKNOWN']}\n{MESSAGES['ORDER_ID']} {payment_id}")
-                    return
-                sub_id = random.randint(1000000, 9999999)
-                add_sub_status = USERS_DB.add_order_subscription(sub_id, order_info['id'], value)
-                if not add_sub_status:
-                    bot.send_message(call.message.chat.id,
-                                     f"{MESSAGES['ERROR_UNKNOWN']}\n{MESSAGES['ORDER_ID']} {payment_id}")
-                    return
-                user_bot.send_message(int(order_info['telegram_id']),
-                                      f"{MESSAGES['PAYMENT_CONFIRMED']}\n{MESSAGES['ORDER_ID']} {payment_id}")
-                bot.send_message(call.message.chat.id,
-                                 f"{MESSAGES['PAYMENT_CONFIRMED_ADMIN']}\n{MESSAGES['ORDER_ID']} {payment_id}")
-                bot.delete_message(call.message.chat.id, call.message.message_id)
-            else:
-                #for wallet balance charge
-                if order_info['plan_id'] == 0:
-                     users= USERS_DB.find_user(telegram_id=order_info['telegram_id'])
-                     if users:
-                        user = users[0]
-                        wallet_balance = int(user['wallet_balance']) + int(order_info['paid_amount'])
-                        user_info = USERS_DB.edit_user(order_info['telegram_id'],wallet_balance=wallet_balance)
-                        if user_info:
-                            user_bot.send_message(int(order_info['telegram_id']),
-                                      f"{MESSAGES['WALLET_PAYMENT_CONFIRMED']}\n{MESSAGES['ORDER_ID']} {payment_id}")
-                            bot.send_message(call.message.chat.id,
-                                 f"{MESSAGES['PAYMENT_CONFIRMED_ADMIN']}\n{MESSAGES['ORDER_ID']} {payment_id}")
-                            bot.delete_message(call.message.chat.id, call.message.message_id)
-                else:
-                    bot.send_message(call.message.chat.id,
-                                 f"{MESSAGES['ERROR_UNKNOWN']}\n{MESSAGES['ORDER_ID']} {payment_id}")
-        else:
-            bot.send_message(call.message.chat.id, f"{MESSAGES['ERROR_UNKNOWN']}\n{MESSAGES['ORDER_ID']} {payment_id}")
+            wallet = USERS_DB.find_wallet(telegram_id=payment_info['telegram_id'])
+            if not wallet:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+                return
+            wallet = wallet[0]
+            new_balance = int(wallet['balance']) + int(payment_info['payment_amount'])
+            wallet_status = USERS_DB.edit_wallet(wallet['telegram_id'], balance=new_balance)
+            if not wallet_status:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+                return
+            bot.delete_message(call.message.chat.id, call.message.message_id)
+            user_bot.send_message(int(payment_info['telegram_id']),
+                                  f"{MESSAGES['WALLET_PAYMENT_CONFIRMED']}\n{MESSAGES['ORDER_ID']} {payment_id}")
+            bot.send_message(call.message.chat.id,
+                             f"{MESSAGES['PAYMENT_CONFIRMED_ADMIN']}\n{MESSAGES['ORDER_ID']} {payment_id}")
+
+        # return
+        # if payment_status:
+        #     plan_info = USERS_DB.find_payment(id=order_info['plan_id'], )
+        #     if plan_info:
+        #         plan_info = plan_info[0]
+        #         value = ADMIN_DB.add_default_user(order_info['user_name'], plan_info['days'], plan_info['size_gb'],
+        #                                           int(PANEL_ADMIN_ID))
+        #         if not value:
+        #             bot.send_message(call.message.chat.id,
+        #                              f"{MESSAGES['ERROR_UNKNOWN']}\n{MESSAGES['ORDER_ID']} {payment_id}")
+        #             return
+        #         sub_id = random.randint(1000000, 9999999)
+        #         add_sub_status = USERS_DB.add_order_subscription(sub_id, order_info['id'], value)
+        #         if not add_sub_status:
+        #             bot.send_message(call.message.chat.id,
+        #                              f"{MESSAGES['ERROR_UNKNOWN']}\n{MESSAGES['ORDER_ID']} {payment_id}")
+        #             return
+        #         user_bot.send_message(int(order_info['telegram_id']),
+        #                               f"{MESSAGES['PAYMENT_CONFIRMED']}\n{MESSAGES['ORDER_ID']} {payment_id}")
+        #         bot.send_message(call.message.chat.id,
+        #                          f"{MESSAGES['PAYMENT_CONFIRMED_ADMIN']}\n{MESSAGES['ORDER_ID']} {payment_id}")
+        #         bot.delete_message(call.message.chat.id, call.message.message_id)
+        #     else:
+        #         # for wallet balance charge
+        #         if order_info['plan_id'] == 0:
+        #             users = USERS_DB.find_user(telegram_id=order_info['telegram_id'])
+        #             if users:
+        #                 user = users[0]
+        #                 wallet_balance = int(user['wallet_balance']) + int(order_info['paid_amount'])
+        #                 user_info = USERS_DB.edit_user(order_info['telegram_id'], wallet_balance=wallet_balance)
+        #                 if user_info:
+        #                     user_bot.send_message(int(order_info['telegram_id']),
+        #                                           f"{MESSAGES['WALLET_PAYMENT_CONFIRMED']}\n{MESSAGES['ORDER_ID']} {payment_id}")
+        #                     bot.send_message(call.message.chat.id,
+        #                                      f"{MESSAGES['PAYMENT_CONFIRMED_ADMIN']}\n{MESSAGES['ORDER_ID']} {payment_id}")
+        #                     bot.delete_message(call.message.chat.id, call.message.message_id)
+        #         else:
+        #             bot.send_message(call.message.chat.id,
+        #                              f"{MESSAGES['ERROR_UNKNOWN']}\n{MESSAGES['ORDER_ID']} {payment_id}")
+        # else:
+        #     bot.send_message(call.message.chat.id, f"{MESSAGES['ERROR_UNKNOWN']}\n{MESSAGES['ORDER_ID']} {payment_id}")
 
     # Payment - Reject Payment Callback
     elif key == 'cancel_payment_by_admin':
@@ -770,17 +789,17 @@ def callback_query(call: CallbackQuery):
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_CLIENT_TOKEN'])
             return
         payment_id = value
-        payment_info = USERS_DB.select_orders()
+        payment_info = USERS_DB.find_payment(id=payment_id)
         if not payment_info:
             bot.send_message(call.message.chat.id,
                              f"{MESSAGES['ERROR_PAYMENT_NOT_FOUND']}\n{MESSAGES['ORDER_ID']} {payment_id}")
             return
         payment_info = payment_info[0]
-        if payment_info['approved'] == '0':
+        if payment_info['approved'] == 0:
             bot.send_message(call.message.chat.id,
                              f"{MESSAGES['ERROR_PAYMENT_ALREADY_REJECTED']}\n{MESSAGES['ORDER_ID']} {payment_id}")
             return
-        payment_status = USERS_DB.edit_order(payment_id, approved=False)
+        payment_status = USERS_DB.edit_payment(payment_id, approved=False)
         if payment_status:
             user_bot.send_message(int(payment_info['telegram_id']),
                                   f"{MESSAGES['PAYMENT_NOT_CONFIRMED']}\n{MESSAGES['ORDER_ID']} {payment_id}")

@@ -68,43 +68,28 @@ def type_of_subscription(text):
     return uuid
 
 
-# def next_step_subscription_status_1(message :Message):
-#     uuid = type_of_subscription(message.text)
-#     if not uuid:
-#         bot.send_message(message.chat.id, MESSAGES['SUBSCRIPTION_INFO_NOT_FOUND'])
-#         return
-#     user_data = ADMIN_DB.find_user(uuid=uuid)
-#     user_data = utils.users_to_dict(user_data)
-#     user_data = utils.dict_process(user_data)
-#     if user_data:
-#         user_data = user_data[0]
-#         bot.send_message(message.chat.id,
-#                          f"{MESSAGES['CONFIRM_SUBSCRIPTION_QUESTION']}\n{MESSAGES['NAME']} <b>{user_data['name']}</b>",
-#                          reply_markup=confirm_subscription_markup(user_data['uuid']))
-#     else:
-#         bot.send_message(message.chat.id, MESSAGES['SUBSCRIPTION_INFO_NOT_FOUND'],
-#                          reply_markup=main_menu_keyboard_markup())
-
 # ----------------------------------- Buy Plan Area -----------------------------------
 order_info = {}
-chargePlan = {}
+charge_wallet = {}
+
 
 # Next Step Buy Plan - Confirm
-def buy_plan_confirm(message: Message, plan):
-    if not plan:
-        bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
-                         reply_markup=main_menu_keyboard_markup())
-        return
-    owner_info = USERS_DB.select_owner_info()[0]
-    if not owner_info:
-        bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
-                         reply_markup=main_menu_keyboard_markup())
-        return
-    price = utils.replace_last_three_with_random(str(plan['price']))
-    order_info['price'] = price
-    bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id,
-                          text=owner_info_template(owner_info['card_number'], owner_info['card_owner'], price),
-                          reply_markup=send_screenshot_markup(plan_id=plan['id']))
+# def buy_plan_confirm(message: Message, plan):
+#     if not plan:
+#         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+#                          reply_markup=main_menu_keyboard_markup())
+#         return
+#     owner_info = USERS_DB.select_owner_info()[0]
+#     if not owner_info:
+#         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+#                          reply_markup=main_menu_keyboard_markup())
+#         return
+#     price = utils.replace_last_three_with_random(str(plan['price']))
+#     order_info['price'] = price
+#     bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id,
+#                           text=owner_info_template(owner_info['card_number'], owner_info['card_owner'], price),
+#                           reply_markup=send_screenshot_markup(plan_id=plan['id']))
+
 
 # Next Step Buy From Wallet - Confirm
 def buy_from_wallet_confirm(message: Message, plan):
@@ -112,85 +97,118 @@ def buy_from_wallet_confirm(message: Message, plan):
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
         return
-    users = USERS_DB.find_user(telegram_id=message.chat.id)
-    if users:
-        user = users[0]
-        if plan['price'] > user['wallet_balance']:
+    wallet = USERS_DB.find_wallet(telegram_id=message.chat.id)
+    if wallet:
+        wallet = wallet[0]
+        if plan['price'] > wallet['balance']:
             bot.send_message(message.chat.id, MESSAGES['LACK_OF_WALLET_BALANCE'])
-            #پاک کردن پیام قبلی و یا ریجستر کردن یک متد
+            # پاک کردن پیام قبلی و یا ریجستر کردن یک متد
             return
-    bot.send_message(message.chat.id, MESSAGES['REQUEST_SEND_NAME'])
+    bot.send_message(message.chat.id, MESSAGES['REQUEST_SEND_NAME'], reply_markup=cancel_markup())
     bot.register_next_step_handler(message, next_step_send_name_for_buy_from_wallet, plan)
+
+
 # Next Step Buy Plan - Send Screenshot
 
-def next_step_send_screenshot(message: Message, plan):
+def next_step_send_screenshot(message, charge_wallet):
     if is_it_cancel(message):
         return
-    if not plan:
+    if not charge_wallet:
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
         return
 
     if message.content_type != 'photo':
         bot.send_message(message.chat.id, MESSAGES['ERROR_TYPE_SEND_SCREENSHOT'], reply_markup=cancel_markup())
-        bot.register_next_step_handler(message.chat.id, next_step_send_screenshot, plan)
+        bot.register_next_step_handler(message, next_step_send_screenshot, charge_wallet)
         return
 
-    bot.send_message(message.chat.id, MESSAGES['REQUEST_SEND_NAME'])
-    order_id = random.randint(1000000, 9999999)
+    # bot.send_message(message.chat.id, MESSAGES['REQUEST_SEND_NAME'])
 
     file_info = bot.get_file(message.photo[-1].file_id)
     downloaded_file = bot.download_file(file_info.file_path)
-    path = os.path.join(os.getcwd(), 'UserBot', 'Receiptions', f"{message.chat.id}-{order_id}.jpg")
+    path = os.path.join(os.getcwd(), 'UserBot', 'Receiptions', f"{message.chat.id}-{charge_wallet['id']}.jpg")
     with open(path, 'wb') as new_file:
         new_file.write(downloaded_file)
 
-    bot.register_next_step_handler(message, next_step_send_name, plan, path, order_id)
-
-
-# Next Step Buy Plan - Send Name
-
-def next_step_send_name(message: Message, plan, path, order_id):
-    if is_it_cancel(message):
-        return
-
-    if not plan:
-        bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
-                         reply_markup=main_menu_keyboard_markup())
-        return
-    name = message.text
-    while is_it_command(message):
-        message = bot.send_message(message.chat.id, MESSAGES['REQUEST_SEND_NAME'])
-        bot.register_next_step_handler(message, next_step_send_name, plan, path, order_id)
-        return
-    # send it for admin bot
-
     created_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    
+
     payment_method = "Card"
-    if plan['id'] == 0:
-        paid_amount = plan['price']
-    else:
-        paid_amount = order_info['price']
-    
-    status = USERS_DB.add_order(order_id, message.chat.id, name, plan['id'], paid_amount, payment_method, path,
-                                created_at)
+
+    status = USERS_DB.add_payment(charge_wallet['id'], message.chat.id, charge_wallet['amount'], payment_method, path,
+                                  message.from_user.full_name,
+                                  created_at)
     if status:
+        payment = USERS_DB.find_payment(id=charge_wallet['id'])
+        if not payment:
+            bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                             reply_markup=main_menu_keyboard_markup())
+            return
+        payment = payment[0]
         for ADMIN in ADMINS_ID:
             admin_bot.send_photo(ADMIN, open(path, 'rb'),
-                                 caption=payment_received_template(plan, name, paid_amount, order_id,
-                                                                   MESSAGES['NEW_PAYMENT_RECEIVED'],
-                                                                   MESSAGES['PAYMENT_ASK_TO_CONFIRM']),
-                                 reply_markup=confirm_payment_by_admin(order_id))
+                                 caption=payment_received_template(payment),
+                                 reply_markup=confirm_payment_by_admin(charge_wallet['id']))
         bot.send_message(message.chat.id, MESSAGES['WAIT_FOR_ADMIN_CONFIRMATION'],
                          reply_markup=main_menu_keyboard_markup())
     else:
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
 
+
+# Next Step Buy Plan - Send Name
+
+# def next_step_send_name(message, plan, path, order_id):
+#     print(plan)
+#     if is_it_cancel(message):
+#         return
+#
+#     if not plan:
+#         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+#                          reply_markup=main_menu_keyboard_markup())
+#         return
+#     name = message.text
+#     while is_it_command(message):
+#         message = bot.send_message(message.chat.id, MESSAGES['REQUEST_SEND_NAME'])
+#         bot.register_next_step_handler(message, next_step_send_name, plan, path, order_id)
+#         return
+#     # send it for admin bot
+#     print(plan)
+#     created_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+#
+#     status = USERS_DB.add_order(order_id, message.chat.id, name, plan['id'], created_at)
+#     sub_id = random.randint(1000000, 9999999)
+#     if not status:
+#         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+#                          reply_markup=main_menu_keyboard_markup())
+#         return
+#
+#     uuid = ADMIN_DB.add_default_user(order_info['user_name'], plan['days'], plan['size_gb'],
+#                                      int(PANEL_ADMIN_ID))
+#     if not uuid:
+#         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+#                          reply_markup=main_menu_keyboard_markup())
+#         return
+#
+#     ordered_sub = USERS_DB.add_order_subscription(sub_id, order_id, uuid)
+#     # if status:
+#     #     for ADMIN in ADMINS_ID:
+#     #         admin_bot.send_photo(ADMIN, open(path, 'rb'),
+#     #                              caption=payment_received_template(plan, name, paid_amount, order_id,
+#     #                                                                MESSAGES['NEW_PAYMENT_RECEIVED'],
+#     #                                                                MESSAGES['PAYMENT_ASK_TO_CONFIRM']),
+#     #                              reply_markup=confirm_payment_by_admin(order_id))
+#     #     bot.send_message(message.chat.id, MESSAGES['WAIT_FOR_ADMIN_CONFIRMATION'],
+#     #                      reply_markup=main_menu_keyboard_markup())
+#     # else:
+#     #     bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+#     #                      reply_markup=main_menu_keyboard_markup())
+
+
 # ----------------------------------- Buy From Wallet Area -----------------------------------
 # Next Step Buy From Wallet - Send Name
 def next_step_send_name_for_buy_from_wallet(message: Message, plan):
+    print(plan)
     if is_it_cancel(message):
         return
 
@@ -204,42 +222,46 @@ def next_step_send_name_for_buy_from_wallet(message: Message, plan):
         bot.register_next_step_handler(message, next_step_send_name_for_buy_from_wallet, plan)
         return
     created_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    payment_method = "Card"
     paid_amount = plan['price']
-    #بعدا روش بهتری اجرا شود
-    path = 'Paid by Wallet ballance'
+
     order_id = random.randint(1000000, 9999999)
-    
+
     value = ADMIN_DB.add_default_user(name, plan['days'], plan['size_gb'],
-                                                  int(PANEL_ADMIN_ID))
+                                      int(PANEL_ADMIN_ID))
     if not value:
         bot.send_message(message.chat.id,
-                                     f"{MESSAGES['ERROR_UNKNOWN']}\n{MESSAGES['ORDER_ID']} {order_id}")
+                         f"{MESSAGES['UNKNOWN_ERROR']}\n{MESSAGES['ORDER_ID']} {order_id}",
+                         reply_markup=main_menu_keyboard_markup())
         return
     sub_id = random.randint(1000000, 9999999)
     add_sub_status = USERS_DB.add_order_subscription(sub_id, order_id, value)
     if not add_sub_status:
         bot.send_message(message.chat.id,
-                                     f"{MESSAGES['ERROR_UNKNOWN']}\n{MESSAGES['ORDER_ID']} {order_id}")
+                         f"{MESSAGES['UNKNOWN_ERROR']}\n{MESSAGES['ORDER_ID']} {order_id}",
+                         reply_markup=main_menu_keyboard_markup())
         return
-    status = USERS_DB.add_order(order_id, message.chat.id, name, plan['id'], paid_amount, payment_method, path,
-                                created_at,True)
+    status = USERS_DB.add_order(order_id, message.chat.id, name, plan['id'], created_at)
+
     if not status:
         bot.send_message(message.chat.id,
-                                     f"{MESSAGES['ERROR_UNKNOWN']}\n{MESSAGES['ORDER_ID']} {order_id}")
+                         f"{MESSAGES['UNKNOWN_ERROR']}\n{MESSAGES['ORDER_ID']} {order_id}",
+                         reply_markup=main_menu_keyboard_markup())
         return
-    users= USERS_DB.find_user(telegram_id=message.chat.id)
-    if users:
-        user = users[0]
-        wallet_balance = int(user['wallet_balance']) - int(paid_amount)
-        user_info = USERS_DB.edit_user(message.chat.id,wallet_balance=wallet_balance)
+    wallet = USERS_DB.find_wallet(telegram_id=message.chat.id)
+    if wallet:
+        wallet = wallet[0]
+        wallet_balance = int(wallet['balance']) - int(paid_amount)
+        user_info = USERS_DB.edit_wallet(message.chat.id, balance=wallet_balance)
         if not user_info:
             bot.send_message(message.chat.id,
-                                     f"{MESSAGES['ERROR_UNKNOWN']}\n{MESSAGES['ORDER_ID']} {order_id}")
+                             f"{MESSAGES['UNKNOWN_ERROR']}\n{MESSAGES['ORDER_ID']} {order_id}",
+                             reply_markup=main_menu_keyboard_markup())
             return
     bot.send_message(message.chat.id,
-                                      f"{MESSAGES['PAYMENT_CONFIRMED']}\n{MESSAGES['ORDER_ID']} {order_id}")
-    
+                     f"{MESSAGES['PAYMENT_CONFIRMED']}\n{MESSAGES['ORDER_ID']} {order_id}",
+                     reply_markup=main_menu_keyboard_markup())
+
+
 # ----------------------------------- Get Free Test Area -----------------------------------
 # Next Step Get Free Test - Send Name
 def next_step_send_name_for_get_free_test(message: Message):
@@ -250,43 +272,66 @@ def next_step_send_name_for_get_free_test(message: Message):
         message = bot.send_message(message.chat.id, MESSAGES['REQUEST_SEND_NAME'])
         bot.register_next_step_handler(message, next_step_send_name_for_get_free_test)
         return
-    created_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    payment_method = "Free"
-    #بعدا روش بهتری اجرا شود
-    path = 'Get free test'
-    plan_id = 0
-    # تغییر این قسمت با تنظیمات
-    days = 7
-    size_gb = 7
-    paid_amount = 0
-    order_id = random.randint(1000000, 9999999)
-    
-    value = ADMIN_DB.add_default_user(name, days, size_gb,
-                                                  int(PANEL_ADMIN_ID))
-    if not value:
-        bot.send_message(message.chat.id,
-                                     f"{MESSAGES['ERROR_UNKNOWN']}\n{MESSAGES['ORDER_ID']} {order_id}")
+
+    test_user_days = 1
+    test_user_size_gb = 1
+    test_user_comment = "Free Test User"
+
+    uuid = ADMIN_DB.add_default_user(name, test_user_days, test_user_size_gb, int(PANEL_ADMIN_ID), test_user_comment)
+    if not uuid:
+        bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                         reply_markup=main_menu_keyboard_markup())
         return
-    sub_id = random.randint(1000000, 9999999)
-    add_sub_status = USERS_DB.add_order_subscription(sub_id, order_id, value)
-    if not add_sub_status:
-        bot.send_message(message.chat.id,
-                                     f"{MESSAGES['ERROR_UNKNOWN']}\n{MESSAGES['ORDER_ID']} {order_id}")
+    non_order_id = random.randint(1000000, 9999999)
+    non_order_status = USERS_DB.add_non_order_subscription(non_order_id, message.chat.id, uuid)
+    if not non_order_status:
+        bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                         reply_markup=main_menu_keyboard_markup())
         return
-    status = USERS_DB.add_order(order_id, message.chat.id, name, plan_id, paid_amount, payment_method, path,
-                                created_at,True)
-    if not status:
-        bot.send_message(message.chat.id,
-                                     f"{MESSAGES['ERROR_UNKNOWN']}\n{MESSAGES['ORDER_ID']} {order_id}")
+
+    edit_user_status = USERS_DB.edit_user(message.chat.id, test_account=True)
+    print(edit_user_status)
+    if not edit_user_status:
+        bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                         reply_markup=main_menu_keyboard_markup())
         return
-    
-    user_info = USERS_DB.edit_user(message.chat.id,get_free=True)
-    if not user_info:
-        bot.send_message(message.chat.id,
-                                     f"{MESSAGES['ERROR_UNKNOWN']}\n{MESSAGES['ORDER_ID']} {order_id}")
-        return
-    bot.send_message(message.chat.id,
-                                      f"{MESSAGES['GET_FREE_CONFIRMED']}\n{MESSAGES['ORDER_ID']} {order_id}")
+    bot.send_message(message.chat.id, MESSAGES['GET_FREE_CONFIRMED'],
+                     reply_markup=main_menu_keyboard_markup())
+    # created_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    #
+    # # plan_id = 0
+    #
+    # # paid_amount = 0
+    # order_id = random.randint(1000000, 9999999)
+    #
+    # value = ADMIN_DB.add_default_user(name, days, size_gb,
+    #                                   int(PANEL_ADMIN_ID))
+    # if not value:
+    #     bot.send_message(message.chat.id,
+    #                      f"{MESSAGES['UNKNOWN_ERROR']}\n{MESSAGES['ORDER_ID']} {order_id}")
+    #     return
+    # sub_id = random.randint(1000000, 9999999)
+    # add_sub_status = USERS_DB.add_order_subscription(sub_id, order_id, value)
+    # if not add_sub_status:
+    #     bot.send_message(message.chat.id,
+    #                      f"{MESSAGES['UNKNOWN_ERROR']}\n{MESSAGES['ORDER_ID']} {order_id}")
+    #     return
+    # status = USERS_DB.add_order(order_id, message.chat.id, name, plan_id, paid_amount, payment_method, path,
+    #                             created_at, True)
+    # if not status:
+    #     bot.send_message(message.chat.id,
+    #                      f"{MESSAGES['UNKNOWN_ERROR']}\n{MESSAGES['ORDER_ID']} {order_id}")
+    #     return
+    #
+    # user_info = USERS_DB.edit_user(message.chat.id, get_free=True)
+    # if not user_info:
+    #     bot.send_message(message.chat.id,
+    #                      f"{MESSAGES['UNKNOWN_ERROR']}\n{MESSAGES['ORDER_ID']} {order_id}")
+    #     return
+    # bot.send_message(message.chat.id,
+    #                  f"{MESSAGES['GET_FREE_CONFIRMED']}\n{MESSAGES['ORDER_ID']} {order_id}")
+
+
 # ----------------------------------- To QR Area -----------------------------------
 # Next Step QR - QR Code
 def next_step_to_qr(message: Message):
@@ -323,7 +368,7 @@ def next_step_link_subscription(message: Message):
                              reply_markup=main_menu_keyboard_markup())
             return
         non_sub_id = random.randint(10000000, 99999999)
-        status = USERS_DB.add_non_order_subscriptions(non_sub_id, message.chat.id, uuid)
+        status = USERS_DB.add_non_order_subscription(non_sub_id, message.chat.id, uuid)
         if status:
             bot.send_message(message.chat.id, MESSAGES['SUBSCRIPTION_CONFIRMED'],
                              reply_markup=main_menu_keyboard_markup())
@@ -334,32 +379,37 @@ def next_step_link_subscription(message: Message):
         bot.send_message(message.chat.id, MESSAGES['SUBSCRIPTION_INFO_NOT_FOUND'],
                          reply_markup=main_menu_keyboard_markup())
 
+
 # ----------------------------------- wallet balance Area -----------------------------------
 # Next Step increase wallet balance - Send amount
-def next_step_increase_wallet_balance(message: Message):
+def next_step_increase_wallet_balance(message):
     if is_it_cancel(message):
         return
-    if not is_it_digit(message,markup=cancel_markup()):
-        bot.register_next_step_handler(message.chat.id, next_step_increase_wallet_balance)
+    if not is_it_digit(message, markup=cancel_markup()):
+        bot.register_next_step_handler(message, next_step_increase_wallet_balance)
         return
+    minimum_deposit_amount = 30000
     amount = int(message.text)
-    #تنظیمات
-    if amount < 30000:
+    # تنظیمات
+    if amount < minimum_deposit_amount:
         bot.send_message(message.chat.id, MESSAGES['MINIMUM_DEPOSIT_AMOUNT'], reply_markup=cancel_markup())
-        bot.register_next_step_handler(message.chat.id, next_step_increase_wallet_balance)
+        bot.register_next_step_handler(message, next_step_increase_wallet_balance)
         return
     owner_info = USERS_DB.select_owner_info()[0]
     if not owner_info:
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
         return
-    price = utils.replace_last_three_with_random(str(amount))
-    #order_info['price'] = price
-    chargePlan['price'] = price
-    chargePlan['id']= 0
-    #Send 0 to identify wallet balance charge
-    bot.send_message(message.chat.id, owner_info_template(owner_info['card_number'], owner_info['card_owner'], price),
-                      reply_markup=send_screenshot_markup(plan_id=chargePlan['id']))
+
+    # order_info['price'] = price
+    charge_wallet['amount'] = utils.replace_last_three_with_random(str(amount))
+    charge_wallet['id'] = random.randint(1000000, 9999999)
+
+    # Send 0 to identify wallet balance charge
+    bot.send_message(message.chat.id,
+                     owner_info_template(owner_info['card_number'], owner_info['card_owner'], charge_wallet['amount']),
+                     reply_markup=send_screenshot_markup(plan_id=charge_wallet['id']))
+
 
 # ----------------------------------- Callback Query Area -----------------------------------
 @bot.callback_query_handler(func=lambda call: True)
@@ -372,7 +422,7 @@ def callback_query(call: CallbackQuery):
     # ----------------------------------- Link Subscription Area -----------------------------------
     # Confirm Link Subscription
     if key == 'confirm_subscription':
-        edit_status = USERS_DB.add_non_order_subscriptions(call.message.chat.id, value)
+        edit_status = USERS_DB.add_non_order_subscription(call.message.chat.id, value, )
         if edit_status:
             bot.delete_message(call.message.chat.id, call.message.message_id)
             bot.send_message(call.message.chat.id, MESSAGES['SUBSCRIPTION_CONFIRMED'],
@@ -397,24 +447,23 @@ def callback_query(call: CallbackQuery):
         bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id,
                               text=plan_info_template(plan),
                               reply_markup=confirm_buy_plan_markup(plan['id']))
-   
-    # Confirm To Buy Plan
-    elif key == 'confirm_buy_plan':
-        plan = USERS_DB.find_plan(id=value)[0]
-        buy_plan_confirm(call.message, plan)
 
-     # Confirm To Buy From Wallet
+    # Confirm To Buy Plan
+    # elif key == 'confirm_buy_plan':
+    #     plan = USERS_DB.find_plan(id=value)[0]
+    #     buy_plan_confirm(call.message, plan)
+
+    # Confirm To Buy From Wallet
     elif key == 'confirm_buy_from_wallet':
         plan = USERS_DB.find_plan(id=value)[0]
         buy_from_wallet_confirm(call.message, plan)
     # Ask To Send Screenshot
     elif key == 'send_screenshot':
         bot.send_message(call.message.chat.id, MESSAGES['REQUEST_SEND_SCREENSHOT'])
-        if value == '0':  
-            bot.register_next_step_handler(call.message, next_step_send_screenshot, chargePlan)
-        else:
-            plan = USERS_DB.find_plan(id=value)[0]
-            bot.register_next_step_handler(call.message, next_step_send_screenshot, plan)
+        bot.register_next_step_handler(call.message, next_step_send_screenshot, charge_wallet)
+        # else:
+        #     plan = USERS_DB.find_plan(id=value)[0]
+        #     bot.register_next_step_handler(call.message, next_step_send_screenshot, plan)
 
     # ----------------------------------- User Subscriptions Info Area -----------------------------------
     # Unlink non-order subscription
@@ -427,12 +476,12 @@ def callback_query(call: CallbackQuery):
         else:
             bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                              reply_markup=main_menu_keyboard_markup())
-            
+
     # ----------------------------------- wallet Area -----------------------------------
     # INCREASE WALLET BALANCE
     elif key == 'INCREASE_WALLET_BALANCE':
-        bot.send_message(call.message.chat.id, MESSAGES['INCREASE_WALLET_BALANCE_AMOUNT'],reply_markup=cancel_markup())
-        
+        bot.send_message(call.message.chat.id, MESSAGES['INCREASE_WALLET_BALANCE_AMOUNT'], reply_markup=cancel_markup())
+
         bot.register_next_step_handler(call.message, next_step_increase_wallet_balance)
 
     # ----------------------------------- User Configs Area -----------------------------------
@@ -448,7 +497,7 @@ def callback_query(call: CallbackQuery):
     elif key == "conf_dir_vless":
         sub = utils.sub_links(value)
         if not sub:
-            bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
             return
         configs = utils.sub_parse(sub['sub_link'])
         if not configs:
@@ -466,7 +515,7 @@ def callback_query(call: CallbackQuery):
     elif key == "conf_dir_vmess":
         sub = utils.sub_links(value)
         if not sub:
-            bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
             return
         configs = utils.sub_parse(sub['sub_link'])
         if not configs:
@@ -484,7 +533,7 @@ def callback_query(call: CallbackQuery):
     elif key == "conf_dir_trojan":
         sub = utils.sub_links(value)
         if not sub:
-            bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
             return
         configs = utils.sub_parse(sub['sub_link'])
         if not configs:
@@ -503,7 +552,7 @@ def callback_query(call: CallbackQuery):
     elif key == "conf_sub_url":
         sub = utils.sub_links(value)
         if not sub:
-            bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
             return
         bot.send_message(call.message.chat.id, f"{KEY_MARKUP['CONFIGS_SUB']}\n{sub['sub_link']}",
                          reply_markup=main_menu_keyboard_markup())
@@ -511,7 +560,7 @@ def callback_query(call: CallbackQuery):
     elif key == "conf_sub_url_b64":
         sub = utils.sub_links(value)
         if not sub:
-            bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
             return
         bot.send_message(call.message.chat.id, f"{KEY_MARKUP['CONFIGS_SUB_B64']}\n{sub['sub_link_b64']}",
                          reply_markup=main_menu_keyboard_markup())
@@ -519,7 +568,7 @@ def callback_query(call: CallbackQuery):
     elif key == "conf_clash":
         sub = utils.sub_links(value)
         if not sub:
-            bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
             return
         bot.send_message(call.message.chat.id, f"{KEY_MARKUP['CONFIGS_CLASH']}\n{sub['clash_configs']}",
                          reply_markup=main_menu_keyboard_markup())
@@ -527,7 +576,7 @@ def callback_query(call: CallbackQuery):
     elif key == "conf_hiddify":
         sub = utils.sub_links(value)
         if not sub:
-            bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
             return
         bot.send_message(call.message.chat.id, f"{KEY_MARKUP['CONFIGS_HIDDIFY']}\n{sub['hiddify_configs']}",
                          reply_markup=main_menu_keyboard_markup())
@@ -559,8 +608,8 @@ def start(message: Message):
         bot.send_message(message.chat.id, MESSAGES['WELCOME'], reply_markup=main_menu_keyboard_markup())
         return
     created_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    wallet_balance = 0
-    status = USERS_DB.add_user(telegram_id=message.chat.id, wallet_balance=wallet_balance, created_at=created_at)
+
+    status = USERS_DB.add_user(telegram_id=message.chat.id, created_at=created_at)
     if not status:
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
@@ -633,31 +682,42 @@ def link_subscription(message: Message):
     bot.register_next_step_handler(message, next_step_link_subscription)
 
 
-
 # User Buy Subscription Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['WALLET'])
 def wallet_balance(message: Message):
     users = USERS_DB.find_user(telegram_id=message.chat.id)
     if users:
-        user = users[0]
-        telegram_user_data = wallet_info_template(int(user['wallet_balance']))
+        wallet_status = USERS_DB.find_wallet(telegram_id=message.chat.id)
+        if not wallet_status:
+            status = USERS_DB.add_wallet(telegram_id=message.chat.id)
+            if not status:
+                bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'])
+                return
+
+        wallet = USERS_DB.find_wallet(telegram_id=message.chat.id)
+        wallet = wallet[0]
+
+        telegram_user_data = wallet_info_template(int(wallet['balance']))
+
         bot.send_message(message.chat.id, telegram_user_data,
-                           reply_markup=wallet_info_markup())
+                         reply_markup=wallet_info_markup())
     else:
-        bot.send_message(message.chat.id, MESSAGES['ERROR_CONFIG_NOT_FOUND'])
+        bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'])
 
 
- # User Buy Subscription Message Handler
+# User Buy Subscription Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['FREE_TEST'])
 def wallet_balance(message: Message):
-    users= USERS_DB.find_user(telegram_id=message.chat.id)
+    users = USERS_DB.find_user(telegram_id=message.chat.id)
     if users:
         user = users[0]
-        if user['get_free'] :
-             bot.send_message(message.chat.id, MESSAGES['ALREADY_RECEIVED_FREE'], reply_markup=main_menu_keyboard_markup())
+        if user['test_account']:
+            bot.send_message(message.chat.id, MESSAGES['ALREADY_RECEIVED_FREE'],
+                             reply_markup=main_menu_keyboard_markup())
+            return
         else:
             bot.send_message(message.chat.id, MESSAGES['REQUEST_SEND_NAME'], reply_markup=cancel_markup())
-        bot.register_next_step_handler(message, next_step_send_name_for_get_free_test)
+            bot.register_next_step_handler(message, next_step_send_name_for_get_free_test)
 
 
 # Start
