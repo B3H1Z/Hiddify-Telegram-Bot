@@ -25,8 +25,6 @@ KEY_MARKUP = {
         'WALLET' : '💰Wallet',
         'INCREASE_WALLET_BALANCE' : '💵Increase wallet balance',
         'FREE_TEST' : '🔥Free Test',
-        'UPGRADE_PLAN' : 'Upgrade',
-        'RENEWAL_PLAN' :'Renew',
 
 
     },
@@ -55,7 +53,6 @@ KEY_MARKUP = {
         'WALLET' : '💰کیف پول',
         'INCREASE_WALLET_BALANCE' : '💵افزایش موجودی',
         'FREE_TEST' : '🔥تست رایگان',
-        'UPGRADE_PLAN' : 'تمدید',
 
 
     }
