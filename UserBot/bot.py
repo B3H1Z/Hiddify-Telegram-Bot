@@ -8,9 +8,7 @@ from config import *
 from AdminBot.templates import configs_template
 from UserBot.markups import *
 from UserBot.templates import *
-from UserBot.messages import MESSAGES
-from UserBot.buttons import KEY_MARKUP
-from UserBot.commands import BOT_COMMANDS
+from UserBot.content import *
 
 import Utils.utils as utils
 from Shared.common import admin_bot
@@ -589,6 +587,26 @@ def callback_query(call: CallbackQuery):
             bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                              reply_markup=main_menu_keyboard_markup())
 
+    elif key == 'update_info_subscription':
+        sub = utils.find_order_subscription_by_uuid(value)
+        if not sub:
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                             reply_markup=main_menu_keyboard_markup())
+            return
+
+        user = ADMIN_DB.find_user(uuid=sub['uuid'])
+        if not user:
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                             reply_markup=main_menu_keyboard_markup())
+            return
+        user = utils.dict_process(utils.users_to_dict(user))[0]
+        try:
+            bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id,
+                                      text=user_info_template(sub['id'], user, MESSAGES['INFO_USER']),
+                                      reply_markup=user_info_markup(sub['uuid']))
+        except:
+            pass
+
     # ----------------------------------- wallet Area -----------------------------------
     # INCREASE WALLET BALANCE
     elif key == 'increase_wallet_balance':
@@ -621,7 +639,7 @@ def callback_query(call: CallbackQuery):
         bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id,
                               text=plan_info_template(plan),
                               reply_markup=confirm_buy_plan_markup(plan['id'], renewal=True))
-        
+
     elif key == 'cancel_increase_wallet_balance':
         bot.delete_message(call.message.chat.id, call.message.message_id)
         bot.send_message(call.message.chat.id, MESSAGES['CANCEL_INCREASE_WALLET_BALANCE'],
@@ -791,10 +809,12 @@ def start(message: Message):
         return
     bot.send_message(message.chat.id, MESSAGES['WELCOME'], reply_markup=main_menu_keyboard_markup())
 
+
 # If user is not in users table, request /start
 @bot.message_handler(func=lambda message: not USERS_DB.find_user(telegram_id=message.chat.id))
 def not_in_users_table(message: Message):
     bot.send_message(message.chat.id, MESSAGES['REQUEST_START'])
+
 
 # User Subscription Status Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['SUBSCRIPTION_STATUS'])
@@ -896,6 +916,7 @@ def wallet_balance(message: Message):
         else:
             bot.send_message(message.chat.id, MESSAGES['REQUEST_SEND_NAME'], reply_markup=cancel_markup())
             bot.register_next_step_handler(message, next_step_send_name_for_get_free_test)
+
 
 # Cancel Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['CANCEL'])

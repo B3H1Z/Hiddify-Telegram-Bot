@@ -1,6 +1,6 @@
 # Description: This file contains all the templates used in the bot.
 from config import LANG, VERSION
-from AdminBot.messages import MESSAGES
+from AdminBot.content import MESSAGES
 
 
 # Single User Info Message Template

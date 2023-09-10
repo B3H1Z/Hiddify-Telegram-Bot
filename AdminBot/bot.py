@@ -5,7 +5,7 @@ import telebot
 from telebot.types import Message, CallbackQuery
 
 from config import *
-from AdminBot.commands import BOT_COMMANDS
+from AdminBot.content import BOT_COMMANDS
 from AdminBot.markups import *
 from AdminBot.templates import *
 import Utils.utils as utils

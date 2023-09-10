@@ -1,7 +1,7 @@
 # Description: This file contains all the reply and inline keyboard markups used in the bot.
 from telebot.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
-from AdminBot.buttons import KEY_MARKUP
-from AdminBot.messages import MESSAGES
+from AdminBot.content import KEY_MARKUP
+from AdminBot.content import MESSAGES
 from config import CLIENT_TOKEN
 from Utils.utils import settings_config_to_dict
 
@@ -27,8 +27,19 @@ def users_list_markup(users, page=1):
     start = (page - 1) * USER_PER_PAGE
     end = start + USER_PER_PAGE
     keys = []
+
     for user in users[start:end]:
-        keys.append(InlineKeyboardButton(user['name'], callback_data=f"info:{user['uuid']}"))
+        status_tag = ""
+        if user['last_connection'] == "Online" or user['last_connection'] == "آنلاین":
+            status_tag = "🔵"
+        else:
+            status_tag = "🟡"
+        if user['remaining_day'] == 0:
+            status_tag = "🔴"
+        if user['usage']['remaining_usage_GB'] <= 0:
+            status_tag = "🔴️"
+
+        keys.append(InlineKeyboardButton(f"{status_tag}|{user['name']}", callback_data=f"info:{user['uuid']}"))
     markup.add(*keys)
     if page < len(users) / USER_PER_PAGE:
         markup.add(InlineKeyboardButton(KEY_MARKUP['NEXT_PAGE'], callback_data=f"next:{page + 1}"), row_width=2)

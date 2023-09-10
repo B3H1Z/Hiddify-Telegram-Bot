@@ -1,6 +1,6 @@
 # Description: This file contains all the templates used in the bot.
 from config import LANG, USERS_DB
-from UserBot.messages import MESSAGES
+from UserBot.content import MESSAGES
 from Utils.utils import settings_config_to_dict
 
 # User Subscription Info Template

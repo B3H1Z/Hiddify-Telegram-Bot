@@ -1,8 +1,7 @@
 # Description: This file contains all the reply and inline keyboard markups used in the bot.
 from telebot import types
 from telebot.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
-from UserBot.buttons import KEY_MARKUP
-from UserBot.messages import MESSAGES
+from UserBot.content import KEY_MARKUP, MESSAGES
 from AdminBot.markups import sub_url_user_list_markup, sub_user_list_markup
 
 
@@ -32,7 +31,6 @@ def user_info_non_sub_markup(uuid):
     markup.row_width = 2
     markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_LIST'], callback_data=f"configs_list:{uuid}"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['RENEWAL_SUBSCRIPTION'], callback_data=f"renewal_subscription:{uuid}"))
-
     markup.add(InlineKeyboardButton(KEY_MARKUP['UNLINK_SUBSCRIPTION'], callback_data=f"unlink_subscription:{uuid}"))
     return markup
 

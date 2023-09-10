@@ -111,7 +111,7 @@ def calculate_remaining_usage(usage_limit_GB, current_usage_GB):
 def calculate_remaining_last_online(last_online_date_time):
     import datetime
     if last_online_date_time == "0001-01-01 00:00:00.000000":
-        return AdminBot.messages.MESSAGES['NEVER']
+        return AdminBot.content.MESSAGES['NEVER']
     last_online_date_time = datetime.datetime.strptime(last_online_date_time, "%Y-%m-%d %H:%M:%S.%f")
     last_online_time = (datetime.datetime.now() - last_online_date_time)
     last_online = AdminBot.templates.last_online_time_template(last_online_time)
@@ -140,7 +140,6 @@ def dict_process(users_dict, sub_id=None):
             "mode": user['mode'],
             "enable": user['enable'],
             "sub_id": sub_id
-            # add telegramid
         })
 
     return users_list
@@ -416,6 +415,7 @@ def privacy_friendly_logging_request(url):
     url = url.scheme + "://" + "panel.private.com" + url.path
     return url
 
+
 def settings_config_to_dict(configs):
     dict_configs = {}
     for entry in configs:
@@ -423,3 +423,14 @@ def settings_config_to_dict(configs):
         value = entry['value']
         dict_configs[key] = value
     return dict_configs
+
+
+def find_order_subscription_by_uuid(uuid):
+    order_subscription = USERS_DB.find_order_subscription(uuid=uuid)
+    non_order_subscription = USERS_DB.find_non_order_subscription(uuid=uuid)
+    if order_subscription:
+        return order_subscription[0]
+    elif non_order_subscription:
+        return non_order_subscription[0]
+    else:
+        return False

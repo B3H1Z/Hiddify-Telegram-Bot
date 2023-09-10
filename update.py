@@ -86,6 +86,7 @@ if __version__ == "4.2.0":
             conn.commit()
         except sqlite3.Error as e:
             print("SQLite error:", e)
+
             # raise Exception("Database update failed")
 
 
