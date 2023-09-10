@@ -58,7 +58,7 @@ def send_screenshot_markup(plan_id):
     markup = InlineKeyboardMarkup()
     markup.row_width = 1
     markup.add(InlineKeyboardButton(KEY_MARKUP['SEND_SCREENSHOT'], callback_data=f"send_screenshot:{plan_id}"))
-    markup.add(InlineKeyboardButton(KEY_MARKUP['CANCEL'], callback_data=f"del_msg:{plan_id}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['CANCEL'], callback_data=f"cancel_increase_wallet_balance:{plan_id}"))
     return markup
 
 

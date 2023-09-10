@@ -63,6 +63,8 @@ MESSAGES = {
         'GET_FREE_CONFIRMED' :  '✅Your free account has been successfully registered',
         'SUCCESSFUL_RENEWAL': '✅Your subscription has been successfully renewed',
         'REQUEST_START': 'Please update the bot with /start command',
+        'CANCEL_INCREASE_WALLET_BALANCE': '❌Increase balance not confirmed',
+  
     },
     'FA': {
         'WELCOME': "به ربات کاربران خوش آمدید",
@@ -125,6 +127,7 @@ MESSAGES = {
         'GET_FREE_CONFIRMED' :  '✅اکانت تست رایگان شما با موفقیت ثبت شد\n از طریق دکمه [📊وضعیت اشتراک] میتوانید به اطلاعات اشتراک خود دسترسی داشته باشید.',
         'SUCCESSFUL_RENEWAL': '✅تمدید اشتراک شما با موفقیت انجام شد',
         'REQUEST_START': 'لطفا ربات را با دستور /start شروع کنید',
+        'CANCEL_INCREASE_WALLET_BALANCE': '❌افزایش موجودی تایید نشد',
     }
 
 }
