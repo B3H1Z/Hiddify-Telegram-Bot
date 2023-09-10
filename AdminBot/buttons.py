@@ -44,6 +44,7 @@ KEY_MARKUP = {
         'USERS_BOT_SEND_MESSAGE_TO_USERS': '📩Send Message to Users',
         'USERS_BOT_SETTINGS': '⚙️Settings',
         'USERS_BOT_SETTINGS_SHOW_HIDI_LINK': 'User Page Hyperlink',
+        'USERS_BOT_SETTINGS_SHOW_THREE_RAND': 'Random 3 Digit Price',
         'ABOUT_BOT': 'ℹ️',
         'TO_QR': 'ً🖼QR',
 
@@ -91,6 +92,7 @@ KEY_MARKUP = {
         'USERS_BOT_SEND_MESSAGE_TO_USERS': '📩ارسال پیام همگانی',
         'USERS_BOT_SETTINGS': '⚙️تنظیمات',
         'USERS_BOT_SETTINGS_SHOW_HIDI_LINK': 'User Page Hyperlink',
+        'USERS_BOT_SETTINGS_SHOW_THREE_RAND': 'مشخصه تصادفی پرداخت',
         'ABOUT_BOT': 'ℹ️',
         'TO_QR': 'ً🖼کیوآر',
 

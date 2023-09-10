@@ -21,6 +21,9 @@ def user_info_markup(uuid):
     markup = InlineKeyboardMarkup()
     markup.row_width = 2
     markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_LIST'], callback_data=f"configs_list:{uuid}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['RENEWAL_SUBSCRIPTION'], callback_data=f"renewal_subscription:{uuid}"))
+    markup.add(
+        InlineKeyboardButton(KEY_MARKUP['UPDATE_SUBSCRIPTION_INFO'], callback_data=f"update_info_subscription:{uuid}"))
     return markup
 
 
@@ -28,6 +31,8 @@ def user_info_non_sub_markup(uuid):
     markup = InlineKeyboardMarkup()
     markup.row_width = 2
     markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_LIST'], callback_data=f"configs_list:{uuid}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['RENEWAL_SUBSCRIPTION'], callback_data=f"renewal_subscription:{uuid}"))
+
     markup.add(InlineKeyboardButton(KEY_MARKUP['UNLINK_SUBSCRIPTION'], callback_data=f"unlink_subscription:{uuid}"))
     return markup
 
@@ -40,10 +45,11 @@ def confirm_subscription_markup(uuid):
     return markup
 
 
-def confirm_buy_plan_markup(plan_id):
+def confirm_buy_plan_markup(plan_id,renewal=False):
     markup = InlineKeyboardMarkup()
     markup.row_width = 1
-    markup.add(InlineKeyboardButton(KEY_MARKUP['BUY_FROM_WALLET'], callback_data=f"confirm_buy_from_wallet:{plan_id}"))
+    callback = "confirm_buy_from_wallet" if not renewal else "confirm_renewal_from_wallet"
+    markup.add(InlineKeyboardButton(KEY_MARKUP['BUY_FROM_WALLET'], callback_data=f"{callback}:{plan_id}"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_plans:None"))
     return markup
 
@@ -56,14 +62,15 @@ def send_screenshot_markup(plan_id):
     return markup
 
 
-def plans_list_markup(plans):
+def plans_list_markup(plans, renewal=False):
     markup = InlineKeyboardMarkup(row_width=1)
+    callback = "renewal_plan_selected" if renewal else "plan_selected"
     keys = []
     for plan in plans:
         if plan['status']:
             keys.append(InlineKeyboardButton(
                 f"{plan['size_gb']}{MESSAGES['GB']} | {plan['days']}{MESSAGES['DAY_EXPIRE']} | {plan['price']}{MESSAGES['TOMAN']}",
-                callback_data=f"plan_selected:{plan['id']}"))
+                callback_data=f"{callback}:{plan['id']}"))
     if len(keys) == 0:
         return None
     markup.add(*keys)
@@ -84,8 +91,10 @@ def cancel_markup():
     markup.add(KeyboardButton(KEY_MARKUP['CANCEL']))
     return markup
 
+
 def wallet_info_markup():
     markup = InlineKeyboardMarkup()
     markup.row_width = 1
-    markup.add(InlineKeyboardButton(KEY_MARKUP['INCREASE_WALLET_BALANCE'], callback_data=f"INCREASE_WALLET_BALANCE:wallet"))
+    markup.add(
+        InlineKeyboardButton(KEY_MARKUP['INCREASE_WALLET_BALANCE'], callback_data=f"increase_wallet_balance:wallet"))
     return markup

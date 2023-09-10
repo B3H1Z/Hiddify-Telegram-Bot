@@ -1,14 +1,14 @@
 # Description: This file contains all the templates used in the bot.
 from config import LANG, USERS_DB
 from UserBot.messages import MESSAGES
-
+from Utils.utils import settings_config_to_dict
 
 # User Subscription Info Template
 def user_info_template(sub_id, usr, header=""):
-    settings = USERS_DB.select_settings()
+    settings = USERS_DB.find_bool_config(key='visible_hiddify_hyperlink')
     if settings:
         settings = settings[0]
-        if settings['visible_hiddify_hyperlink']:
+        if settings['value']:
             user_name = f"<a href='{usr['link']}'> {usr['name']} </a>"
         else:
             user_name = usr['name']
@@ -159,8 +159,9 @@ def connection_help_template(header=""):
 # Support Info Template
 def support_template(owner_info, header=""):
     username = None
+    owner_info = settings_config_to_dict(owner_info)
     if owner_info:
-        username = owner_info['telegram_username'] if owner_info['telegram_username'] else "-"
+        username = owner_info['support_username'] if owner_info['support_username'] else "-"
     else:
         username = "-"
 

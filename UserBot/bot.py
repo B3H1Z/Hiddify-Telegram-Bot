@@ -69,8 +69,8 @@ def type_of_subscription(text):
 
 
 # ----------------------------------- Buy Plan Area -----------------------------------
-order_info = {}
 charge_wallet = {}
+renew_subscription_dict = {}
 
 
 # Next Step Buy Plan - Confirm
@@ -106,6 +106,95 @@ def buy_from_wallet_confirm(message: Message, plan):
             return
     bot.send_message(message.chat.id, MESSAGES['REQUEST_SEND_NAME'], reply_markup=cancel_markup())
     bot.register_next_step_handler(message, next_step_send_name_for_buy_from_wallet, plan)
+
+
+def renewal_from_wallet_confirm(message: Message):
+    if not renew_subscription_dict:
+        bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                         reply_markup=main_menu_keyboard_markup())
+        return
+
+    if not renew_subscription_dict[message.chat.id]:
+        bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                         reply_markup=main_menu_keyboard_markup())
+        return
+
+    if not renew_subscription_dict[message.chat.id]['plan_id'] or not renew_subscription_dict[message.chat.id][
+        'uuid']:
+        bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                         reply_markup=main_menu_keyboard_markup())
+        return
+
+    uuid = renew_subscription_dict[message.chat.id]['uuid']
+    plan_id = renew_subscription_dict[message.chat.id]['plan_id']
+
+    wallet = USERS_DB.find_wallet(telegram_id=message.chat.id)
+    if not wallet:
+        bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                         reply_markup=main_menu_keyboard_markup())
+
+    wallet = wallet[0]
+    plan_info = USERS_DB.find_plan(id=plan_id)
+    if not plan_info:
+        bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                         reply_markup=main_menu_keyboard_markup())
+        return
+
+    plan_info = plan_info[0]
+    if plan_info['price'] > wallet['balance']:
+        bot.send_message(message.chat.id, MESSAGES['LACK_OF_WALLET_BALANCE'])
+        del renew_subscription_dict[message.chat.id]
+        return
+
+    user = ADMIN_DB.find_user(uuid=uuid)
+    if not user:
+        bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                         reply_markup=main_menu_keyboard_markup())
+        return
+
+    user_info = utils.users_to_dict(user)
+    if not user_info:
+        bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                         reply_markup=main_menu_keyboard_markup())
+        return
+
+    user_info_process = utils.dict_process(user_info)
+    user_info = user_info[0]
+
+    if not user_info_process:
+        bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                         reply_markup=main_menu_keyboard_markup())
+        return
+    user_info_process = user_info_process[0]
+
+    new_balance = int(wallet['balance']) - int(plan_info['price'])
+    edit_wallet = USERS_DB.edit_wallet(message.chat.id, balance=new_balance)
+    if not edit_wallet:
+        bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                         reply_markup=main_menu_keyboard_markup())
+        return
+
+    if user_info_process['remaining_day'] <= 0 or user_info_process['usage']['remaining_usage_GB'] <= 0:
+        new_usage_limit = plan_info['size_gb']
+        new_package_days = plan_info['days']
+        ADMIN_DB.reset_package_usage(uuid=uuid)
+        ADMIN_DB.reset_package_days(uuid=uuid)
+    else:
+        new_usage_limit = user_info['usage_limit_GB'] + plan_info['size_gb']
+        new_package_days = user_info['package_days'] + plan_info['days']
+
+    edit_status = ADMIN_DB.edit_user(uuid=uuid, usage_limit_GB=new_usage_limit, package_days=new_package_days)
+    if not edit_status:
+        bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                         reply_markup=main_menu_keyboard_markup())
+        return
+    
+
+    bot.send_message(message.chat.id, MESSAGES['SUCCESSFUL_RENEWAL'], reply_markup=main_menu_keyboard_markup())
+
+    # Apply Plan
+    # bot.send_message(message.chat.id, MESSAGES['REQUEST_SEND_NAME'], reply_markup=cancel_markup())
+    # bot.register_next_step_handler(message, next_step_send_name_for_renewal_from_wallet, info)
 
 
 # Next Step Buy Plan - Send Screenshot
@@ -390,24 +479,39 @@ def next_step_increase_wallet_balance(message):
         return
     minimum_deposit_amount = 30000
     amount = int(message.text)
-    # تنظیمات
+
     if amount < minimum_deposit_amount:
         bot.send_message(message.chat.id, MESSAGES['MINIMUM_DEPOSIT_AMOUNT'], reply_markup=cancel_markup())
         bot.register_next_step_handler(message, next_step_increase_wallet_balance)
         return
-    owner_info = USERS_DB.select_owner_info()[0]
+    owner_info = USERS_DB.select_str_config()
     if not owner_info:
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
         return
+    owner_info = utils.settings_config_to_dict(owner_info)
 
     # order_info['price'] = price
-    charge_wallet['amount'] = utils.replace_last_three_with_random(str(amount))
+    settings = USERS_DB.select_bool_config()
+    if not settings:
+        bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                         reply_markup=main_menu_keyboard_markup())
+        return
+    settings = utils.settings_config_to_dict(settings)
+    if not settings:
+        bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                         reply_markup=main_menu_keyboard_markup())
+        return
+
+    charge_wallet['amount'] = str(amount)
+    if settings['three_random_num_price'] == 1:
+        charge_wallet['amount'] = utils.replace_last_three_with_random(str(amount))
+
     charge_wallet['id'] = random.randint(1000000, 9999999)
 
     # Send 0 to identify wallet balance charge
     bot.send_message(message.chat.id,
-                     owner_info_template(owner_info['card_number'], owner_info['card_owner'], charge_wallet['amount']),
+                     owner_info_template(owner_info['card_number'], owner_info['card_holder'], charge_wallet['amount']),
                      reply_markup=send_screenshot_markup(plan_id=charge_wallet['id']))
 
 
@@ -419,6 +523,7 @@ def callback_query(call: CallbackQuery):
     data = call.data.split(':')
     key = data[0]
     value = data[1]
+    print(data)
     # ----------------------------------- Link Subscription Area -----------------------------------
     # Confirm Link Subscription
     if key == 'confirm_subscription':
@@ -457,6 +562,9 @@ def callback_query(call: CallbackQuery):
     elif key == 'confirm_buy_from_wallet':
         plan = USERS_DB.find_plan(id=value)[0]
         buy_from_wallet_confirm(call.message, plan)
+    elif key == 'confirm_renewal_from_wallet':
+        plan = USERS_DB.find_plan(id=value)[0]
+        renewal_from_wallet_confirm(call.message)
     # Ask To Send Screenshot
     elif key == 'send_screenshot':
         bot.send_message(call.message.chat.id, MESSAGES['REQUEST_SEND_SCREENSHOT'])
@@ -479,10 +587,36 @@ def callback_query(call: CallbackQuery):
 
     # ----------------------------------- wallet Area -----------------------------------
     # INCREASE WALLET BALANCE
-    elif key == 'INCREASE_WALLET_BALANCE':
+    elif key == 'increase_wallet_balance':
         bot.send_message(call.message.chat.id, MESSAGES['INCREASE_WALLET_BALANCE_AMOUNT'], reply_markup=cancel_markup())
 
         bot.register_next_step_handler(call.message, next_step_increase_wallet_balance)
+
+
+    elif key == 'renewal_subscription':
+        renew_subscription_dict[call.message.chat.id] = {
+            'uuid': None,
+            'plan_id': None,
+        }
+        plans = USERS_DB.select_plans()
+        if not plans:
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                             reply_markup=main_menu_keyboard_markup())
+            return
+        renew_subscription_dict[call.message.chat.id]['uuid'] = value
+        bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,
+                                      reply_markup=plans_list_markup(plans, renewal=True))
+
+    elif key == 'renewal_plan_selected':
+        plan = USERS_DB.find_plan(id=value)[0]
+        if not plan:
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                             reply_markup=main_menu_keyboard_markup())
+            return
+        renew_subscription_dict[call.message.chat.id]['plan_id'] = plan['id']
+        bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id,
+                              text=plan_info_template(plan),
+                              reply_markup=confirm_buy_plan_markup(plan['id'], renewal=True))
 
     # ----------------------------------- User Configs Area -----------------------------------
     # User Configs - Main Menu
@@ -554,32 +688,65 @@ def callback_query(call: CallbackQuery):
         if not sub:
             bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
             return
-        bot.send_message(call.message.chat.id, f"{KEY_MARKUP['CONFIGS_SUB']}\n<code>{sub['sub_link']}</code>",
-                         reply_markup=main_menu_keyboard_markup())
+        qr_code = utils.txt_to_qr(sub['sub_link'])
+        if not qr_code:
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
+            return
+        bot.send_photo(
+            call.message.chat.id,
+            photo=qr_code,
+            caption=f"{KEY_MARKUP['CONFIGS_SUB']}\n<code>{sub['sub_link']}</code>",
+            reply_markup=main_menu_keyboard_markup()
+        )
     # User Configs - Base64 Subscription Configs Callback
     elif key == "conf_sub_url_b64":
         sub = utils.sub_links(value)
         if not sub:
             bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
             return
-        bot.send_message(call.message.chat.id, f"{KEY_MARKUP['CONFIGS_SUB_B64']}\n<code>{sub['sub_link_b64']}</code>",
-                         reply_markup=main_menu_keyboard_markup())
+        qr_code = utils.txt_to_qr(sub['sub_link_b64'])
+        if not qr_code:
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
+            return
+        bot.send_photo(
+            call.message.chat.id,
+            photo=qr_code,
+            caption=f"{KEY_MARKUP['CONFIGS_SUB']}\n<code>{sub['sub_link_b64']}</code>",
+            reply_markup=main_menu_keyboard_markup()
+        )
     # User Configs - Subscription Configs For Clash Callback
     elif key == "conf_clash":
         sub = utils.sub_links(value)
         if not sub:
             bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
             return
-        bot.send_message(call.message.chat.id, f"{KEY_MARKUP['CONFIGS_CLASH']}\n<code>{sub['clash_configs']}</code>",
-                         reply_markup=main_menu_keyboard_markup())
+        qr_code = utils.txt_to_qr(sub['clash_configs'])
+        if not qr_code:
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
+            return
+        bot.send_photo(
+            call.message.chat.id,
+            photo=qr_code,
+            caption=f"{KEY_MARKUP['CONFIGS_SUB']}\n<code>{sub['clash_configs']}</code>",
+            reply_markup=main_menu_keyboard_markup()
+        )
     # User Configs - Subscription Configs For Hiddify Callback
     elif key == "conf_hiddify":
         sub = utils.sub_links(value)
         if not sub:
             bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
             return
-        bot.send_message(call.message.chat.id, f"{KEY_MARKUP['CONFIGS_HIDDIFY']}\n<code>{sub['hiddify_configs']}</code>",
-                         reply_markup=main_menu_keyboard_markup())
+        qr_code = utils.txt_to_qr(sub['hiddify_configs'])
+        if not qr_code:
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
+            return
+        bot.send_photo(
+            call.message.chat.id,
+            photo=qr_code,
+            caption=f"{KEY_MARKUP['CONFIGS_SUB']}\n<code>{sub['hiddify_configs']}</code>",
+            reply_markup=main_menu_keyboard_markup()
+        )
+
 
     # ----------------------------------- Back Area -----------------------------------
     # Back To User Menu
@@ -671,7 +838,7 @@ def help_guide(message: Message):
 # Ticket To Support Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['SEND_TICKET'])
 def send_ticket(message: Message):
-    owner_info = USERS_DB.select_owner_info()[0]
+    owner_info = USERS_DB.find_str_config(key="support_username")
     bot.send_message(message.chat.id, support_template(owner_info), reply_markup=main_menu_keyboard_markup())
 
 

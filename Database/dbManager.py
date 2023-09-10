@@ -189,8 +189,7 @@ class UserDBManager:
     def __init__(self, db_file):
         self.conn = self.create_connection(db_file)
         self.create_user_table()
-        self.set_default_settings()
-        self.set_default_owner_info()
+        self.set_default_configs()
 
     def create_connection(self, db_file):
         """ Create a database connection to a SQLite database """
@@ -253,17 +252,17 @@ class UserDBManager:
             self.conn.commit()
             logging.info("Non order subscriptions table created successfully!")
 
-            cur.execute("CREATE TABLE IF NOT EXISTS owner_info ("
-                        "card_number TEXT NULL,"
-                        "card_owner TEXT NULL,"
-                        "telegram_username TEXT NULL)")
+            cur.execute("CREATE TABLE IF NOT EXISTS str_config ("
+                        "key TEXT NOT NULL UNIQUE,"
+                        "value TEXT NULL)")
             self.conn.commit()
-            logging.info("Owner info table created successfully!")
+            logging.info("str_config table created successfully!")
 
-            cur.execute("CREATE TABLE IF NOT EXISTS settings ("
-                        "visible_hiddify_hyperlink BOOLEAN NOT NULL DEFAULT 1)")
+            cur.execute("CREATE TABLE IF NOT EXISTS bool_config ("
+                        "key TEXT NOT NULL UNIQUE,"
+                        "value BOOLEAN NOT NULL)")
             self.conn.commit()
-            logging.info("Settings table created successfully!")
+            logging.info("bool_config table created successfully!")
 
             cur.execute("CREATE TABLE IF NOT EXISTS wallet ("
                         "telegram_id INTEGER NOT NULL,"
@@ -436,50 +435,6 @@ class UserDBManager:
                 return False
 
         return True
-
-    def edit_owner_info(self, **kwargs):
-
-        # There is only one row in owner_info table
-        cur = self.conn.cursor()
-        try:
-            for key, value in kwargs.items():
-                cur.execute(f"UPDATE owner_info SET {key}=?", (value,))
-                self.conn.commit()
-                logging.info(f"Owner info successfully update [{key}] to [{value}]")
-            return True
-        except Error as e:
-            logging.error(f"Error while updating owner info [{key}] to [{value}] \n Error: {e}")
-            return False
-
-    def select_owner_info(self):
-        cur = self.conn.cursor()
-        try:
-            cur.execute("SELECT * FROM owner_info")
-            rows = cur.fetchall()
-            # rows to dict
-            rows = [dict(zip([key[0] for key in cur.description], row)) for row in rows]
-            return rows
-        except Error as e:
-            logging.error(f"Error while selecting all owner info \n Error:{e}")
-            return None
-
-    def set_default_owner_info(self):
-        rows = self.select_owner_info()
-        if not rows:
-            cur = self.conn.cursor()
-            try:
-                cur.execute("INSERT INTO owner_info VALUES(?,?,?)",
-                            (None, None, None))
-                self.conn.commit()
-                logging.info(f"Owner info added successfully!")
-                return True
-
-            except Error as e:
-                logging.error(f"Error while adding owner info \n Error: {e}")
-                return False
-        else:
-            logging.info("Owner info already exists!")
-            return False
 
     def add_order(self, order_id, telegram_id, user_name, plan_id, created_at):
         cur = self.conn.cursor()
@@ -664,10 +619,55 @@ class UserDBManager:
             logging.error(f"Error while deleting order [{kwargs}] \n Error: {e}")
             return False
 
-    def select_settings(self):
+    def edit_bool_config(self, key_row, **kwargs):
+        cur = self.conn.cursor()
+        for key, value in kwargs.items():
+            try:
+                cur.execute(f"UPDATE bool_config SET {key}=? WHERE key=?", (value, key_row))
+                self.conn.commit()
+                logging.info(f"Settings [{key}] successfully update [{key}] to [{value}]")
+            except Error as e:
+                logging.error(f"Error while updating settings [{key}] [{key}] to [{value}] \n Error: {e}")
+                return False
+
+        return True
+
+    def find_bool_config(self, **kwargs):
+        if len(kwargs) != 1:
+            logging.warning("You can only use one key to find settings!")
+            return None
+        rows = []
         cur = self.conn.cursor()
         try:
-            cur.execute("SELECT * FROM settings")
+            for key, value in kwargs.items():
+                cur.execute(f"SELECT * FROM bool_config WHERE {key}=?", (value,))
+                rows = cur.fetchall()
+            if len(rows) == 0:
+                logging.info(f"Settings {kwargs} not found!")
+                return None
+            rows = [dict(zip([key[0] for key in cur.description], row)) for row in rows]
+            return rows
+        except Error as e:
+            logging.error(f"Error while finding settings {kwargs} \n Error:{e}")
+            return None
+
+    def add_bool_config(self, key, value):
+        cur = self.conn.cursor()
+        try:
+            cur.execute(
+                "INSERT INTO bool_config(key,value) VALUES(?,?)",
+                (key, value))
+            self.conn.commit()
+            logging.info(f"Settings [{key}] added successfully!")
+            return True
+        except Error as e:
+            logging.error(f"Error while adding settings [{key}] \n Error: {e}")
+            return False
+
+    def select_bool_config(self):
+        cur = self.conn.cursor()
+        try:
+            cur.execute("SELECT * FROM bool_config")
             rows = cur.fetchall()
             rows = [dict(zip([key[0] for key in cur.description], row)) for row in rows]
             return rows
@@ -675,36 +675,74 @@ class UserDBManager:
             logging.error(f"Error while selecting all settings \n Error:{e}")
             return None
 
-    def edit_settings(self, **kwargs):
-        # There is only one row in settings table
+    def select_str_config(self):
+        cur = self.conn.cursor()
+        try:
+            cur.execute("SELECT * FROM str_config")
+            rows = cur.fetchall()
+            rows = [dict(zip([key[0] for key in cur.description], row)) for row in rows]
+            return rows
+        except Error as e:
+            logging.error(f"Error while selecting all settings \n Error:{e}")
+            return None
+
+    def find_str_config(self, **kwargs):
+        if len(kwargs) != 1:
+            logging.warning("You can only use one key to find settings!")
+            return None
+        rows = []
         cur = self.conn.cursor()
         try:
             for key, value in kwargs.items():
-                cur.execute(f"UPDATE settings SET {key}=?", (value,))
+                cur.execute(f"SELECT * FROM str_config WHERE {key}=?", (value,))
+                rows = cur.fetchall()
+            if len(rows) == 0:
+                logging.info(f"Settings {kwargs} not found!")
+                return None
+            rows = [dict(zip([key[0] for key in cur.description], row)) for row in rows]
+            return rows
+        except Error as e:
+            logging.error(f"Error while finding settings {kwargs} \n Error:{e}")
+            return None
+
+    def edit_str_config(self, key_row, **kwargs):
+        cur = self.conn.cursor()
+        for key, value in kwargs.items():
+            try:
+                cur.execute(f"UPDATE str_config SET {key}=? WHERE key=?", (value, key_row))
                 self.conn.commit()
-                logging.info(f"settings successfully update [{key}] to [{value}]")
+                logging.info(f"Settings [{key}] successfully update [{key}] to [{value}]")
+            except Error as e:
+                logging.error(f"Error while updating settings [{key}] [{key}] to [{value}] \n Error: {e}")
+                return False
+
+        return True
+
+    def add_str_config(self, key, value):
+        cur = self.conn.cursor()
+        try:
+            cur.execute(
+                "INSERT INTO str_config(key,value) VALUES(?,?)",
+                (key, value))
+            self.conn.commit()
+            logging.info(f"Settings [{key}] added successfully!")
             return True
         except Error as e:
-            logging.error(f"Error while updating settings [{key}] to [{value}] \n Error: {e}")
+            logging.error(f"Error while adding settings [{key}] \n Error: {e}")
             return False
 
-    def set_default_settings(self):
-        rows = self.select_settings()
-        if not rows:
-            # insert an empty row
-            cur = self.conn.cursor()
-            try:
-                cur.execute(
-                    "INSERT INTO Settings(visible_hiddify_hyperlink) VALUES(?)",
-                    (True,))
-                self.conn.commit()
-                logging.info(f"Default settings added successfully!")
-                return True
-            except Error as e:
-                logging.error(f"Error while adding default settings \n Error: {e}")
-                return False
-        else:
-            logging.info("Settings already exists!")
+    def set_default_configs(self):
+        # rows = self.select_bool_config()
+        # if not rows:
+        try:
+            self.add_bool_config("visible_hiddify_hyperlink", True)
+            self.add_bool_config("three_random_num_price", True)
+            self.add_str_config("card_number", None)
+            self.add_str_config("card_holder", None)
+            self.add_str_config("support_username", None)
+
+        except Error as e:
+            logging.error(f"Error while setting default configs \n Error:{e}")
             return False
 
     def add_wallet(self, telegram_id):
@@ -763,12 +801,13 @@ class UserDBManager:
             logging.error(f"Error while updating balance [{key}] to [{value}] \n Error: {e}")
             return False
 
-    def add_payment(self, payment_id, telegram_id, payment_amount, payment_method, payment_image,user_name, created_at):
+    def add_payment(self, payment_id, telegram_id, payment_amount, payment_method, payment_image, user_name,
+                    created_at):
         cur = self.conn.cursor()
         try:
             cur.execute(
                 "INSERT INTO payments(id,telegram_id, payment_amount,payment_method,payment_image,user_name,created_at) VALUES(?,?,?,?,?,?,?)",
-                (payment_id, telegram_id, payment_amount, payment_method, payment_image,user_name, created_at))
+                (payment_id, telegram_id, payment_amount, payment_method, payment_image, user_name, created_at))
             self.conn.commit()
             logging.info(f"Payment [{payment_id}] added successfully!")
             return True
@@ -788,6 +827,7 @@ class UserDBManager:
         except Error as e:
             logging.error(f"Error while updating payment [{key}] to [{value}] \n Error: {e}")
             return False
+
     def find_payment(self, **kwargs):
         if len(kwargs) != 1:
             logging.warning("You can only use one key to find payment!")

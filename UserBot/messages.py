@@ -61,6 +61,7 @@ MESSAGES = {
         'PAYMENT_CONFIRMED': '✅Payment confirmed',
         'ALREADY_RECEIVED_FREE': 'You have already received your free test account!',
         'GET_FREE_CONFIRMED' :  '✅Your free account has been successfully registered',
+        'SUCCESSFUL_RENEWAL': '✅Your subscription has been successfully renewed',
     },
     'FA': {
         'WELCOME': "به ربات کاربران خوش آمدید",
@@ -121,6 +122,7 @@ MESSAGES = {
         'PAYMENT_CONFIRMED': '✅پرداخت شما تایید شد\n از طریق دکمه [📊وضعیت اشتراک] میتوانید به اطلاعات اشتراک خود دسترسی داشته باشید.',
         'ALREADY_RECEIVED_FREE': 'شما قبلا اکانت تست رایگان خود را دریافت نموده‌اید!',
         'GET_FREE_CONFIRMED' :  '✅اکانت تست رایگان شما با موفقیت ثبت شد\n از طریق دکمه [📊وضعیت اشتراک] میتوانید به اطلاعات اشتراک خود دسترسی داشته باشید.',
+        'SUCCESSFUL_RENEWAL': '✅تمدید اشتراک شما با موفقیت انجام شد',
     }
 
 }

@@ -402,7 +402,7 @@ def order_user_info(telegram_id):
 
 # Replace last three characters of a string with random numbers (For Payment)
 def replace_last_three_with_random(input_string):
-    if len(input_string) < 3:
+    if len(input_string) <= 3:
         return input_string  # Not enough characters to replace
 
     random_numbers = ''.join(random.choice(string.digits) for _ in range(3))
@@ -415,3 +415,11 @@ def privacy_friendly_logging_request(url):
     url = urlparse(url)
     url = url.scheme + "://" + "panel.private.com" + url.path
     return url
+
+def settings_config_to_dict(configs):
+    dict_configs = {}
+    for entry in configs:
+        key = entry['key']
+        value = entry['value']
+        dict_configs[key] = value
+    return dict_configs

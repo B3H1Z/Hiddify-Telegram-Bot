@@ -272,7 +272,7 @@ def users_bot_edit_owner_info_username(message: Message):
     if not message.text.startswith('@'):
         bot.send_message(message.chat.id, MESSAGES['ERROR_INVALID_USERNAME'], reply_markup=main_menu_keyboard_markup())
         return
-    status = USERS_DB.edit_owner_info(telegram_username=message.text)
+    status = USERS_DB.edit_str_config("support_username",value=message.text)
     if not status:
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=main_menu_keyboard_markup())
         return
@@ -289,18 +289,21 @@ def users_bot_edit_owner_info_card_number(message: Message):
         bot.send_message(message.chat.id, MESSAGES['ERROR_INVALID_CARD_NUMBER'],
                          reply_markup=main_menu_keyboard_markup())
         return
-    status = USERS_DB.edit_owner_info(card_number=message.text)
+    status = USERS_DB.edit_str_config("card_number",value=message.text)
+
     if not status:
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=main_menu_keyboard_markup())
         return
     bot.send_message(message.chat.id, MESSAGES['SUCCESS_UPDATE_DATA'], reply_markup=main_menu_keyboard_markup())
 
 
+
 # Users Bot - Edit Owner Info - Cardholder Name
 def users_bot_edit_owner_info_card_name(message: Message):
     if is_it_cancel(message):
         return
-    status = USERS_DB.edit_owner_info(card_owner=message.text)
+    status = USERS_DB.edit_str_config("card_holder",value=message.text)
+
     if not status:
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=main_menu_keyboard_markup())
         return
@@ -332,10 +335,10 @@ def users_bot_send_msg_users(message: Message):
 
 # Users Bot - Settings - Update Message
 def users_bot_settings_update_message(message: Message):
-    settings = USERS_DB.select_settings()
+    settings = USERS_DB.select_bool_config()
+
     if not settings:
         return
-    settings = settings[0]
     bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id,
                           text=f"{MESSAGES['USERS_BOT_SETTINGS']}",
                           reply_markup=users_bot_management_settings_markup(settings))
@@ -588,7 +591,8 @@ def callback_query(call: CallbackQuery):
         if not sub:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
             return
-        bot.send_message(call.message.chat.id, f"{KEY_MARKUP['CONFIGS_HIDDIFY']}\n<code>{sub['hiddify_configs']}</code>",
+        bot.send_message(call.message.chat.id,
+                         f"{KEY_MARKUP['CONFIGS_HIDDIFY']}\n<code>{sub['hiddify_configs']}</code>",
                          reply_markup=main_menu_keyboard_markup())
 
     else:
@@ -649,10 +653,11 @@ def callback_query(call: CallbackQuery):
 
     # Owner Info - Edit Owner Info Callback
     elif key == "users_bot_owner_info":
-        owner_info = USERS_DB.select_owner_info()[0]
+        card_number = USERS_DB.select_str_config()
+        owner_info = utils.settings_config_to_dict(card_number)
         bot.send_message(call.message.chat.id,
-                         owner_info_template(owner_info['telegram_username'], owner_info['card_number'],
-                                             owner_info['card_owner']),
+                         owner_info_template(owner_info['support_username'], owner_info['card_number'],
+                                             owner_info['card_holder']),
                          reply_markup=users_bot_edit_owner_info_markup())
     # Owner Info - Edit Owner Username Callback
     elif key == "users_bot_owner_info_edit_username":
@@ -680,22 +685,41 @@ def callback_query(call: CallbackQuery):
 
     # User Bot Settings  - Main Settings Callback
     elif key == "users_bot_settings":
-        settings = USERS_DB.select_settings()
+        settings = USERS_DB.select_bool_config()
         if not settings:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
             return
-        settings = settings[0]
+
         bot.send_message(call.message.chat.id, f"{MESSAGES['USERS_BOT_SETTINGS']}",
                          reply_markup=users_bot_management_settings_markup(settings))
 
     # User Bot Settings  - Set Hyperlink Status Callback
     elif key == "users_bot_settings_hyperlink":
         if value == "1":
-            USERS_DB.edit_settings(visible_hiddify_hyperlink=False)
+            edit_config = USERS_DB.edit_bool_config("visible_hiddify_hyperlink", value=False)
+            if not edit_config:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+                return
         elif value == "0":
-            USERS_DB.edit_settings(visible_hiddify_hyperlink=True)
+            edit_config = USERS_DB.edit_bool_config("visible_hiddify_hyperlink", value=True)
+            if not edit_config:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+                return
         users_bot_settings_update_message(call.message)
 
+    # User Bot Settings  - Set three random letters for define price
+    elif key == "users_bot_settings_three_rand_price":
+        if value == "1":
+            edit_config = USERS_DB.edit_bool_config("three_random_num_price", value=False)
+            if not edit_config:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+                return
+        elif value == "0":
+            edit_config = USERS_DB.edit_bool_config("three_random_num_price", value=True)
+            if not edit_config:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+                return
+        users_bot_settings_update_message(call.message)
     # User Bot Settings  - Order Status Callback
     elif key == "users_bot_orders_status":
         bot.send_message(call.message.chat.id, f"{MESSAGES['USERS_BOT_ORDER_NUMBER_REQUEST']}")

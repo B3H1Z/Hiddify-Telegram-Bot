@@ -1,4 +1,5 @@
 from config import LANG
+
 KEY_MARKUP = {
     'EN': {
         'BACK': '🔙Back',
@@ -22,10 +23,11 @@ KEY_MARKUP = {
         'SEND_TICKET': '📩Supporter',
         'TO_QR': 'ً🖼QR',
         'CONFIGS_LIST': '📝Configs',
-        'WALLET' : '💰Wallet',
-        'INCREASE_WALLET_BALANCE' : '💵Increase wallet balance',
-        'FREE_TEST' : '🔥Free Test',
-
+        'WALLET': '💰Wallet',
+        'INCREASE_WALLET_BALANCE': '💵Increase wallet balance',
+        'FREE_TEST': '🔥Free Test',
+        'RENEWAL_SUBSCRIPTION': '🔄Renewal Subscription',
+        'UPDATE_SUBSCRIPTION_INFO': '🔄Update Subscription Info',
 
     },
     'FA': {
@@ -50,10 +52,11 @@ KEY_MARKUP = {
         'SEND_TICKET': '📩پشتیبانی',
         'TO_QR': 'ً🖼کیوآر',
         'CONFIGS_LIST': '📝کانفیگ ها',
-        'WALLET' : '💰کیف پول',
-        'INCREASE_WALLET_BALANCE' : '💵افزایش موجودی',
-        'FREE_TEST' : '🔥تست رایگان',
-
+        'WALLET': '💰کیف پول',
+        'INCREASE_WALLET_BALANCE': '💵افزایش موجودی',
+        'FREE_TEST': '🔥تست رایگان',
+        'RENEWAL_SUBSCRIPTION': '🔁تمدید اشتراک',
+        'UPDATE_SUBSCRIPTION_INFO': '🔄بروزرسانی اطلاعات',
 
     }
 }

@@ -3,6 +3,7 @@ from telebot.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMar
 from AdminBot.buttons import KEY_MARKUP
 from AdminBot.messages import MESSAGES
 from config import CLIENT_TOKEN
+from Utils.utils import settings_config_to_dict
 
 
 # Main Menu Reply Keyboard Markup
@@ -139,9 +140,13 @@ def users_bot_management_markup(value=None):
 def users_bot_management_settings_markup(settings):
     markup = InlineKeyboardMarkup()
     markup.row_width = 1
+    settings = settings_config_to_dict(settings)
     status_hyperlink = "✅" if settings['visible_hiddify_hyperlink'] else "❌"
+    status_three_rand = "✅" if settings['three_random_num_price'] else "❌"
     markup.add(InlineKeyboardButton(f"{KEY_MARKUP['USERS_BOT_SETTINGS_SHOW_HIDI_LINK']} | {status_hyperlink}",
                                     callback_data=f"users_bot_settings_hyperlink:{settings['visible_hiddify_hyperlink']}"))
+    markup.add(InlineKeyboardButton(f"{KEY_MARKUP['USERS_BOT_SETTINGS_SHOW_THREE_RAND']} | {status_three_rand}",
+                                    callback_data=f"users_bot_settings_three_rand_price:{settings['three_random_num_price']}"))
     return markup
 
 
