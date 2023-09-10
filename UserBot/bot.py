@@ -100,8 +100,8 @@ def buy_from_wallet_confirm(message: Message, plan):
 
     wallet = USERS_DB.find_wallet(telegram_id=message.chat.id)
     if not wallet:
-        bot.send_message(message.chat.id, f"{MESSAGES['UNKNOWN_ERROR']}\n{MESSAGES['REQUEST_UPDATE_BOT']}",
-                            reply_markup=main_menu_keyboard_markup())
+        # Wallet not created
+        bot.send_message(message.chat.id, MESSAGES['LACK_OF_WALLET_BALANCE'])
 
     if wallet:
         wallet = wallet[0]
