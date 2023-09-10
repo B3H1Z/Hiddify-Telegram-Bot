@@ -787,6 +787,10 @@ def start(message: Message):
         return
     bot.send_message(message.chat.id, MESSAGES['WELCOME'], reply_markup=main_menu_keyboard_markup())
 
+# If user is not in users table, request /start
+@bot.message_handler(func=lambda message: not USERS_DB.find_user(telegram_id=message.chat.id))
+def not_in_users_table(message: Message):
+    bot.send_message(message.chat.id, MESSAGES['REQUEST_START'])
 
 # User Subscription Status Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['SUBSCRIPTION_STATUS'])
