@@ -97,15 +97,21 @@ def buy_from_wallet_confirm(message: Message, plan):
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
         return
+
     wallet = USERS_DB.find_wallet(telegram_id=message.chat.id)
+    if not wallet:
+        bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                         reply_markup=main_menu_keyboard_markup())
+        return
+
     if wallet:
         wallet = wallet[0]
         if plan['price'] > wallet['balance']:
             bot.send_message(message.chat.id, MESSAGES['LACK_OF_WALLET_BALANCE'])
-            # پاک کردن پیام قبلی و یا ریجستر کردن یک متد
             return
-    bot.send_message(message.chat.id, MESSAGES['REQUEST_SEND_NAME'], reply_markup=cancel_markup())
-    bot.register_next_step_handler(message, next_step_send_name_for_buy_from_wallet, plan)
+        else:
+            bot.send_message(message.chat.id, MESSAGES['REQUEST_SEND_NAME'], reply_markup=cancel_markup())
+            bot.register_next_step_handler(message, next_step_send_name_for_buy_from_wallet, plan)
 
 
 def renewal_from_wallet_confirm(message: Message):
@@ -188,7 +194,6 @@ def renewal_from_wallet_confirm(message: Message):
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
         return
-    
 
     bot.send_message(message.chat.id, MESSAGES['SUCCESSFUL_RENEWAL'], reply_markup=main_menu_keyboard_markup())
 

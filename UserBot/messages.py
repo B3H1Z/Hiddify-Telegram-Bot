@@ -62,6 +62,7 @@ MESSAGES = {
         'ALREADY_RECEIVED_FREE': 'You have already received your free test account!',
         'GET_FREE_CONFIRMED' :  '✅Your free account has been successfully registered',
         'SUCCESSFUL_RENEWAL': '✅Your subscription has been successfully renewed',
+        'REQUEST_USER_START': 'Please /start the bot again',
     },
     'FA': {
         'WELCOME': "به ربات کاربران خوش آمدید",
@@ -123,6 +124,7 @@ MESSAGES = {
         'ALREADY_RECEIVED_FREE': 'شما قبلا اکانت تست رایگان خود را دریافت نموده‌اید!',
         'GET_FREE_CONFIRMED' :  '✅اکانت تست رایگان شما با موفقیت ثبت شد\n از طریق دکمه [📊وضعیت اشتراک] میتوانید به اطلاعات اشتراک خود دسترسی داشته باشید.',
         'SUCCESSFUL_RENEWAL': '✅تمدید اشتراک شما با موفقیت انجام شد',
+        'REQUEST_USER_START': 'لطفا ربات را مجددا /strat  کنید',
     }
 
 }
