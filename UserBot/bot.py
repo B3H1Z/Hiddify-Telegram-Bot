@@ -614,14 +614,18 @@ def callback_query(call: CallbackQuery):
     elif key == 'renewal_plan_selected':
         plan = USERS_DB.find_plan(id=value)[0]
         if not plan:
-            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+            bot.send_message(call.message.chat.id, MESSAGES['PLANS_NOT_FOUND'],
                              reply_markup=main_menu_keyboard_markup())
             return
         renew_subscription_dict[call.message.chat.id]['plan_id'] = plan['id']
         bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id,
                               text=plan_info_template(plan),
                               reply_markup=confirm_buy_plan_markup(plan['id'], renewal=True))
-
+        
+    elif key == 'cancel_increase_wallet_balance':
+        bot.delete_message(call.message.chat.id, call.message.message_id)
+        bot.send_message(call.message.chat.id, MESSAGES['CANCEL_INCREASE_WALLET_BALANCE'],
+                         reply_markup=main_menu_keyboard_markup())
     # ----------------------------------- User Configs Area -----------------------------------
     # User Configs - Main Menu
     elif key == 'configs_list':
@@ -871,7 +875,10 @@ def wallet_balance(message: Message):
 
         wallet = USERS_DB.find_wallet(telegram_id=message.chat.id)
         wallet = wallet[0]
-
+        #--------------- for test only
+        wallet_balance = 100000
+        user_info = USERS_DB.edit_wallet(message.chat.id, balance=wallet_balance)
+        #-----------
         telegram_user_data = wallet_info_template(int(wallet['balance']))
 
         bot.send_message(message.chat.id, telegram_user_data,
@@ -893,6 +900,11 @@ def wallet_balance(message: Message):
         else:
             bot.send_message(message.chat.id, MESSAGES['REQUEST_SEND_NAME'], reply_markup=cancel_markup())
             bot.register_next_step_handler(message, next_step_send_name_for_get_free_test)
+
+# Cancel Message Handler
+@bot.message_handler(func=lambda message: message.text == KEY_MARKUP['CANCEL'])
+def wallet_balance(message: Message):
+    bot.send_message(message.chat.id, MESSAGES['CANCELED'], reply_markup=main_menu_keyboard_markup())
 
 
 # Start
