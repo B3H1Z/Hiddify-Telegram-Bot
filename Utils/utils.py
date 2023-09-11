@@ -168,6 +168,10 @@ def sub_links(uuid):
     sub['hiddify_configs'] = f"{BASE_URL}/{PANEL_DIR[1]}/{uuid}/clash/meta/all.yml"
     sub['sub_link'] = f"{BASE_URL}/{PANEL_DIR[1]}/{uuid}/all.txt"
     sub['sub_link_b64'] = f"{BASE_URL}/{PANEL_DIR[1]}/{uuid}/all.txt?base64=True"
+    # Add in v8.0 Hiddify
+    sub['sub_link_auto'] = f"{BASE_URL}/{PANEL_DIR[1]}/{uuid}/sub/?asn=unknown"
+    sub['sing_box_full'] = f"{BASE_URL}/{PANEL_DIR[1]}/{uuid}/full-singbox.json?asn=unknown"
+    sub['sing_box'] = f"{BASE_URL}/{PANEL_DIR[1]}/{uuid}/singbox.json?asn=unknown"
     return sub
 
 
@@ -416,13 +420,29 @@ def privacy_friendly_logging_request(url):
     return url
 
 
-def settings_config_to_dict(configs):
-    dict_configs = {}
-    for entry in configs:
-        key = entry['key']
-        value = entry['value']
-        dict_configs[key] = value
-    return dict_configs
+# def settings_config_to_dict(configs):
+#     dict_configs = {}
+#     for entry in configs:
+#         key = entry['key']
+#         value = entry['value']
+#         dict_configs[key] = value
+#     return dict_configs
+
+
+def all_configs_settings():
+    bool_configs = USERS_DB.select_bool_config()
+    int_configs = USERS_DB.select_int_config()
+    str_configs = USERS_DB.select_str_config()
+
+    # all configs to one dict
+    all_configs = {}
+    for config in bool_configs:
+        all_configs[config['key']] = config['value']
+    for config in int_configs:
+        all_configs[config['key']] = config['value']
+    for config in str_configs:
+        all_configs[config['key']] = config['value']
+    return all_configs
 
 
 def find_order_subscription_by_uuid(uuid):
@@ -434,3 +454,11 @@ def find_order_subscription_by_uuid(uuid):
         return non_order_subscription[0]
     else:
         return False
+
+
+def toman_to_rial(toman):
+    return int(toman) * 10
+
+
+def rial_to_toman(rial):
+    return int(int(rial) / 10)

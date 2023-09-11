@@ -254,8 +254,7 @@ def users_bot_add_plan_price(message: Message):
         return
     if not is_it_digit(message):
         return
-    add_plan_data['price'] = int(message.text)
-
+    add_plan_data['price'] = utils.toman_to_rial(message.text)
     msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=while_edit_user_markup())
     status = utils.users_bot_add_plan(add_plan_data['usage'], add_plan_data['days'], add_plan_data['price'])
     bot.delete_message(message.chat.id, msg_wait.message_id)
@@ -272,7 +271,7 @@ def users_bot_edit_owner_info_username(message: Message):
     if not message.text.startswith('@'):
         bot.send_message(message.chat.id, MESSAGES['ERROR_INVALID_USERNAME'], reply_markup=main_menu_keyboard_markup())
         return
-    status = USERS_DB.edit_str_config("support_username",value=message.text)
+    status = USERS_DB.edit_str_config("support_username", value=message.text)
     if not status:
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=main_menu_keyboard_markup())
         return
@@ -289,7 +288,7 @@ def users_bot_edit_owner_info_card_number(message: Message):
         bot.send_message(message.chat.id, MESSAGES['ERROR_INVALID_CARD_NUMBER'],
                          reply_markup=main_menu_keyboard_markup())
         return
-    status = USERS_DB.edit_str_config("card_number",value=message.text)
+    status = USERS_DB.edit_str_config("card_number", value=message.text)
 
     if not status:
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=main_menu_keyboard_markup())
@@ -297,12 +296,11 @@ def users_bot_edit_owner_info_card_number(message: Message):
     bot.send_message(message.chat.id, MESSAGES['SUCCESS_UPDATE_DATA'], reply_markup=main_menu_keyboard_markup())
 
 
-
 # Users Bot - Edit Owner Info - Cardholder Name
 def users_bot_edit_owner_info_card_name(message: Message):
     if is_it_cancel(message):
         return
-    status = USERS_DB.edit_str_config("card_holder",value=message.text)
+    status = USERS_DB.edit_str_config("card_holder", value=message.text)
 
     if not status:
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=main_menu_keyboard_markup())
@@ -335,10 +333,8 @@ def users_bot_send_msg_users(message: Message):
 
 # Users Bot - Settings - Update Message
 def users_bot_settings_update_message(message: Message):
-    settings = USERS_DB.select_bool_config()
+    settings = utils.all_configs_settings()
 
-    if not settings:
-        return
     bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id,
                           text=f"{MESSAGES['USERS_BOT_SETTINGS']}",
                           reply_markup=users_bot_management_settings_markup(settings))
@@ -403,6 +399,17 @@ def users_bot_sub_status(message: Message):
     bot.send_message(message.chat.id, msg,
                      reply_markup=user_info_markup(usr['uuid']))
 
+def users_bot_settings_min_depo(message: Message):
+    if is_it_cancel(message):
+        return
+    if not is_it_digit(message):
+        return
+    new_min_depo = utils.toman_to_rial(message.text)
+    status = USERS_DB.edit_int_config("min_deposit_amount", value=new_min_depo)
+    if not status:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=main_menu_keyboard_markup())
+        return
+    bot.send_message(message.chat.id, MESSAGES['SUCCESS_UPDATE_DATA'], reply_markup=main_menu_keyboard_markup())
 
 # ----------------------------------- Callbacks -----------------------------------
 # Callback Handler for Inline Buttons
@@ -561,39 +568,181 @@ def callback_query(call: CallbackQuery):
                 bot.send_message(call.message.chat.id, f"{message}",
                                  reply_markup=main_menu_keyboard_markup())
 
+    # User Configs - Main Menu
+    elif key == 'configs_list':
+        bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,
+                                      reply_markup=sub_url_user_list_markup(value))
+    # User Configs - Direct Link
+    elif key == 'conf_dir':
+        bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,
+                                      reply_markup=sub_user_list_markup(value))
+    # User Configs - Vless Configs Callback
+    elif key == "conf_dir_vless":
+        sub = utils.sub_links(value)
+        if not sub:
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
+            return
+        configs = utils.sub_parse(sub['sub_link'])
+        if not configs:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_CONFIG_NOT_FOUND'])
+            return
+        if not configs['vless']:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_CONFIG_NOT_FOUND'])
+            return
+        msgs = configs_template(configs['vless'])
+        for message in msgs:
+            if message:
+                bot.send_message(call.message.chat.id, f"{message}",
+                                 reply_markup=main_menu_keyboard_markup())
+    # User Configs - VMess Configs Callback
+    elif key == "conf_dir_vmess":
+        sub = utils.sub_links(value)
+        if not sub:
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
+            return
+        configs = utils.sub_parse(sub['sub_link'])
+        if not configs:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_CONFIG_NOT_FOUND'])
+            return
+        if not configs['vmess']:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_CONFIG_NOT_FOUND'])
+            return
+        msgs = configs_template(configs['vmess'])
+        for message in msgs:
+            if message:
+                bot.send_message(call.message.chat.id, f"{message}",
+                                 reply_markup=main_menu_keyboard_markup())
+    # User Configs - Trojan Configs Callback
+    elif key == "conf_dir_trojan":
+        sub = utils.sub_links(value)
+        if not sub:
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
+            return
+        configs = utils.sub_parse(sub['sub_link'])
+        if not configs:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_CONFIG_NOT_FOUND'])
+            return
+        if not configs['trojan']:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_CONFIG_NOT_FOUND'])
+            return
+        msgs = configs_template(configs['trojan'])
+        for message in msgs:
+            if message:
+                bot.send_message(call.message.chat.id, f"{message}",
+                                 reply_markup=main_menu_keyboard_markup())
+
     # User Configs - Subscription Configs Callback
     elif key == "conf_sub_url":
         sub = utils.sub_links(value)
         if not sub:
-            bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
             return
-        bot.send_message(call.message.chat.id, f"{KEY_MARKUP['CONFIGS_SUB']}\n<code>{sub['sub_link']}</code>",
-                         reply_markup=main_menu_keyboard_markup())
+        qr_code = utils.txt_to_qr(sub['sub_link'])
+        if not qr_code:
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
+            return
+        bot.send_photo(
+            call.message.chat.id,
+            photo=qr_code,
+            caption=f"{KEY_MARKUP['CONFIGS_SUB']}\n<code>{sub['sub_link']}</code>",
+            reply_markup=main_menu_keyboard_markup()
+        )
     # User Configs - Base64 Subscription Configs Callback
     elif key == "conf_sub_url_b64":
         sub = utils.sub_links(value)
         if not sub:
-            bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
             return
-        bot.send_message(call.message.chat.id, f"{KEY_MARKUP['CONFIGS_SUB_B64']}\n<code>{sub['sub_link_b64']}</code>",
-                         reply_markup=main_menu_keyboard_markup())
+        qr_code = utils.txt_to_qr(sub['sub_link_b64'])
+        if not qr_code:
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
+            return
+        bot.send_photo(
+            call.message.chat.id,
+            photo=qr_code,
+            caption=f"{KEY_MARKUP['CONFIGS_SUB_B64']}\n<code>{sub['sub_link_b64']}</code>",
+            reply_markup=main_menu_keyboard_markup()
+        )
     # User Configs - Subscription Configs For Clash Callback
     elif key == "conf_clash":
         sub = utils.sub_links(value)
         if not sub:
-            bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
             return
-        bot.send_message(call.message.chat.id, f"{KEY_MARKUP['CONFIGS_CLASH']}\n<code>{sub['clash_configs']}</code>",
-                         reply_markup=main_menu_keyboard_markup())
+        qr_code = utils.txt_to_qr(sub['clash_configs'])
+        if not qr_code:
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
+            return
+        bot.send_photo(
+            call.message.chat.id,
+            photo=qr_code,
+            caption=f"{KEY_MARKUP['CONFIGS_CLASH']}\n<code>{sub['clash_configs']}</code>",
+            reply_markup=main_menu_keyboard_markup()
+        )
     # User Configs - Subscription Configs For Hiddify Callback
     elif key == "conf_hiddify":
         sub = utils.sub_links(value)
         if not sub:
-            bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
             return
-        bot.send_message(call.message.chat.id,
-                         f"{KEY_MARKUP['CONFIGS_HIDDIFY']}\n<code>{sub['hiddify_configs']}</code>",
-                         reply_markup=main_menu_keyboard_markup())
+        qr_code = utils.txt_to_qr(sub['hiddify_configs'])
+        if not qr_code:
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
+            return
+        bot.send_photo(
+            call.message.chat.id,
+            photo=qr_code,
+            caption=f"{KEY_MARKUP['CONFIGS_HIDDIFY']}\n<code>{sub['hiddify_configs']}</code>",
+            reply_markup=main_menu_keyboard_markup()
+        )
+
+    elif key == "conf_sub_auto":
+        sub = utils.sub_links(value)
+        if not sub:
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
+            return
+        qr_code = utils.txt_to_qr(sub['sub_link_auto'])
+        if not qr_code:
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
+            return
+        bot.send_photo(
+            call.message.chat.id,
+            photo=qr_code,
+            caption=f"{KEY_MARKUP['CONFIGS_SUB_AUTO']}\n<code>{sub['sub_link_auto']}</code>",
+            reply_markup=main_menu_keyboard_markup()
+        )
+
+    elif key == "conf_sub_sing_box":
+        sub = utils.sub_links(value)
+        if not sub:
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
+            return
+        qr_code = utils.txt_to_qr(sub['sing_box'])
+        if not qr_code:
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
+            return
+        bot.send_photo(
+            call.message.chat.id,
+            photo=qr_code,
+            caption=f"{KEY_MARKUP['CONFIGS_SING_BOX']}\n<code>{sub['sing_box']}</code>",
+            reply_markup=main_menu_keyboard_markup()
+        )
+
+    elif key == "conf_sub_full_sing_box":
+        sub = utils.sub_links(value)
+        if not sub:
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
+            return
+        qr_code = utils.txt_to_qr(sub['sing_box_full'])
+        if not qr_code:
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
+            return
+        bot.send_photo(
+            call.message.chat.id,
+            photo=qr_code,
+            caption=f"{KEY_MARKUP['CONFIGS_FULL_SING_BOX']}\n<code>{sub['sing_box_full']}</code>",
+            reply_markup=main_menu_keyboard_markup()
+        )
 
     else:
         bot.answer_callback_query(call.id, MESSAGES['ERROR_INVALID_COMMAND'])
@@ -653,8 +802,7 @@ def callback_query(call: CallbackQuery):
 
     # Owner Info - Edit Owner Info Callback
     elif key == "users_bot_owner_info":
-        card_number = USERS_DB.select_str_config()
-        owner_info = utils.settings_config_to_dict(card_number)
+        owner_info = utils.all_configs_settings()
         bot.send_message(call.message.chat.id,
                          owner_info_template(owner_info['support_username'], owner_info['card_number'],
                                              owner_info['card_holder']),
@@ -689,7 +837,7 @@ def callback_query(call: CallbackQuery):
         if not settings:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
             return
-
+        settings = all_configs_settings()
         bot.send_message(call.message.chat.id, f"{MESSAGES['USERS_BOT_SETTINGS']}",
                          reply_markup=users_bot_management_settings_markup(settings))
 
@@ -716,6 +864,25 @@ def callback_query(call: CallbackQuery):
                 return
         elif value == "0":
             edit_config = USERS_DB.edit_bool_config("three_random_num_price", value=True)
+            if not edit_config:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+                return
+        users_bot_settings_update_message(call.message)
+
+    elif key == "users_bot_settings_min_depo":
+        settings = utils.all_configs_settings()
+        bot.send_message(call.message.chat.id, f"{MESSAGES['CURRENT_VALUE']}: {rial_to_toman(settings['min_deposit_amount'])}\n{MESSAGES['USERS_BOT_SETTING_MIN_DEPO']}",
+                         reply_markup=while_edit_user_markup())
+        bot.register_next_step_handler(call.message, users_bot_settings_min_depo)
+
+    elif key == "users_bot_settings_panel_v8":
+        if value == "1":
+            edit_config = USERS_DB.edit_bool_config("hiddify_v8_feature", value=False)
+            if not edit_config:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+                return
+        elif value == "0":
+            edit_config = USERS_DB.edit_bool_config("hiddify_v8_feature", value=True)
             if not edit_config:
                 bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
                 return

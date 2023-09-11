@@ -2,7 +2,9 @@
 from telebot import types
 from telebot.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
 from UserBot.content import KEY_MARKUP, MESSAGES
+from UserBot.content import MESSAGES
 from AdminBot.markups import sub_url_user_list_markup, sub_user_list_markup
+from Utils.utils import rial_to_toman
 
 
 # Main Menu Reply Keyboard Markup
@@ -19,16 +21,18 @@ def main_menu_keyboard_markup():
 def user_info_markup(uuid):
     markup = InlineKeyboardMarkup()
     markup.row_width = 2
-    markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_LIST'], callback_data=f"configs_list:{uuid}"))
-    markup.add(InlineKeyboardButton(KEY_MARKUP['RENEWAL_SUBSCRIPTION'], callback_data=f"renewal_subscription:{uuid}"))
     markup.add(
         InlineKeyboardButton(KEY_MARKUP['UPDATE_SUBSCRIPTION_INFO'], callback_data=f"update_info_subscription:{uuid}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_LIST'], callback_data=f"configs_list:{uuid}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['RENEWAL_SUBSCRIPTION'], callback_data=f"renewal_subscription:{uuid}"))
     return markup
 
 
 def user_info_non_sub_markup(uuid):
     markup = InlineKeyboardMarkup()
     markup.row_width = 2
+    markup.add(
+        InlineKeyboardButton(KEY_MARKUP['UPDATE_SUBSCRIPTION_INFO'], callback_data=f"update_info_subscription:{uuid}"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_LIST'], callback_data=f"configs_list:{uuid}"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['RENEWAL_SUBSCRIPTION'], callback_data=f"renewal_subscription:{uuid}"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['UNLINK_SUBSCRIPTION'], callback_data=f"unlink_subscription:{uuid}"))
@@ -43,7 +47,7 @@ def confirm_subscription_markup(uuid):
     return markup
 
 
-def confirm_buy_plan_markup(plan_id,renewal=False):
+def confirm_buy_plan_markup(plan_id, renewal=False):
     markup = InlineKeyboardMarkup()
     markup.row_width = 1
     callback = "confirm_buy_from_wallet" if not renewal else "confirm_renewal_from_wallet"
@@ -67,7 +71,7 @@ def plans_list_markup(plans, renewal=False):
     for plan in plans:
         if plan['status']:
             keys.append(InlineKeyboardButton(
-                f"{plan['size_gb']}{MESSAGES['GB']} | {plan['days']}{MESSAGES['DAY_EXPIRE']} | {plan['price']}{MESSAGES['TOMAN']}",
+                f"{plan['size_gb']}{MESSAGES['GB']} | {plan['days']}{MESSAGES['DAY_EXPIRE']} | {rial_to_toman(plan['price'])}{MESSAGES['TOMAN']}",
                 callback_data=f"{callback}:{plan['id']}"))
     if len(keys) == 0:
         return None

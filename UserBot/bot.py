@@ -226,7 +226,8 @@ def next_step_send_screenshot(message, charge_wallet):
 
     payment_method = "Card"
 
-    status = USERS_DB.add_payment(charge_wallet['id'], message.chat.id, charge_wallet['amount'], payment_method, path,
+    status = USERS_DB.add_payment(charge_wallet['id'], message.chat.id,
+                                  charge_wallet['amount'], payment_method, path,
                                   message.from_user.full_name,
                                   created_at)
     if status:
@@ -299,7 +300,6 @@ def next_step_send_screenshot(message, charge_wallet):
 # ----------------------------------- Buy From Wallet Area -----------------------------------
 # Next Step Buy From Wallet - Send Name
 def next_step_send_name_for_buy_from_wallet(message: Message, plan):
-    print(plan)
     if is_it_cancel(message):
         return
 
@@ -479,31 +479,33 @@ def next_step_increase_wallet_balance(message):
     if not is_it_digit(message, markup=cancel_markup()):
         bot.register_next_step_handler(message, next_step_increase_wallet_balance)
         return
-    minimum_deposit_amount = 30000
-    amount = int(message.text)
+    minimum_deposit_amount = utils.all_configs_settings()
+    minimum_deposit_amount = minimum_deposit_amount['min_deposit_amount']
+    amount = utils.toman_to_rial(message.text)
 
     if amount < minimum_deposit_amount:
-        bot.send_message(message.chat.id, MESSAGES['MINIMUM_DEPOSIT_AMOUNT'], reply_markup=cancel_markup())
+        bot.send_message(message.chat.id, f"{MESSAGES['INCREASE_WALLET_BALANCE_AMOUNT']}\n{MESSAGES['MINIMUM_DEPOSIT_AMOUNT']}: "
+                                          f"{rial_to_toman(minimum_deposit_amount)} {MESSAGES['TOMAN']}", reply_markup=cancel_markup())
         bot.register_next_step_handler(message, next_step_increase_wallet_balance)
         return
-    owner_info = USERS_DB.select_str_config()
-    if not owner_info:
+    settings = utils.all_configs_settings()
+    if not settings:
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
         return
-    owner_info = utils.settings_config_to_dict(owner_info)
 
-    # order_info['price'] = price
-    settings = USERS_DB.select_bool_config()
-    if not settings:
-        bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
-                         reply_markup=main_menu_keyboard_markup())
-        return
-    settings = utils.settings_config_to_dict(settings)
-    if not settings:
-        bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
-                         reply_markup=main_menu_keyboard_markup())
-        return
+    # # order_info['price'] = price
+    # settings = USERS_DB.select_bool_config()
+    # if not settings:
+    #     bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+    #                      reply_markup=main_menu_keyboard_markup())
+    #     return
+    # settings = utils.settings_config_to_dict(settings)
+
+    # if not settings:
+    #     bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+    #                      reply_markup=main_menu_keyboard_markup())
+    #     return
 
     charge_wallet['amount'] = str(amount)
     if settings['three_random_num_price'] == 1:
@@ -513,7 +515,7 @@ def next_step_increase_wallet_balance(message):
 
     # Send 0 to identify wallet balance charge
     bot.send_message(message.chat.id,
-                     owner_info_template(owner_info['card_number'], owner_info['card_holder'], charge_wallet['amount']),
+                     owner_info_template(settings['card_number'], settings['card_holder'], charge_wallet['amount']),
                      reply_markup=send_screenshot_markup(plan_id=charge_wallet['id']))
 
 
@@ -525,7 +527,7 @@ def callback_query(call: CallbackQuery):
     data = call.data.split(':')
     key = data[0]
     value = data[1]
-    print(data)
+
     # ----------------------------------- Link Subscription Area -----------------------------------
     # Confirm Link Subscription
     if key == 'confirm_subscription':
@@ -602,8 +604,8 @@ def callback_query(call: CallbackQuery):
         user = utils.dict_process(utils.users_to_dict(user))[0]
         try:
             bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id,
-                                      text=user_info_template(sub['id'], user, MESSAGES['INFO_USER']),
-                                      reply_markup=user_info_markup(sub['uuid']))
+                                  text=user_info_template(sub['id'], user, MESSAGES['INFO_USER']),
+                                  reply_markup=user_info_markup(sub['uuid']))
         except:
             pass
 
@@ -737,7 +739,7 @@ def callback_query(call: CallbackQuery):
         bot.send_photo(
             call.message.chat.id,
             photo=qr_code,
-            caption=f"{KEY_MARKUP['CONFIGS_SUB']}\n<code>{sub['sub_link_b64']}</code>",
+            caption=f"{KEY_MARKUP['CONFIGS_SUB_B64']}\n<code>{sub['sub_link_b64']}</code>",
             reply_markup=main_menu_keyboard_markup()
         )
     # User Configs - Subscription Configs For Clash Callback
@@ -753,7 +755,7 @@ def callback_query(call: CallbackQuery):
         bot.send_photo(
             call.message.chat.id,
             photo=qr_code,
-            caption=f"{KEY_MARKUP['CONFIGS_SUB']}\n<code>{sub['clash_configs']}</code>",
+            caption=f"{KEY_MARKUP['CONFIGS_CLASH']}\n<code>{sub['clash_configs']}</code>",
             reply_markup=main_menu_keyboard_markup()
         )
     # User Configs - Subscription Configs For Hiddify Callback
@@ -769,7 +771,55 @@ def callback_query(call: CallbackQuery):
         bot.send_photo(
             call.message.chat.id,
             photo=qr_code,
-            caption=f"{KEY_MARKUP['CONFIGS_SUB']}\n<code>{sub['hiddify_configs']}</code>",
+            caption=f"{KEY_MARKUP['CONFIGS_HIDDIFY']}\n<code>{sub['hiddify_configs']}</code>",
+            reply_markup=main_menu_keyboard_markup()
+        )
+
+    elif key == "conf_sub_auto":
+        sub = utils.sub_links(value)
+        if not sub:
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
+            return
+        qr_code = utils.txt_to_qr(sub['sub_link_auto'])
+        if not qr_code:
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
+            return
+        bot.send_photo(
+            call.message.chat.id,
+            photo=qr_code,
+            caption=f"{KEY_MARKUP['CONFIGS_SUB_AUTO']}\n<code>{sub['sub_link_auto']}</code>",
+            reply_markup=main_menu_keyboard_markup()
+        )
+
+    elif key == "conf_sub_sing_box":
+        sub = utils.sub_links(value)
+        if not sub:
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
+            return
+        qr_code = utils.txt_to_qr(sub['sing_box'])
+        if not qr_code:
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
+            return
+        bot.send_photo(
+            call.message.chat.id,
+            photo=qr_code,
+            caption=f"{KEY_MARKUP['CONFIGS_SING_BOX']}\n<code>{sub['sing_box']}</code>",
+            reply_markup=main_menu_keyboard_markup()
+        )
+
+    elif key == "conf_sub_full_sing_box":
+        sub = utils.sub_links(value)
+        if not sub:
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
+            return
+        qr_code = utils.txt_to_qr(sub['sing_box_full'])
+        if not qr_code:
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
+            return
+        bot.send_photo(
+            call.message.chat.id,
+            photo=qr_code,
+            caption=f"{KEY_MARKUP['CONFIGS_FULL_SING_BOX']}\n<code>{sub['sing_box_full']}</code>",
             reply_markup=main_menu_keyboard_markup()
         )
 
@@ -884,8 +934,8 @@ def link_subscription(message: Message):
 # User Buy Subscription Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['WALLET'])
 def wallet_balance(message: Message):
-    users = USERS_DB.find_user(telegram_id=message.chat.id)
-    if users:
+    user = USERS_DB.find_user(telegram_id=message.chat.id)
+    if user:
         wallet_status = USERS_DB.find_wallet(telegram_id=message.chat.id)
         if not wallet_status:
             status = USERS_DB.add_wallet(telegram_id=message.chat.id)
@@ -895,7 +945,7 @@ def wallet_balance(message: Message):
 
         wallet = USERS_DB.find_wallet(telegram_id=message.chat.id)
         wallet = wallet[0]
-        telegram_user_data = wallet_info_template(int(wallet['balance']))
+        telegram_user_data = wallet_info_template(wallet['balance'])
 
         bot.send_message(message.chat.id, telegram_user_data,
                          reply_markup=wallet_info_markup())

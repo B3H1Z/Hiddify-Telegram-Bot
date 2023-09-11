@@ -1,7 +1,8 @@
 # Description: This file contains all the templates used in the bot.
 from config import LANG, USERS_DB
 from UserBot.content import MESSAGES
-from Utils.utils import settings_config_to_dict
+from Utils.utils import rial_to_toman, toman_to_rial,all_configs_settings
+
 
 # User Subscription Info Template
 def user_info_template(sub_id, usr, header=""):
@@ -35,7 +36,7 @@ def wallet_info_template(balance):
         return MESSAGES['ZERO_BALANCE']
     else:
         return f"""
-         {MESSAGES['WALLET_INFO_PART_1']} {balance} {MESSAGES['WALLET_INFO_PART_2']}
+         {MESSAGES['WALLET_INFO_PART_1']} {rial_to_toman(balance)} {MESSAGES['WALLET_INFO_PART_2']}
          """
 
 
@@ -47,7 +48,7 @@ def plan_info_template(plan, header=""):
 
 {MESSAGES['PLAN_INFO_SIZE']} {plan['size_gb']} {MESSAGES['GB']}
 {MESSAGES['PLAN_INFO_DAYS']} {plan['days']} {MESSAGES['DAY_EXPIRE']}
-{MESSAGES['PLAN_INFO_PRICE']} {plan['price']} {MESSAGES['TOMAN']}
+{MESSAGES['PLAN_INFO_PRICE']} {rial_to_toman(plan['price'])} {MESSAGES['TOMAN']}
 """
 
 
@@ -60,9 +61,10 @@ def owner_info_template(card_number, card_holder_name, price, header=""):
         return f"""
 {header}
 
-💰لطفا دقیقا مبلغ: <code>{price}</code> {MESSAGES['TOMAN']}
+💰لطفا دقیقا مبلغ: <code>{price}</code> {MESSAGES['RIAL']}
+💴معادل: {rial_to_toman(price)} {MESSAGES['TOMAN']}
 💳را به شماره کارت: <code>{card_number}</code>
-به نام <b>{card_holder_name}</b> واریز کنید.
+👤به نام <b>{card_holder_name}</b> واریز کنید.
 
 ❗️بعد از واریز مبلغ، اسکرین شات از تراکنش را برای ما ارسال کنید.
 """
@@ -86,7 +88,7 @@ def payment_received_template(payment, header="", footer=""):
 
 شماره سفارش: <code>{payment['id']}</code>
 نام کاربر: <b>{payment['user_name']}</b>
-هزینه پرداخت شده: <b>{payment['payment_amount']}</b> {MESSAGES['TOMAN']}
+هزینه پرداخت شده: <b>{rial_to_toman(payment['payment_amount'])}</b> {MESSAGES['TOMAN']}
 ---------------------
 ⬇️درخواست افزایش موجودی کیف پول⬇️
 
@@ -159,7 +161,7 @@ def connection_help_template(header=""):
 # Support Info Template
 def support_template(owner_info, header=""):
     username = None
-    owner_info = settings_config_to_dict(owner_info)
+    owner_info = all_configs_settings()
     if owner_info:
         username = owner_info['support_username'] if owner_info['support_username'] else "-"
     else:

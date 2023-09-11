@@ -22,10 +22,13 @@
         "UPDATE_MESSAGE": "🔄Update Message",
         "BACK": "🔙Back",
         "CONFIGS_DIR": "Configs",
+        "CONFIGS_SUB_AUTO":"Auto Subscription",
         "CONFIGS_SUB": "Subscription Link",
         "CONFIGS_SUB_B64": "Subscription Link b64",
         "CONFIGS_CLASH": "Clash Subscription",
         "CONFIGS_HIDDIFY": "Hiddify Subscription",
+        "CONFIGS_SING_BOX":"Sing-box",
+        "CONFIGS_FULL_SING_BOX":"Full Sing-box",
         "SEARCH_USER_NAME": "Search by Name",
         "SEARCH_USER_UUID": "Search by UUID",
         "SEARCH_USER_CONFIG": "Search by Config",
@@ -43,6 +46,8 @@
         "USERS_BOT_SETTINGS": "⚙️Settings",
         "USERS_BOT_SETTINGS_SHOW_HIDI_LINK": "User Page Hyperlink",
         "USERS_BOT_SETTINGS_SHOW_THREE_RAND": "Random 3 Digit Price",
+        "USERS_BOT_SETTINGS_MIN_DEPO": "Minimum Deposit",
+        "USERS_BOT_SETTINGS_PNL_V8_FEATURES": "Panel V8 Features",
         "ABOUT_BOT": "ℹ️",
         "TO_QR": "ً🖼QR"
     },
@@ -69,10 +74,13 @@
         "UPDATE_MESSAGE": "🔄به‌روزرسانی پیام",
         "BACK": "🔙بازگشت",
         "CONFIGS_DIR": "کانفیگ",
+        "CONFIGS_SUB_AUTO":"اشتراک خودکار",
         "CONFIGS_SUB": "لینک اشتراک",
         "CONFIGS_SUB_B64": "لینک اشتراک b64",
         "CONFIGS_CLASH": "اشتراک Clash",
         "CONFIGS_HIDDIFY": "اشتراک Hiddify",
+        "CONFIGS_SING_BOX":"Sing-box",
+        "CONFIGS_FULL_SING_BOX":"Full Sing-box",
         "SEARCH_USER_NAME": "جستجو با نام",
         "SEARCH_USER_UUID": "جستجو با UUID",
         "SEARCH_USER_CONFIG": "جستجو با کانفیگ",
@@ -90,6 +98,8 @@
         "USERS_BOT_SETTINGS": "⚙️تنظیمات",
         "USERS_BOT_SETTINGS_SHOW_HIDI_LINK": "User Page Hyperlink",
         "USERS_BOT_SETTINGS_SHOW_THREE_RAND": "مشخصه تصادفی پرداخت",
+        "USERS_BOT_SETTINGS_MIN_DEPO": "محدودیت حداقل پرداخت",
+        "USERS_BOT_SETTINGS_PNL_V8_FEATURES": "اشتراک های نسخه 8",
         "ABOUT_BOT": "ℹ️",
         "TO_QR": "ً🖼کیوآر"
     }

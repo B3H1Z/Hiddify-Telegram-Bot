@@ -258,6 +258,12 @@ class UserDBManager:
             self.conn.commit()
             logging.info("str_config table created successfully!")
 
+            cur.execute("CREATE TABLE IF NOT EXISTS int_config ("
+                        "key TEXT NOT NULL UNIQUE,"
+                        "value INTEGER NOT NULL)")
+            self.conn.commit()
+            logging.info("int_config table created successfully!")
+
             cur.execute("CREATE TABLE IF NOT EXISTS bool_config ("
                         "key TEXT NOT NULL UNIQUE,"
                         "value BOOLEAN NOT NULL)")
@@ -731,15 +737,75 @@ class UserDBManager:
             logging.error(f"Error while adding settings [{key}] \n Error: {e}")
             return False
 
+    def select_int_config(self):
+        cur = self.conn.cursor()
+        try:
+            cur.execute("SELECT * FROM int_config")
+            rows = cur.fetchall()
+            rows = [dict(zip([key[0] for key in cur.description], row)) for row in rows]
+            return rows
+        except Error as e:
+            logging.error(f"Error while selecting all settings \n Error:{e}")
+            return None
+
+    def find_int_config(self, **kwargs):
+        if len(kwargs) != 1:
+            logging.warning("You can only use one key to find settings!")
+            return None
+        rows = []
+        cur = self.conn.cursor()
+        try:
+            for key, value in kwargs.items():
+                cur.execute(f"SELECT * FROM int_config WHERE {key}=?", (value,))
+                rows = cur.fetchall()
+            if len(rows) == 0:
+                logging.info(f"Settings {kwargs} not found!")
+                return None
+            rows = [dict(zip([key[0] for key in cur.description], row)) for row in rows]
+            return rows
+        except Error as e:
+            logging.error(f"Error while finding settings {kwargs} \n Error:{e}")
+            return None
+
+    def edit_int_config(self, key_row, **kwargs):
+        cur = self.conn.cursor()
+        for key, value in kwargs.items():
+            try:
+                cur.execute(f"UPDATE int_config SET {key}=? WHERE key=?", (value, key_row))
+                self.conn.commit()
+                logging.info(f"Settings [{key}] successfully update [{key}] to [{value}]")
+            except Error as e:
+                logging.error(f"Error while updating settings [{key}] [{key}] to [{value}] \n Error: {e}")
+                return False
+
+        return True
+
+    def add_int_config(self, key, value):
+        cur = self.conn.cursor()
+        try:
+            cur.execute(
+                "INSERT INTO int_config(key,value) VALUES(?,?)",
+                (key, value))
+            self.conn.commit()
+            logging.info(f"Settings [{key}] added successfully!")
+            return True
+        except Error as e:
+            logging.error(f"Error while adding settings [{key}] \n Error: {e}")
+            return False
+
     def set_default_configs(self):
         # rows = self.select_bool_config()
         # if not rows:
         try:
             self.add_bool_config("visible_hiddify_hyperlink", True)
             self.add_bool_config("three_random_num_price", True)
+            self.add_bool_config("hiddify_v8_feature", False)
             self.add_str_config("card_number", None)
             self.add_str_config("card_holder", None)
             self.add_str_config("support_username", None)
+            self.add_int_config("min_deposit_amount", 10000)
+            self.add_int_config("alert_remaining_days", 3)
+            self.add_int_config("alert_remaining_size", 3)
 
         except Error as e:
             logging.error(f"Error while setting default configs \n Error:{e}")
