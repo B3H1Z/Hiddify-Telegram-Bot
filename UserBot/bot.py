@@ -13,6 +13,7 @@ from UserBot.content import *
 import Utils.utils as utils
 from Shared.common import admin_bot
 
+BASE_URL = urlparse(PANEL_URL).scheme + "://" + urlparse(PANEL_URL).netloc
 # TELEGRAM_DB.create_user_table()
 # Initialize Bot
 bot = telebot.TeleBot(CLIENT_TOKEN, parse_mode="HTML")
@@ -193,6 +194,11 @@ def renewal_from_wallet_confirm(message: Message):
         return
 
     bot.send_message(message.chat.id, MESSAGES['SUCCESSFUL_RENEWAL'], reply_markup=main_menu_keyboard_markup())
+    link = f"{BASE_URL}/{urlparse(PANEL_URL).path.split('/')[1]}/{uuid}/"
+    user_name = f"<a href='{link}'> {user_info_process['name']} </a>"
+    for ADMIN in ADMINS_ID:
+        #admin_bot.send_message(ADMIN, f"{MESSAGES['ADMIN_NOTIFY_NEW_RENEWAL']} {user_name} {MESSAGES['SUBSCRIPTION']}\n{MESSAGES['ORDER_ID']} {order_id}")
+        admin_bot.send_message(ADMIN, f"{MESSAGES['ADMIN_NOTIFY_NEW_RENEWAL']} {user_name} {MESSAGES['SUBSCRIPTION']}\n{MESSAGES['ORDER_ID']} {order_id}")
 
     # Apply Plan
     # bot.send_message(message.chat.id, MESSAGES['REQUEST_SEND_NAME'], reply_markup=cancel_markup())
@@ -351,6 +357,10 @@ def next_step_send_name_for_buy_from_wallet(message: Message, plan):
     bot.send_message(message.chat.id,
                      f"{MESSAGES['PAYMENT_CONFIRMED']}\n{MESSAGES['ORDER_ID']} {order_id}",
                      reply_markup=main_menu_keyboard_markup())
+    link = f"{BASE_URL}/{urlparse(PANEL_URL).path.split('/')[1]}/{value}/"
+    user_name = f"<a href='{link}'> {name} </a>"
+    for ADMIN in ADMINS_ID:
+        admin_bot.send_message(ADMIN, f"{MESSAGES['ADMIN_NOTIFY_NEW_SUB']} {user_name} {MESSAGES['ADMIN_NOTIFY_CONFIRM']}\n{MESSAGES['ORDER_ID']} {order_id}")
 
 
 # ----------------------------------- Get Free Test Area -----------------------------------
@@ -388,6 +398,10 @@ def next_step_send_name_for_get_free_test(message: Message):
         return
     bot.send_message(message.chat.id, MESSAGES['GET_FREE_CONFIRMED'],
                      reply_markup=main_menu_keyboard_markup())
+    link = f"{BASE_URL}/{urlparse(PANEL_URL).path.split('/')[1]}/{value}/"
+    user_name = f"<a href='{link}'> {name} </a>"
+    for ADMIN in ADMINS_ID:
+        admin_bot.send_message(ADMIN, f"{MESSAGES['ADMIN_NOTIFY_NEW_FREE_TEST']} {user_name} {MESSAGES['ADMIN_NOTIFY_CONFIRM']}\n{MESSAGES['ORDER_ID']} {order_id}")
     # created_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     #
     # # plan_id = 0
