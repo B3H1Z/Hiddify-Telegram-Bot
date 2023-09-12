@@ -23,15 +23,15 @@ fi
 
 if [ "$1" == "pre-release" ]; then
   branch="pre-release"
-  echo -e "${RED}Installing pre-release version...${RED}"
+  echo -e "${RED}Installing pre-release version...${RESET}"
 else
   branch="main" # Default branch
 fi
 
 echo -e "${GREEN}Step 1: Cloning the repository and changing directory...${RESET}"
-echo -e "${RED}Branch: ${branch}${RED}"
-echo -e "${RED}${1}${RED}"
-echo -e "${RED}${2}${RED}"
+echo -e "${RED}Branch: ${branch}${RESET}"
+echo -e "${RED}${1}${RESET}"
+echo -e "${RED}${2}${RESET}"
 repository_url="https://github.com/B3H1Z/Hiddify-Telegram-Bot.git"
 install_dir="/opt/Hiddify-Telegram-Bot"
 
