@@ -35,24 +35,20 @@ echo -e "${RED}${2}${RESET}"
 repository_url="https://github.com/B3H1Z/Hiddify-Telegram-Bot.git"
 install_dir="/opt/Hiddify-Telegram-Bot"
 
+# Set the branch directly
 branch="main"
 
-# Check for command-line arguments
-if [ "$#" -gt 0 ]; then
-    while [ "$#" -gt 0 ]; do
-        case "$1" in
-            --pre-release)
-                pre_release=true
-                ;;
-            *)
-                branch="$1"
-                ;;
-        esac
-        shift
-    done
+# Check if --pre-release was provided
+if [ "$1" = "--pre-release" ]; then
+    pre_release=true
+    shift
 fi
 
-# Check if --pre-release was provided
+# Check if an argument was provided for the branch
+if [ "$#" -gt 0 ]; then
+    branch="$1"
+fi
+
 if [ "$pre_release" = true ]; then
     echo "Pre-release flag detected. Performing pre-release installation on branch '$branch'..."
     # Add your pre-release installation logic here
@@ -60,6 +56,7 @@ else
     echo "Performing regular installation on branch '$branch'..."
     # Add your regular installation logic here
 fi
+
 
 if [ -d "$install_dir" ]; then
   echo "Directory $install_dir exists."
