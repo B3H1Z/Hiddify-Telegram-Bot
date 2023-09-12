@@ -23,7 +23,7 @@ fi
 
 if [ "$1" == "pre-release" ]; then
   branch="pre-release"
-  echo -e "${GREEN}Installing pre-release version...${RESET}"
+  echo -e "${RED}Installing pre-release version...${RED}"
 else
   branch="main" # Default branch
 fi
@@ -35,7 +35,8 @@ install_dir="/opt/Hiddify-Telegram-Bot"
 if [ -d "$install_dir" ]; then
   echo "Directory $install_dir exists."
 else
-  git clone --branch "$branch" "$repository_url" "$install_dir" || display_error_and_exit "Failed to clone the repository."
+  git clone -b "$branch" "$repository_url" "$install_dir" || display_error_and_exit "Failed to clone the repository."
+  echo -e "${GREEN}${branch}${RESET}"
 fi
 
 cd "$install_dir" || display_error_and_exit "Failed to change directory."
