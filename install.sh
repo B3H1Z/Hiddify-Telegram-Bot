@@ -27,7 +27,7 @@ install_dir="/opt/Hiddify-Telegram-Bot"
 
 branch="main"
 
-if [ "$1" == "--pre-release" ]; then
+if [ "$0" == "--pre-release" ]; then
     branch="pre-release"
 fi
 
