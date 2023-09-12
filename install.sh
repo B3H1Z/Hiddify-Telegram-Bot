@@ -44,21 +44,7 @@ fi
 cd "$install_dir" || display_error_and_exit "Failed to change directory."
 
 echo -e "${GREEN}Step 2: Installing requirements...${RESET}"
-if ! pip install -q -r requirements.txt 2>&1 | grep -q "AttributeError: module 'lib' has no attribute 'X509_V_FLAG_CB_ISSUER_CHECK'"; then
-  echo -e "${RED}Failed to install requirements. Removing existing pyopenssl and reinstalling...${RESET}"
-
-  # Remove existing pyopenssl using your original command
-  if ! sudo rm -rf /usr/lib/python3/dist-packages/OpenSSL; then
-    display_error_and_exit "Failed to remove existing pyopenssl. Please check for errors and try again."
-  fi
-
-  # Install pyopenssl
-  if ! sudo pip3 install pyopenssl; then
-    display_error_and_exit "Failed to install pyopenssl. Please check for errors and try again."
-  else
-    echo -e "${GREEN}pyopenssl has been installed.${RESET}"
-  fi
-fi
+pip install -r requirements.txt || display_error_and_exit "Failed to install requirements."
 
 
 echo -e "${GREEN}Step 3: Preparing ...${RESET}"
