@@ -1,4 +1,12 @@
 #!/bin/bash
+branch="main"
+while getopts b: flag
+do
+    case "${flag}" in
+        b) branch=${OPTARG};;
+    esac
+done
+echo "Branch: $branch";
 
 # Define text colors
 GREEN='\033[0;32m'
@@ -34,30 +42,6 @@ echo -e "${RED}${1}${RESET}"
 echo -e "${RED}${2}${RESET}"
 repository_url="https://github.com/B3H1Z/Hiddify-Telegram-Bot.git"
 install_dir="/opt/Hiddify-Telegram-Bot"
-
-# Set the branch directly
-branch="main"
-echo "Command-line arguments: $@"
-
-# Check if --pre-release was provided
-if [ "$1" = "--pre-release" ]; then
-    pre_release=true
-    shift
-fi
-
-# Check if an argument was provided for the branch
-if [ "$#" -gt 0 ]; then
-    branch="$1"
-fi
-
-if [ "$pre_release" = true ]; then
-    echo "Pre-release flag detected. Performing pre-release installation on branch '$branch'..."
-    # Add your pre-release installation logic here
-else
-    echo "Performing regular installation on branch '$branch'..."
-    # Add your regular installation logic here
-fi
-
 
 if [ -d "$install_dir" ]; then
   echo "Directory $install_dir exists."
