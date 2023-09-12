@@ -1,7 +1,7 @@
 #!/bin/bash
 branch="main"
-echo -e "Num0:${RED}${0}${RESET}"
-echo -e "Num1:${RED}${1}${RESET}"
+echo -e "${RED}${0}${RESET}"
+echo -e "${RED}${1}${RESET}"
 echo "Branch: $branch";
 
 # Define text colors
