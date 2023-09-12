@@ -12,7 +12,8 @@ from UserBot.content import *
 
 import Utils.utils as utils
 from Shared.common import admin_bot
-
+from Database.dbManager import USERS_DB
+from Utils.api import api
 
 # TELEGRAM_DB.create_user_table()
 # Initialize Bot
