@@ -3,7 +3,6 @@ import random
 
 import telebot
 from telebot.types import Message, CallbackQuery
-
 from config import *
 from AdminBot.templates import configs_template
 from UserBot.markups import *
@@ -12,6 +11,9 @@ from UserBot.content import *
 
 import Utils.utils as utils
 from Shared.common import admin_bot
+
+from Database.dbManager import USERS_DB
+from Utils.api import api
 
 # TELEGRAM_DB.create_user_table()
 # Initialize Bot
@@ -149,13 +151,13 @@ def renewal_from_wallet_confirm(message: Message):
         del renew_subscription_dict[message.chat.id]
         return
 
-    user = ADMIN_DB.find_user(uuid=uuid)
+    user = api.find(uuid=uuid)
     if not user:
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
         return
 
-    user_info = utils.users_to_dict(user)
+    user_info = utils.users_to_dict([user])
     if not user_info:
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
@@ -180,13 +182,16 @@ def renewal_from_wallet_confirm(message: Message):
     if user_info_process['remaining_day'] <= 0 or user_info_process['usage']['remaining_usage_GB'] <= 0:
         new_usage_limit = plan_info['size_gb']
         new_package_days = plan_info['days']
-        ADMIN_DB.reset_package_usage(uuid=uuid)
-        ADMIN_DB.reset_package_days(uuid=uuid)
+        last_reset_time = datetime.datetime.now().strftime("%Y-%m-%d")
+        api.update(uuid=uuid, usage_limit_GB=new_usage_limit, start_date=last_reset_time)
+        # ADMIN_DB.reset_package_usage(uuid=uuid)
+        # ADMIN_DB.reset_package_days(uuid=uuid)
     else:
         new_usage_limit = user_info['usage_limit_GB'] + plan_info['size_gb']
         new_package_days = user_info['package_days'] + plan_info['days']
 
-    edit_status = ADMIN_DB.edit_user(uuid=uuid, usage_limit_GB=new_usage_limit, package_days=new_package_days)
+    # edit_status = ADMIN_DB.edit_user(uuid=uuid, usage_limit_GB=new_usage_limit, package_days=new_package_days)
+    edit_status = api.update(uuid=uuid, usage_limit_GB=new_usage_limit, package_days=new_package_days)
     if not edit_status:
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
@@ -317,8 +322,8 @@ def next_step_send_name_for_buy_from_wallet(message: Message, plan):
 
     order_id = random.randint(1000000, 9999999)
 
-    value = ADMIN_DB.add_default_user(name, plan['days'], plan['size_gb'],
-                                      int(PANEL_ADMIN_ID))
+    # value = ADMIN_DB.add_default_user(name, plan['days'], plan['size_gb'],)
+    value = api.insert(name=name, usage_limit_GB=plan['size_gb'], package_days=plan['days'])
     if not value:
         bot.send_message(message.chat.id,
                          f"{MESSAGES['UNKNOWN_ERROR']}\n{MESSAGES['ORDER_ID']} {order_id}",
@@ -368,7 +373,9 @@ def next_step_send_name_for_get_free_test(message: Message):
     test_user_size_gb = 1
     test_user_comment = "Free Test User"
 
-    uuid = ADMIN_DB.add_default_user(name, test_user_days, test_user_size_gb, int(PANEL_ADMIN_ID), test_user_comment)
+    # uuid = ADMIN_DB.add_default_user(name, test_user_days, test_user_size_gb, int(PANEL_ADMIN_ID), test_user_comment)
+    uuid = api.insert(name=name, usage_limit_GB=test_user_size_gb, package_days=test_user_days,
+                      comment=test_user_comment)
     if not uuid:
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
@@ -381,7 +388,6 @@ def next_step_send_name_for_get_free_test(message: Message):
         return
 
     edit_user_status = USERS_DB.edit_user(message.chat.id, test_account=True)
-    print(edit_user_status)
     if not edit_user_status:
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
@@ -484,8 +490,9 @@ def next_step_increase_wallet_balance(message):
     amount = utils.toman_to_rial(message.text)
 
     if amount < minimum_deposit_amount:
-        bot.send_message(message.chat.id, f"{MESSAGES['INCREASE_WALLET_BALANCE_AMOUNT']}\n{MESSAGES['MINIMUM_DEPOSIT_AMOUNT']}: "
-                                          f"{rial_to_toman(minimum_deposit_amount)} {MESSAGES['TOMAN']}", reply_markup=cancel_markup())
+        bot.send_message(message.chat.id,
+                         f"{MESSAGES['INCREASE_WALLET_BALANCE_AMOUNT']}\n{MESSAGES['MINIMUM_DEPOSIT_AMOUNT']}: "
+                         f"{rial_to_toman(minimum_deposit_amount)} {MESSAGES['TOMAN']}", reply_markup=cancel_markup())
         bot.register_next_step_handler(message, next_step_increase_wallet_balance)
         return
     settings = utils.all_configs_settings()
@@ -596,12 +603,12 @@ def callback_query(call: CallbackQuery):
                              reply_markup=main_menu_keyboard_markup())
             return
 
-        user = ADMIN_DB.find_user(uuid=sub['uuid'])
+        user = api.find(uuid=sub['uuid'])
         if not user:
             bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                              reply_markup=main_menu_keyboard_markup())
             return
-        user = utils.dict_process(utils.users_to_dict(user))[0]
+        user = utils.dict_process(utils.users_to_dict([user]))[0]
         try:
             bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id,
                                   text=user_info_template(sub['id'], user, MESSAGES['INFO_USER']),
@@ -861,14 +868,15 @@ def start(message: Message):
 
 
 # If user is not in users table, request /start
-@bot.message_handler(func=lambda message: not USERS_DB.find_user(telegram_id=message.chat.id))
-def not_in_users_table(message: Message):
-    bot.send_message(message.chat.id, MESSAGES['REQUEST_START'])
+# @bot.message_handler(func=lambda message: not USERS_DB.find_user(telegram_id=message.chat.id))
+# def not_in_users_table(message: Message):
+#     bot.send_message(message.chat.id, MESSAGES['REQUEST_START'])
 
 
 # User Subscription Status Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['SUBSCRIPTION_STATUS'])
 def subscription_status(message: Message):
+    print(message.chat.id)
     non_order_subs = utils.non_order_user_info(message.chat.id)
     order_subs = utils.order_user_info(message.chat.id)
 

@@ -1,15 +1,20 @@
 # Description: API for connecting to the panel
+import json
+import logging
+import os
 import random
 import string
 from io import BytesIO
 import re
 from datetime import datetime
+from urllib.parse import urlparse
+from Database.dbManager import USERS_DB
 import psutil
 import qrcode
-
-from config import *
+import requests
+from config import PANEL_URL, BACKUP_LOC, CLIENT_TOKEN
 import AdminBot.templates
-
+from Utils.api import api
 # Global variables
 # Make Session for requests
 session = requests.session()
@@ -65,17 +70,34 @@ def post_request(url, data):
 
 
 # Change user data format
+# def users_to_dict(users_dict):
+#     if not users_dict:
+#         return False
+#     users_array = []
+#     for user in users_dict:
+#         users_array.append({'id': user[0], 'uuid': user[1], 'name': user[2], 'last_online': user[3],
+#                             'expiry_time': user[4],
+#                             'usage_limit_GB': user[5], 'package_days': user[6], 'mode': user[7],
+#                             'monthly': user[8], 'start_date': user[9], 'current_usage_GB': user[10],
+#                             'last_reset_time': user[11], 'comment': user[12], 'telegram_id': user[13],
+#                             'added_by': user[14], 'max_ips': user[15], 'enable': user[16]})
+#     return users_array
+
 def users_to_dict(users_dict):
+    print(f"users_dict: {users_dict}")
     if not users_dict:
         return False
     users_array = []
     for user in users_dict:
-        users_array.append({'id': user[0], 'uuid': user[1], 'name': user[2], 'last_online': user[3],
-                            'expiry_time': user[4],
-                            'usage_limit_GB': user[5], 'package_days': user[6], 'mode': user[7],
-                            'monthly': user[8], 'start_date': user[9], 'current_usage_GB': user[10],
-                            'last_reset_time': user[11], 'comment': user[12], 'telegram_id': user[13],
-                            'added_by': user[14], 'max_ips': user[15], 'enable': user[16]})
+        users_array.append({'uuid': user['uuid'], 'name': user['name'], 'last_online': user['last_online'],
+                            'expiry_time': None,
+                            'usage_limit_GB': user['usage_limit_GB'], 'package_days': user['package_days'],
+                            'mode': user['mode'],
+                            'monthly': None, 'start_date': user['start_date'],
+                            'current_usage_GB': user['current_usage_GB'],
+                            'last_reset_time': user['last_reset_time'], 'comment': user['comment'],
+                            'telegram_id': user['telegram_id'],
+                            'added_by': user['added_by_uuid'], 'max_ips': None, 'enable': None})
     return users_array
 
 
@@ -110,9 +132,10 @@ def calculate_remaining_usage(usage_limit_GB, current_usage_GB):
 # Calculate last online time
 def calculate_remaining_last_online(last_online_date_time):
     import datetime
-    if last_online_date_time == "0001-01-01 00:00:00.000000":
+    if last_online_date_time == "0001-01-01 00:00:00.000000" or last_online_date_time == "1-01-01 00:00:00":
         return AdminBot.content.MESSAGES['NEVER']
-    last_online_date_time = datetime.datetime.strptime(last_online_date_time, "%Y-%m-%d %H:%M:%S.%f")
+    # last_online_date_time = datetime.datetime.strptime(last_online_date_time, "%Y-%m-%d %H:%M:%S.%f")
+    last_online_date_time = datetime.datetime.strptime(last_online_date_time, "%Y-%m-%d %H:%M:%S")
     last_online_time = (datetime.datetime.now() - last_online_date_time)
     last_online = AdminBot.templates.last_online_time_template(last_online_time)
     return last_online
@@ -148,7 +171,7 @@ def dict_process(users_dict, sub_id=None):
 # Get single user info - return dict of user info
 def user_info(uuid):
     logging.info(f"Get info of user single user - {uuid}")
-    lu = dict_process(users_to_dict(ADMIN_DB.select_users()))
+    lu = api.select()
     if not lu:
         return False
     for user in lu:
@@ -257,7 +280,8 @@ def system_status():
 
 # Search user by name
 def search_user_by_name(name):
-    users = dict_process(users_to_dict(ADMIN_DB.select_users()))
+    # users = dict_process(users_to_dict(ADMIN_DB.select_users()))
+    users = api.select()
     if not users:
         return False
     res = []
@@ -271,7 +295,8 @@ def search_user_by_name(name):
 
 # Search user by uuid
 def search_user_by_uuid(uuid):
-    users = dict_process(users_to_dict(ADMIN_DB.select_users()))
+    # users = dict_process(users_to_dict(ADMIN_DB.select_users()))
+    users = api.select()
     if not users:
         return False
     for user in users:
@@ -374,9 +399,13 @@ def non_order_user_info(telegram_id):
     non_ordered_subscriptions = USERS_DB.find_non_order_subscription(telegram_id=telegram_id)
     if non_ordered_subscriptions:
         for subscription in non_ordered_subscriptions:
-            non_order_user = ADMIN_DB.find_user(uuid=subscription['uuid'])
+            # non_order_user = ADMIN_DB.find_user(uuid=subscription['uuid'])
+            non_order_user = api.find(subscription['uuid'])
+            # print(f"non_order_user:{non_order_user}")
+            # non_order_user = search_by_property(non_order_user, uuid=subscription['uuid'])
+
             if non_order_user:
-                non_order_user = users_to_dict(non_order_user)
+                non_order_user = users_to_dict([non_order_user])
                 non_order_user = dict_process(non_order_user, subscription['id'])
                 if non_order_user:
                     non_order_user = non_order_user[0]
@@ -393,9 +422,11 @@ def order_user_info(telegram_id):
             ordered_subscriptions = USERS_DB.find_order_subscription(order_id=order['id'])
             if ordered_subscriptions:
                 for subscription in ordered_subscriptions:
-                    order_user = ADMIN_DB.find_user(uuid=subscription['uuid'])
+                    order_user = api.find(subscription['uuid'])
+                    # print(f"order_user:{order_user}")
+                    # order_user = search_by_property(order_user, uuid=subscription['uuid'])
                     if order_user:
-                        order_user = users_to_dict(order_user)
+                        order_user = users_to_dict([order_user])
                         order_user = dict_process(order_user, subscription['id'])
                         if order_user:
                             order_user = order_user[0]
@@ -462,3 +493,12 @@ def toman_to_rial(toman):
 
 def rial_to_toman(rial):
     return int(int(rial) / 10)
+
+
+def search_by_property(list, **kwargs):
+    print(f"kwargs:{kwargs}")
+    for item in list:
+        if all(item[key] == value for key, value in kwargs.items()):
+            print(f"item:{item}")
+            return item
+    return None

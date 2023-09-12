@@ -2,6 +2,14 @@ import datetime
 import logging
 import sqlite3
 from sqlite3 import Error
+from urllib.parse import urlparse
+
+# import config
+# from Utils.utils import PANEL_URL,API_PATH
+from Utils.api import API
+from config import PANEL_URL, API_PATH, USERS_DB_LOC, MAIN_DB_LOC
+
+API = API(PANEL_URL + API_PATH)
 
 
 class AdminDBManager:
@@ -18,6 +26,7 @@ class AdminDBManager:
             return None
 
     def select_users(self):
+        return API.select()
         cur = self.conn.cursor()
         try:
             cur.execute("SELECT * FROM user")
@@ -28,6 +37,7 @@ class AdminDBManager:
             return None
 
     def find_user(self, only_one=False, **kwargs):
+        return API.find(kwargs['uuid'])
         if len(kwargs) != 1:
             logging.warning("You can only use one key to find user!")
             return None
@@ -63,6 +73,17 @@ class AdminDBManager:
             return False
 
     def edit_user(self, uuid, **kwargs):
+        get_old_data = self.find_user(uuid=uuid)
+        if get_old_data is None:
+            print("User not found!")
+            return False
+        for key, value in kwargs.items():
+            if key not in get_old_data.keys():
+                print(f"Invalid key [{key}]")
+                return False
+
+
+        return API.update(uuid, kwargs)
         cur = self.conn.cursor()
 
         for key, value in kwargs.items():
@@ -78,6 +99,7 @@ class AdminDBManager:
 
     def add_user(self, uuid, name, last_online, expiry_time, usage_limit_GB, package_days, mode, monthly, start_date,
                  current_usage_GB, last_reset_time, comment, telegram_id, added_by, max_ips, enable):
+
         cur = self.conn.cursor()
         try:
             cur.execute("INSERT INTO user(uuid, name, last_online, expiry_time, usage_limit_GB, package_days, mode, "
@@ -106,16 +128,20 @@ class AdminDBManager:
             logging.error(f"Error while adding user details [{user_id}] \n Error: {e}")
             return False
 
-    def add_default_user(self, name, package_days, usage_limit_GB, added_by, comment=None, mode='no_reset', monthly=0,
+    def add_default_user(self, name, package_days, usage_limit_GB, added_by=None, comment=None, mode='no_reset', monthly=0,
                          max_ips=100, enable=1, telegram_id=None):
+
+        # logging.info(f"Adding default user [{uuid}]")
+
         import uuid
         uuid = str(uuid.uuid4())
-        logging.info(f"Adding default user [{uuid}]")
         last_online = '0001-01-01 00:00:00.000000'
         expiry_time = (datetime.datetime.now() + datetime.timedelta(days=180)).strftime("%Y-%m-%d")
         start_date = None
         current_usage_GB = 0
+        added_by = urlparse(PANEL_URL).path.split('/')[2]
         last_reset_time = datetime.datetime.now().strftime("%Y-%m-%d")
+        return API.insert(uuid, name, usage_limit_GB, package_days, added_by, last_reset_time)
         user_added = self.add_user(uuid, name, last_online, expiry_time, usage_limit_GB, package_days, mode, monthly,
                                    start_date,
                                    current_usage_GB, last_reset_time, comment, telegram_id, added_by, max_ips, enable)
@@ -190,6 +216,7 @@ class UserDBManager:
         self.conn = self.create_connection(db_file)
         self.create_user_table()
         self.set_default_configs()
+
 
     def create_connection(self, db_file):
         """ Create a database connection to a SQLite database """
@@ -289,8 +316,6 @@ class UserDBManager:
                         "FOREIGN KEY (telegram_id) REFERENCES users (telegram_id))")
             self.conn.commit()
             logging.info("Payments table created successfully!")
-
-
 
 
         except Error as e:
@@ -912,3 +937,6 @@ class UserDBManager:
         except Error as e:
             logging.error(f"Error while finding payment {kwargs} \n Error:{e}")
             return None
+
+# ADMIN_DB = AdminDBManager(MAIN_DB_LOC)
+USERS_DB = UserDBManager(USERS_DB_LOC)

@@ -5,9 +5,10 @@ import os
 from urllib.parse import urlparse
 import requests
 from termcolor import colored
-from Database.dbManager import AdminDBManager
-from Database.dbManager import UserDBManager
 from version import __version__
+
+
+# PANEL_URL, API_PATH = None, None
 
 # Bypass proxy
 os.environ['no_proxy'] = '*'
@@ -36,27 +37,27 @@ try:
     if not os.path.exists(MAIN_DB_LOC):
         logging.error(f"Database file not found in {MAIN_DB_LOC} directory!")
         raise FileNotFoundError("Database file not found!")
-    ADMIN_DB = AdminDBManager(MAIN_DB_LOC)
+    # ADMIN_DB = Database.dbManager.AdminDBManager(MAIN_DB_LOC)
 except Exception as e:
     logging.error(f"Error while connecting to database \n Error:{e}")
     raise Exception("Error while connecting to database")
 
-USERS_DB = None
+# USERS_DB = None
 
 
 def setup_users_db():
-    global USERS_DB
+    # global USERS_DB
     try:
         if not os.path.exists(USERS_DB_LOC):
             logging.error(f"Database file not found in {USERS_DB_LOC} directory!")
             # Create database file
             with open(USERS_DB_LOC, "w") as f:
                 pass
-        USERS_DB = UserDBManager(USERS_DB_LOC)
+        # USERS_DB = Database.dbManager.UserDBManager(USERS_DB_LOC)
     except Exception as e:
         logging.error(f"Error while connecting to database \n Error:{e}")
         raise Exception("Error while connecting to database")
-    return USERS_DB
+    # return USERS_DB
 
 
 def is_config_exists():
@@ -87,8 +88,6 @@ def read_config_file():
 
 
 ADMINS_ID, TELEGRAM_TOKEN, CLIENT_TOKEN, PANEL_URL, LANG, PANEL_ADMIN_ID = None, None, None, None, None, None
-
-
 def set_variables(json):
     global ADMINS_ID, TELEGRAM_TOKEN, PANEL_URL, LANG, PANEL_ADMIN_ID, CLIENT_TOKEN
     ADMINS_ID = json["admin_id"]
@@ -102,7 +101,9 @@ def set_variables(json):
         setup_users_db()
     PANEL_URL = json["url"]
     LANG = json["lang"]
-    PANEL_ADMIN_ID = ADMIN_DB.find_admins(uuid=urlparse(PANEL_URL).path.split('/')[2])
+    # PANEL_ADMIN_ID = ADMIN_DB.find_admins(uuid=urlparse(PANEL_URL).path.split('/')[2])
+    PANEL_ADMIN_ID = urlparse(PANEL_URL).path.split('/')[2]
+    print("PANEL_ADMIN_ID", PANEL_ADMIN_ID)
     if not PANEL_ADMIN_ID:
         print(colored("Admin panel UUID is not valid!", "red"))
         raise Exception("Admin panel UUID is not valid!")
@@ -131,11 +132,11 @@ def panel_url_validator(url):
         return False
     elif request.status_code == 200:
         print(colored("URL is valid!", "green"))
-    admin_url_uuid = urlparse(url).path.split('/')[2]
-    status = ADMIN_DB.find_admins(uuid=admin_url_uuid)
-    if not status:
-        print(colored("Admin URL UUID is not valid!", "red"))
-        return False
+    # admin_url_uuid = urlparse(url).path.split('/')[2]
+    # # status = ADMIN_DB.find_admins(uuid=admin_url_uuid)
+    # if not status:
+    #     print(colored("Admin URL UUID is not valid!", "red"))
+    #     return False
     return url
 
 

@@ -1,20 +1,22 @@
 # Description: Main Bot File
-import random
+import datetime
+import logging
 import time
 import telebot
 from telebot.types import Message, CallbackQuery
 
-from config import *
-from AdminBot.content import BOT_COMMANDS
-from AdminBot.markups import *
-from AdminBot.templates import *
-import Utils.utils as utils
+from config import TELEGRAM_TOKEN, ADMINS_ID, PANEL_ADMIN_ID, CLIENT_TOKEN, MAIN_DB_LOC
+from AdminBot.content import BOT_COMMANDS, MESSAGES, KEY_MARKUP
+from AdminBot import markups
+from AdminBot import templates
+from Utils import utils
 from Shared.common import user_bot
+from Database.dbManager import USERS_DB
+from Utils.api import api
 
 # Initialize Bot
 bot = telebot.TeleBot(TELEGRAM_TOKEN, parse_mode="HTML")
 bot.delete_webhook()
-
 if CLIENT_TOKEN:
     user_bot = user_bot()
 # Bot Start Commands
@@ -23,6 +25,7 @@ try:
         telebot.types.BotCommand("/start", BOT_COMMANDS['START']),
     ])
 except telebot.apihelper.ApiTelegramException as e:
+    print(e.result.json())
     if e.result.status_code == 401:
         logging.error("Invalid Telegram Bot Token!")
         exit(1)
@@ -30,7 +33,8 @@ except telebot.apihelper.ApiTelegramException as e:
 
 # ----------------------------------- Helper Functions -----------------------------------
 # Check if message is digit
-def is_it_digit(message: Message, response=MESSAGES['ERROR_INVALID_NUMBER'], markup=main_menu_keyboard_markup()):
+def is_it_digit(message: Message, response=MESSAGES['ERROR_INVALID_NUMBER'],
+                markup=markups.main_menu_keyboard_markup()):
     if not message.text.isdigit():
         bot.send_message(message.chat.id, response, reply_markup=markup)
         return False
@@ -40,7 +44,7 @@ def is_it_digit(message: Message, response=MESSAGES['ERROR_INVALID_NUMBER'], mar
 # Check if message is cancel
 def is_it_cancel(message: Message, response=MESSAGES['CANCELED']):
     if message.text == KEY_MARKUP['CANCEL']:
-        bot.send_message(message.chat.id, response, reply_markup=main_menu_keyboard_markup())
+        bot.send_message(message.chat.id, response, reply_markup=markups.main_menu_keyboard_markup())
         return True
     return False
 
@@ -55,7 +59,7 @@ def add_user_name(message: Message):
     if is_it_cancel(message):
         return
     add_user_data['name'] = message.text
-    bot.send_message(message.chat.id, MESSAGES['ADD_USER_USAGE_LIMIT'], reply_markup=while_add_user_markup())
+    bot.send_message(message.chat.id, MESSAGES['ADD_USER_USAGE_LIMIT'], reply_markup=markups.while_add_user_markup())
     bot.register_next_step_handler(message, add_user_limit)
 
 
@@ -64,11 +68,11 @@ def add_user_limit(message: Message):
     if is_it_cancel(message):
         return
     if not is_it_digit(message, f"{MESSAGES['ERROR_INVALID_NUMBER']}\n{MESSAGES['ADD_USER_USAGE_LIMIT']}",
-                       while_add_user_markup()):
+                       markups.while_add_user_markup()):
         bot.register_next_step_handler(message, add_user_limit)
         return
     add_user_data['limit'] = message.text
-    bot.send_message(message.chat.id, MESSAGES['ADD_USER_DAYS'], reply_markup=while_add_user_markup())
+    bot.send_message(message.chat.id, MESSAGES['ADD_USER_DAYS'], reply_markup=markups.while_add_user_markup())
     bot.register_next_step_handler(message, add_user_usage_days)
 
 
@@ -77,40 +81,44 @@ def add_user_usage_days(message: Message):
     if is_it_cancel(message, MESSAGES['CANCEL_ADD_USER']):
         return
     if not is_it_digit(message, f"{MESSAGES['ERROR_INVALID_NUMBER']}\n{MESSAGES['ADD_USER_DAYS']}",
-                       while_add_user_markup()):
+                       markups.while_add_user_markup()):
         bot.register_next_step_handler(message, add_user_usage_days)
         return
     add_user_data['usage_days'] = message.text
     bot.send_message(message.chat.id,
                      f"{MESSAGES['ADD_USER_CONFIRM']}\n\n{MESSAGES['INFO_USER']} {add_user_data['name']}\n"
                      f"{MESSAGES['INFO_USAGE']} {add_user_data['limit']} {MESSAGES['GB']}\n{MESSAGES['INFO_REMAINING_DAYS']} {add_user_data['usage_days']} {MESSAGES['DAY']}",
-                     reply_markup=confirm_add_user_markup())
+                     reply_markup=markups.confirm_add_user_markup())
     bot.register_next_step_handler(message, confirm_add_user)
 
 
 # Add User - Confirm to add user
 def confirm_add_user(message: Message):
     if message.text == KEY_MARKUP['CANCEL']:
-        bot.send_message(message.chat.id, MESSAGES['CANCEL_ADD_USER'], reply_markup=main_menu_keyboard_markup())
+        bot.send_message(message.chat.id, MESSAGES['CANCEL_ADD_USER'], reply_markup=markups.main_menu_keyboard_markup())
         return
     if message.text == KEY_MARKUP['CONFIRM']:
         msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'])
-        res = ADMIN_DB.add_default_user(name=add_user_data['name'], package_days=int(add_user_data['usage_days']),
-                                        usage_limit_GB=int(add_user_data['limit']), added_by=int(PANEL_ADMIN_ID))
+        # res = ADMIN_DB.add_default_user(name=add_user_data['name'], package_days=int(add_user_data['usage_days']),
+        #                                 usage_limit_GB=int(add_user_data['limit']))
+        res = api.insert(name=add_user_data['name'], package_days=int(add_user_data['usage_days']),
+                         usage_limit_GB=int(add_user_data['limit']))
         if res:
-            bot.send_message(message.chat.id, MESSAGES['SUCCESS_ADD_USER'], reply_markup=main_menu_keyboard_markup())
+            bot.send_message(message.chat.id, MESSAGES['SUCCESS_ADD_USER'],
+                             reply_markup=markups.main_menu_keyboard_markup())
             usr = utils.user_info(res)
             if not usr:
                 bot.send_message(message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'])
                 return
-            msg = user_info_template(usr, MESSAGES['NEW_USER_INFO'])
+            msg = templates.user_info_template(usr, MESSAGES['NEW_USER_INFO'])
             bot.delete_message(message.chat.id, msg_wait.message_id)
-            bot.send_message(message.chat.id, msg, reply_markup=user_info_markup(usr['uuid']))
+            bot.send_message(message.chat.id, msg, reply_markup=markups.user_info_markup(usr['uuid']))
 
         else:
-            bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=main_menu_keyboard_markup())
+            bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'],
+                             reply_markup=markups.main_menu_keyboard_markup())
     else:
-        bot.send_message(message.chat.id, MESSAGES['CANCEL_ADD_USER'], reply_markup=main_menu_keyboard_markup())
+        bot.send_message(message.chat.id, MESSAGES['CANCEL_ADD_USER'], reply_markup=markups.main_menu_keyboard_markup())
 
 
 # ----------------------------------- Edit User Area -----------------------------------
@@ -118,14 +126,15 @@ def confirm_add_user(message: Message):
 def edit_user_name(message: Message, uuid):
     if is_it_cancel(message):
         return
-    msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=while_edit_user_markup())
-    status = ADMIN_DB.edit_user(uuid, name=message.text)
+    msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=markups.while_edit_user_markup())
+    # status = ADMIN_DB.edit_user(uuid, name=message.text)
+    status = api.update(uuid, name=message.text)
     bot.delete_message(message.chat.id, msg_wait.message_id)
     if not status:
-        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=main_menu_keyboard_markup())
+        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
         return
     bot.send_message(message.chat.id, f"{MESSAGES['SUCCESS_USER_NAME_EDITED']} {message.text} ",
-                     reply_markup=main_menu_keyboard_markup())
+                     reply_markup=markups.main_menu_keyboard_markup())
 
 
 # Edit User - Usage
@@ -134,14 +143,15 @@ def edit_user_usage(message: Message, uuid):
         return
     if not is_it_digit(message):
         return
-    msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=while_edit_user_markup())
-    status = ADMIN_DB.edit_user(uuid, usage_limit_GB=int(message.text))
+    msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=markups.while_edit_user_markup())
+    # status = ADMIN_DB.edit_user(uuid, usage_limit_GB=int(message.text))
+    status = api.update(uuid, usage_limit_GB=int(message.text))
     bot.delete_message(message.chat.id, msg_wait.message_id)
     if not status:
-        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=main_menu_keyboard_markup())
+        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
         return
     bot.send_message(message.chat.id, f"{MESSAGES['SUCCESS_USER_USAGE_EDITED']} {message.text} {MESSAGES['GB']}",
-                     reply_markup=main_menu_keyboard_markup())
+                     reply_markup=markups.main_menu_keyboard_markup())
 
 
 # Edit User - Days
@@ -150,29 +160,31 @@ def edit_user_days(message: Message, uuid):
         return
     if not is_it_digit(message):
         return
-    msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=while_edit_user_markup())
-    status = ADMIN_DB.edit_user(uuid, package_days=int(message.text))
+    msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=markups.while_edit_user_markup())
+    # status = ADMIN_DB.edit_user(uuid, package_days=int(message.text))
+    status = api.update(uuid, package_days=int(message.text))
     bot.delete_message(message.chat.id, msg_wait.message_id)
     if not status:
-        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=main_menu_keyboard_markup())
+        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
         return
     bot.send_message(message.chat.id,
                      f"{MESSAGES['SUCCESS_USER_DAYS_EDITED']} {message.text} {MESSAGES['DAY_EXPIRE']} ",
-                     reply_markup=main_menu_keyboard_markup())
+                     reply_markup=markups.main_menu_keyboard_markup())
 
 
 # Edit User - Comment
 def edit_user_comment(message: Message, uuid):
     if is_it_cancel(message):
         return
-    msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=while_edit_user_markup())
-    status = ADMIN_DB.edit_user(uuid, comment=message.text)
+    msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=markups.while_edit_user_markup())
+    # status = ADMIN_DB.edit_user(uuid, comment=message.text)
+    status = api.update(uuid, comment=message.text)
     bot.delete_message(message.chat.id, msg_wait.message_id)
     if not status:
-        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=main_menu_keyboard_markup())
+        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
         return
     bot.send_message(message.chat.id, f"{MESSAGES['SUCCESS_USER_COMMENT_EDITED']} {message.text} ",
-                     reply_markup=main_menu_keyboard_markup())
+                     reply_markup=markups.main_menu_keyboard_markup())
 
 
 # ----------------------------------- Search User Area -----------------------------------
@@ -180,46 +192,49 @@ def edit_user_comment(message: Message, uuid):
 def search_user_name(message: Message):
     if is_it_cancel(message):
         return
-    msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=while_edit_user_markup())
+    msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=markups.while_edit_user_markup())
     users = utils.search_user_by_name(message.text)
     bot.delete_message(message.chat.id, msg_wait.message_id)
     if not users:
-        bot.send_message(message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'], reply_markup=main_menu_keyboard_markup())
+        bot.send_message(message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'],
+                         reply_markup=markups.main_menu_keyboard_markup())
         return
-    bot.send_message(message.chat.id, MESSAGES['SUCCESS_SEARCH_USER'], reply_markup=main_menu_keyboard_markup())
+    bot.send_message(message.chat.id, MESSAGES['SUCCESS_SEARCH_USER'], reply_markup=markups.main_menu_keyboard_markup())
 
-    bot.send_message(message.chat.id, users_list_template(users, MESSAGES['SEARCH_RESULT']),
-                     reply_markup=users_list_markup(users))
+    bot.send_message(message.chat.id, templates.users_list_template(users, MESSAGES['SEARCH_RESULT']),
+                     reply_markup=markups.users_list_markup(users))
 
 
 # Search User - UUID
 def search_user_uuid(message: Message):
     if is_it_cancel(message):
         return
-    msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=while_edit_user_markup())
+    msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=markups.while_edit_user_markup())
     user = utils.search_user_by_uuid(message.text)
     bot.delete_message(message.chat.id, msg_wait.message_id)
     if not user:
-        bot.send_message(message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'], reply_markup=main_menu_keyboard_markup())
+        bot.send_message(message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'],
+                         reply_markup=markups.main_menu_keyboard_markup())
         return
-    bot.send_message(message.chat.id, MESSAGES['SUCCESS_SEARCH_USER'], reply_markup=main_menu_keyboard_markup())
-    bot.send_message(message.chat.id, user_info_template(user, MESSAGES['SEARCH_RESULT']),
-                     reply_markup=user_info_markup(user['uuid']))
+    bot.send_message(message.chat.id, MESSAGES['SUCCESS_SEARCH_USER'], reply_markup=markups.main_menu_keyboard_markup())
+    bot.send_message(message.chat.id, templates.user_info_template(user, MESSAGES['SEARCH_RESULT']),
+                     reply_markup=markups.user_info_markup(user['uuid']))
 
 
 # Search User - Config
 def search_user_config(message: Message):
     if is_it_cancel(message):
         return
-    msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=while_edit_user_markup())
+    msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=markups.while_edit_user_markup())
     user = utils.search_user_by_config(message.text)
     bot.delete_message(message.chat.id, msg_wait.message_id)
     if not user:
-        bot.send_message(message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'], reply_markup=main_menu_keyboard_markup())
+        bot.send_message(message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'],
+                         reply_markup=markups.main_menu_keyboard_markup())
         return
-    bot.send_message(message.chat.id, MESSAGES['SUCCESS_SEARCH_USER'], reply_markup=main_menu_keyboard_markup())
-    bot.send_message(message.chat.id, user_info_template(user, MESSAGES['SEARCH_RESULT']),
-                     reply_markup=user_info_markup(user['uuid']))
+    bot.send_message(message.chat.id, MESSAGES['SUCCESS_SEARCH_USER'], reply_markup=markups.main_menu_keyboard_markup())
+    bot.send_message(message.chat.id, templates.user_info_template(user, MESSAGES['SEARCH_RESULT']),
+                     reply_markup=markups.user_info_markup(user['uuid']))
 
 
 # ----------------------------------- Users Bot Management Area -----------------------------------
@@ -233,7 +248,8 @@ def users_bot_add_plan_usage(message: Message):
     if not is_it_digit(message):
         return
     add_plan_data['usage'] = int(message.text)
-    bot.send_message(message.chat.id, MESSAGES['USERS_BOT_ADD_PLAN_DAYS'], reply_markup=while_edit_user_markup())
+    bot.send_message(message.chat.id, MESSAGES['USERS_BOT_ADD_PLAN_DAYS'],
+                     reply_markup=markups.while_edit_user_markup())
     bot.register_next_step_handler(message, users_bot_add_plan_days)
 
 
@@ -244,7 +260,8 @@ def users_bot_add_plan_days(message: Message):
     if not is_it_digit(message):
         return
     add_plan_data['days'] = int(message.text)
-    bot.send_message(message.chat.id, MESSAGES['USERS_BOT_ADD_PLAN_PRICE'], reply_markup=while_edit_user_markup())
+    bot.send_message(message.chat.id, MESSAGES['USERS_BOT_ADD_PLAN_PRICE'],
+                     reply_markup=markups.while_edit_user_markup())
     bot.register_next_step_handler(message, users_bot_add_plan_price)
 
 
@@ -255,13 +272,14 @@ def users_bot_add_plan_price(message: Message):
     if not is_it_digit(message):
         return
     add_plan_data['price'] = utils.toman_to_rial(message.text)
-    msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=while_edit_user_markup())
+    msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=markups.while_edit_user_markup())
     status = utils.users_bot_add_plan(add_plan_data['usage'], add_plan_data['days'], add_plan_data['price'])
     bot.delete_message(message.chat.id, msg_wait.message_id)
     if not status:
-        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=main_menu_keyboard_markup())
+        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
         return
-    bot.send_message(message.chat.id, MESSAGES['USERS_BOT_ADD_PLAN_SUCCESS'], reply_markup=main_menu_keyboard_markup())
+    bot.send_message(message.chat.id, MESSAGES['USERS_BOT_ADD_PLAN_SUCCESS'],
+                     reply_markup=markups.main_menu_keyboard_markup())
 
 
 # Users Bot - Edit Owner Info - Username
@@ -269,13 +287,14 @@ def users_bot_edit_owner_info_username(message: Message):
     if is_it_cancel(message):
         return
     if not message.text.startswith('@'):
-        bot.send_message(message.chat.id, MESSAGES['ERROR_INVALID_USERNAME'], reply_markup=main_menu_keyboard_markup())
+        bot.send_message(message.chat.id, MESSAGES['ERROR_INVALID_USERNAME'],
+                         reply_markup=markups.main_menu_keyboard_markup())
         return
     status = USERS_DB.edit_str_config("support_username", value=message.text)
     if not status:
-        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=main_menu_keyboard_markup())
+        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
         return
-    bot.send_message(message.chat.id, MESSAGES['SUCCESS_UPDATE_DATA'], reply_markup=main_menu_keyboard_markup())
+    bot.send_message(message.chat.id, MESSAGES['SUCCESS_UPDATE_DATA'], reply_markup=markups.main_menu_keyboard_markup())
 
 
 # Users Bot - Edit Owner Info - Card Number
@@ -286,14 +305,14 @@ def users_bot_edit_owner_info_card_number(message: Message):
         return
     if len(message.text) != 16:
         bot.send_message(message.chat.id, MESSAGES['ERROR_INVALID_CARD_NUMBER'],
-                         reply_markup=main_menu_keyboard_markup())
+                         reply_markup=markups.main_menu_keyboard_markup())
         return
     status = USERS_DB.edit_str_config("card_number", value=message.text)
 
     if not status:
-        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=main_menu_keyboard_markup())
+        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
         return
-    bot.send_message(message.chat.id, MESSAGES['SUCCESS_UPDATE_DATA'], reply_markup=main_menu_keyboard_markup())
+    bot.send_message(message.chat.id, MESSAGES['SUCCESS_UPDATE_DATA'], reply_markup=markups.main_menu_keyboard_markup())
 
 
 # Users Bot - Edit Owner Info - Cardholder Name
@@ -303,9 +322,9 @@ def users_bot_edit_owner_info_card_name(message: Message):
     status = USERS_DB.edit_str_config("card_holder", value=message.text)
 
     if not status:
-        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=main_menu_keyboard_markup())
+        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
         return
-    bot.send_message(message.chat.id, MESSAGES['SUCCESS_UPDATE_DATA'], reply_markup=main_menu_keyboard_markup())
+    bot.send_message(message.chat.id, MESSAGES['SUCCESS_UPDATE_DATA'], reply_markup=markups.main_menu_keyboard_markup())
 
 
 # Users Bot - Send Message - All Users
@@ -313,13 +332,14 @@ def users_bot_send_msg_users(message: Message):
     if is_it_cancel(message):
         return
     if not CLIENT_TOKEN:
-        bot.send_message(message.chat.id, MESSAGES['ERROR_CLIENT_TOKEN'], reply_markup=main_menu_keyboard_markup())
+        bot.send_message(message.chat.id, MESSAGES['ERROR_CLIENT_TOKEN'],
+                         reply_markup=markups.main_menu_keyboard_markup())
         return
-    msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=while_edit_user_markup())
-    users_number_id = USERS_DB.select_users()
+    msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=markups.while_edit_user_markup())
+    users_number_id = api.select()
     bot.delete_message(message.chat.id, msg_wait.message_id)
     if not users_number_id:
-        bot.send_message(message.chat.id, MESSAGES['ERROR_NO_USERS'], reply_markup=main_menu_keyboard_markup())
+        bot.send_message(message.chat.id, MESSAGES['ERROR_NO_USERS'], reply_markup=markups.main_menu_keyboard_markup())
         return
     for user in users_number_id:
         time.sleep(0.05)
@@ -328,7 +348,8 @@ def users_bot_send_msg_users(message: Message):
         except Exception as e:
             logging.warning(f"Error in send message to user {user['telegram_id']}: {e}")
             continue
-    bot.send_message(message.chat.id, MESSAGES['SUCCESS_SEND_MSG_USERS'], reply_markup=main_menu_keyboard_markup())
+    bot.send_message(message.chat.id, MESSAGES['SUCCESS_SEND_MSG_USERS'],
+                     reply_markup=markups.main_menu_keyboard_markup())
 
 
 # Users Bot - Settings - Update Message
@@ -337,7 +358,7 @@ def users_bot_settings_update_message(message: Message):
 
     bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id,
                           text=f"{MESSAGES['USERS_BOT_SETTINGS']}",
-                          reply_markup=users_bot_management_settings_markup(settings))
+                          reply_markup=markups.users_bot_management_settings_markup(settings))
 
 
 # Users Bot - Order Status
@@ -350,12 +371,13 @@ def users_bot_order_status(message: Message):
 
     payment = USERS_DB.find_payment(id=int(message.text))
     if not payment:
-        bot.send_message(message.chat.id, MESSAGES['ERROR_ORDER_NOT_FOUND'], reply_markup=main_menu_keyboard_markup())
+        bot.send_message(message.chat.id, MESSAGES['ERROR_ORDER_NOT_FOUND'],
+                         reply_markup=markups.main_menu_keyboard_markup())
         return
 
     # plan = USERS_DB.find_plan(id=payment[0]['plan_id'])
     # if not payment:
-    #     bot.send_message(message.chat.id, MESSAGES['ERROR_ORDER_NOT_FOUND'], reply_markup=main_menu_keyboard_markup())
+    #     bot.send_message(message.chat.id, MESSAGES['ERROR_ORDER_NOT_FOUND'], reply_markup=markups.main_menu_keyboard_markup())
     #     return
     payment = payment[0]
     is_it_accepted = None
@@ -369,7 +391,7 @@ def users_bot_order_status(message: Message):
     bot.send_photo(message.chat.id, photo=open(payment['payment_image'], 'rb'),
                    caption=payment_received_template(payment,
                                                      footer=f"{MESSAGES['PAYMENT_ACCEPT_STATUS']} {is_it_accepted}\n{MESSAGES['CREATED_AT']} {payment['created_at']}"),
-                   reply_markup=main_menu_keyboard_markup())
+                   reply_markup=markups.main_menu_keyboard_markup())
 
 
 def users_bot_sub_status(message: Message):
@@ -383,11 +405,13 @@ def users_bot_sub_status(message: Message):
     elif len(message.text) == 8:
         user = USERS_DB.find_non_order_subscription(id=int(message.text))
     else:
-        bot.send_message(message.chat.id, MESSAGES['ERROR_SUB_NOT_FOUND'], reply_markup=main_menu_keyboard_markup())
+        bot.send_message(message.chat.id, MESSAGES['ERROR_SUB_NOT_FOUND'],
+                         reply_markup=markups.main_menu_keyboard_markup())
         return
 
     if not user:
-        bot.send_message(message.chat.id, MESSAGES['ERROR_SUB_NOT_FOUND'], reply_markup=main_menu_keyboard_markup())
+        bot.send_message(message.chat.id, MESSAGES['ERROR_SUB_NOT_FOUND'],
+                         reply_markup=markups.main_menu_keyboard_markup())
         return
     user_uuid = user[0]['uuid']
 
@@ -395,9 +419,10 @@ def users_bot_sub_status(message: Message):
     if not usr:
         bot.send_message(message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'])
         return
-    msg = user_info_template(usr)
+    msg = templates.user_info_template(usr)
     bot.send_message(message.chat.id, msg,
-                     reply_markup=user_info_markup(usr['uuid']))
+                     reply_markup=markups.user_info_markup(usr['uuid']))
+
 
 def users_bot_settings_min_depo(message: Message):
     if is_it_cancel(message):
@@ -407,9 +432,10 @@ def users_bot_settings_min_depo(message: Message):
     new_min_depo = utils.toman_to_rial(message.text)
     status = USERS_DB.edit_int_config("min_deposit_amount", value=new_min_depo)
     if not status:
-        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=main_menu_keyboard_markup())
+        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
         return
-    bot.send_message(message.chat.id, MESSAGES['SUCCESS_UPDATE_DATA'], reply_markup=main_menu_keyboard_markup())
+    bot.send_message(message.chat.id, MESSAGES['SUCCESS_UPDATE_DATA'], reply_markup=markups.main_menu_keyboard_markup())
+
 
 # ----------------------------------- Callbacks -----------------------------------
 # Callback Handler for Inline Buttons
@@ -432,38 +458,43 @@ def callback_query(call: CallbackQuery):
         if not usr:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'])
             return
-        msg = user_info_template(usr)
+        msg = templates.user_info_template(usr)
         bot.send_message(call.message.chat.id, msg,
-                         reply_markup=user_info_markup(usr['uuid']))
+                         reply_markup=markups.user_info_markup(usr['uuid']))
 
     # Next Page Callback
     elif key == "next":
-        users_list = utils.dict_process(utils.users_to_dict(ADMIN_DB.select_users()))
+        # users_list = utils.dict_process(utils.users_to_dict(ADMIN_DB.select_users()))
+        users_list = api.select()
         if not users_list:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'])
             return
         bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,
-                                      reply_markup=users_list_markup(users_list, int(value)))
+                                      reply_markup=markups.users_list_markup(users_list, int(value)))
 
     # ----------------------------------- Single User Info Area Callbacks -----------------------------------
     # Delete User Callback
     elif key == "user_delete":
-        status = ADMIN_DB.delete_user(uuid=value)
+        # status = ADMIN_DB.delete_user(uuid=value)
+        bot.send_message(call.message.chat.id, MESSAGES['FEATUR_UNAVAILABLE'],
+                         reply_markup=markups.main_menu_keyboard_markup())
+        return
         if not status:
-            bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=main_menu_keyboard_markup())
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'],
+                             reply_markup=markups.main_menu_keyboard_markup())
             return
         bot.delete_message(call.message.chat.id, call.message.message_id)
         bot.send_message(call.message.chat.id, MESSAGES['SUCCESS_USER_DELETED'],
-                         reply_markup=main_menu_keyboard_markup())
+                         reply_markup=markups.main_menu_keyboard_markup())
     # Edit User Main Button Callback
     elif key == "user_edit":
         bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,
-                                      reply_markup=edit_user_markup(value))
+                                      reply_markup=markups.edit_user_markup(value))
 
     # Configs User Callback
     elif key == "user_config":
         bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,
-                                      reply_markup=sub_url_user_list_markup(value))
+                                      reply_markup=markups.sub_url_user_list_markup(value))
         return
 
     # ----------------------------------- Edit User Area Callbacks -----------------------------------
@@ -473,38 +504,48 @@ def callback_query(call: CallbackQuery):
         if not usr:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
             return
-        msg = user_info_template(usr, MESSAGES['EDITED_USER_INFO'])
+        msg = templates.user_info_template(usr, MESSAGES['EDITED_USER_INFO'])
         bot.edit_message_text(msg, call.message.chat.id, call.message.message_id,
-                              reply_markup=edit_user_markup(value))
+                              reply_markup=markups.edit_user_markup(value))
     # Edit User - Edit Usage Callback
     elif key == "user_edit_usage":
-        bot.send_message(call.message.chat.id, MESSAGES['ENTER_NEW_USAGE_LIMIT'], reply_markup=while_edit_user_markup())
+        bot.send_message(call.message.chat.id, MESSAGES['ENTER_NEW_USAGE_LIMIT'],
+                         reply_markup=markups.while_edit_user_markup())
         bot.register_next_step_handler(call.message, edit_user_usage, value)
     # Edit User - Reset Usage Callback
     elif key == "user_edit_reset_usage":
-        status = ADMIN_DB.reset_package_usage(uuid=value)
+        status = api.update(uuid=value, current_usage_GB=0)
         if not status:
-            bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=main_menu_keyboard_markup())
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'],
+                             reply_markup=markups.main_menu_keyboard_markup())
             return
-        bot.send_message(call.message.chat.id, MESSAGES['RESET_USAGE'], reply_markup=main_menu_keyboard_markup())
+        bot.send_message(call.message.chat.id, MESSAGES['RESET_USAGE'],
+                         reply_markup=markups.main_menu_keyboard_markup())
     # Edit User - Edit Days Callback
     elif key == "user_edit_days":
-        bot.send_message(call.message.chat.id, MESSAGES['ENTER_NEW_DAYS'], reply_markup=while_edit_user_markup())
+        bot.send_message(call.message.chat.id, MESSAGES['ENTER_NEW_DAYS'],
+                         reply_markup=markups.while_edit_user_markup())
         bot.register_next_step_handler(call.message, edit_user_days, value)
     # Edit User - Reset Days Callback
     elif key == "user_edit_reset_days":
-        status = ADMIN_DB.reset_package_days(uuid=value)
+        # status = ADMIN_DB.reset_package_days(uuid=value)
+        last_reset_time = datetime.datetime.now().strftime("%Y-%m-%d")
+        status = api.update(uuid=value, start_date=last_reset_time)
+        # api.insert()
         if not status:
-            bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=main_menu_keyboard_markup())
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'],
+                             reply_markup=markups.main_menu_keyboard_markup())
             return
-        bot.send_message(call.message.chat.id, MESSAGES['RESET_DAYS'], reply_markup=main_menu_keyboard_markup())
+        bot.send_message(call.message.chat.id, MESSAGES['RESET_DAYS'], reply_markup=markups.main_menu_keyboard_markup())
     # Edit User - Edit Comment Callback
     elif key == "user_edit_comment":
-        bot.send_message(call.message.chat.id, MESSAGES['ENTER_NEW_COMMENT'], reply_markup=while_edit_user_markup())
+        bot.send_message(call.message.chat.id, MESSAGES['ENTER_NEW_COMMENT'],
+                         reply_markup=markups.while_edit_user_markup())
         bot.register_next_step_handler(call.message, edit_user_comment, value)
     # Edit User - Edit Name Callback
     elif key == "user_edit_name":
-        bot.send_message(call.message.chat.id, MESSAGES['ENTER_NEW_NAME'], reply_markup=while_edit_user_markup())
+        bot.send_message(call.message.chat.id, MESSAGES['ENTER_NEW_NAME'],
+                         reply_markup=markups.while_edit_user_markup())
         bot.register_next_step_handler(call.message, edit_user_name, value)
 
     # ----------------------------------- Configs User Info Area Callbacks -----------------------------------
@@ -512,7 +553,7 @@ def callback_query(call: CallbackQuery):
 
     elif key == "conf_dir":
         bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,
-                                      reply_markup=sub_user_list_markup(value))
+                                      reply_markup=markups.sub_user_list_markup(value))
     # User Configs - VLESS Configs Callback
     elif key == "conf_dir_vless":
         sub = utils.sub_links(value)
@@ -526,11 +567,11 @@ def callback_query(call: CallbackQuery):
         if not configs['vless']:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_CONFIG_NOT_FOUND'])
             return
-        msgs = configs_template(configs['vless'])
+        msgs = templates.configs_template(configs['vless'])
         for message in msgs:
             if message:
                 bot.send_message(call.message.chat.id, f"{message}",
-                                 reply_markup=main_menu_keyboard_markup())
+                                 reply_markup=markups.main_menu_keyboard_markup())
     # User Configs - VMess Configs Callback
     elif key == "conf_dir_vmess":
         sub = utils.sub_links(value)
@@ -544,11 +585,11 @@ def callback_query(call: CallbackQuery):
         if not configs['vmess']:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_CONFIG_NOT_FOUND'])
             return
-        msgs = configs_template(configs['vmess'])
+        msgs = templates.configs_template(configs['vmess'])
         for message in msgs:
             if message:
                 bot.send_message(call.message.chat.id, f"{message}",
-                                 reply_markup=main_menu_keyboard_markup())
+                                 reply_markup=markups.main_menu_keyboard_markup())
     # User Configs - Trojan Configs Callback
     elif key == "conf_dir_trojan":
         sub = utils.sub_links(value)
@@ -562,20 +603,20 @@ def callback_query(call: CallbackQuery):
         if not configs['trojan']:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_CONFIG_NOT_FOUND'])
             return
-        msgs = configs_template(configs['trojan'])
+        msgs = templates.configs_template(configs['trojan'])
         for message in msgs:
             if message:
                 bot.send_message(call.message.chat.id, f"{message}",
-                                 reply_markup=main_menu_keyboard_markup())
+                                 reply_markup=markups.main_menu_keyboard_markup())
 
     # User Configs - Main Menu
     elif key == 'configs_list':
         bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,
-                                      reply_markup=sub_url_user_list_markup(value))
+                                      reply_markup=markups.sub_url_user_list_markup(value))
     # User Configs - Direct Link
     elif key == 'conf_dir':
         bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,
-                                      reply_markup=sub_user_list_markup(value))
+                                      reply_markup=markups.sub_user_list_markup(value))
     # User Configs - Vless Configs Callback
     elif key == "conf_dir_vless":
         sub = utils.sub_links(value)
@@ -589,11 +630,11 @@ def callback_query(call: CallbackQuery):
         if not configs['vless']:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_CONFIG_NOT_FOUND'])
             return
-        msgs = configs_template(configs['vless'])
+        msgs = templates.configs_template(configs['vless'])
         for message in msgs:
             if message:
                 bot.send_message(call.message.chat.id, f"{message}",
-                                 reply_markup=main_menu_keyboard_markup())
+                                 reply_markup=markups.main_menu_keyboard_markup())
     # User Configs - VMess Configs Callback
     elif key == "conf_dir_vmess":
         sub = utils.sub_links(value)
@@ -607,11 +648,11 @@ def callback_query(call: CallbackQuery):
         if not configs['vmess']:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_CONFIG_NOT_FOUND'])
             return
-        msgs = configs_template(configs['vmess'])
+        msgs = templates.configs_template(configs['vmess'])
         for message in msgs:
             if message:
                 bot.send_message(call.message.chat.id, f"{message}",
-                                 reply_markup=main_menu_keyboard_markup())
+                                 reply_markup=markups.main_menu_keyboard_markup())
     # User Configs - Trojan Configs Callback
     elif key == "conf_dir_trojan":
         sub = utils.sub_links(value)
@@ -625,11 +666,11 @@ def callback_query(call: CallbackQuery):
         if not configs['trojan']:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_CONFIG_NOT_FOUND'])
             return
-        msgs = configs_template(configs['trojan'])
+        msgs = templates.configs_template(configs['trojan'])
         for message in msgs:
             if message:
                 bot.send_message(call.message.chat.id, f"{message}",
-                                 reply_markup=main_menu_keyboard_markup())
+                                 reply_markup=markups.main_menu_keyboard_markup())
 
     # User Configs - Subscription Configs Callback
     elif key == "conf_sub_url":
@@ -645,7 +686,7 @@ def callback_query(call: CallbackQuery):
             call.message.chat.id,
             photo=qr_code,
             caption=f"{KEY_MARKUP['CONFIGS_SUB']}\n<code>{sub['sub_link']}</code>",
-            reply_markup=main_menu_keyboard_markup()
+            reply_markup=markups.main_menu_keyboard_markup()
         )
     # User Configs - Base64 Subscription Configs Callback
     elif key == "conf_sub_url_b64":
@@ -661,7 +702,7 @@ def callback_query(call: CallbackQuery):
             call.message.chat.id,
             photo=qr_code,
             caption=f"{KEY_MARKUP['CONFIGS_SUB_B64']}\n<code>{sub['sub_link_b64']}</code>",
-            reply_markup=main_menu_keyboard_markup()
+            reply_markup=markups.main_menu_keyboard_markup()
         )
     # User Configs - Subscription Configs For Clash Callback
     elif key == "conf_clash":
@@ -677,7 +718,7 @@ def callback_query(call: CallbackQuery):
             call.message.chat.id,
             photo=qr_code,
             caption=f"{KEY_MARKUP['CONFIGS_CLASH']}\n<code>{sub['clash_configs']}</code>",
-            reply_markup=main_menu_keyboard_markup()
+            reply_markup=markups.main_menu_keyboard_markup()
         )
     # User Configs - Subscription Configs For Hiddify Callback
     elif key == "conf_hiddify":
@@ -693,7 +734,7 @@ def callback_query(call: CallbackQuery):
             call.message.chat.id,
             photo=qr_code,
             caption=f"{KEY_MARKUP['CONFIGS_HIDDIFY']}\n<code>{sub['hiddify_configs']}</code>",
-            reply_markup=main_menu_keyboard_markup()
+            reply_markup=markups.main_menu_keyboard_markup()
         )
 
     elif key == "conf_sub_auto":
@@ -709,7 +750,7 @@ def callback_query(call: CallbackQuery):
             call.message.chat.id,
             photo=qr_code,
             caption=f"{KEY_MARKUP['CONFIGS_SUB_AUTO']}\n<code>{sub['sub_link_auto']}</code>",
-            reply_markup=main_menu_keyboard_markup()
+            reply_markup=markups.main_menu_keyboard_markup()
         )
 
     elif key == "conf_sub_sing_box":
@@ -725,7 +766,7 @@ def callback_query(call: CallbackQuery):
             call.message.chat.id,
             photo=qr_code,
             caption=f"{KEY_MARKUP['CONFIGS_SING_BOX']}\n<code>{sub['sing_box']}</code>",
-            reply_markup=main_menu_keyboard_markup()
+            reply_markup=markups.main_menu_keyboard_markup()
         )
 
     elif key == "conf_sub_full_sing_box":
@@ -741,7 +782,7 @@ def callback_query(call: CallbackQuery):
             call.message.chat.id,
             photo=qr_code,
             caption=f"{KEY_MARKUP['CONFIGS_FULL_SING_BOX']}\n<code>{sub['sing_box_full']}</code>",
-            reply_markup=main_menu_keyboard_markup()
+            reply_markup=markups.main_menu_keyboard_markup()
         )
 
     else:
@@ -750,30 +791,35 @@ def callback_query(call: CallbackQuery):
     # ----------------------------------- Search User Area Callbacks -----------------------------------
     # Search User - Name Callback
     if key == "search_name":
-        bot.send_message(call.message.chat.id, MESSAGES['SEARCH_USER_NAME'], reply_markup=while_edit_user_markup())
+        bot.send_message(call.message.chat.id, MESSAGES['SEARCH_USER_NAME'],
+                         reply_markup=markups.while_edit_user_markup())
         bot.register_next_step_handler(call.message, search_user_name)
     # Search User - UUID Callback
     elif key == "search_uuid":
-        bot.send_message(call.message.chat.id, MESSAGES['SEARCH_USER_UUID'], reply_markup=while_edit_user_markup())
+        bot.send_message(call.message.chat.id, MESSAGES['SEARCH_USER_UUID'],
+                         reply_markup=markups.while_edit_user_markup())
         bot.register_next_step_handler(call.message, search_user_uuid)
     # Search User - Config Callback
     elif key == "search_config":
-        bot.send_message(call.message.chat.id, MESSAGES['SEARCH_USER_CONFIG'], reply_markup=while_edit_user_markup())
+        bot.send_message(call.message.chat.id, MESSAGES['SEARCH_USER_CONFIG'],
+                         reply_markup=markups.while_edit_user_markup())
         bot.register_next_step_handler(call.message, search_user_config)
     # Search User - Expired Callback
     elif key == "search_expired":
-        users_list = utils.dict_process(utils.users_to_dict(ADMIN_DB.select_users()))
+        # users_list = utils.dict_process(utils.users_to_dict(ADMIN_DB.select_users()))
+        users_list = api.select()
         users_list = utils.expired_users_list(users_list)
         if not users_list:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'])
             return
-        msg = users_list_template(users_list, MESSAGES['EXPIRED_USERS_LIST'])
-        bot.send_message(call.message.chat.id, msg, reply_markup=users_list_markup(users_list))
+        msg = templates.users_list_template(users_list, MESSAGES['EXPIRED_USERS_LIST'])
+        bot.send_message(call.message.chat.id, msg, reply_markup=markups.users_list_markup(users_list))
 
     # ----------------------------------- Users Bot Management Callbacks -----------------------------------
     # Plan Management - Add Plan Callback
     elif key == "users_bot_add_plan":
-        bot.send_message(call.message.chat.id, MESSAGES['USERS_BOT_ADD_PLAN'], reply_markup=while_edit_user_markup())
+        bot.send_message(call.message.chat.id, MESSAGES['USERS_BOT_ADD_PLAN'],
+                         reply_markup=markups.while_edit_user_markup())
         bot.send_message(call.message.chat.id, MESSAGES['USERS_BOT_ADD_PLAN_USAGE'])
         bot.register_next_step_handler(call.message, users_bot_add_plan_usage)
 
@@ -792,7 +838,7 @@ def callback_query(call: CallbackQuery):
         if not plans:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_PLAN_NOT_FOUND'])
             return
-        plans_markup = plans_list_markup(plans)
+        plans_markup = markups.plans_list_markup(plans)
         if not plans_markup:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_PLAN_NOT_FOUND'])
             return
@@ -804,31 +850,31 @@ def callback_query(call: CallbackQuery):
     elif key == "users_bot_owner_info":
         owner_info = utils.all_configs_settings()
         bot.send_message(call.message.chat.id,
-                         owner_info_template(owner_info['support_username'], owner_info['card_number'],
-                                             owner_info['card_holder']),
-                         reply_markup=users_bot_edit_owner_info_markup())
+                         templates.owner_info_template(owner_info['support_username'], owner_info['card_number'],
+                                                       owner_info['card_holder']),
+                         reply_markup=markups.users_bot_edit_owner_info_markup())
     # Owner Info - Edit Owner Username Callback
     elif key == "users_bot_owner_info_edit_username":
         bot.send_message(call.message.chat.id, f"{MESSAGES['USERS_BOT_OWNER_INFO_ADD_USERNAME']}",
-                         reply_markup=while_edit_user_markup())
+                         reply_markup=markups.while_edit_user_markup())
         bot.register_next_step_handler(call.message, users_bot_edit_owner_info_username)
 
     # Owner Info - Edit Owner Card Number Callback
     elif key == "users_bot_owner_info_edit_card_number":
         bot.send_message(call.message.chat.id, f"{MESSAGES['USERS_BOT_OWNER_INFO_ADD_CARD_NUMBER']}",
-                         reply_markup=while_edit_user_markup())
+                         reply_markup=markups.while_edit_user_markup())
         bot.register_next_step_handler(call.message, users_bot_edit_owner_info_card_number)
 
     # Owner Info - Edit Owner Cardholder Callback
     elif key == "users_bot_owner_info_edit_card_name":
         bot.send_message(call.message.chat.id, f"{MESSAGES['USERS_BOT_OWNER_INFO_ADD_CARD_NAME']}",
-                         reply_markup=while_edit_user_markup())
+                         reply_markup=markups.while_edit_user_markup())
         bot.register_next_step_handler(call.message, users_bot_edit_owner_info_card_name)
 
     # Send Message - Send Message To All Users Callback
     elif key == "users_bot_send_msg_users":
         bot.send_message(call.message.chat.id, f"{MESSAGES['USERS_BOT_SEND_MSG_USERS']}",
-                         reply_markup=while_edit_user_markup())
+                         reply_markup=markups.while_edit_user_markup())
         bot.register_next_step_handler(call.message, users_bot_send_msg_users)
 
     # User Bot Settings  - Main Settings Callback
@@ -837,9 +883,9 @@ def callback_query(call: CallbackQuery):
         if not settings:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
             return
-        settings = all_configs_settings()
+        settings = utils.all_configs_settings()
         bot.send_message(call.message.chat.id, f"{MESSAGES['USERS_BOT_SETTINGS']}",
-                         reply_markup=users_bot_management_settings_markup(settings))
+                         reply_markup=markups.users_bot_management_settings_markup(settings))
 
     # User Bot Settings  - Set Hyperlink Status Callback
     elif key == "users_bot_settings_hyperlink":
@@ -871,8 +917,9 @@ def callback_query(call: CallbackQuery):
 
     elif key == "users_bot_settings_min_depo":
         settings = utils.all_configs_settings()
-        bot.send_message(call.message.chat.id, f"{MESSAGES['CURRENT_VALUE']}: {rial_to_toman(settings['min_deposit_amount'])}\n{MESSAGES['USERS_BOT_SETTING_MIN_DEPO']}",
-                         reply_markup=while_edit_user_markup())
+        bot.send_message(call.message.chat.id,
+                         f"{MESSAGES['CURRENT_VALUE']}: {utils.rial_to_toman(settings['min_deposit_amount'])}\n{MESSAGES['USERS_BOT_SETTING_MIN_DEPO']}",
+                         reply_markup=markups.while_edit_user_markup())
         bot.register_next_step_handler(call.message, users_bot_settings_min_depo)
 
     elif key == "users_bot_settings_panel_v8":
@@ -1006,9 +1053,9 @@ def callback_query(call: CallbackQuery):
         if not usr:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'])
             return
-        msg = user_info_template(usr)
+        msg = templates.user_info_template(usr)
         bot.edit_message_text(msg, call.message.chat.id, call.message.message_id,
-                              reply_markup=user_info_markup(usr['uuid']))
+                              reply_markup=markups.user_info_markup(usr['uuid']))
 
 
 # Check Admin Permission
@@ -1020,25 +1067,26 @@ def not_admin(message: Message):
 # Send Welcome Message Handler
 @bot.message_handler(commands=['help', 'start', 'restart'])
 def send_welcome(message: Message):
-    bot.reply_to(message, MESSAGES['WELCOME'], reply_markup=main_menu_keyboard_markup())
+    bot.reply_to(message, MESSAGES['WELCOME'], reply_markup=markups.main_menu_keyboard_markup())
 
 
 # Send users list Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['USERS_LIST'])
 def all_users_list(message: Message):
-    users_list = utils.dict_process(utils.users_to_dict(ADMIN_DB.select_users()))
+    # users_list = utils.dict_process(utils.users_to_dict(ADMIN_DB.select_users()))
+    users_list = api.select()
     if not users_list:
         bot.send_message(message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'])
         return
-    msg = users_list_template(users_list)
-    bot.send_message(message.chat.id, msg, reply_markup=users_list_markup(users_list))
+    msg = templates.users_list_template(users_list)
+    bot.send_message(message.chat.id, msg, reply_markup=markups.users_list_markup(users_list))
 
 
 # Add User Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['ADD_USER'])
 def add_user(message: Message):
     global add_user_data
-    bot.send_message(message.chat.id, MESSAGES['ADD_USER_NAME'], reply_markup=while_add_user_markup())
+    bot.send_message(message.chat.id, MESSAGES['ADD_USER_NAME'], reply_markup=markups.while_add_user_markup())
     bot.register_next_step_handler(message, add_user_name)
 
 
@@ -1058,7 +1106,7 @@ def server_backup(message: Message):
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['SERVER_STATUS'])
 def server_status(message: Message):
     msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'])
-    status = system_status_template(utils.system_status())
+    status = templates.system_status_template(utils.system_status())
 
     if status:
         bot.send_message(message.chat.id, status)
@@ -1070,7 +1118,7 @@ def server_status(message: Message):
 # Search User Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['USERS_SEARCH'])
 def search_user(message: Message):
-    bot.send_message(message.chat.id, MESSAGES['SEARCH_USER'], reply_markup=search_user_markup())
+    bot.send_message(message.chat.id, MESSAGES['SEARCH_USER'], reply_markup=markups.search_user_markup())
 
 
 # Users Bot Management Message Handler
@@ -1079,13 +1127,14 @@ def users_bot_management(message: Message):
     if not CLIENT_TOKEN:
         bot.send_message(message.chat.id, MESSAGES['ERROR_CLIENT_TOKEN'])
         return
-    bot.send_message(message.chat.id, KEY_MARKUP['USERS_BOT_MANAGEMENT'], reply_markup=users_bot_management_markup())
+    bot.send_message(message.chat.id, KEY_MARKUP['USERS_BOT_MANAGEMENT'],
+                     reply_markup=markups.users_bot_management_markup())
 
 
 # About Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['ABOUT_BOT'])
 def about_bot(message: Message):
-    bot.send_message(message.chat.id, about_template())
+    bot.send_message(message.chat.id, templates.about_template())
 
 
 # ----------------------------------- Main -----------------------------------

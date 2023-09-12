@@ -103,7 +103,8 @@
         "PAYMENT_ACCEPT_STATUS_WAITING": "🟡Waiting",
         "PAYMENT_ACCEPT_STATUS": "Status:",
         "CREATED_AT": "Created:",
-        "WALLET_PAYMENT_CONFIRMED": "✅Payment confirmed\nYour wallet balance has increased."
+        "WALLET_PAYMENT_CONFIRMED": "✅Payment confirmed\nYour wallet balance has increased.",
+        "FEATUR_UNAVAILABLE": "❌This feature is not available at the moment."
     },
     "FA": {
         "WELCOME": "به ربات مدیریت هیدیفای خوش آمدید.",
@@ -209,6 +210,7 @@
         "PAYMENT_ACCEPT_STATUS_WAITING": "🟡در انتظار تایید",
         "PAYMENT_ACCEPT_STATUS": "وضعیت:",
         "CREATED_AT": "تاریخ ایجاد:",
-        "WALLET_PAYMENT_CONFIRMED": "✅پرداخت شما تایید شد\n از طریق دکمه [💰کیف پول] میتوانید به موجودی کیف پول خود دسترسی داشته باشید."
+        "WALLET_PAYMENT_CONFIRMED": "✅پرداخت شما تایید شد\n از طریق دکمه [💰کیف پول] میتوانید به موجودی کیف پول خود دسترسی داشته باشید.",
+        "FEATUR_UNAVAILABLE": "❌این قابلیت در حال حاضر در دسترس نیست."
     }
 }

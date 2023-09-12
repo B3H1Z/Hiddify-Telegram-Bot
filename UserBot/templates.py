@@ -1,9 +1,8 @@
 # Description: This file contains all the templates used in the bot.
-from config import LANG, USERS_DB
+from config import LANG, USERS_DB_LOC,MAIN_DB_LOC
 from UserBot.content import MESSAGES
 from Utils.utils import rial_to_toman, toman_to_rial,all_configs_settings
-
-
+from Database.dbManager import USERS_DB
 # User Subscription Info Template
 def user_info_template(sub_id, usr, header=""):
     settings = USERS_DB.find_bool_config(key='visible_hiddify_hyperlink')
