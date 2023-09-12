@@ -23,6 +23,7 @@ fi
 
 if [ "$1" == "pre-release" ]; then
   branch="pre-release"
+  echo -e "${GREEN}Installing pre-release version...${RESET}"
 else
   branch="main" # Default branch
 fi
