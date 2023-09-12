@@ -1,9 +1,4 @@
 #!/bin/bash
-branch="main"
-echo -e "${RED}${0}${RESET}"
-echo -e "${RED}${1}${RESET}"
-echo "Branch: $branch";
-
 # Define text colors
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -30,6 +25,10 @@ echo -e "${GREEN}Step 1: Cloning the repository and changing directory...${RESET
 repository_url="https://github.com/B3H1Z/Hiddify-Telegram-Bot.git"
 install_dir="/opt/Hiddify-Telegram-Bot"
 
+branch="main"
+if [ "$0" == "--pre-release" ]; then
+    branch="pre-release"
+    
 if [ -d "$install_dir" ]; then
   echo "Directory $install_dir exists."
 else
