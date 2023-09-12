@@ -30,6 +30,7 @@ if ! command -v python3 &>/dev/null || ! command -v pip &>/dev/null; then
 fi
 
 echo -e "${GREEN}Step 1: Cloning the repository and changing directory...${RESET}"
+echo -e "${RED}${0}${RESET}"
 echo -e "${RED}${1}${RESET}"
 repository_url="https://github.com/B3H1Z/Hiddify-Telegram-Bot.git"
 install_dir="/opt/Hiddify-Telegram-Bot"
