@@ -31,6 +31,7 @@ fi
 echo -e "${GREEN}Step 1: Cloning the repository and changing directory...${RESET}"
 echo -e "${RED}Branch: ${branch}${RED}"
 echo -e "${RED}${1}${RED}"
+echo -e "${RED}${2}${RED}"
 repository_url="https://github.com/B3H1Z/Hiddify-Telegram-Bot.git"
 install_dir="/opt/Hiddify-Telegram-Bot"
 
