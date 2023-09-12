@@ -14,9 +14,6 @@ from Shared.common import admin_bot
 from Database.dbManager import USERS_DB
 from Utils.api import api
 
-from Database.dbManager import USERS_DB
-from Utils.api import api
-
 # TELEGRAM_DB.create_user_table()
 # Initialize Bot
 bot = telebot.TeleBot(CLIENT_TOKEN, parse_mode="HTML")
