@@ -88,10 +88,23 @@ echo -e "${GREEN}Step 6: Adding cron jobs...${RESET}"
 
 add_cron_job_if_not_exists() {
   local cron_job="$1"
-  if ! crontab -l | grep -q "$cron_job"; then
-    (crontab -l 2>/dev/null; echo "$cron_job") | crontab -
+  local current_crontab
+
+  # Normalize the cron job formatting (remove extra spaces)
+  cron_job=$(echo "$cron_job" | sed -e 's/^[ \t]*//' -e 's/[ \t]*$//')
+
+  # Check if the cron job already exists in the current user's crontab
+  current_crontab=$(crontab -l 2>/dev/null || true)
+  
+  if [[ -z "$current_crontab" ]]; then
+    # No existing crontab, so add the new cron job
+    (echo "$cron_job") | crontab -
+  elif ! (echo "$current_crontab" | grep -Fq "$cron_job"); then
+    # Cron job doesn't exist, so append it to the crontab
+    (echo "$current_crontab"; echo "$cron_job") | crontab -
   fi
 }
+
 
 # Add cron job for reboot
 add_cron_job_if_not_exists "@reboot cd $install_dir && ./restart.sh"
