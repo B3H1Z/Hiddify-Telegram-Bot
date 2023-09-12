@@ -37,6 +37,7 @@ install_dir="/opt/Hiddify-Telegram-Bot"
 
 # Set the branch directly
 branch="main"
+echo "Command-line arguments: $@"
 
 # Check if --pre-release was provided
 if [ "$1" = "--pre-release" ]; then
