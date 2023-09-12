@@ -26,8 +26,12 @@ repository_url="https://github.com/B3H1Z/Hiddify-Telegram-Bot.git"
 install_dir="/opt/Hiddify-Telegram-Bot"
 
 branch="main"
-if [ "$0" == "--pre-release" ]; then
+
+if [ "$1" == "--pre-release" ]; then
     branch="pre-release"
+fi
+
+echo "Selected branch: $branch"
     
 if [ -d "$install_dir" ]; then
   echo "Directory $install_dir exists."
