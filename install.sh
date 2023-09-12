@@ -29,6 +29,7 @@ else
 fi
 
 echo -e "${GREEN}Step 1: Cloning the repository and changing directory...${RESET}"
+echo -e "${GREEN}${branch}${RESET}"
 repository_url="https://github.com/B3H1Z/Hiddify-Telegram-Bot.git"
 install_dir="/opt/Hiddify-Telegram-Bot"
 
@@ -36,7 +37,6 @@ if [ -d "$install_dir" ]; then
   echo "Directory $install_dir exists."
 else
   git clone -b "$branch" "$repository_url" "$install_dir" || display_error_and_exit "Failed to clone the repository."
-  echo -e "${GREEN}${branch}${RESET}"
 fi
 
 cd "$install_dir" || display_error_and_exit "Failed to change directory."
