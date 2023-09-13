@@ -5,7 +5,7 @@ import time
 import telebot
 from telebot.types import Message, CallbackQuery
 
-from config import TELEGRAM_TOKEN, ADMINS_ID, PANEL_ADMIN_ID, CLIENT_TOKEN, MAIN_DB_LOC
+from config import TELEGRAM_TOKEN, ADMINS_ID, PANEL_ADMIN_ID, CLIENT_TOKEN
 from AdminBot.content import BOT_COMMANDS, MESSAGES, KEY_MARKUP
 from AdminBot import markups
 from AdminBot import templates

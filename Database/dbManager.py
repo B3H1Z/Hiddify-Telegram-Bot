@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 # import config
 # from Utils.utils import PANEL_URL,API_PATH
 from Utils.api import API
-from config import PANEL_URL, API_PATH, USERS_DB_LOC, MAIN_DB_LOC
+from config import PANEL_URL, API_PATH, USERS_DB_LOC
 
 API = API(PANEL_URL + API_PATH)
 

@@ -12,14 +12,14 @@ from version import __version__
 
 # Bypass proxy
 os.environ['no_proxy'] = '*'
-DEBUG = True
+# DEBUG = True
 
 VERSION = __version__
 
-if DEBUG:
-    MAIN_DB_LOC = os.path.join(os.getcwd(), "hiddifypanel.db")
-else:
-    MAIN_DB_LOC = "/opt/hiddify-config/hiddify-panel/hiddifypanel.db"
+# if DEBUG:
+#     MAIN_DB_LOC = os.path.join(os.getcwd(), "hiddifypanel.db")
+# else:
+#     MAIN_DB_LOC = "/opt/hiddify-config/hiddify-panel/hiddifypanel.db"
 
 USERS_DB_LOC = os.path.join(os.getcwd(), "Database", "hidyBot.db")
 CONF_LOC = os.path.join(os.getcwd(), "config.json")
@@ -32,15 +32,15 @@ logging.basicConfig(handlers=[logging.FileHandler(filename=LOG_LOC,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 
-try:
-    # Check is database file exists
-    if not os.path.exists(MAIN_DB_LOC):
-        logging.error(f"Database file not found in {MAIN_DB_LOC} directory!")
-        raise FileNotFoundError("Database file not found!")
-    # ADMIN_DB = Database.dbManager.AdminDBManager(MAIN_DB_LOC)
-except Exception as e:
-    logging.error(f"Error while connecting to database \n Error:{e}")
-    raise Exception("Error while connecting to database")
+# try:
+#     # Check is database file exists
+#     if not os.path.exists(MAIN_DB_LOC):
+#         logging.error(f"Database file not found in {MAIN_DB_LOC} directory!")
+#         raise FileNotFoundError("Database file not found!")
+#     # ADMIN_DB = Database.dbManager.AdminDBManager(MAIN_DB_LOC)
+# except Exception as e:
+#     logging.error(f"Error while connecting to database \n Error:{e}")
+#     raise Exception("Error while connecting to database")
 
 # USERS_DB = None
 
