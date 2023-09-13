@@ -1,5 +1,4 @@
 #!/bin/bash
-
 # Define text colors
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -21,19 +20,18 @@ if ! command -v python3 &>/dev/null || ! command -v pip &>/dev/null; then
   display_error_and_exit "Python 3 and pip are required. Please install them and try again."
 fi
 
-if [ "$1" == "pre-release" ]; then
-  branch="pre-release"
-  echo -e "${RED}Installing pre-release version...${RESET}"
-else
-  branch="main" # Default branch
-fi
-
 echo -e "${GREEN}Step 1: Cloning the repository and changing directory...${RESET}"
-echo -e "${RED}Branch: ${branch}${RESET}"
-echo -e "${RED}${1}${RESET}"
-echo -e "${RED}${2}${RESET}"
+
 repository_url="https://github.com/B3H1Z/Hiddify-Telegram-Bot.git"
 install_dir="/opt/Hiddify-Telegram-Bot"
+
+branch="main"
+
+if [ "$0" == "--pre-release" ]; then
+    branch="pre-release"
+fi
+
+echo "Selected branch: $branch"
 
 if [ -d "$install_dir" ]; then
   echo "Directory $install_dir exists."
@@ -44,21 +42,7 @@ fi
 cd "$install_dir" || display_error_and_exit "Failed to change directory."
 
 echo -e "${GREEN}Step 2: Installing requirements...${RESET}"
-if ! pip install -q -r requirements.txt 2>&1 | grep -q "AttributeError: module 'lib' has no attribute 'X509_V_FLAG_CB_ISSUER_CHECK'"; then
-  echo -e "${RED}Failed to install requirements. Removing existing pyopenssl and reinstalling...${RESET}"
-
-  # Remove existing pyopenssl using your original command
-  if ! sudo rm -rf /usr/lib/python3/dist-packages/OpenSSL; then
-    display_error_and_exit "Failed to remove existing pyopenssl. Please check for errors and try again."
-  fi
-
-  # Install pyopenssl
-  if ! sudo pip3 install pyopenssl; then
-    display_error_and_exit "Failed to install pyopenssl. Please check for errors and try again."
-  else
-    echo -e "${GREEN}pyopenssl has been installed.${RESET}"
-  fi
-fi
+pip install -r requirements.txt || display_error_and_exit "Failed to install requirements."
 
 
 echo -e "${GREEN}Step 3: Preparing ...${RESET}"
@@ -88,10 +72,23 @@ echo -e "${GREEN}Step 6: Adding cron jobs...${RESET}"
 
 add_cron_job_if_not_exists() {
   local cron_job="$1"
-  if ! crontab -l | grep -q "$cron_job"; then
-    (crontab -l 2>/dev/null; echo "$cron_job") | crontab -
+  local current_crontab
+
+  # Normalize the cron job formatting (remove extra spaces)
+  cron_job=$(echo "$cron_job" | sed -e 's/^[ \t]*//' -e 's/[ \t]*$//')
+
+  # Check if the cron job already exists in the current user's crontab
+  current_crontab=$(crontab -l 2>/dev/null || true)
+
+  if [[ -z "$current_crontab" ]]; then
+    # No existing crontab, so add the new cron job
+    (echo "$cron_job") | crontab -
+  elif ! (echo "$current_crontab" | grep -Fq "$cron_job"); then
+    # Cron job doesn't exist, so append it to the crontab
+    (echo "$current_crontab"; echo "$cron_job") | crontab -
   fi
 }
+
 
 # Add cron job for reboot
 add_cron_job_if_not_exists "@reboot cd $install_dir && ./restart.sh"
