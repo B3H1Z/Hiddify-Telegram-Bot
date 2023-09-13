@@ -203,42 +203,40 @@ def renewal_from_wallet_confirm(message: Message):
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
         return
-    if user_info_process['enable']:
-        if user_info_process['remaining_day'] <= 0 or user_info_process['usage']['remaining_usage_GB'] <= 0:
-            new_usage_limit = plan_info['size_gb']
-            new_package_days = plan_info['days']
-            last_reset_time = datetime.datetime.now().strftime("%Y-%m-%d")
-            api.update(uuid=uuid, usage_limit_GB=new_usage_limit, start_date=last_reset_time)
-        # ADMIN_DB.reset_package_usage(uuid=uuid)
-        # ADMIN_DB.reset_package_days(uuid=uuid)
-        else:
-            new_usage_limit = user_info['usage_limit_GB'] + plan_info['size_gb']
-            new_package_days = user_info['package_days'] + plan_info['days']
+    
+    if user_info_process['remaining_day'] <= 0 or user_info_process['usage']['remaining_usage_GB'] <= 0:
+        new_usage_limit = plan_info['size_gb']
+        new_package_days = plan_info['days']
+        last_reset_time = datetime.datetime.now().strftime("%Y-%m-%d")
+        api.update(uuid=uuid, usage_limit_GB=new_usage_limit, start_date=last_reset_time)
+    # ADMIN_DB.reset_package_usage(uuid=uuid)
+    # ADMIN_DB.reset_package_days(uuid=uuid)
+    else:
+        new_usage_limit = user_info['usage_limit_GB'] + plan_info['size_gb']
+        new_package_days = user_info['package_days'] + plan_info['days']
         
-        #Add New Order
-        order_id = random.randint(1000000, 9999999)
-        created_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        status = USERS_DB.add_order(order_id, message.chat.id, user_info_process['name'], plan_id, created_at)
-        if not status:
-            bot.send_message(message.chat.id,
+    #Add New Order
+    order_id = random.randint(1000000, 9999999)
+    created_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    status = USERS_DB.add_order(order_id, message.chat.id, user_info_process['name'], plan_id, created_at)
+    if not status:
+        bot.send_message(message.chat.id,
                          f"{MESSAGES['UNKNOWN_ERROR']}\n{MESSAGES['ORDER_ID']} {order_id}",
                          reply_markup=main_menu_keyboard_markup())
-            return
-        # edit_status = ADMIN_DB.edit_user(uuid=uuid, usage_limit_GB=new_usage_limit, package_days=new_package_days)
-        edit_status = api.update(uuid=uuid, usage_limit_GB=new_usage_limit, package_days=new_package_days)
-        if not edit_status:
-            bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+        return
+    # edit_status = ADMIN_DB.edit_user(uuid=uuid, usage_limit_GB=new_usage_limit, package_days=new_package_days)
+    edit_status = api.update(uuid=uuid, usage_limit_GB=new_usage_limit, package_days=new_package_days)
+    if not edit_status:
+        bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
-            return
+        return
 
-        bot.send_message(message.chat.id, MESSAGES['SUCCESSFUL_RENEWAL'], reply_markup=main_menu_keyboard_markup())
-        link = f"{BASE_URL}/{urlparse(PANEL_URL).path.split('/')[1]}/{uuid}/"
-        user_name = f"<a href='{link}'> {user_info_process['name']} </a>"
-        for ADMIN in ADMINS_ID:
-            admin_bot.send_message(ADMIN, f"{MESSAGES['ADMIN_NOTIFY_NEW_RENEWAL']} {user_name} {MESSAGES['SUBSCRIPTION']}\n{MESSAGES['ORDER_ID']} {order_id}")
-    else:
-        bot.send_message(message.chat.id, MESSAGES['SUBSCRIPTION_DISABLED_BY_ADMIN'],
-                         reply_markup=main_menu_keyboard_markup())
+    bot.send_message(message.chat.id, MESSAGES['SUCCESSFUL_RENEWAL'], reply_markup=main_menu_keyboard_markup())
+    link = f"{BASE_URL}/{urlparse(PANEL_URL).path.split('/')[1]}/{uuid}/"
+    user_name = f"<a href='{link}'> {user_info_process['name']} </a>"
+    for ADMIN in ADMINS_ID:
+        admin_bot.send_message(ADMIN, f"{MESSAGES['ADMIN_NOTIFY_NEW_RENEWAL']} {user_name} {MESSAGES['SUBSCRIPTION']}\n{MESSAGES['ORDER_ID']} {order_id}")
+
             
 
     # Apply Plan
