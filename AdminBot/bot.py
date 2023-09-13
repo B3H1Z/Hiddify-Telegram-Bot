@@ -353,12 +353,12 @@ def users_bot_send_msg_users(message: Message):
 
 
 # Users Bot - Settings - Update Message
-def users_bot_settings_update_message(message: Message):
+def users_bot_settings_update_message(message: Message, markup):
     settings = utils.all_configs_settings()
 
     bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id,
                           text=f"{MESSAGES['USERS_BOT_SETTINGS']}",
-                          reply_markup=markups.users_bot_management_settings_markup(settings))
+                          reply_markup=markup)
 
 
 # Users Bot - Order Status
@@ -450,6 +450,14 @@ def users_bot_settings_channel_id(message: Message):
         return
     bot.send_message(message.chat.id, MESSAGES['SUCCESS_UPDATE_DATA'], reply_markup=markups.main_menu_keyboard_markup())
 
+def users_bot_settings_welcome_msg(message: Message):
+    if is_it_cancel(message):
+        return
+    status = USERS_DB.edit_str_config("msg_user_start", value=message.text)
+    if not status:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
+        return
+    bot.send_message(message.chat.id, MESSAGES['SUCCESS_UPDATE_DATA'], reply_markup=markups.main_menu_keyboard_markup())
 
 # ----------------------------------- Callbacks -----------------------------------
 # Callback Handler for Inline Buttons
@@ -914,7 +922,7 @@ def callback_query(call: CallbackQuery):
             if not edit_config:
                 bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
                 return
-        users_bot_settings_update_message(call.message)
+        users_bot_settings_update_message(call.message,markups.users_bot_management_settings_markup(settings))
 
     # User Bot Settings  - Set three random letters for define price
     elif key == "users_bot_settings_three_rand_price":
@@ -928,7 +936,7 @@ def callback_query(call: CallbackQuery):
             if not edit_config:
                 bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
                 return
-        users_bot_settings_update_message(call.message)
+        users_bot_settings_update_message(call.message,markups.users_bot_management_settings_markup(settings))
 
     elif key == "users_bot_settings_min_depo":
         settings = utils.all_configs_settings()
@@ -937,18 +945,18 @@ def callback_query(call: CallbackQuery):
                          reply_markup=markups.while_edit_user_markup())
         bot.register_next_step_handler(call.message, users_bot_settings_min_depo)
 
-    elif key == "users_bot_settings_panel_v8":
-        if value == "1":
-            edit_config = USERS_DB.edit_bool_config("hiddify_v8_feature", value=False)
-            if not edit_config:
-                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
-                return
-        elif value == "0":
-            edit_config = USERS_DB.edit_bool_config("hiddify_v8_feature", value=True)
-            if not edit_config:
-                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
-                return
-        users_bot_settings_update_message(call.message)
+    # elif key == "users_bot_settings_panel_v8":
+    #     if value == "1":
+    #         edit_config = USERS_DB.edit_bool_config("hiddify_v8_feature", value=False)
+    #         if not edit_config:
+    #             bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+    #             return
+    #     elif value == "0":
+    #         edit_config = USERS_DB.edit_bool_config("hiddify_v8_feature", value=True)
+    #         if not edit_config:
+    #             bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+    #             return
+    #     users_bot_settings_update_message(call.message)
 
     elif key == "users_bot_settings_channel_id":
         settings = utils.all_configs_settings()
@@ -973,8 +981,42 @@ def callback_query(call: CallbackQuery):
             if not edit_config:
                 bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
                 return
-        users_bot_settings_update_message(call.message)
+        users_bot_settings_update_message(call.message,markups.users_bot_management_settings_markup(settings))
 
+    elif key == "users_bot_settings_visible_sub_menu":
+        settings = utils.all_configs_settings()
+        bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,
+                                      reply_markup=markups.users_bot_management_settings_visible_sub_markup(settings))
+    elif key == "users_bot_settings_visible_sub":
+        settings = utils.all_configs_settings()
+        row_key = value
+        current_status = settings[row_key]
+        if current_status == 1:
+            edit_config = USERS_DB.edit_bool_config(row_key, value=False)
+            if not edit_config:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+                return
+        elif current_status == 0:
+            edit_config = USERS_DB.edit_bool_config(row_key, value=True)
+            if not edit_config:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+                return
+        settings = utils.all_configs_settings()
+        users_bot_settings_update_message(call.message,markups.users_bot_management_settings_visible_sub_markup(settings))
+
+    elif key == "users_bot_settings_set_welcome_msg":
+        settings = utils.all_configs_settings()
+        bot.send_message(call.message.chat.id,
+                         f"{MESSAGES['CURRENT_VALUE']}: {settings['msg_user_start']}\n{MESSAGES['USERS_BOT_SETTING_WELCOME_MSG']}",
+                         reply_markup=markups.while_edit_user_markup())
+        bot.register_next_step_handler(call.message, users_bot_settings_welcome_msg)
+
+    elif key == "users_bot_settings_test_sub":
+        settings = utils.all_configs_settings()
+        bot.send_message(call.message.chat.id,
+                         f"{MESSAGES['CURRENT_VALUE']}: {settings['test_sub']}\n{MESSAGES['USERS_BOT_SETTING_TEST_SUB']}",
+                         reply_markup=markups.while_edit_user_markup())
+        bot.register_next_step_handler(call.message, users_bot_settings_test_sub)
     # User Bot Settings  - Order Status Callback
     elif key == "users_bot_orders_status":
         bot.send_message(call.message.chat.id, f"{MESSAGES['USERS_BOT_ORDER_NUMBER_REQUEST']}")
@@ -983,6 +1025,7 @@ def callback_query(call: CallbackQuery):
     elif key == "users_bot_sub_status":
         bot.send_message(call.message.chat.id, f"{MESSAGES['USERS_BOT_SUB_ID_REQUEST']}")
         bot.register_next_step_handler(call.message, users_bot_sub_status)
+
 
     # ----------------------------------- Payment Callbacks -----------------------------------
     # Payment - Confirm Payment Callback
@@ -1109,6 +1152,7 @@ def not_admin(message: Message):
 @bot.message_handler(commands=['help', 'start', 'restart'])
 def send_welcome(message: Message):
     bot.reply_to(message, MESSAGES['WELCOME'], reply_markup=markups.main_menu_keyboard_markup())
+    bot.send_message(message.chat.id, MESSAGES['REQUEST_JOIN_HIDY'], reply_markup=markups.start_bot_markup())
 
 
 # Send users list Message Handler

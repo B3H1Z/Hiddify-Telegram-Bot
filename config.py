@@ -26,6 +26,7 @@ CONF_LOC = os.path.join(os.getcwd(), "config.json")
 LOG_LOC = os.path.join(os.getcwd(), "Logs", "hidyBot.log")
 BACKUP_LOC = os.path.join(os.getcwd(), "Backup")
 API_PATH = "/api/v1"
+HIDY_BOT_ID = "@HidyBotGroup"
 
 logging.basicConfig(handlers=[logging.FileHandler(filename=LOG_LOC,
                                                   encoding='utf-8', mode='w')],
@@ -56,7 +57,7 @@ def setup_users_db():
         # USERS_DB = Database.dbManager.UserDBManager(USERS_DB_LOC)
     except Exception as e:
         logging.error(f"Error while connecting to database \n Error:{e}")
-        raise Exception("Error while connecting to database")
+        raise Exception(f"Error while connecting to database \nBe in touch with {HIDY_BOT_ID}")
     # return USERS_DB
 
 
@@ -82,7 +83,7 @@ def create_config_file(admin_id, token, url, lang, client_token):
 def read_config_file():
     if not is_config_exists():
         print(colored("Config file not found! Please run config.py script first!", "red"))
-        raise FileNotFoundError(f"{CONF_LOC} file not found!")
+        raise FileNotFoundError(f"{CONF_LOC} file not found!\nBe in touch with {HIDY_BOT_ID}")
     with open(CONF_LOC, "r") as f:
         return json.load(f)
 
@@ -106,7 +107,7 @@ def set_variables(json):
     print("PANEL_ADMIN_ID", PANEL_ADMIN_ID)
     if not PANEL_ADMIN_ID:
         print(colored("Admin panel UUID is not valid!", "red"))
-        raise Exception("Admin panel UUID is not valid!")
+        raise Exception(f"Admin panel UUID is not valid!\nBe in touch with {HIDY_BOT_ID}")
     PANEL_ADMIN_ID = PANEL_ADMIN_ID[0][0]
 
 
