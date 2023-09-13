@@ -32,7 +32,7 @@ if [ "$0" == "--pre-release" ]; then
 fi
 
 echo "Selected branch: $branch"
-
+    
 if [ -d "$install_dir" ]; then
   echo "Directory $install_dir exists."
 else
@@ -79,7 +79,7 @@ add_cron_job_if_not_exists() {
 
   # Check if the cron job already exists in the current user's crontab
   current_crontab=$(crontab -l 2>/dev/null || true)
-
+  
   if [[ -z "$current_crontab" ]]; then
     # No existing crontab, so add the new cron job
     (echo "$cron_job") | crontab -
