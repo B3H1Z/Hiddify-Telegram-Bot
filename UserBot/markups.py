@@ -71,7 +71,7 @@ def plans_list_markup(plans, renewal=False):
     for plan in plans:
         if plan['status']:
             keys.append(InlineKeyboardButton(
-                f"{plan['size_gb']}{MESSAGES['GB']} | {plan['days']}{MESSAGES['DAY_EXPIRE']} | {rial_to_toman(plan['price'])}{MESSAGES['TOMAN']}",
+                f"{plan['size_gb']}{MESSAGES['GB']} | {plan['days']}{MESSAGES['DAY_EXPIRE']} | {rial_to_toman(plan['price'])} {MESSAGES['TOMAN']}",
                 callback_data=f"{callback}:{plan['id']}"))
     if len(keys) == 0:
         return None
@@ -100,3 +100,15 @@ def wallet_info_markup():
     markup.add(
         InlineKeyboardButton(KEY_MARKUP['INCREASE_WALLET_BALANCE'], callback_data=f"increase_wallet_balance:wallet"))
     return markup
+
+def force_join_channel_markup(channel_id):
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 1
+    markup.add(
+        InlineKeyboardButton(KEY_MARKUP['JOIN_CHANNEL'], url=f"https://t.me/{channel_id}",)
+    )
+    markup.add(
+        InlineKeyboardButton(KEY_MARKUP['FORCE_JOIN_CHANNEL_ACCEPTED'], callback_data=f"start:None")
+    )
+    return markup
+

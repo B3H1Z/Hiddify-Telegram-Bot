@@ -48,6 +48,8 @@
         "USERS_BOT_SETTINGS_SHOW_THREE_RAND": "Random 3 Digit Price",
         "USERS_BOT_SETTINGS_MIN_DEPO": "Minimum Deposit",
         "USERS_BOT_SETTINGS_PNL_V8_FEATURES": "Panel V8 Features",
+        "USERS_BOT_SETTINGS_CHANNEL_ID": "Support Channel",
+        "USERS_BOT_SETTINGS_CHANNEL_ّFORCE_JOIN":"Force Join",
         "ABOUT_BOT": "ℹ️",
         "TO_QR": "ً🖼QR"
     },
@@ -96,10 +98,12 @@
         "USERS_BOT_OWNER_INFO_EDIT_CARD_NAME": "ویرایش نام صاحب کارت",
         "USERS_BOT_SEND_MESSAGE_TO_USERS": "📩ارسال پیام همگانی",
         "USERS_BOT_SETTINGS": "⚙️تنظیمات",
-        "USERS_BOT_SETTINGS_SHOW_HIDI_LINK": "User Page Hyperlink",
+        "USERS_BOT_SETTINGS_SHOW_HIDI_LINK": "هایپرلینک هیدیفای",
         "USERS_BOT_SETTINGS_SHOW_THREE_RAND": "مشخصه تصادفی پرداخت",
         "USERS_BOT_SETTINGS_MIN_DEPO": "محدودیت حداقل پرداخت",
         "USERS_BOT_SETTINGS_PNL_V8_FEATURES": "اشتراک های نسخه 8",
+        "USERS_BOT_SETTINGS_CHANNEL_ID": "کانال پشتیبانی",
+        "USERS_BOT_SETTINGS_CHANNEL_ّFORCE_JOIN":"عضویت اجباری",
         "ABOUT_BOT": "ℹ️",
         "TO_QR": "ً🖼کیوآر"
     }

@@ -8,6 +8,7 @@
         "ERROR_CONFIG_NOT_FOUND": "❌Config not found",
         "ERROR_PLAN_NOT_FOUND": "❌Plan not found",
         "ERROR_SUB_NOT_FOUND": "❌Subscription not found",
+        "ERROR_CHANNEL_ID_NOT_SET": "❌Channel ID not set, please set it first.",
         "SUCCESS_USER_DELETED": "✅User deleted",
         "SUCCESS_USER_EDITED": "✅User edited",
         "SUCCESS_USER_ADDED": "✅User added",
@@ -84,6 +85,8 @@
         "USERS_BOT_ORDER_NUMBER_REQUEST": "Please enter the order number:",
         "USERS_BOT_SUB_ID_REQUEST": "Please enter the subscription ID:",
         "USERS_BOT_SETTING_MIN_DEPO": "Please enter the minimum deposit:",
+        "USERS_BOT_SETTING_CHANNEL_ID": "Please enter the channel ID:",
+        "USERS_BOT_SETTING_FORCE_JOIN_HELP": "⭕Please add the bot to your channel and make it admin to work properly.",
         "ERROR_INVALID_USERNAME": "❌Invalid username\nUsername must start with @",
         "ERROR_INVALID_CARD_NUMBER": "❌Invalid card number",
         "PAYMENT_CONFIRMED": "✅Payment confirmed",
@@ -115,6 +118,7 @@
         "ERROR_CONFIG_NOT_FOUND": "❌کانفیگ یافت نشد",
         "ERROR_PLAN_NOT_FOUND": "❌پلن یافت نشد",
         "ERROR_SUB_NOT_FOUND": "❌اشتراکی با این شناسه یافت نشد",
+        "ERROR_CHANNEL_ID_NOT_SET": "❌آیدی کانال پشتیبانی تنظیم نشده است، لطفا ابتدا آن را تنظیم کنید.",
         "SUCCESS_USER_DELETED": "✅کاربر حذف شد",
         "SUCCESS_USER_EDITED": "✅کاربر ویرایش شد",
         "SUCCESS_USER_ADDED": "✅کاربر اضافه شد",
@@ -190,8 +194,10 @@
         "USERS_BOT_ORDER_NUMBER_REQUEST": "لطفا شماره سفارش را وارد کنید:",
         "USERS_BOT_SUB_ID_REQUEST": "لطفا شناسه اشتراک را وارد کنید:",
         "USERS_BOT_SETTING_MIN_DEPO": "لطفا حداقل مبلغ واریزی را تعیین کنید:",
+        "USERS_BOT_SETTING_CHANNEL_ID": "لطفا آیدی کانال را وارد کنید:",
+        "USERS_BOT_SETTING_FORCE_JOIN_HELP": "⭕لطفا برای اجرای این قابلیت، حتما ربات را به کانال خود اضافه و آن را ادمین کنید!",
         "SUCCESS_UPDATE_DATA": "✅اطلاعات با موفقیت به روز شد",
-        "ERROR_INVALID_USERNAME": "❌نام کاربری نامعتبر است\n نام کاربری باید با @ شروع شود",
+        "ERROR_INVALID_USERNAME": "❌آیدی نامعتبر است\n آیدی باید با @ شروع شود",
         "ERROR_INVALID_CARD_NUMBER": "❌شماره کارت نامعتبر است\nشماره کارت باید 16 رقمی باشد",
         "PAYMENT_CONFIRMED": "✅پرداخت شما تایید شد\n از طریق دکمه [📊وضعیت اشتراک] میتوانید به اطلاعات اشتراک خود دسترسی داشته باشید.",
         "PAYMENT_NOT_CONFIRMED": "❌پرداخت شما تایید نشد!\nلطفا اگر اشتباهی صورت گرفته با پشتیبانی در تماس باشید.",

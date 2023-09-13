@@ -32,6 +32,9 @@ except telebot.apihelper.ApiTelegramException as e:
         exit(1)
 
 
+# This function checks if the user is a member of the channel
+
+
 # Check if message is digit
 def is_it_digit(message: Message, response=MESSAGES['ERROR_INVALID_NUMBER'], markup=main_menu_keyboard_markup()):
     if not message.text.isdigit():
@@ -89,6 +92,29 @@ renew_subscription_dict = {}
 #     bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id,
 #                           text=owner_info_template(owner_info['card_number'], owner_info['card_owner'], price),
 #                           reply_markup=send_screenshot_markup(plan_id=plan['id']))
+def user_channel_status(user_id):
+    try:
+        settings = utils.all_configs_settings()
+        if settings['channel_id']:
+            user = bot.get_chat_member(settings['channel_id'], user_id)
+            return user.status in ['member', 'administrator', 'creator']
+        else:
+            return True
+    except telebot.apihelper.ApiException as e:
+        print(e)
+        return False
+
+
+def is_user_in_channel(user_id):
+    settings = all_configs_settings()
+    if settings['force_join_channel'] == 1:
+        if not settings['channel_id']:
+            return True
+        if not user_channel_status(user_id):
+            bot.send_message(user_id, MESSAGES['REQUEST_JOIN_CHANNEL'],
+                             reply_markup=force_join_channel_markup(settings['channel_id']))
+            return False
+    return True
 
 
 # Next Step Buy From Wallet - Confirm
@@ -432,6 +458,8 @@ def next_step_send_name_for_get_free_test(message: Message):
 # ----------------------------------- To QR Area -----------------------------------
 # Next Step QR - QR Code
 def next_step_to_qr(message: Message):
+    if is_it_cancel(message):
+        return
     if not message.text:
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
@@ -534,10 +562,30 @@ def callback_query(call: CallbackQuery):
     data = call.data.split(':')
     key = data[0]
     value = data[1]
-
     # ----------------------------------- Link Subscription Area -----------------------------------
     # Confirm Link Subscription
-    if key == 'confirm_subscription':
+    if key == 'start':
+        bot.delete_message(call.message.chat.id, call.message.message_id)
+        user_id = call.message.chat.id
+        join_status = is_user_in_channel(user_id)
+
+        if not join_status:
+            return
+
+        if USERS_DB.find_user(telegram_id=user_id):
+            bot.send_message(user_id, MESSAGES['WELCOME'], reply_markup=main_menu_keyboard_markup())
+            return
+
+        created_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        status = USERS_DB.add_user(telegram_id=user_id, created_at=created_at)
+
+        if not status:
+            bot.send_message(user_id, MESSAGES['UNKNOWN_ERROR'], reply_markup=main_menu_keyboard_markup())
+            return
+
+        bot.send_message(user_id, MESSAGES['WELCOME'], reply_markup=main_menu_keyboard_markup())
+
+    elif key == 'confirm_subscription':
         edit_status = USERS_DB.add_non_order_subscription(call.message.chat.id, value, )
         if edit_status:
             bot.delete_message(call.message.chat.id, call.message.message_id)
@@ -831,6 +879,8 @@ def callback_query(call: CallbackQuery):
         )
 
 
+
+
     # ----------------------------------- Back Area -----------------------------------
     # Back To User Menu
     elif key == "back_to_user_panel":
@@ -853,7 +903,10 @@ def callback_query(call: CallbackQuery):
 
 # Bot Start Message Handler
 @bot.message_handler(commands=['start'])
-def start(message: Message):
+def start_bot(message: Message):
+    join_status = is_user_in_channel(message.chat.id)
+    if not join_status:
+        return
     if USERS_DB.find_user(telegram_id=message.chat.id):
         bot.send_message(message.chat.id, MESSAGES['WELCOME'], reply_markup=main_menu_keyboard_markup())
         return
@@ -868,15 +921,20 @@ def start(message: Message):
 
 
 # If user is not in users table, request /start
-# @bot.message_handler(func=lambda message: not USERS_DB.find_user(telegram_id=message.chat.id))
-# def not_in_users_table(message: Message):
-#     bot.send_message(message.chat.id, MESSAGES['REQUEST_START'])
+@bot.message_handler(func=lambda message: not USERS_DB.find_user(telegram_id=message.chat.id))
+def not_in_users_table(message: Message):
+    join_status = is_user_in_channel(message.chat.id)
+    if not join_status:
+        return
+    bot.send_message(message.chat.id, MESSAGES['REQUEST_START'])
 
 
 # User Subscription Status Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['SUBSCRIPTION_STATUS'])
 def subscription_status(message: Message):
-    print(message.chat.id)
+    join_status = is_user_in_channel(message.chat.id)
+    if not join_status:
+        return
     non_order_subs = utils.non_order_user_info(message.chat.id)
     order_subs = utils.order_user_info(message.chat.id)
 
@@ -901,6 +959,9 @@ def subscription_status(message: Message):
 # User Buy Subscription Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['BUY_SUBSCRIPTION'])
 def buy_subscription(message: Message):
+    join_status = is_user_in_channel(message.chat.id)
+    if not join_status:
+        return
     plans = USERS_DB.select_plans()
     if not plans:
         bot.send_message(message.chat.id, MESSAGES['PLANS_NOT_FOUND'], reply_markup=main_menu_keyboard_markup())
@@ -915,19 +976,28 @@ def buy_subscription(message: Message):
 # Config To QR Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['TO_QR'])
 def to_qr(message: Message):
-    bot.send_message(message.chat.id, MESSAGES['REQUEST_SEND_TO_QR'])
+    join_status = is_user_in_channel(message.chat.id)
+    if not join_status:
+        return
+    bot.send_message(message.chat.id, MESSAGES['REQUEST_SEND_TO_QR'], reply_markup=cancel_markup())
     bot.register_next_step_handler(message, next_step_to_qr)
 
 
 # Help Guide Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['HELP_GUIDE'])
 def help_guide(message: Message):
+    join_status = is_user_in_channel(message.chat.id)
+    if not join_status:
+        return
     bot.send_message(message.chat.id, connection_help_template(), reply_markup=main_menu_keyboard_markup())
 
 
 # Ticket To Support Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['SEND_TICKET'])
 def send_ticket(message: Message):
+    join_status = is_user_in_channel(message.chat.id)
+    if not join_status:
+        return
     owner_info = USERS_DB.find_str_config(key="support_username")
     bot.send_message(message.chat.id, support_template(owner_info), reply_markup=main_menu_keyboard_markup())
 
@@ -935,6 +1005,9 @@ def send_ticket(message: Message):
 # Link Subscription Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['LINK_SUBSCRIPTION'])
 def link_subscription(message: Message):
+    join_status = is_user_in_channel(message.chat.id)
+    if not join_status:
+        return
     bot.send_message(message.chat.id, MESSAGES['ENTER_SUBSCRIPTION_INFO'], reply_markup=cancel_markup())
     bot.register_next_step_handler(message, next_step_link_subscription)
 
@@ -942,6 +1015,9 @@ def link_subscription(message: Message):
 # User Buy Subscription Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['WALLET'])
 def wallet_balance(message: Message):
+    join_status = is_user_in_channel(message.chat.id)
+    if not join_status:
+        return
     user = USERS_DB.find_user(telegram_id=message.chat.id)
     if user:
         wallet_status = USERS_DB.find_wallet(telegram_id=message.chat.id)
@@ -964,6 +1040,9 @@ def wallet_balance(message: Message):
 # User Buy Subscription Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['FREE_TEST'])
 def wallet_balance(message: Message):
+    join_status = is_user_in_channel(message.chat.id)
+    if not join_status:
+        return
     users = USERS_DB.find_user(telegram_id=message.chat.id)
     if users:
         user = users[0]
@@ -979,6 +1058,9 @@ def wallet_balance(message: Message):
 # Cancel Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['CANCEL'])
 def wallet_balance(message: Message):
+    join_status = is_user_in_channel(message.chat.id)
+    if not join_status:
+        return
     bot.send_message(message.chat.id, MESSAGES['CANCELED'], reply_markup=main_menu_keyboard_markup())
 
 
