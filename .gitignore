@@ -9,4 +9,5 @@ hiddifypanel.db
 config.json
 
 *.pyc
-*.pyo
+*.pyo!/qodana.yaml
+qodana.yaml

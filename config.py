@@ -5,58 +5,60 @@ import os
 from urllib.parse import urlparse
 import requests
 from termcolor import colored
-from Database.dbManager import AdminDBManager
-from Database.dbManager import UserDBManager
 from version import __version__
+
+
+# PANEL_URL, API_PATH = None, None
 
 # Bypass proxy
 os.environ['no_proxy'] = '*'
-DEBUG = False
+# DEBUG = True
 
 VERSION = __version__
 
-if DEBUG:
-    MAIN_DB_LOC = os.path.join(os.getcwd(), "hiddifypanel.db")
-else:
-    MAIN_DB_LOC = "/opt/hiddify-config/hiddify-panel/hiddifypanel.db"
+# if DEBUG:
+#     MAIN_DB_LOC = os.path.join(os.getcwd(), "hiddifypanel.db")
+# else:
+#     MAIN_DB_LOC = "/opt/hiddify-config/hiddify-panel/hiddifypanel.db"
 
 USERS_DB_LOC = os.path.join(os.getcwd(), "Database", "hidyBot.db")
 CONF_LOC = os.path.join(os.getcwd(), "config.json")
 LOG_LOC = os.path.join(os.getcwd(), "Logs", "hidyBot.log")
 BACKUP_LOC = os.path.join(os.getcwd(), "Backup")
 API_PATH = "/api/v1"
+HIDY_BOT_ID = "@HidyBotGroup"
 
 logging.basicConfig(handlers=[logging.FileHandler(filename=LOG_LOC,
                                                   encoding='utf-8', mode='w')],
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 
-try:
-    # Check is database file exists
-    if not os.path.exists(MAIN_DB_LOC):
-        logging.error(f"Database file not found in {MAIN_DB_LOC} directory!")
-        raise FileNotFoundError("Database file not found!")
-    ADMIN_DB = AdminDBManager(MAIN_DB_LOC)
-except Exception as e:
-    logging.error(f"Error while connecting to database \n Error:{e}")
-    raise Exception("Error while connecting to database")
+# try:
+#     # Check is database file exists
+#     if not os.path.exists(MAIN_DB_LOC):
+#         logging.error(f"Database file not found in {MAIN_DB_LOC} directory!")
+#         raise FileNotFoundError("Database file not found!")
+#     # ADMIN_DB = Database.dbManager.AdminDBManager(MAIN_DB_LOC)
+# except Exception as e:
+#     logging.error(f"Error while connecting to database \n Error:{e}")
+#     raise Exception("Error while connecting to database")
 
-USERS_DB = None
+# USERS_DB = None
 
 
 def setup_users_db():
-    global USERS_DB
+    # global USERS_DB
     try:
         if not os.path.exists(USERS_DB_LOC):
             logging.error(f"Database file not found in {USERS_DB_LOC} directory!")
             # Create database file
             with open(USERS_DB_LOC, "w") as f:
                 pass
-        USERS_DB = UserDBManager(USERS_DB_LOC)
+        # USERS_DB = Database.dbManager.UserDBManager(USERS_DB_LOC)
     except Exception as e:
         logging.error(f"Error while connecting to database \n Error:{e}")
-        raise Exception("Error while connecting to database")
-    return USERS_DB
+        raise Exception(f"Error while connecting to database \nBe in touch with {HIDY_BOT_ID}")
+    # return USERS_DB
 
 
 def is_config_exists():
@@ -81,14 +83,12 @@ def create_config_file(admin_id, token, url, lang, client_token):
 def read_config_file():
     if not is_config_exists():
         print(colored("Config file not found! Please run config.py script first!", "red"))
-        raise FileNotFoundError(f"{CONF_LOC} file not found!")
+        raise FileNotFoundError(f"{CONF_LOC} file not found!\nBe in touch with {HIDY_BOT_ID}")
     with open(CONF_LOC, "r") as f:
         return json.load(f)
 
 
 ADMINS_ID, TELEGRAM_TOKEN, CLIENT_TOKEN, PANEL_URL, LANG, PANEL_ADMIN_ID = None, None, None, None, None, None
-
-
 def set_variables(json):
     global ADMINS_ID, TELEGRAM_TOKEN, PANEL_URL, LANG, PANEL_ADMIN_ID, CLIENT_TOKEN
     ADMINS_ID = json["admin_id"]
@@ -102,10 +102,12 @@ def set_variables(json):
         setup_users_db()
     PANEL_URL = json["url"]
     LANG = json["lang"]
-    PANEL_ADMIN_ID = ADMIN_DB.find_admins(uuid=urlparse(PANEL_URL).path.split('/')[2])
+    # PANEL_ADMIN_ID = ADMIN_DB.find_admins(uuid=urlparse(PANEL_URL).path.split('/')[2])
+    PANEL_ADMIN_ID = urlparse(PANEL_URL).path.split('/')[2]
+    print("PANEL_ADMIN_ID", PANEL_ADMIN_ID)
     if not PANEL_ADMIN_ID:
         print(colored("Admin panel UUID is not valid!", "red"))
-        raise Exception("Admin panel UUID is not valid!")
+        raise Exception(f"Admin panel UUID is not valid!\nBe in touch with {HIDY_BOT_ID}")
     PANEL_ADMIN_ID = PANEL_ADMIN_ID[0][0]
 
 
@@ -131,11 +133,11 @@ def panel_url_validator(url):
         return False
     elif request.status_code == 200:
         print(colored("URL is valid!", "green"))
-    admin_url_uuid = urlparse(url).path.split('/')[2]
-    status = ADMIN_DB.find_admins(uuid=admin_url_uuid)
-    if not status:
-        print(colored("Admin URL UUID is not valid!", "red"))
-        return False
+    # admin_url_uuid = urlparse(url).path.split('/')[2]
+    # # status = ADMIN_DB.find_admins(uuid=admin_url_uuid)
+    # if not status:
+    #     print(colored("Admin URL UUID is not valid!", "red"))
+    #     return False
     return url
 
 

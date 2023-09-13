@@ -1,7 +1,6 @@
 # Crontab
-from Cronjob.backup import cron_backup
-from Cronjob.reminder import cron_reminder
 import argparse
+from config import CLIENT_TOKEN
 
 # use argparse to get the arguments
 if __name__ == "__main__":
@@ -12,9 +11,14 @@ if __name__ == "__main__":
 
     # run the functions based on the arguments
     if args.backup:
+        from Cronjob.backup import cron_backup
         cron_backup()
+
     elif args.reminder:
-        cron_reminder()
+        if CLIENT_TOKEN:
+            from Cronjob.reminder import cron_reminder
+            cron_reminder()
+
 
 # To run this file, use this command:
 # python3 crontab.py --backup
