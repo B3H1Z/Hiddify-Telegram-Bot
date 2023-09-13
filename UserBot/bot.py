@@ -11,7 +11,6 @@ from UserBot.content import *
 
 import Utils.utils as utils
 from Shared.common import admin_bot
-
 from Database.dbManager import USERS_DB
 from Utils.api import api
 
@@ -19,7 +18,7 @@ from Utils.api import api
 bot = telebot.TeleBot(CLIENT_TOKEN, parse_mode="HTML")
 bot.remove_webhook()
 admin_bot = admin_bot()
-
+BASE_URL = urlparse(PANEL_URL).scheme + "://" + urlparse(PANEL_URL).netloc
 
 # *********************************** Helper Functions ***********************************
 # Check if message is digit
@@ -176,18 +175,27 @@ def renewal_from_wallet_confirm(message: Message):
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
         return
-
+    
     if user_info_process['remaining_day'] <= 0 or user_info_process['usage']['remaining_usage_GB'] <= 0:
         new_usage_limit = plan_info['size_gb']
         new_package_days = plan_info['days']
         last_reset_time = datetime.datetime.now().strftime("%Y-%m-%d")
         api.update(uuid=uuid, usage_limit_GB=new_usage_limit, start_date=last_reset_time)
-        # ADMIN_DB.reset_package_usage(uuid=uuid)
-        # ADMIN_DB.reset_package_days(uuid=uuid)
+    # ADMIN_DB.reset_package_usage(uuid=uuid)
+    # ADMIN_DB.reset_package_days(uuid=uuid)
     else:
         new_usage_limit = user_info['usage_limit_GB'] + plan_info['size_gb']
         new_package_days = user_info['package_days'] + plan_info['days']
-
+        
+    #Add New Order
+    order_id = random.randint(1000000, 9999999)
+    created_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    status = USERS_DB.add_order(order_id, message.chat.id, user_info_process['name'], plan_id, created_at)
+    if not status:
+        bot.send_message(message.chat.id,
+                         f"{MESSAGES['UNKNOWN_ERROR']}\n{MESSAGES['ORDER_ID']} {order_id}",
+                         reply_markup=main_menu_keyboard_markup())
+        return
     # edit_status = ADMIN_DB.edit_user(uuid=uuid, usage_limit_GB=new_usage_limit, package_days=new_package_days)
     edit_status = api.update(uuid=uuid, usage_limit_GB=new_usage_limit, package_days=new_package_days)
     if not edit_status:
@@ -196,6 +204,12 @@ def renewal_from_wallet_confirm(message: Message):
         return
 
     bot.send_message(message.chat.id, MESSAGES['SUCCESSFUL_RENEWAL'], reply_markup=main_menu_keyboard_markup())
+    link = f"{BASE_URL}/{urlparse(PANEL_URL).path.split('/')[1]}/{uuid}/"
+    user_name = f"<a href='{link}'> {user_info_process['name']} </a>"
+    for ADMIN in ADMINS_ID:
+        admin_bot.send_message(ADMIN, f"{MESSAGES['ADMIN_NOTIFY_NEW_RENEWAL']} {user_name} {MESSAGES['SUBSCRIPTION']}\n{MESSAGES['ORDER_ID']} {order_id}")
+
+            
 
 
 # Next Step Buy Plan - Send Screenshot
@@ -299,6 +313,10 @@ def next_step_send_name_for_buy_from_wallet(message: Message, plan):
     bot.send_message(message.chat.id,
                      f"{MESSAGES['PAYMENT_CONFIRMED']}\n{MESSAGES['ORDER_ID']} {order_id}",
                      reply_markup=main_menu_keyboard_markup())
+    link = f"{BASE_URL}/{urlparse(PANEL_URL).path.split('/')[1]}/{value}/"
+    user_name = f"<a href='{link}'> {name} </a>"
+    for ADMIN in ADMINS_ID:
+        admin_bot.send_message(ADMIN, f"{MESSAGES['ADMIN_NOTIFY_NEW_SUB']} {user_name} {MESSAGES['ADMIN_NOTIFY_CONFIRM']}\n{MESSAGES['ORDER_ID']} {order_id}")
 
 
 # ----------------------------------- Get Free Test Area -----------------------------------
@@ -336,7 +354,11 @@ def next_step_send_name_for_get_free_test(message: Message):
         return
     bot.send_message(message.chat.id, MESSAGES['GET_FREE_CONFIRMED'],
                      reply_markup=main_menu_keyboard_markup())
-
+    link = f"{BASE_URL}/{urlparse(PANEL_URL).path.split('/')[1]}/{uuid}/"
+    user_name = f"<a href='{link}'> {name} </a>"
+    for ADMIN in ADMINS_ID:
+        admin_bot.send_message(ADMIN, f"{MESSAGES['ADMIN_NOTIFY_NEW_FREE_TEST']} {user_name} {MESSAGES['ADMIN_NOTIFY_CONFIRM']}")
+    
 
 # ----------------------------------- To QR Area -----------------------------------
 # Next Step QR - QR Code
