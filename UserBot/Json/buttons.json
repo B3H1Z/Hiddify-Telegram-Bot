@@ -28,7 +28,9 @@
         "INCREASE_WALLET_BALANCE": "💵Increase wallet balance",
         "FREE_TEST": "🔥Free Test",
         "RENEWAL_SUBSCRIPTION": "🔄Renewal Subscription",
-        "UPDATE_SUBSCRIPTION_INFO": "🔄Update Subscription Info"
+        "UPDATE_SUBSCRIPTION_INFO": "🔄Update Subscription Info",
+        "JOIN_CHANNEL": "📢Join Channel",
+        "FORCE_JOIN_CHANNEL_ACCEPTED": "✅I joined"
     },
     "FA": {
         "BACK": "🔙بازگشت",
@@ -59,6 +61,8 @@
         "INCREASE_WALLET_BALANCE": "💵افزایش موجودی",
         "FREE_TEST": "🔥تست رایگان",
         "RENEWAL_SUBSCRIPTION": "🔁تمدید اشتراک",
-        "UPDATE_SUBSCRIPTION_INFO": "🔄بروزرسانی اطلاعات"
+        "UPDATE_SUBSCRIPTION_INFO": "🔄بروزرسانی اطلاعات",
+        "JOIN_CHANNEL": "📢عضویت در کانال",
+        "FORCE_JOIN_CHANNEL_ACCEPTED": "✅عضو شدم"
     }
 }

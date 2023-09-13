@@ -83,7 +83,6 @@ class API:
                 user[key] = kwargs[key]
             response = requests.post(self.url + endpoint, data=json.dumps(user),
                                      headers={'Content-Type': 'application/json'})
-            print(f"UPDATE:{response.text}")
             return uuid
         except Exception as e:
             print(e)

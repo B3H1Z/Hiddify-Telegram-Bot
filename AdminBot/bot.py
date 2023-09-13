@@ -5,7 +5,7 @@ import time
 import telebot
 from telebot.types import Message, CallbackQuery
 
-from config import TELEGRAM_TOKEN, ADMINS_ID, PANEL_ADMIN_ID, CLIENT_TOKEN, MAIN_DB_LOC
+from config import TELEGRAM_TOKEN, ADMINS_ID, PANEL_ADMIN_ID, CLIENT_TOKEN
 from AdminBot.content import BOT_COMMANDS, MESSAGES, KEY_MARKUP
 from AdminBot import markups
 from AdminBot import templates
@@ -336,7 +336,7 @@ def users_bot_send_msg_users(message: Message):
                          reply_markup=markups.main_menu_keyboard_markup())
         return
     msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=markups.while_edit_user_markup())
-    users_number_id = api.select()
+    users_number_id = USERS_DB.select_users()
     bot.delete_message(message.chat.id, msg_wait.message_id)
     if not users_number_id:
         bot.send_message(message.chat.id, MESSAGES['ERROR_NO_USERS'], reply_markup=markups.main_menu_keyboard_markup())
@@ -431,6 +431,20 @@ def users_bot_settings_min_depo(message: Message):
         return
     new_min_depo = utils.toman_to_rial(message.text)
     status = USERS_DB.edit_int_config("min_deposit_amount", value=new_min_depo)
+    if not status:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
+        return
+    bot.send_message(message.chat.id, MESSAGES['SUCCESS_UPDATE_DATA'], reply_markup=markups.main_menu_keyboard_markup())
+
+
+def users_bot_settings_channel_id(message: Message):
+    if is_it_cancel(message):
+        return
+    if not message.text.startswith('@'):
+        bot.send_message(message.chat.id, MESSAGES['ERROR_INVALID_USERNAME'],
+                         reply_markup=markups.main_menu_keyboard_markup())
+        return
+    status = USERS_DB.edit_str_config("channel_id", value=message.text)
     if not status:
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
         return
@@ -722,6 +736,7 @@ def callback_query(call: CallbackQuery):
         )
     # User Configs - Subscription Configs For Hiddify Callback
     elif key == "conf_hiddify":
+        print(value)
         sub = utils.sub_links(value)
         if not sub:
             bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
@@ -934,6 +949,32 @@ def callback_query(call: CallbackQuery):
                 bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
                 return
         users_bot_settings_update_message(call.message)
+
+    elif key == "users_bot_settings_channel_id":
+        settings = utils.all_configs_settings()
+        bot.send_message(call.message.chat.id,
+                         f"{MESSAGES['CURRENT_VALUE']}: {settings['channel_id']}\n{MESSAGES['USERS_BOT_SETTING_CHANNEL_ID']}",
+                         reply_markup=markups.while_edit_user_markup())
+        bot.register_next_step_handler(call.message, users_bot_settings_channel_id)
+
+    elif key == "users_bot_settings_force_join":
+        settings = utils.all_configs_settings()
+        if not settings['channel_id']:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_CHANNEL_ID_NOT_SET'])
+            return
+        if value == "1":
+            edit_config = USERS_DB.edit_bool_config("force_join_channel", value=False)
+            if not edit_config:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+                return
+        elif value == "0":
+            edit_config = USERS_DB.edit_bool_config("force_join_channel", value=True)
+            bot.send_message(call.message.chat.id, MESSAGES['USERS_BOT_SETTING_FORCE_JOIN_HELP'])
+            if not edit_config:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+                return
+        users_bot_settings_update_message(call.message)
+
     # User Bot Settings  - Order Status Callback
     elif key == "users_bot_orders_status":
         bot.send_message(call.message.chat.id, f"{MESSAGES['USERS_BOT_ORDER_NUMBER_REQUEST']}")

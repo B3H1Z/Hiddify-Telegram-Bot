@@ -1,5 +1,5 @@
 # Description: This file contains all the templates used in the bot.
-from config import LANG, USERS_DB_LOC,MAIN_DB_LOC
+from config import LANG
 from UserBot.content import MESSAGES
 from Utils.utils import rial_to_toman, toman_to_rial,all_configs_settings
 from Database.dbManager import USERS_DB

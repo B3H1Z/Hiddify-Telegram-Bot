@@ -84,7 +84,6 @@ def post_request(url, data):
 #     return users_array
 
 def users_to_dict(users_dict):
-    print(f"users_dict: {users_dict}")
     if not users_dict:
         return False
     users_array = []
@@ -495,10 +494,9 @@ def rial_to_toman(rial):
     return int(int(rial) / 10)
 
 
-def search_by_property(list, **kwargs):
-    print(f"kwargs:{kwargs}")
-    for item in list:
-        if all(item[key] == value for key, value in kwargs.items()):
-            print(f"item:{item}")
-            return item
-    return None
+# def search_by_property(list, **kwargs):
+#     for item in list:
+#         if all(item[key] == value for key, value in kwargs.items()):
+#             print(f"item:{item}")
+#             return item
+#     return None

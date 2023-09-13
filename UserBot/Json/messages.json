@@ -62,6 +62,7 @@
         "SUCCESSFUL_RENEWAL": "✅Your subscription has been successfully renewed",
         "REQUEST_START": "Please update the bot with /start command",
         "CANCEL_INCREASE_WALLET_BALANCE": "❌Increase balance not confirmed",
+        "REQUEST_JOIN_CHANNEL": "Please join our channel to use the bot",
         "ADMIN_NOTIFY_NEW_SUB" : "A new subscription was registered with the name of:",
         "ADMIN_NOTIFY_CONFIRM" : "",
         "ADMIN_NOTIFY_NEW_FREE_TEST" : "A new free tesst subscription was registered with the name of:",
@@ -132,12 +133,12 @@
         "SUCCESSFUL_RENEWAL": "✅تمدید اشتراک شما با موفقیت انجام شد",
         "REQUEST_START": "لطفا ربات را با دستور /start شروع کنید",
         "CANCEL_INCREASE_WALLET_BALANCE": "❌افزایش موجودی تایید نشد",
+        "REQUEST_JOIN_CHANNEL": "لطفا برای استفاده از ربات ابتدا در کانال ما عضو شوید",
         "ADMIN_NOTIFY_NEW_SUB" : "اشتراک جدیدی با نام:",
         "ADMIN_NOTIFY_CONFIRM" : "ثبت شد",
         "ADMIN_NOTIFY_NEW_FREE_TEST" : "اشتراک تست رایگان جدیدی با نام:",
         "ADMIN_NOTIFY_NEW_RENEWAL" : "تمدید شد",
         "SUBSCRIPTION" : "اشتراک",
         "SUBSCRIPTION_DISABLED_BY_ADMIN": "شتراک شما توسط ادمین شما غیرفعال شده است. برای اطلاعات بیشترلطفا با ادمین خود تماس حاصل فرمایید"
-    
     }
 }

@@ -1,5 +1,4 @@
 #!/bin/bash
-
 # Define text colors
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -22,19 +21,29 @@ if ! command -v python3 &>/dev/null || ! command -v pip &>/dev/null; then
 fi
 
 echo -e "${GREEN}Step 1: Cloning the repository and changing directory...${RESET}"
+
 repository_url="https://github.com/B3H1Z/Hiddify-Telegram-Bot.git"
 install_dir="/opt/Hiddify-Telegram-Bot"
+
+branch="main"
+
+if [ "$0" == "--pre-release" ]; then
+    branch="pre-release"
+fi
+
+echo "Selected branch: $branch"
 
 if [ -d "$install_dir" ]; then
   echo "Directory $install_dir exists."
 else
-  git clone "$repository_url" "$install_dir" || display_error_and_exit "Failed to clone the repository."
+  git clone -b "$branch" "$repository_url" "$install_dir" || display_error_and_exit "Failed to clone the repository."
 fi
 
 cd "$install_dir" || display_error_and_exit "Failed to change directory."
 
 echo -e "${GREEN}Step 2: Installing requirements...${RESET}"
 pip install -r requirements.txt || display_error_and_exit "Failed to install requirements."
+
 
 echo -e "${GREEN}Step 3: Preparing ...${RESET}"
 logs_dir="$install_dir/Logs"
@@ -61,26 +70,34 @@ nohup python3 hiddifyTelegramBot.py >>/opt/Hiddify-Telegram-Bot/bot.log 2>&1 &
 
 echo -e "${GREEN}Step 6: Adding cron jobs...${RESET}"
 
-if ! crontab -l | grep "@reboot cd $install_dir && ./restart.sh"; then
-  (
-    crontab -l 2>/dev/null
-    echo "@reboot cd $install_dir && ./restart.sh"
-  ) | crontab -
-fi
+add_cron_job_if_not_exists() {
+  local cron_job="$1"
+  local current_crontab
 
-if ! crontab -l | grep "0 */6 * * * cd $install_dir && python3 crontab.py --backup"; then
-  (
-    crontab -l 2>/dev/null
-    echo "0 */6 * * * cd $install_dir && python3 crontab.py --backup"
-  ) | crontab -
-fi
+  # Normalize the cron job formatting (remove extra spaces)
+  cron_job=$(echo "$cron_job" | sed -e 's/^[ \t]*//' -e 's/[ \t]*$//')
 
-if ! crontab -l | grep "0 12 * * * cd $install_dir && python3 crontab.py --reminder"; then
-  (
-    crontab -l 2>/dev/null
-    echo "0 12 * * * cd $install_dir && python3 crontab.py --reminder"
-  ) | crontab -
-fi
+  # Check if the cron job already exists in the current user's crontab
+  current_crontab=$(crontab -l 2>/dev/null || true)
+
+  if [[ -z "$current_crontab" ]]; then
+    # No existing crontab, so add the new cron job
+    (echo "$cron_job") | crontab -
+  elif ! (echo "$current_crontab" | grep -Fq "$cron_job"); then
+    # Cron job doesn't exist, so append it to the crontab
+    (echo "$current_crontab"; echo "$cron_job") | crontab -
+  fi
+}
+
+
+# Add cron job for reboot
+add_cron_job_if_not_exists "@reboot cd $install_dir && ./restart.sh"
+
+# Add cron job to run every 6 hours
+add_cron_job_if_not_exists "0 */6 * * * cd $install_dir && python3 crontab.py --backup"
+
+# Add cron job to run at 12:00 PM daily
+add_cron_job_if_not_exists "0 12 * * * cd $install_dir && python3 crontab.py --reminder"
 
 echo -e "${GREEN}Waiting for a few seconds...${RESET}"
 sleep 5

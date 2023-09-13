@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 # import config
 # from Utils.utils import PANEL_URL,API_PATH
 from Utils.api import API
-from config import PANEL_URL, API_PATH, USERS_DB_LOC, MAIN_DB_LOC
+from config import PANEL_URL, API_PATH, USERS_DB_LOC
 
 API = API(PANEL_URL + API_PATH)
 
@@ -411,7 +411,7 @@ class UserDBManager:
     def select_plans(self):
         cur = self.conn.cursor()
         try:
-            cur.execute("SELECT * FROM plans")
+            cur.execute("SELECT * FROM plans ORDER BY price ASC")
             rows = cur.fetchall()
             rows = [dict(zip([key[0] for key in cur.description], row)) for row in rows]
             return rows
@@ -825,9 +825,11 @@ class UserDBManager:
             self.add_bool_config("visible_hiddify_hyperlink", True)
             self.add_bool_config("three_random_num_price", True)
             self.add_bool_config("hiddify_v8_feature", False)
+            self.add_bool_config("force_join_channel", False)
             self.add_str_config("card_number", None)
             self.add_str_config("card_holder", None)
             self.add_str_config("support_username", None)
+            self.add_str_config("channel_id", None)
             self.add_int_config("min_deposit_amount", 10000)
             self.add_int_config("alert_remaining_days", 3)
             self.add_int_config("alert_remaining_size", 3)
