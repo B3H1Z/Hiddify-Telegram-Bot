@@ -87,6 +87,9 @@
         "USERS_BOT_SETTING_MIN_DEPO": "Please enter the minimum deposit:",
         "USERS_BOT_SETTING_CHANNEL_ID": "Please enter the channel ID:",
         "USERS_BOT_SETTING_FORCE_JOIN_HELP": "⭕Please add the bot to your channel and make it admin to work properly.",
+        "USERS_BOT_SETTING_WELCOME_MSG": "Please enter the welcome message:",
+        "USERS_BOT_SETTINGS_TEST_SUB_DAYS": "Please enter the days of test subscription:",
+        "USERS_BOT_SETTINGS_TEST_SUB_USAGE": "Please enter the usage limit(GB) of test subscription:",
         "ERROR_INVALID_USERNAME": "❌Invalid username\nUsername must start with @",
         "ERROR_INVALID_CARD_NUMBER": "❌Invalid card number",
         "PAYMENT_CONFIRMED": "✅Payment confirmed",
@@ -107,10 +110,11 @@
         "PAYMENT_ACCEPT_STATUS": "Status:",
         "CREATED_AT": "Created:",
         "WALLET_PAYMENT_CONFIRMED": "✅Payment confirmed\nYour wallet balance has increased.",
-        "FEATUR_UNAVAILABLE": "❌This feature is not available at the moment."
+        "FEATUR_UNAVAILABLE": "❌This feature is not available at the moment.",
+        "REQUEST_JOIN_HIDY": "Please join the support group to get the latest information."
     },
     "FA": {
-        "WELCOME": "به ربات مدیریت هیدیفای خوش آمدید.",
+        "WELCOME": "به ربات مدیریت هیدی بات خوش آمدید.",
         "ERROR_INVALID_NUMBER": "❌تنها اعداد مجاز هستند!",
         "ERROR_USER_NOT_FOUND": "❌کاربر یافت نشد",
         "ERROR_INVALID_COMMAND": "❌فرمان نامعتبر",
@@ -196,6 +200,9 @@
         "USERS_BOT_SETTING_MIN_DEPO": "لطفا حداقل مبلغ واریزی را تعیین کنید:",
         "USERS_BOT_SETTING_CHANNEL_ID": "لطفا آیدی کانال را وارد کنید:",
         "USERS_BOT_SETTING_FORCE_JOIN_HELP": "⭕لطفا برای اجرای این قابلیت، حتما ربات را به کانال خود اضافه و آن را ادمین کنید!",
+        "USERS_BOT_SETTING_WELCOME_MSG": "لطفا پیام خوش آمدگویی را تنظیم کنید:",
+        "USERS_BOT_SETTINGS_TEST_SUB_DAYS": "لطفا تعداد روزهای اشتراک تست را تنظیم کنید:",
+        "USERS_BOT_SETTINGS_TEST_SUB_USAGE": "لطفا حجم(گیگابایت) اشتراک تست را تنظیم کنید:",
         "SUCCESS_UPDATE_DATA": "✅اطلاعات با موفقیت به روز شد",
         "ERROR_INVALID_USERNAME": "❌آیدی نامعتبر است\n آیدی باید با @ شروع شود",
         "ERROR_INVALID_CARD_NUMBER": "❌شماره کارت نامعتبر است\nشماره کارت باید 16 رقمی باشد",
@@ -217,6 +224,7 @@
         "PAYMENT_ACCEPT_STATUS": "وضعیت:",
         "CREATED_AT": "تاریخ ایجاد:",
         "WALLET_PAYMENT_CONFIRMED": "✅پرداخت شما تایید شد\n از طریق دکمه [💰کیف پول] میتوانید به موجودی کیف پول خود دسترسی داشته باشید.",
-        "FEATUR_UNAVAILABLE": "❌این قابلیت در حال حاضر در دسترس نیست."
+        "FEATUR_UNAVAILABLE": "❌این قابلیت در حال حاضر در دسترس نیست.",
+        "REQUEST_JOIN_HIDY": "📍جهت دریافت آخرین اطلاعات، در گروه پشتیبانی عضو شوید."
     }
 }

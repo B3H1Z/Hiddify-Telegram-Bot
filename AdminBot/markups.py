@@ -2,7 +2,7 @@
 from telebot.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
 from AdminBot.content import KEY_MARKUP
 from AdminBot.content import MESSAGES
-from config import CLIENT_TOKEN
+from config import CLIENT_TOKEN, HIDY_BOT_ID
 from Utils.utils import all_configs_settings, rial_to_toman
 
 
@@ -100,17 +100,22 @@ def sub_url_user_list_markup(uuid):
     markup = InlineKeyboardMarkup()
     markup.row_width = 2
     settings = all_configs_settings()
-    markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_DIR'], callback_data=f"conf_dir:{uuid}"))
-    if settings['hiddify_v8_feature']:
+    if settings['visible_conf_dir']:
+        markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_DIR'], callback_data=f"conf_dir:{uuid}"))
+    if settings['visible_conf_sub_auto']:
         markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_SUB_AUTO'], callback_data=f"conf_sub_auto:{uuid}"))
-
-    markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_SUB'], callback_data=f"conf_sub_url:{uuid}"),
-               InlineKeyboardButton(KEY_MARKUP['CONFIGS_SUB_B64'], callback_data=f"conf_sub_url_b64:{uuid}"))
-    markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_CLASH'], callback_data=f"conf_clash:{uuid}"),
-               InlineKeyboardButton(KEY_MARKUP['CONFIGS_HIDDIFY'], callback_data=f"conf_hiddify:{uuid}"))
-    if settings['hiddify_v8_feature']:
-        markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_SING_BOX'], callback_data=f"conf_sub_sing_box:{uuid}"),
-                   InlineKeyboardButton(KEY_MARKUP['CONFIGS_FULL_SING_BOX'],
+    if settings['visible_conf_sub_url']:
+        markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_SUB'], callback_data=f"conf_sub_url:{uuid}"))
+    if settings['visible_conf_sub_url_b64']:
+        markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_SUB_B64'], callback_data=f"conf_sub_url_b64:{uuid}"))
+    if settings['visible_conf_clash']:
+        markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_CLASH'], callback_data=f"conf_clash:{uuid}"))
+    if settings['visible_conf_hiddify']:
+        markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_HIDDIFY'], callback_data=f"conf_hiddify:{uuid}"))
+    if settings['visible_conf_sub_sing_box']:
+        markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_SING_BOX'], callback_data=f"conf_sub_sing_box:{uuid}"))
+    if settings['visible_conf_sub_full_sing_box']:
+        markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_FULL_SING_BOX'],
                                         callback_data=f"conf_sub_full_sing_box:{uuid}"))
 
     markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_user_panel:{uuid}"))
@@ -162,20 +167,58 @@ def users_bot_management_settings_markup(settings):
     markup.row_width = 1
     status_hyperlink = "✅" if settings['visible_hiddify_hyperlink'] else "❌"
     status_three_rand = "✅" if settings['three_random_num_price'] else "❌"
-    status_panel_v8 = "✅" if settings['hiddify_v8_feature'] else "❌"
     status_force_join = "✅" if settings['force_join_channel'] else "❌"
     markup.add(InlineKeyboardButton(f"{KEY_MARKUP['USERS_BOT_SETTINGS_SHOW_HIDI_LINK']} | {status_hyperlink}",
                                     callback_data=f"users_bot_settings_hyperlink:{settings['visible_hiddify_hyperlink']}"))
-    markup.add(InlineKeyboardButton(f"{KEY_MARKUP['USERS_BOT_SETTINGS_PNL_V8_FEATURES']} | {status_panel_v8}",
-                                    callback_data=f"users_bot_settings_panel_v8:{settings['hiddify_v8_feature']}"))
     markup.add(InlineKeyboardButton(f"{KEY_MARKUP['USERS_BOT_SETTINGS_SHOW_THREE_RAND']} | {status_three_rand}",
                                     callback_data=f"users_bot_settings_three_rand_price:{settings['three_random_num_price']}"))
     markup.add(InlineKeyboardButton(f"{KEY_MARKUP['USERS_BOT_SETTINGS_CHANNEL_ّFORCE_JOIN']} | {status_force_join}",
                                     callback_data=f"users_bot_settings_force_join:{settings['force_join_channel']}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_VISIBLE_SUBS'],
+                                    callback_data=f"users_bot_settings_visible_sub_menu:None"))
+
     markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_MIN_DEPO'],
                                     callback_data=f"users_bot_settings_min_depo:{settings['min_deposit_amount']}"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_CHANNEL_ID'],
                                     callback_data=f"users_bot_settings_channel_id:{settings['channel_id']}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_SET_WELCOME_MSG'],
+                                    callback_data=f"users_bot_settings_set_welcome_msg:None"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_TEST_SUB'],
+                                    callback_data=f"users_bot_settings_test_sub:None"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"users_bot_management:None"))
+    return markup
+
+
+def users_bot_management_settings_visible_sub_markup(settings):
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 1
+
+    status_visible_conf_dir = "✅" if settings['visible_conf_dir'] else "❌"
+    status_conf_sub_auto = "✅" if settings['visible_conf_sub_auto'] else "❌"
+    status_conf_sub_url = "✅" if settings['visible_conf_sub_url'] else "❌"
+    status_conf_sub_url_b64 = "✅" if settings['visible_conf_sub_url_b64'] else "❌"
+    status_conf_clash = "✅" if settings['visible_conf_clash'] else "❌"
+    status_conf_hiddify = "✅" if settings['visible_conf_hiddify'] else "❌"
+    status_conf_sub_sing_box = "✅" if settings['visible_conf_sub_sing_box'] else "❌"
+    status_conf_sub_full_sing_box = "✅" if settings['visible_conf_sub_full_sing_box'] else "❌"
+
+    markup.add(InlineKeyboardButton(f"{KEY_MARKUP['CONFIGS_DIR']} | {status_visible_conf_dir}",
+                                    callback_data=f"users_bot_settings_visible_sub:visible_conf_dir"))
+    markup.add(InlineKeyboardButton(f"{KEY_MARKUP['CONFIGS_SUB_AUTO']} | {status_conf_sub_auto}",
+                                    callback_data=f"users_bot_settings_visible_sub:visible_conf_sub_auto"))
+    markup.add(InlineKeyboardButton(f"{KEY_MARKUP['CONFIGS_SUB']} | {status_conf_sub_url}",
+                                    callback_data=f"users_bot_settings_visible_sub:visible_conf_sub_url"))
+    markup.add(InlineKeyboardButton(f"{KEY_MARKUP['CONFIGS_SUB_B64']} | {status_conf_sub_url_b64}",
+                                    callback_data=f"users_bot_settings_visible_sub:visible_conf_sub_url_b64"))
+    markup.add(InlineKeyboardButton(f"{KEY_MARKUP['CONFIGS_CLASH']} | {status_conf_clash}",
+                                    callback_data=f"users_bot_settings_visible_sub:visible_conf_clash"))
+    markup.add(InlineKeyboardButton(f"{KEY_MARKUP['CONFIGS_HIDDIFY']} | {status_conf_hiddify}",
+                                    callback_data=f"users_bot_settings_visible_sub:visible_conf_hiddify"))
+    markup.add(InlineKeyboardButton(f"{KEY_MARKUP['CONFIGS_SING_BOX']} | {status_conf_sub_sing_box}",
+                                    callback_data=f"users_bot_settings_visible_sub:visible_conf_sub_sing_box"))
+    markup.add(InlineKeyboardButton(f"{KEY_MARKUP['CONFIGS_FULL_SING_BOX']} | {status_conf_sub_full_sing_box}",
+                                    callback_data=f"users_bot_settings_visible_sub:visible_conf_sub_full_sing_box"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"users_bot_settings:None"))
     return markup
 
 
@@ -204,4 +247,11 @@ def plans_list_markup(plans):
     if len(keys) == 0:
         return None
     markup.add(*keys)
+    return markup
+
+
+def start_bot_markup():
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 1
+    markup.add(InlineKeyboardButton(KEY_MARKUP['SUPPORT_GROUP'], url=f"https://t.me/{HIDY_BOT_ID}"))
     return markup

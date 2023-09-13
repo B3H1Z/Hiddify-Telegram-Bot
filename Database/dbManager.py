@@ -82,7 +82,6 @@ class AdminDBManager:
                 print(f"Invalid key [{key}]")
                 return False
 
-
         return API.update(uuid, kwargs)
         cur = self.conn.cursor()
 
@@ -128,7 +127,8 @@ class AdminDBManager:
             logging.error(f"Error while adding user details [{user_id}] \n Error: {e}")
             return False
 
-    def add_default_user(self, name, package_days, usage_limit_GB, added_by=None, comment=None, mode='no_reset', monthly=0,
+    def add_default_user(self, name, package_days, usage_limit_GB, added_by=None, comment=None, mode='no_reset',
+                         monthly=0,
                          max_ips=100, enable=1, telegram_id=None):
 
         # logging.info(f"Adding default user [{uuid}]")
@@ -217,7 +217,6 @@ class UserDBManager:
         self.create_user_table()
         self.set_default_configs()
 
-
     def create_connection(self, db_file):
         """ Create a database connection to a SQLite database """
         try:
@@ -302,7 +301,7 @@ class UserDBManager:
                         "balance INTEGER NOT NULL DEFAULT 0,"
                         "FOREIGN KEY (telegram_id) REFERENCES users (telegram_id))")
             self.conn.commit()
-            logging.info("Settings table created successfully!")
+            logging.info("wallet table created successfully!")
 
             cur.execute("CREATE TABLE IF NOT EXISTS payments ("
                         "id INTEGER PRIMARY KEY,"
@@ -824,15 +823,30 @@ class UserDBManager:
         try:
             self.add_bool_config("visible_hiddify_hyperlink", True)
             self.add_bool_config("three_random_num_price", True)
-            self.add_bool_config("hiddify_v8_feature", False)
             self.add_bool_config("force_join_channel", False)
+
+            self.add_bool_config("visible_conf_dir", False)
+            self.add_bool_config("visible_conf_sub_auto", True)
+            self.add_bool_config("visible_conf_sub_url", False)
+            self.add_bool_config("visible_conf_sub_url_b64", False)
+            self.add_bool_config("visible_conf_clash", False)
+            self.add_bool_config("visible_conf_hiddify", False)
+            self.add_bool_config("visible_conf_sub_sing_box", False)
+            self.add_bool_config("visible_conf_sub_full_sing_box", False)
+
             self.add_str_config("card_number", None)
             self.add_str_config("card_holder", None)
             self.add_str_config("support_username", None)
             self.add_str_config("channel_id", None)
+            self.add_str_config("msg_user_start", None)
+
             self.add_int_config("min_deposit_amount", 10000)
+
             self.add_int_config("alert_remaining_days", 3)
             self.add_int_config("alert_remaining_size", 3)
+
+            self.add_int_config("test_sub_days", 1)
+            self.add_int_config("test_sub_size_gb", 1)
 
         except Error as e:
             logging.error(f"Error while setting default configs \n Error:{e}")
@@ -939,6 +953,7 @@ class UserDBManager:
         except Error as e:
             logging.error(f"Error while finding payment {kwargs} \n Error:{e}")
             return None
+
 
 # ADMIN_DB = AdminDBManager(MAIN_DB_LOC)
 USERS_DB = UserDBManager(USERS_DB_LOC)

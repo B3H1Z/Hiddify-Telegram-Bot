@@ -202,13 +202,13 @@ def package_size_end_soon_template(sub_id, remaining_size):
     if LANG == 'FA':
         return f"""
 تنها {remaining_size} گیگابایت تا اتمام اعتبار پکیج شما باقی مانده است.
-لطفا برای خرید پکیج جدید اقدام کنید.
+لطفا برای تمدید پکیج اقدام کنید.
 
 شناسه پکیج شما: <code>{sub_id}</code>
 """
     elif LANG == 'EN':
         return f"""
 Only {remaining_size} GB left until your package expires.
-Please purchase a new package.
+Please renewal package.
 Your package ID: <code>{sub_id}</code>
 """

@@ -50,8 +50,14 @@
         "USERS_BOT_SETTINGS_PNL_V8_FEATURES": "Panel V8 Features",
         "USERS_BOT_SETTINGS_CHANNEL_ID": "Support Channel",
         "USERS_BOT_SETTINGS_CHANNEL_ّFORCE_JOIN":"Force Join",
+        "USERS_BOT_SETTINGS_VISIBLE_SUBS":"Visible Subscriptions",
+        "USERS_BOT_SETTINGS_SET_WELCOME_MSG":"Welcome Message",
+        "USERS_BOT_SETTINGS_TEST_SUB":"Test Subscription",
+        "USERS_BOT_SETTINGS_TEST_SUB_DAYS":"Test Subscription Days",
+        "USERS_BOT_SETTINGS_TEST_SUB_SIZE":"Test Subscription Size",
         "ABOUT_BOT": "ℹ️",
-        "TO_QR": "ً🖼QR"
+        "TO_QR": "ً🖼QR",
+        "SUPPORT_GROUP": "Support Group"
     },
     "FA": {
         "CONFIRM": "✅تأیید",
@@ -75,7 +81,7 @@
         "EDIT_COMMENT": "📝ویرایش یادداشت",
         "UPDATE_MESSAGE": "🔄به‌روزرسانی پیام",
         "BACK": "🔙بازگشت",
-        "CONFIGS_DIR": "کانفیگ",
+        "CONFIGS_DIR": "کانفیگ مستقیم",
         "CONFIGS_SUB_AUTO":"اشتراک خودکار",
         "CONFIGS_SUB": "لینک اشتراک",
         "CONFIGS_SUB_B64": "لینک اشتراک b64",
@@ -104,7 +110,13 @@
         "USERS_BOT_SETTINGS_PNL_V8_FEATURES": "اشتراک های نسخه 8",
         "USERS_BOT_SETTINGS_CHANNEL_ID": "کانال پشتیبانی",
         "USERS_BOT_SETTINGS_CHANNEL_ّFORCE_JOIN":"عضویت اجباری",
+        "USERS_BOT_SETTINGS_VISIBLE_SUBS":"نمایش اشتراک ها",
+        "USERS_BOT_SETTINGS_SET_WELCOME_MSG":"پیام خوش آمدگویی",
+        "USERS_BOT_SETTINGS_TEST_SUB":"اشتراک تستی",
+        "USERS_BOT_SETTINGS_TEST_SUB_DAYS":"مدت اشتراک تستی",
+        "USERS_BOT_SETTINGS_TEST_SUB_SIZE":"حجم اشتراک تستی",
         "ABOUT_BOT": "ℹ️",
-        "TO_QR": "ً🖼کیوآر"
+        "TO_QR": "ً🖼کیوآر",
+        "SUPPORT_GROUP": "گروه پشتیبانی"
     }
 }
