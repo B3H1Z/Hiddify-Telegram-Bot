@@ -2,11 +2,14 @@
 # Define text colors
 GREEN='\033[0;32m'
 RED='\033[0;31m'
+YELLOW='\033[1;33m'
 RESET='\033[0m' # Reset text color
-
+7
+HIDY_BOT_ID="@HidyBotGroup"
 # Function to display error messages and exit
 function display_error_and_exit() {
   echo -e "${RED}Error: $1${RESET}"
+  echo -e "${YELLOW}${HIDY_BOT_ID}${RESET}"
   exit 1
 }
 
@@ -32,7 +35,7 @@ if [ "$0" == "--pre-release" ]; then
 fi
 
 echo "Selected branch: $branch"
-    
+
 if [ -d "$install_dir" ]; then
   echo "Directory $install_dir exists."
 else
@@ -79,7 +82,7 @@ add_cron_job_if_not_exists() {
 
   # Check if the cron job already exists in the current user's crontab
   current_crontab=$(crontab -l 2>/dev/null || true)
-  
+
   if [[ -z "$current_crontab" ]]; then
     # No existing crontab, so add the new cron job
     (echo "$cron_job") | crontab -
