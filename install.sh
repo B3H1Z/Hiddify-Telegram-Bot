@@ -13,6 +13,68 @@ function display_error_and_exit() {
   exit 1
 }
 
+install_git_if_needed() {
+  if ! command -v git &>/dev/null; then
+    echo "Git is not installed. Installing Git..."
+
+    # Install Git based on the operating system (Linux)
+    if [ -f /etc/os-release ]; then
+      source /etc/os-release
+      if [ "$ID" == "ubuntu" ] || [ "$ID" == "debian" ]; then
+        sudo apt update
+        sudo apt install -y git
+      elif [ "$ID" == "centos" ] || [ "$ID" == "rhel" ]; then
+        sudo yum install -y git
+      fi
+    elif [ "$(uname -s)" == "Darwin" ]; then # macOS
+      brew install git
+    else
+      echo "Unsupported operating system. Please install Git manually and try again."
+      exit 1
+    fi
+
+    if ! command -v git &>/dev/null; then
+      echo "Failed to install Git. Please install Git manually and try again."
+      exit 1
+    fi
+
+    echo "Git has been installed successfully."
+  fi
+}
+
+# Function to install Python 3 and pip if they are not already installed
+install_python3_and_pip_if_needed() {
+  if ! command -v python3 &>/dev/null || ! command -v pip &>/dev/null; then
+    echo "Python 3 and pip are required. Installing Python 3 and pip..."
+
+    # Install Python 3 and pip based on the operating system (Linux)
+    if [ -f /etc/os-release ]; then
+      source /etc/os-release
+      if [ "$ID" == "ubuntu" ] || [ "$ID" == "debian" ]; then
+        sudo apt update
+        sudo apt install -y python3 python3-pip
+      elif [ "$ID" == "centos" ] || [ "$ID" == "rhel" ]; then
+        sudo yum install -y python3 python3-pip
+      fi
+    elif [ "$(uname -s)" == "Darwin" ]; then # macOS
+      brew install python@3
+    else
+      echo "Unsupported operating system. Please install Python 3 and pip manually and try again."
+      exit 1
+    fi
+
+    if ! command -v python3 &>/dev/null || ! command -v pip &>/dev/null; then
+      echo "Failed to install Python 3 and pip. Please install Python 3 and pip manually and try again."
+      exit 1
+    fi
+
+    echo "Python 3 and pip have been installed successfully."
+  fi
+}
+echo -e "${GREEN}Step 0: Checking requirements...${RESET}"
+install_git_if_needed
+install_python3_and_pip_if_needed
+
 # Check if Git is installed
 if ! command -v git &>/dev/null; then
   display_error_and_exit "Git is not installed. Please install Git and try again."
