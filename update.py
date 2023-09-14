@@ -2,6 +2,16 @@ import sqlite3
 from version import __version__
 from config import *
 
+import argparse
+
+
+def version():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--update-v4-v5", action="store_true", help="Update database from version 4 to 5")
+    args = parser.parse_args()
+    return args
+
+
 conn = sqlite3.connect(USERS_DB_LOC)
 
 
@@ -44,28 +54,32 @@ def drop_columns_from_table(table_name, columns_to_drop):
     #         conn.close()
 
 
-if __version__ == "4.2.0":
+main_version = __version__.split(".")[0]
+
+
+def update_v4_v5():
+    if main_version != "4":
+        print("No update is needed")
+        return
     with sqlite3.connect(USERS_DB_LOC) as conn:
-        print("Updating to version 4.2.1")
-        print("Updating database...")
-        # First, remove not approved orders
+        print("Updating database from version 4 to 5")
+
+        # Changes in orders table
         try:
             cur = conn.cursor()
             cur.execute("DELETE FROM orders WHERE approved = 0")
             conn.commit()
         except sqlite3.Error as e:
             print("SQLite error:", e)
-            # raise Exception("Database update failed")
-
         try:
             cur = conn.cursor()
             cur.execute("DELETE FROM orders WHERE approved IS NULL")
             conn.commit()
         except sqlite3.Error as e:
             print("SQLite error:", e)
-            # raise Exception("Database update failed")
+        drop_columns_from_table('orders', ['payment_image', 'payment_method', 'approved'])
 
-        # # Move card_number, card_holder and support_username to str_config
+        # Changes in owner_info table
         # try:
         #     cur = conn.cursor()
         #     cur.execute("SELECT * FROM owner_info")
@@ -77,9 +91,7 @@ if __version__ == "4.2.0":
         #         conn.commit()
         # except sqlite3.Error as e:
         #     print("SQLite error:", e)
-        #     # raise Exception("Database update failed")
 
-        # Drop owner_info table
         try:
             cur = conn.cursor()
             cur.execute("DROP TABLE owner_info")
@@ -87,13 +99,26 @@ if __version__ == "4.2.0":
         except sqlite3.Error as e:
             print("SQLite error:", e)
 
-            # raise Exception("Database update failed")
+        # Drop settings table
+        try:
+            cur = conn.cursor()
+            cur.execute("DROP TABLE settings")
+            conn.commit()
+        except sqlite3.Error as e:
+            print("SQLite error:", e)
+
+        # Add test_subscription bool default 0 to users table
+        try:
+            cur = conn.cursor()
+            cur.execute("ALTER TABLE users ADD COLUMN test_subscription BOOLEAN DEFAULT 0")
+            conn.commit()
+        except sqlite3.Error as e:
+            print("SQLite error:", e)
 
 
-        # Then, drop the columns
-        status = drop_columns_from_table('orders', ['payment_image', 'payment_method', 'approved'])
-        if status:
-            print("Database updated successfully")
-        else:
-            print("Database update failed")
-            # raise Exception("Database update failed")
+if __name__ == "__main__":
+    args = version()
+    if args.update_v4_v5:
+        update_v4_v5()
+    else:
+        print("No update is needed")

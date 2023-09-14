@@ -232,7 +232,7 @@ class UserDBManager:
             cur.execute("CREATE TABLE IF NOT EXISTS users ("
                         "id INTEGER PRIMARY KEY AUTOINCREMENT,"
                         "telegram_id INTEGER NOT NULL UNIQUE,"
-                        "test_account BOOLEAN NOT NULL DEFAULT 0,"
+                        "test_subscription BOOLEAN NOT NULL DEFAULT 0,"
                         "created_at TEXT NOT NULL)")
             self.conn.commit()
             logging.info("User table created successfully!")
@@ -824,6 +824,9 @@ class UserDBManager:
             self.add_bool_config("visible_hiddify_hyperlink", True)
             self.add_bool_config("three_random_num_price", True)
             self.add_bool_config("force_join_channel", False)
+            self.add_bool_config("panel_auto_backup", True)
+            self.add_bool_config("test_subscription", True)
+            self.add_bool_config("reminder_notification", True)
 
             self.add_bool_config("visible_conf_dir", False)
             self.add_bool_config("visible_conf_sub_auto", True)
@@ -842,8 +845,8 @@ class UserDBManager:
 
             self.add_int_config("min_deposit_amount", 10000)
 
-            self.add_int_config("alert_remaining_days", 3)
-            self.add_int_config("alert_remaining_size", 3)
+            self.add_int_config("reminder_notification_days", 3)
+            self.add_int_config("reminder_notification_usage", 3)
 
             self.add_int_config("test_sub_days", 1)
             self.add_int_config("test_sub_size_gb", 1)

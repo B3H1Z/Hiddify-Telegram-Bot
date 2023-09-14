@@ -450,6 +450,7 @@ def users_bot_settings_channel_id(message: Message):
         return
     bot.send_message(message.chat.id, MESSAGES['SUCCESS_UPDATE_DATA'], reply_markup=markups.main_menu_keyboard_markup())
 
+
 def users_bot_settings_welcome_msg(message: Message):
     if is_it_cancel(message):
         return
@@ -459,10 +460,60 @@ def users_bot_settings_welcome_msg(message: Message):
         return
     bot.send_message(message.chat.id, MESSAGES['SUCCESS_UPDATE_DATA'], reply_markup=markups.main_menu_keyboard_markup())
 
+
+def users_bot_settings_test_sub_size(message: Message):
+    if is_it_cancel(message):
+        return
+    if not is_it_digit(message):
+        return
+    status = USERS_DB.edit_int_config("test_sub_size_gb", value=message.text)
+    if not status:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
+        return
+    bot.send_message(message.chat.id, MESSAGES['SUCCESS_UPDATE_DATA'], reply_markup=markups.main_menu_keyboard_markup())
+
+
+def users_bot_settings_test_sub_days(message: Message):
+    if is_it_cancel(message):
+        return
+    if not is_it_digit(message):
+        return
+    status = USERS_DB.edit_int_config("test_sub_days", value=message.text)
+    if not status:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
+        return
+    bot.send_message(message.chat.id, MESSAGES['SUCCESS_UPDATE_DATA'], reply_markup=markups.main_menu_keyboard_markup())
+
+
+def users_bot_settings_notif_reminder_usage(message: Message):
+    if is_it_cancel(message):
+        return
+    if not is_it_digit(message):
+        return
+    status = USERS_DB.edit_int_config("reminder_notification_usage", value=message.text)
+    if not status:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
+        return
+    bot.send_message(message.chat.id, MESSAGES['SUCCESS_UPDATE_DATA'], reply_markup=markups.main_menu_keyboard_markup())
+
+
+def users_bot_settings_notif_reminder_days(message: Message):
+    if is_it_cancel(message):
+        return
+    if not is_it_digit(message):
+        return
+    status = USERS_DB.edit_int_config("reminder_notification_days", value=message.text)
+    if not status:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
+        return
+    bot.send_message(message.chat.id, MESSAGES['SUCCESS_UPDATE_DATA'], reply_markup=markups.main_menu_keyboard_markup())
+
+
 # ----------------------------------- Callbacks -----------------------------------
 # Callback Handler for Inline Buttons
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call: CallbackQuery):
+    logging.info(f"Callback Query: {call.data}")
     bot.answer_callback_query(call.id, MESSAGES['WAIT'])
     # Check if user is not admin
     if call.from_user.id not in ADMINS_ID:
@@ -907,8 +958,8 @@ def callback_query(call: CallbackQuery):
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
             return
         settings = utils.all_configs_settings()
-        bot.send_message(call.message.chat.id, f"{MESSAGES['USERS_BOT_SETTINGS']}",
-                         reply_markup=markups.users_bot_management_settings_markup(settings))
+        bot.edit_message_text(MESSAGES['USERS_BOT_SETTINGS'], call.message.chat.id, call.message.message_id,
+                              reply_markup=markups.users_bot_management_settings_markup(settings))
 
     # User Bot Settings  - Set Hyperlink Status Callback
     elif key == "users_bot_settings_hyperlink":
@@ -922,7 +973,7 @@ def callback_query(call: CallbackQuery):
             if not edit_config:
                 bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
                 return
-        users_bot_settings_update_message(call.message,markups.users_bot_management_settings_markup(settings))
+        users_bot_settings_update_message(call.message, markups.users_bot_management_settings_markup(settings))
 
     # User Bot Settings  - Set three random letters for define price
     elif key == "users_bot_settings_three_rand_price":
@@ -936,7 +987,21 @@ def callback_query(call: CallbackQuery):
             if not edit_config:
                 bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
                 return
-        users_bot_settings_update_message(call.message,markups.users_bot_management_settings_markup(settings))
+        users_bot_settings_update_message(call.message, markups.users_bot_management_settings_markup(settings))
+
+    elif key == "users_bot_settings_panel_auto_backup":
+        if value == "1":
+            edit_config = USERS_DB.edit_bool_config("panel_auto_backup", value=False)
+            if not edit_config:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+                return
+        elif value == "0":
+            edit_config = USERS_DB.edit_bool_config("panel_auto_backup", value=True)
+            if not edit_config:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+                return
+        settings = utils.all_configs_settings()
+        users_bot_settings_update_message(call.message, markups.users_bot_management_settings_markup(settings))
 
     elif key == "users_bot_settings_min_depo":
         settings = utils.all_configs_settings()
@@ -981,7 +1046,7 @@ def callback_query(call: CallbackQuery):
             if not edit_config:
                 bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
                 return
-        users_bot_settings_update_message(call.message,markups.users_bot_management_settings_markup(settings))
+        users_bot_settings_update_message(call.message, markups.users_bot_management_settings_markup(settings))
 
     elif key == "users_bot_settings_visible_sub_menu":
         settings = utils.all_configs_settings()
@@ -1002,7 +1067,8 @@ def callback_query(call: CallbackQuery):
                 bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
                 return
         settings = utils.all_configs_settings()
-        users_bot_settings_update_message(call.message,markups.users_bot_management_settings_visible_sub_markup(settings))
+        users_bot_settings_update_message(call.message,
+                                          markups.users_bot_management_settings_visible_sub_markup(settings))
 
     elif key == "users_bot_settings_set_welcome_msg":
         settings = utils.all_configs_settings()
@@ -1011,12 +1077,79 @@ def callback_query(call: CallbackQuery):
                          reply_markup=markups.while_edit_user_markup())
         bot.register_next_step_handler(call.message, users_bot_settings_welcome_msg)
 
+    elif key == "users_bot_settings_test_sub_menu":
+        settings = utils.all_configs_settings()
+        bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,
+                                      reply_markup=markups.users_bot_management_settings_test_sub_markup(settings))
+
     elif key == "users_bot_settings_test_sub":
         settings = utils.all_configs_settings()
+        row_key = value
+        current_status = settings['test_subscription']
+        if current_status == 1:
+            edit_config = USERS_DB.edit_bool_config(row_key, value=False)
+            if not edit_config:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+                return
+        elif current_status == 0:
+            edit_config = USERS_DB.edit_bool_config(row_key, value=True)
+            if not edit_config:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+                return
+        settings = utils.all_configs_settings()
+        users_bot_settings_update_message(call.message, markups.users_bot_management_settings_test_sub_markup(settings))
+    elif key == "users_bot_settings_test_sub_size":
+        settings = utils.all_configs_settings()
         bot.send_message(call.message.chat.id,
-                         f"{MESSAGES['CURRENT_VALUE']}: {settings['test_sub']}\n{MESSAGES['USERS_BOT_SETTING_TEST_SUB']}",
+                         f"{MESSAGES['CURRENT_VALUE']}: {settings['test_sub_size_gb']} {MESSAGES['GB']}\n{MESSAGES['USERS_BOT_SETTINGS_TEST_SUB_USAGE']}",
                          reply_markup=markups.while_edit_user_markup())
-        bot.register_next_step_handler(call.message, users_bot_settings_test_sub)
+        bot.register_next_step_handler(call.message, users_bot_settings_test_sub_size)
+    elif key == "users_bot_settings_test_sub_days":
+        settings = utils.all_configs_settings()
+        bot.send_message(call.message.chat.id,
+                         f"{MESSAGES['CURRENT_VALUE']}: {settings['test_sub_days']} {MESSAGES['DAY']}\n{MESSAGES['USERS_BOT_SETTINGS_TEST_SUB_DAYS']}",
+                         reply_markup=markups.while_edit_user_markup())
+        bot.register_next_step_handler(call.message, users_bot_settings_test_sub_days)
+
+    # User Bot Settings  - Reminder Notification Callback
+    elif key == "users_bot_settings_notif_reminder_menu":
+        settings = utils.all_configs_settings()
+        bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,
+                                      reply_markup=markups.users_bot_management_settings_notif_reminder_markup(
+                                          settings))
+
+    elif key == "users_bot_settings_notif_reminder":
+        settings = utils.all_configs_settings()
+        row_key = value
+        current_status = settings['reminder_notification']
+        if current_status == 1:
+            edit_config = USERS_DB.edit_bool_config(row_key, value=False)
+            if not edit_config:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+                return
+        elif current_status == 0:
+            edit_config = USERS_DB.edit_bool_config(row_key, value=True)
+            if not edit_config:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+                return
+        settings = utils.all_configs_settings()
+        users_bot_settings_update_message(call.message,
+                                          markups.users_bot_management_settings_notif_reminder_markup(settings))
+
+    elif key == "users_bot_settings_notif_reminder_usage":
+        settings = utils.all_configs_settings()
+        bot.send_message(call.message.chat.id,
+                         f"{MESSAGES['CURRENT_VALUE']}: {settings['reminder_notification_usage']} {MESSAGES['GB']}\n{MESSAGES['USERS_BOT_SETTINGS_NOTIF_REMINDER_USAGE']}",
+                         reply_markup=markups.while_edit_user_markup())
+        bot.register_next_step_handler(call.message, users_bot_settings_notif_reminder_usage)
+    elif key == "users_bot_settings_notif_reminder_days":
+        settings = utils.all_configs_settings()
+        bot.send_message(call.message.chat.id,
+                         f"{MESSAGES['CURRENT_VALUE']}: {settings['reminder_notification_days']} {MESSAGES['DAY']}\n{MESSAGES['USERS_BOT_SETTINGS_NOTIF_REMINDER_DAYS']}",
+                         reply_markup=markups.while_edit_user_markup())
+        bot.register_next_step_handler(call.message, users_bot_settings_notif_reminder_days)
+
+
     # User Bot Settings  - Order Status Callback
     elif key == "users_bot_orders_status":
         bot.send_message(call.message.chat.id, f"{MESSAGES['USERS_BOT_ORDER_NUMBER_REQUEST']}")

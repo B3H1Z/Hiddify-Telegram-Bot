@@ -55,6 +55,10 @@
         "USERS_BOT_SETTINGS_TEST_SUB":"Test Subscription",
         "USERS_BOT_SETTINGS_TEST_SUB_DAYS":"Test Subscription Days",
         "USERS_BOT_SETTINGS_TEST_SUB_SIZE":"Test Subscription Size",
+        "USERS_BOT_SETTINGS_NOTIF_REMINDER":"Subscription Reminder",
+        "USERS_BOT_SETTINGS_NOTIF_REMINDER_USAGE":"Usage Reminder",
+        "USERS_BOT_SETTINGS_NOTIF_REMINDER_DAYS":"Days Reminder",
+        "USERS_BOT_SETTINGS_PANEL_AUTO_BACKUP":"Panel Auto Backup",
         "ABOUT_BOT": "ℹ️",
         "TO_QR": "ً🖼QR",
         "SUPPORT_GROUP": "Support Group"
@@ -115,6 +119,10 @@
         "USERS_BOT_SETTINGS_TEST_SUB":"اشتراک تستی",
         "USERS_BOT_SETTINGS_TEST_SUB_DAYS":"مدت اشتراک تستی",
         "USERS_BOT_SETTINGS_TEST_SUB_SIZE":"حجم اشتراک تستی",
+        "USERS_BOT_SETTINGS_NOTIF_REMINDER":"یادآور وضعیت اشتراک",
+        "USERS_BOT_SETTINGS_NOTIF_REMINDER_USAGE":"یادآور وضعیت مصرف",
+        "USERS_BOT_SETTINGS_NOTIF_REMINDER_DAYS":"یادآور وضعیت زمان",
+        "USERS_BOT_SETTINGS_PANEL_AUTO_BACKUP":"بکاپ خودکار پنل",
         "ABOUT_BOT": "ℹ️",
         "TO_QR": "ً🖼کیوآر",
         "SUPPORT_GROUP": "گروه پشتیبانی"

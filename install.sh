@@ -4,7 +4,7 @@ GREEN='\033[0;32m'
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
 RESET='\033[0m' # Reset text color
-7
+
 HIDY_BOT_ID="@HidyBotGroup"
 # Function to display error messages and exit
 function display_error_and_exit() {

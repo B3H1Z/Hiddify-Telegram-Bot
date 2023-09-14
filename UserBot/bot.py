@@ -20,6 +20,7 @@ bot.remove_webhook()
 admin_bot = admin_bot()
 BASE_URL = urlparse(PANEL_URL).scheme + "://" + urlparse(PANEL_URL).netloc
 
+
 # *********************************** Helper Functions ***********************************
 # Check if message is digit
 def is_it_digit(message: Message, response=MESSAGES['ERROR_INVALID_NUMBER'], markup=main_menu_keyboard_markup()):
@@ -175,7 +176,7 @@ def renewal_from_wallet_confirm(message: Message):
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
         return
-    
+
     if user_info_process['remaining_day'] <= 0 or user_info_process['usage']['remaining_usage_GB'] <= 0:
         new_usage_limit = plan_info['size_gb']
         new_package_days = plan_info['days']
@@ -186,8 +187,8 @@ def renewal_from_wallet_confirm(message: Message):
     else:
         new_usage_limit = user_info['usage_limit_GB'] + plan_info['size_gb']
         new_package_days = user_info['package_days'] + plan_info['days']
-        
-    #Add New Order
+
+    # Add New Order
     order_id = random.randint(1000000, 9999999)
     created_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     status = USERS_DB.add_order(order_id, message.chat.id, user_info_process['name'], plan_id, created_at)
@@ -207,9 +208,8 @@ def renewal_from_wallet_confirm(message: Message):
     link = f"{BASE_URL}/{urlparse(PANEL_URL).path.split('/')[1]}/{uuid}/"
     user_name = f"<a href='{link}'> {user_info_process['name']} </a>"
     for ADMIN in ADMINS_ID:
-        admin_bot.send_message(ADMIN, f"{MESSAGES['ADMIN_NOTIFY_NEW_RENEWAL']} {user_name} {MESSAGES['SUBSCRIPTION']}\n{MESSAGES['ORDER_ID']} {order_id}")
-
-            
+        admin_bot.send_message(ADMIN,
+                               f"{MESSAGES['ADMIN_NOTIFY_NEW_RENEWAL']} {user_name} {MESSAGES['SUBSCRIPTION']}\n{MESSAGES['ORDER_ID']} {order_id}")
 
 
 # Next Step Buy Plan - Send Screenshot
@@ -316,7 +316,8 @@ def next_step_send_name_for_buy_from_wallet(message: Message, plan):
     link = f"{BASE_URL}/{urlparse(PANEL_URL).path.split('/')[1]}/{value}/"
     user_name = f"<a href='{link}'> {name} </a>"
     for ADMIN in ADMINS_ID:
-        admin_bot.send_message(ADMIN, f"{MESSAGES['ADMIN_NOTIFY_NEW_SUB']} {user_name} {MESSAGES['ADMIN_NOTIFY_CONFIRM']}\n{MESSAGES['ORDER_ID']} {order_id}")
+        admin_bot.send_message(ADMIN,
+                               f"{MESSAGES['ADMIN_NOTIFY_NEW_SUB']} {user_name} {MESSAGES['ADMIN_NOTIFY_CONFIRM']}\n{MESSAGES['ORDER_ID']} {order_id}")
 
 
 # ----------------------------------- Get Free Test Area -----------------------------------
@@ -347,7 +348,7 @@ def next_step_send_name_for_get_free_test(message: Message):
                          reply_markup=main_menu_keyboard_markup())
         return
 
-    edit_user_status = USERS_DB.edit_user(message.chat.id, test_account=True)
+    edit_user_status = USERS_DB.edit_user(message.chat.id, test_subscription=True)
     if not edit_user_status:
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
@@ -357,8 +358,9 @@ def next_step_send_name_for_get_free_test(message: Message):
     link = f"{BASE_URL}/{urlparse(PANEL_URL).path.split('/')[1]}/{uuid}/"
     user_name = f"<a href='{link}'> {name} </a>"
     for ADMIN in ADMINS_ID:
-        admin_bot.send_message(ADMIN, f"{MESSAGES['ADMIN_NOTIFY_NEW_FREE_TEST']} {user_name} {MESSAGES['ADMIN_NOTIFY_CONFIRM']}")
-    
+        admin_bot.send_message(ADMIN,
+                               f"{MESSAGES['ADMIN_NOTIFY_NEW_FREE_TEST']} {user_name} {MESSAGES['ADMIN_NOTIFY_CONFIRM']}")
+
 
 # ----------------------------------- To QR Area -----------------------------------
 # Next Step QR - QR Code
@@ -926,14 +928,18 @@ def wallet_balance(message: Message):
 
 # User Buy Subscription Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['FREE_TEST'])
-def wallet_balance(message: Message):
+def free_test(message: Message):
     join_status = is_user_in_channel(message.chat.id)
     if not join_status:
+        return
+    settings = utils.all_configs_settings()
+    if not settings['test_subscription']:
+        bot.send_message(message.chat.id, MESSAGES['FREE_TEST_NOT_AVAILABLE'], reply_markup=main_menu_keyboard_markup())
         return
     users = USERS_DB.find_user(telegram_id=message.chat.id)
     if users:
         user = users[0]
-        if user['test_account']:
+        if user['test_subscription']:
             bot.send_message(message.chat.id, MESSAGES['ALREADY_RECEIVED_FREE'],
                              reply_markup=main_menu_keyboard_markup())
             return
@@ -944,7 +950,7 @@ def wallet_balance(message: Message):
 
 # Cancel Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['CANCEL'])
-def wallet_balance(message: Message):
+def cancel(message: Message):
     join_status = is_user_in_channel(message.chat.id)
     if not join_status:
         return

@@ -1,10 +1,14 @@
 #!/bin/bash
+# shellcheck disable=SC2034
+target_version="5.0.0"
 
 # Define text colors
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 YELLOW='\033[0;33m'
 RESET='\033[0m' # Reset text color
+
+
 
 # Function to display colored messages
 function display_message() {
@@ -46,6 +50,19 @@ function reinstall_bot() {
       ;;
   esac
 }
+
+# Run FOR update from version 4 to 5
+current_version=$(python /opt/Hiddify-Telegram-Bot/version.py --version)
+current_version_first_part=$(echo "current_version" | cut -d '.' -f 1)
+target_version_first_part=$(echo "target_version" | cut -d '.' -f 1)
+
+if [ "$current_version_first_part" = "4" ] && [ "$target_version_first_part" = "5" ]; then
+    echo "Version is 4, running update.py to update to version 5."
+    python3 /opt/Hiddify-Telegram-Bot/update.py --update-v4-v5
+    echo "Update.py has been run."
+else
+    echo "Version is not 4."
+fi
 
 # Function to update and restart the bot
 function update_bot() {

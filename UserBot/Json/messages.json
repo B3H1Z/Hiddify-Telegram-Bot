@@ -67,7 +67,8 @@
         "ADMIN_NOTIFY_CONFIRM" : "",
         "ADMIN_NOTIFY_NEW_FREE_TEST" : "A new free tesst subscription was registered with the name of:",
         "ADMIN_NOTIFY_NEW_RENEWAL" : "",
-        "SUBSCRIPTION" : "subscription was extended"
+        "SUBSCRIPTION" : "subscription was extended",
+        "FREE_TEST_NOT_AVAILABLE" : "Free test is not available at the moment"
     },
     "FA": {
         "WELCOME": "به ربات کاربران خوش آمدید",
@@ -137,6 +138,7 @@
         "ADMIN_NOTIFY_CONFIRM" : "ثبت شد",
         "ADMIN_NOTIFY_NEW_FREE_TEST" : "اشتراک تست رایگان جدیدی با نام:",
         "ADMIN_NOTIFY_NEW_RENEWAL" : "تمدید شد",
-        "SUBSCRIPTION" : "اشتراک"
+        "SUBSCRIPTION" : "اشتراک",
+        "FREE_TEST_NOT_AVAILABLE" : "اکانت تست رایگان در حال حاضر در دسترس نمی‌باشد"
     }
 }

@@ -168,12 +168,16 @@ def users_bot_management_settings_markup(settings):
     status_hyperlink = "✅" if settings['visible_hiddify_hyperlink'] else "❌"
     status_three_rand = "✅" if settings['three_random_num_price'] else "❌"
     status_force_join = "✅" if settings['force_join_channel'] else "❌"
+    status_panel_auto_backup = "✅" if settings['panel_auto_backup'] else "❌"
     markup.add(InlineKeyboardButton(f"{KEY_MARKUP['USERS_BOT_SETTINGS_SHOW_HIDI_LINK']} | {status_hyperlink}",
                                     callback_data=f"users_bot_settings_hyperlink:{settings['visible_hiddify_hyperlink']}"))
     markup.add(InlineKeyboardButton(f"{KEY_MARKUP['USERS_BOT_SETTINGS_SHOW_THREE_RAND']} | {status_three_rand}",
                                     callback_data=f"users_bot_settings_three_rand_price:{settings['three_random_num_price']}"))
     markup.add(InlineKeyboardButton(f"{KEY_MARKUP['USERS_BOT_SETTINGS_CHANNEL_ّFORCE_JOIN']} | {status_force_join}",
                                     callback_data=f"users_bot_settings_force_join:{settings['force_join_channel']}"))
+    markup.add(
+        InlineKeyboardButton(f"{KEY_MARKUP['USERS_BOT_SETTINGS_PANEL_AUTO_BACKUP']} | {status_panel_auto_backup}",
+                             callback_data=f"users_bot_settings_panel_auto_backup:{settings['panel_auto_backup']}"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_VISIBLE_SUBS'],
                                     callback_data=f"users_bot_settings_visible_sub_menu:None"))
 
@@ -184,8 +188,40 @@ def users_bot_management_settings_markup(settings):
     markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_SET_WELCOME_MSG'],
                                     callback_data=f"users_bot_settings_set_welcome_msg:None"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_TEST_SUB'],
-                                    callback_data=f"users_bot_settings_test_sub:None"))
+                                    callback_data=f"users_bot_settings_test_sub_menu:None"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_NOTIF_REMINDER'],
+                                    callback_data=f"users_bot_settings_notif_reminder_menu:None"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"users_bot_management:None"))
+    return markup
+
+
+def users_bot_management_settings_test_sub_markup(settings):
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 1
+    status_test_sub = "✅" if settings['test_subscription'] else "❌"
+    markup.add(InlineKeyboardButton(f"{KEY_MARKUP['USERS_BOT_SETTINGS_TEST_SUB']} | {status_test_sub}",
+                                    callback_data=f"users_bot_settings_test_sub:test_subscription"))
+    if settings['test_subscription']:
+        markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_TEST_SUB_SIZE'],
+                                        callback_data=f"users_bot_settings_test_sub_size:None"))
+        markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_TEST_SUB_DAYS'],
+                                        callback_data=f"users_bot_settings_test_sub_days:None"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"users_bot_settings:None"))
+    return markup
+
+
+def users_bot_management_settings_notif_reminder_markup(settings):
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 1
+    status_test_sub = "✅" if settings['reminder_notification'] else "❌"
+    markup.add(InlineKeyboardButton(f"{KEY_MARKUP['USERS_BOT_SETTINGS_NOTIF_REMINDER']} | {status_test_sub}",
+                                    callback_data=f"users_bot_settings_notif_reminder:reminder_notification"))
+    if settings['reminder_notification']:
+        markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_NOTIF_REMINDER_USAGE'],
+                                        callback_data=f"users_bot_settings_notif_reminder_usage:None"))
+        markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_NOTIF_REMINDER_DAYS'],
+                                        callback_data=f"users_bot_settings_notif_reminder_days:None"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"users_bot_settings:None"))
     return markup
 
 
