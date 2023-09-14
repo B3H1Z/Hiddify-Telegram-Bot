@@ -843,6 +843,12 @@ class UserDBManager:
             self.add_str_config("channel_id", None)
             self.add_str_config("msg_user_start", None)
 
+            self.add_str_config("msg_manual_android", None)
+            self.add_str_config("msg_manual_ios", None)
+            self.add_str_config("msg_manual_windows", None)
+            self.add_str_config("msg_manual_mac", None)
+            self.add_str_config("msg_manual_linux", None)
+
             self.add_int_config("min_deposit_amount", 10000)
 
             self.add_int_config("reminder_notification_days", 3)

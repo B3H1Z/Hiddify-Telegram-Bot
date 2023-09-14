@@ -180,6 +180,8 @@ def users_bot_management_settings_markup(settings):
                              callback_data=f"users_bot_settings_panel_auto_backup:{settings['panel_auto_backup']}"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_VISIBLE_SUBS'],
                                     callback_data=f"users_bot_settings_visible_sub_menu:None"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_PANEL_MANUAL'],
+                                    callback_data="users_bot_settings_panel_manual_menu:None"))
 
     markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_MIN_DEPO'],
                                     callback_data=f"users_bot_settings_min_depo:{settings['min_deposit_amount']}"))
@@ -193,6 +195,7 @@ def users_bot_management_settings_markup(settings):
                                     callback_data=f"users_bot_settings_notif_reminder_menu:None"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"users_bot_management:None"))
     return markup
+
 
 
 def users_bot_management_settings_test_sub_markup(settings):
@@ -257,7 +260,21 @@ def users_bot_management_settings_visible_sub_markup(settings):
     markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"users_bot_settings:None"))
     return markup
 
-
+def users_bot_management_settings_panel_manual_markup():
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 1
+    markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_PANEL_MANUAL_ANDROID'],
+                                    callback_data=f"users_bot_settings_panel_manual:msg_manual_android"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_PANEL_MANUAL_IOS'],
+                                    callback_data=f"users_bot_settings_panel_manual:msg_manual_ios"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_PANEL_MANUAL_WIN'],
+                                    callback_data=f"users_bot_settings_panel_manual:msg_manual_windows"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_PANEL_MANUAL_MAC'],
+                                    callback_data=f"users_bot_settings_panel_manual:msg_manual_mac"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_PANEL_MANUAL_LIN'],
+                                    callback_data=f"users_bot_settings_panel_manual:msg_manual_linux"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"users_bot_settings:None"))
+    return markup
 # Users Bot Management - Edit Owner Info - Inline Keyboard Markup
 def users_bot_edit_owner_info_markup():
     markup = InlineKeyboardMarkup()

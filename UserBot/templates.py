@@ -14,20 +14,19 @@ def user_info_template(sub_id, usr, header=""):
             user_name = usr['name']
     else:
         user_name = usr['name']
-    if usr['enable'] == 1:
-        status = MESSAGES['ACTIVE_SUBSCRIPTION_STATUS']
-    else:
-        status = MESSAGES['DEACTIVE_SUBSCRIPTION_STATUS']
+    # if usr['enable'] == 1:
+    #     status = MESSAGES['ACTIVE_SUBSCRIPTION_STATUS']
+    # else:
+    #     status = MESSAGES['DEACTIVE_SUBSCRIPTION_STATUS']
     return f"""
 {header}
 
 {MESSAGES['USER_NAME']} {user_name}
 {MESSAGES['INFO_USAGE']} {usr['usage']['current_usage_GB']} {MESSAGES['OF']} {usr['usage']['usage_limit_GB']} {MESSAGES['GB']}
 {MESSAGES['INFO_REMAINING_DAYS']} {usr['remaining_day']} {MESSAGES['DAY_EXPIRE']}
-{MESSAGES['SUBSCRIPTION_STATUS']} {status}
 {MESSAGES['INFO_ID']} <code>{sub_id}</code>
 """
-
+# {MESSAGES['SUBSCRIPTION_STATUS']} {status}
 
 # Wallet Info Template
 def wallet_info_template(balance):
@@ -85,7 +84,7 @@ def payment_received_template(payment, header="", footer=""):
         return f"""
 {header}
 
-شماره سفارش: <code>{payment['id']}</code>
+شماره تراکنش: <code>{payment['id']}</code>
 نام کاربر: <b>{payment['user_name']}</b>
 هزینه پرداخت شده: <b>{rial_to_toman(payment['payment_amount'])}</b> {MESSAGES['TOMAN']}
 ---------------------
@@ -97,7 +96,7 @@ def payment_received_template(payment, header="", footer=""):
         return f"""
 {header}
 
-Order number: <b>{payment['id']}</b>
+Payment number: <b>{payment['id']}</b>
 Registered name: <b>{payment['user_name']}</b>
 Paid amount: <b>{payment['payment_amount']}</b> {MESSAGES['TOMAN']}
 ---------------------

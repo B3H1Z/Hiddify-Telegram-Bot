@@ -508,6 +508,14 @@ def users_bot_settings_notif_reminder_days(message: Message):
         return
     bot.send_message(message.chat.id, MESSAGES['SUCCESS_UPDATE_DATA'], reply_markup=markups.main_menu_keyboard_markup())
 
+def users_bot_settings_panel_manual(message: Message,db_key):
+    if is_it_cancel(message):
+        return
+    status = USERS_DB.edit_str_config(db_key,value=message.text)
+    if not status:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
+        return
+    bot.send_message(message.chat.id, MESSAGES['SUCCESS_UPDATE_DATA'], reply_markup=markups.main_menu_keyboard_markup())
 
 # ----------------------------------- Callbacks -----------------------------------
 # Callback Handler for Inline Buttons
@@ -1148,7 +1156,15 @@ def callback_query(call: CallbackQuery):
                          f"{MESSAGES['CURRENT_VALUE']}: {settings['reminder_notification_days']} {MESSAGES['DAY']}\n{MESSAGES['USERS_BOT_SETTINGS_NOTIF_REMINDER_DAYS']}",
                          reply_markup=markups.while_edit_user_markup())
         bot.register_next_step_handler(call.message, users_bot_settings_notif_reminder_days)
-
+    elif key == "users_bot_settings_panel_manual_menu":
+        bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,
+                                      reply_markup=markups.users_bot_management_settings_panel_manual_markup())
+    elif key == "users_bot_settings_panel_manual":
+        settings = utils.all_configs_settings()
+        bot.send_message(call.message.chat.id,
+                         f"{MESSAGES['CURRENT_VALUE']}: {settings[value]}\n{MESSAGES['USERS_BOT_SETTINGS_PANEL_MANUAL']}",
+                         reply_markup=markups.while_edit_user_markup())
+        bot.register_next_step_handler(call.message, users_bot_settings_panel_manual, value)
 
     # User Bot Settings  - Order Status Callback
     elif key == "users_bot_orders_status":

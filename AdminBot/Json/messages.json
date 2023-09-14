@@ -82,7 +82,7 @@
     "SUCCESS_UPDATE_DATA": "✅Data updated",
     "USERS_BOT_SETTINGS": "⚙️Users Bot Settings",
     "USERS_BOT_SETTINGS_HYPERLINK": "Set Hyperlink visibility when user request subscription info",
-    "USERS_BOT_ORDER_NUMBER_REQUEST": "Please enter the order number:",
+    "USERS_BOT_ORDER_NUMBER_REQUEST": "Please enter the payment number:",
     "USERS_BOT_SUB_ID_REQUEST": "Please enter the subscription ID:",
     "USERS_BOT_SETTING_MIN_DEPO": "Please enter the minimum deposit:",
     "USERS_BOT_SETTING_CHANNEL_ID": "Please enter the channel ID:",
@@ -92,6 +92,7 @@
     "USERS_BOT_SETTINGS_TEST_SUB_USAGE": "Please enter the usage limit(GB) of test subscription:",
     "USERS_BOT_SETTINGS_NOTIF_REMINDER_DAYS": "Set the number of days before the end of the subscription to send a reminder message:",
     "USERS_BOT_SETTINGS_NOTIF_REMINDER_USAGE": "Set the remaining GB to send a reminder message:",
+    "USERS_BOT_SETTINGS_PANEL_MANUAL": "Please enter the manual text to show in the user panel:",
     "ERROR_INVALID_USERNAME": "❌Invalid username\nUsername must start with @",
     "ERROR_INVALID_CARD_NUMBER": "❌Invalid card number",
     "PAYMENT_CONFIRMED": "✅Payment confirmed",
@@ -101,8 +102,8 @@
     "PAYMENT_CONFIRMED_ADMIN": "✅Payment confirmed",
     "PAYMENT_NOT_CONFIRMED_ADMIN": "❌Payment not confirmed",
     "ERROR_PAYMENT_NOT_FOUND": "❌Payment not found",
-    "ERROR_ORDER_NOT_FOUND": "❌Order not found",
-    "ORDER_ID": "Order number:",
+    "ERROR_ORDER_NOT_FOUND": "❌Payment not found",
+    "ORDER_ID": "Payment number:",
     "SUB_ID": "Subscription ID:",
     "USER_TIME_EXPIRED": "⚠️EXPIRED",
     "PAYMENT_ASK_CHANGE_STATUS": "Do you want to change the status of the payment?",
@@ -197,7 +198,7 @@
     "USERS_BOT_PLAN_DELETED": "✅پلن با موفقیت حذف شد",
     "USERS_BOT_SETTINGS": "⚙️تنظیمات ربات کاربران",
     "USERS_BOT_SETTINGS_HYPERLINK": "تنظیم نمایش Hyperlink صفحه هیدیفای روی نام کاربر هنگام دریافت اطلاعات اشتراک",
-    "USERS_BOT_ORDER_NUMBER_REQUEST": "لطفا شماره سفارش را وارد کنید:",
+    "USERS_BOT_ORDER_NUMBER_REQUEST": "لطفا شماره تراکنش را وارد کنید:",
     "USERS_BOT_SUB_ID_REQUEST": "لطفا شناسه اشتراک را وارد کنید:",
     "USERS_BOT_SETTING_MIN_DEPO": "لطفا حداقل مبلغ واریزی را تعیین کنید:",
     "USERS_BOT_SETTING_CHANNEL_ID": "لطفا آیدی کانال را وارد کنید:",
@@ -207,6 +208,7 @@
     "USERS_BOT_SETTINGS_TEST_SUB_USAGE": "لطفا حجم(گیگابایت) اشتراک تست را تنظیم کنید:",
     "USERS_BOT_SETTINGS_NOTIF_REMINDER_DAYS": "تعیین کنید که چند روز قبل از اتمام اشتراک پیام یادآوری تمدید اشتراک ارسال شود:",
     "USERS_BOT_SETTINGS_NOTIF_REMINDER_USAGE": "تعیین کنید که چند گیگ مانده به اتمام اشتراک پیام یادآوری تمدید اشتراک ارسال شود:",
+    "USERS_BOT_SETTINGS_PANEL_MANUAL": "لطفا متن راهنمای مورد نظر را برای نمایش در پنل کاربران وارد کنید:",
     "SUCCESS_UPDATE_DATA": "✅اطلاعات با موفقیت به روز شد",
     "ERROR_INVALID_USERNAME": "❌آیدی نامعتبر است\n آیدی باید با @ شروع شود",
     "ERROR_INVALID_CARD_NUMBER": "❌شماره کارت نامعتبر است\nشماره کارت باید 16 رقمی باشد",
@@ -216,12 +218,12 @@
     "ERROR_PAYMENT_ALREADY_REJECTED": "❌پرداخت قبلا رد شده است",
     "PAYMENT_CONFIRMED_ADMIN": "✅پرداخت با موفقیت تایید شد",
     "PAYMENT_NOT_CONFIRMED_ADMIN": "❌پرداخت تایید نشد",
-    "ERROR_ORDER_NOT_FOUND": "❌سفارش یافت نشد",
+    "ERROR_ORDER_NOT_FOUND": "❌تراکنش یافت نشد",
     "ERROR_PAYMENT_NOT_FOUND": "❌پرداخت یافت نشد",
-    "ORDER_ID": "شماره سفارش",
+    "ORDER_ID": "شماره تراکنش",
     "SUB_ID": "شناسه اشتراک",
     "USER_TIME_EXPIRED": "⚠️منقضی",
-    "PAYMENT_ASK_CHANGE_STATUS": "آیا میخواهید وضعیت سفارش را تغییر دهید؟",
+    "PAYMENT_ASK_CHANGE_STATUS": "آیا میخواهید وضعیت تراکنش را تغییر دهید؟",
     "PAYMENT_ACCEPT_STATUS_CONFIRMED": "🟢تایید شده",
     "PAYMENT_ACCEPT_STATUS_NOT_CONFIRMED": "🔴رد شده",
     "PAYMENT_ACCEPT_STATUS_WAITING": "🟡در انتظار تایید",
@@ -230,5 +232,7 @@
     "WALLET_PAYMENT_CONFIRMED": "✅پرداخت شما تایید شد\n از طریق دکمه [💰کیف پول] میتوانید به موجودی کیف پول خود دسترسی داشته باشید.",
     "FEATUR_UNAVAILABLE": "❌این قابلیت در حال حاضر در دسترس نیست.",
     "REQUEST_JOIN_HIDY": "📍جهت دریافت آخرین اطلاعات، در گروه پشتیبانی عضو شوید."
+
+
   }
 }

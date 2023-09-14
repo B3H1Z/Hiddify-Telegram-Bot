@@ -24,6 +24,9 @@ BASE_URL = urlparse(PANEL_URL).scheme + "://" + urlparse(PANEL_URL).netloc
 # *********************************** Helper Functions ***********************************
 # Check if message is digit
 def is_it_digit(message: Message, response=MESSAGES['ERROR_INVALID_NUMBER'], markup=main_menu_keyboard_markup()):
+    if not message.text:
+        bot.send_message(message.chat.id, response, reply_markup=markup)
+        return False
     if not message.text.isdigit():
         bot.send_message(message.chat.id, response, reply_markup=markup)
         return False
@@ -205,6 +208,7 @@ def renewal_from_wallet_confirm(message: Message):
         return
 
     bot.send_message(message.chat.id, MESSAGES['SUCCESSFUL_RENEWAL'], reply_markup=main_menu_keyboard_markup())
+    update_info_subscription(message, uuid)
     link = f"{BASE_URL}/{urlparse(PANEL_URL).path.split('/')[1]}/{uuid}/"
     user_name = f"<a href='{link}'> {user_info_process['name']} </a>"
     for ADMIN in ADMINS_ID:
@@ -448,6 +452,35 @@ def next_step_increase_wallet_balance(message):
                      reply_markup=send_screenshot_markup(plan_id=charge_wallet['id']))
 
 
+def update_info_subscription(message: Message, uuid):
+    value = uuid
+    sub = utils.find_order_subscription_by_uuid(value)
+    if not sub:
+        bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                         reply_markup=main_menu_keyboard_markup())
+        return
+    print(sub)
+    if sub.get('telegram_id', None):
+        # Non-Order Subscription markup
+        mrkup = user_info_non_sub_markup(sub['uuid'])
+    else:
+        # Ordered Subscription markup
+        mrkup = user_info_markup(sub['uuid'])
+
+    user = api.find(uuid=sub['uuid'])
+    if not user:
+        bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                         reply_markup=main_menu_keyboard_markup())
+        return
+    user = utils.dict_process(utils.users_to_dict([user]))[0]
+    try:
+        bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id,
+                              text=user_info_template(sub['id'], user, MESSAGES['INFO_USER']),
+                              reply_markup=mrkup)
+    except:
+        pass
+
+
 # *********************************** Callback Query Area ***********************************
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call: CallbackQuery):
@@ -515,6 +548,7 @@ def callback_query(call: CallbackQuery):
         renewal_from_wallet_confirm(call.message)
     # Ask To Send Screenshot
     elif key == 'send_screenshot':
+        bot.delete_message(call.message.chat.id, call.message.message_id)
         bot.send_message(call.message.chat.id, MESSAGES['REQUEST_SEND_SCREENSHOT'])
         bot.register_next_step_handler(call.message, next_step_send_screenshot, charge_wallet)
 
@@ -531,24 +565,7 @@ def callback_query(call: CallbackQuery):
                              reply_markup=main_menu_keyboard_markup())
 
     elif key == 'update_info_subscription':
-        sub = utils.find_order_subscription_by_uuid(value)
-        if not sub:
-            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'],
-                             reply_markup=main_menu_keyboard_markup())
-            return
-
-        user = api.find(uuid=sub['uuid'])
-        if not user:
-            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'],
-                             reply_markup=main_menu_keyboard_markup())
-            return
-        user = utils.dict_process(utils.users_to_dict([user]))[0]
-        try:
-            bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id,
-                                  text=user_info_template(sub['id'], user, MESSAGES['INFO_USER']),
-                                  reply_markup=user_info_markup(sub['uuid']))
-        except:
-            pass
+        update_info_subscription(call.message, value)
 
     # ----------------------------------- wallet Area -----------------------------------
     # INCREASE WALLET BALANCE
@@ -764,6 +781,26 @@ def callback_query(call: CallbackQuery):
             reply_markup=main_menu_keyboard_markup()
         )
 
+    # manual
+    elif key == "msg_manual":
+        settings = utils.all_configs_settings()
+        android_msg = settings['msg_manual_android'] if settings['msg_manual_android'] else MESSAGES['MANUAL_ANDROID']
+        ios_msg = settings['msg_manual_ios'] if settings['msg_manual_ios'] else MESSAGES['MANUAL_IOS']
+        win_msg = settings['msg_manual_win'] if settings['msg_manual_windows'] else MESSAGES['MANUAL_WIN']
+        mac_msg = settings['msg_manual_mac'] if settings['msg_manual_mac'] else MESSAGES['MANUAL_MAC']
+        linux_msg = settings['msg_manual_lin'] if settings['msg_manual_linux'] else MESSAGES['MANUAL_LIN']
+        if value == 'android':
+            bot.send_message(call.message.chat.id, android_msg, reply_markup=main_menu_keyboard_markup())
+        elif value == 'ios':
+            bot.send_message(call.message.chat.id, ios_msg, reply_markup=main_menu_keyboard_markup())
+        elif value == 'win':
+            bot.send_message(call.message.chat.id, win_msg, reply_markup=main_menu_keyboard_markup())
+        elif value == 'mac':
+            bot.send_message(call.message.chat.id, mac_msg, reply_markup=main_menu_keyboard_markup())
+        elif value == 'lin':
+            bot.send_message(call.message.chat.id, linux_msg, reply_markup=main_menu_keyboard_markup())
+
+
 
 
 
@@ -873,12 +910,13 @@ def to_qr(message: Message):
 
 
 # Help Guide Message Handler
-@bot.message_handler(func=lambda message: message.text == KEY_MARKUP['HELP_GUIDE'])
+@bot.message_handler(func=lambda message: message.text == KEY_MARKUP['MANUAL'])
 def help_guide(message: Message):
     join_status = is_user_in_channel(message.chat.id)
     if not join_status:
         return
-    bot.send_message(message.chat.id, connection_help_template(), reply_markup=main_menu_keyboard_markup())
+    bot.send_message(message.chat.id, MESSAGES['MANUAL_HDR'],
+                     reply_markup=users_bot_management_settings_panel_manual_markup())
 
 
 # Ticket To Support Message Handler

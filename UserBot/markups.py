@@ -15,27 +15,28 @@ def main_menu_keyboard_markup():
     markup.add(KeyboardButton(KEY_MARKUP['FREE_TEST']), KeyboardButton(KEY_MARKUP['WALLET']))
     # KeyboardButton(KEY_MARKUP['TO_QR']),
     markup.add(KeyboardButton(KEY_MARKUP['SEND_TICKET']),
-               KeyboardButton(KEY_MARKUP['HELP_GUIDE']))
+               KeyboardButton(KEY_MARKUP['MANUAL']))
     return markup
 
 
 def user_info_markup(uuid):
     markup = InlineKeyboardMarkup()
-    markup.row_width = 2
-    markup.add(
-        InlineKeyboardButton(KEY_MARKUP['UPDATE_SUBSCRIPTION_INFO'], callback_data=f"update_info_subscription:{uuid}"))
+    markup.row_width = 1
     markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_LIST'], callback_data=f"configs_list:{uuid}"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['RENEWAL_SUBSCRIPTION'], callback_data=f"renewal_subscription:{uuid}"))
+    markup.add(
+        InlineKeyboardButton(KEY_MARKUP['UPDATE_SUBSCRIPTION_INFO'], callback_data=f"update_info_subscription:{uuid}"))
     return markup
+
 
 
 def user_info_non_sub_markup(uuid):
     markup = InlineKeyboardMarkup()
     markup.row_width = 2
-    markup.add(
-        InlineKeyboardButton(KEY_MARKUP['UPDATE_SUBSCRIPTION_INFO'], callback_data=f"update_info_subscription:{uuid}"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_LIST'], callback_data=f"configs_list:{uuid}"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['RENEWAL_SUBSCRIPTION'], callback_data=f"renewal_subscription:{uuid}"))
+    markup.add(
+        InlineKeyboardButton(KEY_MARKUP['UPDATE_SUBSCRIPTION_INFO'], callback_data=f"update_info_subscription:{uuid}"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['UNLINK_SUBSCRIPTION'], callback_data=f"unlink_subscription:{uuid}"))
     return markup
 
@@ -113,3 +114,19 @@ def force_join_channel_markup(channel_id):
     )
     return markup
 
+
+def users_bot_management_settings_panel_manual_markup():
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 1
+    markup.add(InlineKeyboardButton(KEY_MARKUP['MANUAL_ANDROID'],
+                                    callback_data=f"msg_manual:android"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['MANUAL_IOS'],
+                                    callback_data=f"msg_manual:ios"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['MANUAL_WIN'],
+                                    callback_data=f"msg_manual:win"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['MANUAL_MAC'],
+                                    callback_data=f"msg_manual:mac"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['MANUAL_LIN'],
+                                    callback_data=f"msg_manual:lin"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"users_bot_settings:None"))
+    return markup
