@@ -2,13 +2,78 @@
 # Define text colors
 GREEN='\033[0;32m'
 RED='\033[0;31m'
+YELLOW='\033[1;33m'
 RESET='\033[0m' # Reset text color
 
+HIDY_BOT_ID="@HidyBotGroup"
 # Function to display error messages and exit
 function display_error_and_exit() {
   echo -e "${RED}Error: $1${RESET}"
+  echo -e "${YELLOW}${HIDY_BOT_ID}${RESET}"
   exit 1
 }
+
+install_git_if_needed() {
+  if ! command -v git &>/dev/null; then
+    echo "Git is not installed. Installing Git..."
+
+    # Install Git based on the operating system (Linux)
+    if [ -f /etc/os-release ]; then
+      source /etc/os-release
+      if [ "$ID" == "ubuntu" ] || [ "$ID" == "debian" ]; then
+        sudo apt update
+        sudo apt install -y git
+      elif [ "$ID" == "centos" ] || [ "$ID" == "rhel" ]; then
+        sudo yum install -y git
+      fi
+    elif [ "$(uname -s)" == "Darwin" ]; then # macOS
+      brew install git
+    else
+      echo "Unsupported operating system. Please install Git manually and try again."
+      exit 1
+    fi
+
+    if ! command -v git &>/dev/null; then
+      echo "Failed to install Git. Please install Git manually and try again."
+      exit 1
+    fi
+
+    echo "Git has been installed successfully."
+  fi
+}
+
+# Function to install Python 3 and pip if they are not already installed
+install_python3_and_pip_if_needed() {
+  if ! command -v python3 &>/dev/null || ! command -v pip &>/dev/null; then
+    echo "Python 3 and pip are required. Installing Python 3 and pip..."
+
+    # Install Python 3 and pip based on the operating system (Linux)
+    if [ -f /etc/os-release ]; then
+      source /etc/os-release
+      if [ "$ID" == "ubuntu" ] || [ "$ID" == "debian" ]; then
+        sudo apt update
+        sudo apt install -y python3 python3-pip
+      elif [ "$ID" == "centos" ] || [ "$ID" == "rhel" ]; then
+        sudo yum install -y python3 python3-pip
+      fi
+    elif [ "$(uname -s)" == "Darwin" ]; then # macOS
+      brew install python@3
+    else
+      echo "Unsupported operating system. Please install Python 3 and pip manually and try again."
+      exit 1
+    fi
+
+    if ! command -v python3 &>/dev/null || ! command -v pip &>/dev/null; then
+      echo "Failed to install Python 3 and pip. Please install Python 3 and pip manually and try again."
+      exit 1
+    fi
+
+    echo "Python 3 and pip have been installed successfully."
+  fi
+}
+echo -e "${GREEN}Step 0: Checking requirements...${RESET}"
+install_git_if_needed
+install_python3_and_pip_if_needed
 
 # Check if Git is installed
 if ! command -v git &>/dev/null; then
@@ -32,7 +97,7 @@ if [ "$0" == "--pre-release" ]; then
 fi
 
 echo "Selected branch: $branch"
-    
+
 if [ -d "$install_dir" ]; then
   echo "Directory $install_dir exists."
 else
@@ -79,7 +144,7 @@ add_cron_job_if_not_exists() {
 
   # Check if the cron job already exists in the current user's crontab
   current_crontab=$(crontab -l 2>/dev/null || true)
-  
+
   if [[ -z "$current_crontab" ]]; then
     # No existing crontab, so add the new cron job
     (echo "$cron_job") | crontab -
