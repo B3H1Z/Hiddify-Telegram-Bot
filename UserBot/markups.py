@@ -106,6 +106,7 @@ def wallet_info_markup():
 def force_join_channel_markup(channel_id):
     markup = InlineKeyboardMarkup()
     markup.row_width = 1
+    channel_id = channel_id.replace("@", "")
     markup.add(
         InlineKeyboardButton(KEY_MARKUP['JOIN_CHANNEL'], url=f"https://t.me/{channel_id}",)
     )

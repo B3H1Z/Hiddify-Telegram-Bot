@@ -167,35 +167,36 @@ def users_bot_management_settings_markup(settings):
     markup.row_width = 1
     status_hyperlink = "✅" if settings['visible_hiddify_hyperlink'] else "❌"
     status_three_rand = "✅" if settings['three_random_num_price'] else "❌"
-    status_force_join = "✅" if settings['force_join_channel'] else "❌"
     status_panel_auto_backup = "✅" if settings['panel_auto_backup'] else "❌"
+    status_force_join = "✅" if settings['force_join_channel'] else "❌"
+
     markup.add(InlineKeyboardButton(f"{KEY_MARKUP['USERS_BOT_SETTINGS_SHOW_HIDI_LINK']} | {status_hyperlink}",
                                     callback_data=f"users_bot_settings_hyperlink:{settings['visible_hiddify_hyperlink']}"))
     markup.add(InlineKeyboardButton(f"{KEY_MARKUP['USERS_BOT_SETTINGS_SHOW_THREE_RAND']} | {status_three_rand}",
                                     callback_data=f"users_bot_settings_three_rand_price:{settings['three_random_num_price']}"))
+    markup.add(InlineKeyboardButton(f"{KEY_MARKUP['USERS_BOT_SETTINGS_PANEL_AUTO_BACKUP']} | {status_panel_auto_backup}",
+                             callback_data=f"users_bot_settings_panel_auto_backup:{settings['panel_auto_backup']}"))
     markup.add(InlineKeyboardButton(f"{KEY_MARKUP['USERS_BOT_SETTINGS_CHANNEL_ّFORCE_JOIN']} | {status_force_join}",
                                     callback_data=f"users_bot_settings_force_join:{settings['force_join_channel']}"))
-    markup.add(
-        InlineKeyboardButton(f"{KEY_MARKUP['USERS_BOT_SETTINGS_PANEL_AUTO_BACKUP']} | {status_panel_auto_backup}",
-                             callback_data=f"users_bot_settings_panel_auto_backup:{settings['panel_auto_backup']}"))
-    markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_VISIBLE_SUBS'],
-                                    callback_data=f"users_bot_settings_visible_sub_menu:None"))
-    markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_PANEL_MANUAL'],
-                                    callback_data="users_bot_settings_panel_manual_menu:None"))
 
-    markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_MIN_DEPO'],
-                                    callback_data=f"users_bot_settings_min_depo:{settings['min_deposit_amount']}"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_CHANNEL_ID'],
                                     callback_data=f"users_bot_settings_channel_id:{settings['channel_id']}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_VISIBLE_SUBS'],
+                                    callback_data=f"users_bot_settings_visible_sub_menu:None"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_SET_WELCOME_MSG'],
                                     callback_data=f"users_bot_settings_set_welcome_msg:None"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_PANEL_MANUAL'],
+                                    callback_data="users_bot_settings_panel_manual_menu:None"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_TEST_SUB'],
                                     callback_data=f"users_bot_settings_test_sub_menu:None"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_NOTIF_REMINDER'],
                                     callback_data=f"users_bot_settings_notif_reminder_menu:None"))
-    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"users_bot_management:None"))
-    return markup
+    markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_MIN_DEPO'],
+                                    callback_data=f"users_bot_settings_min_depo:{settings['min_deposit_amount']}"))
 
+
+    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"users_bot_management_menu:None"))
+    return markup
 
 
 def users_bot_management_settings_test_sub_markup(settings):
@@ -260,6 +261,7 @@ def users_bot_management_settings_visible_sub_markup(settings):
     markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"users_bot_settings:None"))
     return markup
 
+
 def users_bot_management_settings_panel_manual_markup():
     markup = InlineKeyboardMarkup()
     markup.row_width = 1
@@ -275,6 +277,8 @@ def users_bot_management_settings_panel_manual_markup():
                                     callback_data=f"users_bot_settings_panel_manual:msg_manual_linux"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"users_bot_settings:None"))
     return markup
+
+
 # Users Bot Management - Edit Owner Info - Inline Keyboard Markup
 def users_bot_edit_owner_info_markup():
     markup = InlineKeyboardMarkup()
@@ -306,5 +310,6 @@ def plans_list_markup(plans):
 def start_bot_markup():
     markup = InlineKeyboardMarkup()
     markup.row_width = 1
-    markup.add(InlineKeyboardButton(KEY_MARKUP['SUPPORT_GROUP'], url=f"https://t.me/{HIDY_BOT_ID}"))
+    bot_id = HIDY_BOT_ID.replace("@", "")
+    markup.add(InlineKeyboardButton(KEY_MARKUP['SUPPORT_GROUP'], url=f"https://t.me/{bot_id}"))
     return markup

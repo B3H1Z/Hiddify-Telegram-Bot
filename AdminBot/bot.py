@@ -1,5 +1,6 @@
 # Description: Main Bot File
 import datetime
+import html
 import logging
 import time
 import telebot
@@ -47,6 +48,30 @@ def is_it_cancel(message: Message, response=MESSAGES['CANCELED']):
         bot.send_message(message.chat.id, response, reply_markup=markups.main_menu_keyboard_markup())
         return True
     return False
+
+
+def message_to_html(message: Message):
+    text = message.text
+    entities = message.entities
+
+    html_content = ""
+
+    offset = 0
+    for entity in entities:
+        html_content += html.escape(text[offset:entity.offset])
+        if entity.type == 'bold':
+            html_content += f'<b>{html.escape(text[entity.offset:entity.offset + entity.length])}</b>'
+        elif entity.type == 'italic':
+            html_content += f'<i>{html.escape(text[entity.offset:entity.offset + entity.length])}</i>'
+        elif entity.type == 'code':
+            html_content += f'<code>{html.escape(text[entity.offset:entity.offset + entity.length])}</code>'
+        elif entity.type == 'pre':
+            html_content += f'<pre>{html.escape(text[entity.offset:entity.offset + entity.length])}</pre>'
+        elif entity.type == 'text_link':
+            html_content += f'<a href="{html.escape(entity.url)}">{html.escape(text[entity.offset:entity.offset + entity.length])}</a>'
+        offset = entity.offset + entity.length
+    html_content += html.escape(text[offset:])
+    return html_content
 
 
 # ----------------------------------- Add User Area -----------------------------------
@@ -454,7 +479,11 @@ def users_bot_settings_channel_id(message: Message):
 def users_bot_settings_welcome_msg(message: Message):
     if is_it_cancel(message):
         return
-    status = USERS_DB.edit_str_config("msg_user_start", value=message.text)
+    if message.entities:
+        msg = message_to_html(message)
+    else:
+        msg = message.text
+    status = USERS_DB.edit_str_config("msg_user_start", value=msg)
     if not status:
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
         return
@@ -508,14 +537,21 @@ def users_bot_settings_notif_reminder_days(message: Message):
         return
     bot.send_message(message.chat.id, MESSAGES['SUCCESS_UPDATE_DATA'], reply_markup=markups.main_menu_keyboard_markup())
 
-def users_bot_settings_panel_manual(message: Message,db_key):
+
+def users_bot_settings_panel_manual(message: Message, db_key):
     if is_it_cancel(message):
         return
-    status = USERS_DB.edit_str_config(db_key,value=message.text)
+    if message.entities:
+        msg = message_to_html(message)
+    else:
+        msg = message.text
+
+    status = USERS_DB.edit_str_config(db_key, value=msg)
     if not status:
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
         return
     bot.send_message(message.chat.id, MESSAGES['SUCCESS_UPDATE_DATA'], reply_markup=markups.main_menu_keyboard_markup())
+
 
 # ----------------------------------- Callbacks -----------------------------------
 # Callback Handler for Inline Buttons
@@ -898,6 +934,10 @@ def callback_query(call: CallbackQuery):
         bot.send_message(call.message.chat.id, msg, reply_markup=markups.users_list_markup(users_list))
 
     # ----------------------------------- Users Bot Management Callbacks -----------------------------------
+    elif key == "users_bot_management_menu":
+        bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,
+                                      reply_markup=markups.users_bot_management_markup())
+
     # Plan Management - Add Plan Callback
     elif key == "users_bot_add_plan":
         bot.send_message(call.message.chat.id, MESSAGES['USERS_BOT_ADD_PLAN'],
@@ -981,6 +1021,7 @@ def callback_query(call: CallbackQuery):
             if not edit_config:
                 bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
                 return
+        settings = utils.all_configs_settings()
         users_bot_settings_update_message(call.message, markups.users_bot_management_settings_markup(settings))
 
     # User Bot Settings  - Set three random letters for define price
@@ -995,6 +1036,7 @@ def callback_query(call: CallbackQuery):
             if not edit_config:
                 bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
                 return
+        settings = utils.all_configs_settings()
         users_bot_settings_update_message(call.message, markups.users_bot_management_settings_markup(settings))
 
     elif key == "users_bot_settings_panel_auto_backup":
@@ -1054,6 +1096,7 @@ def callback_query(call: CallbackQuery):
             if not edit_config:
                 bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
                 return
+        settings = utils.all_configs_settings()
         users_bot_settings_update_message(call.message, markups.users_bot_management_settings_markup(settings))
 
     elif key == "users_bot_settings_visible_sub_menu":
@@ -1211,48 +1254,6 @@ def callback_query(call: CallbackQuery):
                                   f"{MESSAGES['WALLET_PAYMENT_CONFIRMED']}\n{MESSAGES['ORDER_ID']} {payment_id}")
             bot.send_message(call.message.chat.id,
                              f"{MESSAGES['PAYMENT_CONFIRMED_ADMIN']}\n{MESSAGES['ORDER_ID']} {payment_id}")
-
-        # return
-        # if payment_status:
-        #     plan_info = USERS_DB.find_payment(id=order_info['plan_id'], )
-        #     if plan_info:
-        #         plan_info = plan_info[0]
-        #         value = ADMIN_DB.add_default_user(order_info['user_name'], plan_info['days'], plan_info['size_gb'],
-        #                                           int(PANEL_ADMIN_ID))
-        #         if not value:
-        #             bot.send_message(call.message.chat.id,
-        #                              f"{MESSAGES['ERROR_UNKNOWN']}\n{MESSAGES['ORDER_ID']} {payment_id}")
-        #             return
-        #         sub_id = random.randint(1000000, 9999999)
-        #         add_sub_status = USERS_DB.add_order_subscription(sub_id, order_info['id'], value)
-        #         if not add_sub_status:
-        #             bot.send_message(call.message.chat.id,
-        #                              f"{MESSAGES['ERROR_UNKNOWN']}\n{MESSAGES['ORDER_ID']} {payment_id}")
-        #             return
-        #         user_bot.send_message(int(order_info['telegram_id']),
-        #                               f"{MESSAGES['PAYMENT_CONFIRMED']}\n{MESSAGES['ORDER_ID']} {payment_id}")
-        #         bot.send_message(call.message.chat.id,
-        #                          f"{MESSAGES['PAYMENT_CONFIRMED_ADMIN']}\n{MESSAGES['ORDER_ID']} {payment_id}")
-        #         bot.delete_message(call.message.chat.id, call.message.message_id)
-        #     else:
-        #         # for wallet balance charge
-        #         if order_info['plan_id'] == 0:
-        #             users = USERS_DB.find_user(telegram_id=order_info['telegram_id'])
-        #             if users:
-        #                 user = users[0]
-        #                 wallet_balance = int(user['wallet_balance']) + int(order_info['paid_amount'])
-        #                 user_info = USERS_DB.edit_user(order_info['telegram_id'], wallet_balance=wallet_balance)
-        #                 if user_info:
-        #                     user_bot.send_message(int(order_info['telegram_id']),
-        #                                           f"{MESSAGES['WALLET_PAYMENT_CONFIRMED']}\n{MESSAGES['ORDER_ID']} {payment_id}")
-        #                     bot.send_message(call.message.chat.id,
-        #                                      f"{MESSAGES['PAYMENT_CONFIRMED_ADMIN']}\n{MESSAGES['ORDER_ID']} {payment_id}")
-        #                     bot.delete_message(call.message.chat.id, call.message.message_id)
-        #         else:
-        #             bot.send_message(call.message.chat.id,
-        #                              f"{MESSAGES['ERROR_UNKNOWN']}\n{MESSAGES['ORDER_ID']} {payment_id}")
-        # else:
-        #     bot.send_message(call.message.chat.id, f"{MESSAGES['ERROR_UNKNOWN']}\n{MESSAGES['ORDER_ID']} {payment_id}")
 
     # Payment - Reject Payment Callback
     elif key == 'cancel_payment_by_admin':
