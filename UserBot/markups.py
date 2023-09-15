@@ -54,7 +54,10 @@ def confirm_buy_plan_markup(plan_id, renewal=False):
     markup.row_width = 1
     callback = "confirm_buy_from_wallet" if not renewal else "confirm_renewal_from_wallet"
     markup.add(InlineKeyboardButton(KEY_MARKUP['BUY_FROM_WALLET'], callback_data=f"{callback}:{plan_id}"))
-    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_plans:None"))
+    if renewal:
+        markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_renewal_plans:None"))
+    else:
+        markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_plans:None"))
     return markup
 
 
@@ -77,6 +80,8 @@ def plans_list_markup(plans, renewal=False):
                 callback_data=f"{callback}:{plan['id']}"))
     if len(keys) == 0:
         return None
+    if renewal:
+        keys.append(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_user_panel:None"))
     markup.add(*keys)
     return markup
 
