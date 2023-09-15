@@ -1,4 +1,6 @@
 #!/bin/bash
+# shellcheck disable=SC2034
+target_version="5.0.0"
 
 # Define text colors
 GREEN='\033[0;32m'
@@ -47,15 +49,23 @@ function reinstall_bot() {
   esac
 }
 
+
+branch="main"
+
+if [ "$0" == "--pre-release" ]; then
+    branch="pre-release"
+fi
+echo "Selected branch: $branch"
+
 # Function to update and restart the bot
 function update_bot() {
   display_message "${GREEN}Updating the bot...${RESET}"
   git stash
-  if git pull origin main; then
+  if git pull origin "$branch"; then
     nohup python3 hiddifyTelegramBot.py >>bot.log 2>&1 &
     display_message "${GREEN}Bot has been updated and restarted.${RESET}"
   else
-    if git pull --rebase origin main; then
+    if git pull --rebase origin "$branch"; then
       nohup python3 hiddifyTelegramBot.py >>bot.log 2>&1 &
       display_message "${GREEN}Bot has been updated and restarted.${RESET}"
     else
