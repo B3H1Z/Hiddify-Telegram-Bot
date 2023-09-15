@@ -790,15 +790,15 @@ def callback_query(call: CallbackQuery):
         mac_msg = settings['msg_manual_mac'] if settings['msg_manual_mac'] else MESSAGES['MANUAL_MAC']
         linux_msg = settings['msg_manual_lin'] if settings['msg_manual_linux'] else MESSAGES['MANUAL_LIN']
         if value == 'android':
-            bot.send_message(call.message.chat.id, android_msg, reply_markup=main_menu_keyboard_markup())
+            bot.send_message(call.message.chat.id, android_msg, parse_mode="HTML", reply_markup=main_menu_keyboard_markup())
         elif value == 'ios':
-            bot.send_message(call.message.chat.id, ios_msg, reply_markup=main_menu_keyboard_markup())
+            bot.send_message(call.message.chat.id, ios_msg, parse_mode="HTML", reply_markup=main_menu_keyboard_markup())
         elif value == 'win':
-            bot.send_message(call.message.chat.id, win_msg, reply_markup=main_menu_keyboard_markup())
+            bot.send_message(call.message.chat.id, win_msg, parse_mode="HTML", reply_markup=main_menu_keyboard_markup())
         elif value == 'mac':
-            bot.send_message(call.message.chat.id, mac_msg, reply_markup=main_menu_keyboard_markup())
+            bot.send_message(call.message.chat.id, mac_msg, parse_mode="HTML", reply_markup=main_menu_keyboard_markup())
         elif value == 'lin':
-            bot.send_message(call.message.chat.id, linux_msg, reply_markup=main_menu_keyboard_markup())
+            bot.send_message(call.message.chat.id, linux_msg, parse_mode="HTML", reply_markup=main_menu_keyboard_markup())
 
 
 
