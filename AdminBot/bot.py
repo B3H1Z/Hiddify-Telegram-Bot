@@ -481,7 +481,7 @@ def users_bot_settings_welcome_msg(message: Message):
         return
     if message.entities:
         #msg = message_to_html(message)
-        msg = message.text_html
+        msg = message.html_text
     else:
         msg = message.text
     status = USERS_DB.edit_str_config("msg_user_start", value=msg)
@@ -544,7 +544,7 @@ def users_bot_settings_panel_manual(message: Message, db_key):
         return
     if message.entities:
         #msg = message_to_html(message)
-        msg = message.text_html
+        msg = message.html_text
     else:
         msg = message.text
 
