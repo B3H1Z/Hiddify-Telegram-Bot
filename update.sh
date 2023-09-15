@@ -8,8 +8,6 @@ RED='\033[0;31m'
 YELLOW='\033[0;33m'
 RESET='\033[0m' # Reset text color
 
-
-
 # Function to display colored messages
 function display_message() {
   echo -e "$1"
@@ -63,16 +61,22 @@ if [ "$current_version_first_part" = "4" ] && [ "$target_version_first_part" = "
 else
     echo "Version is not 4."
 fi
+branch="main"
+
+if [ "$0" == "--pre-release" ]; then
+    branch="pre-release"
+fi
+echo "Selected branch: $branch"
 
 # Function to update and restart the bot
 function update_bot() {
   display_message "${GREEN}Updating the bot...${RESET}"
   git stash
-  if git pull origin main; then
+  if git pull origin "$branch"; then
     nohup python3 hiddifyTelegramBot.py >>bot.log 2>&1 &
     display_message "${GREEN}Bot has been updated and restarted.${RESET}"
   else
-    if git pull --rebase origin main; then
+    if git pull --rebase origin "$branch"; then
       nohup python3 hiddifyTelegramBot.py >>bot.log 2>&1 &
       display_message "${GREEN}Bot has been updated and restarted.${RESET}"
     else
