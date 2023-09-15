@@ -78,10 +78,10 @@ function update_bot() {
 
 ## Stop the bot gracefully before proceeding
 #stop_bot
-
-# Wait for a few seconds
-display_message "Please wait for 5 seconds ..."
-sleep 5
+#
+## Wait for a few seconds
+#display_message "Please wait for 5 seconds ..."
+#sleep 5
 
 # If version.py does not exist, offer to reinstall the bot; otherwise, update it
 if [ ! -f /opt/Hiddify-Telegram-Bot/version.py ]; then
