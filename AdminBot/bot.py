@@ -479,11 +479,8 @@ def users_bot_settings_channel_id(message: Message):
 def users_bot_settings_welcome_msg(message: Message):
     if is_it_cancel(message):
         return
-    if message.entities:
-        msg = message_to_html(message)
-    else:
-        msg = message.text
-    status = USERS_DB.edit_str_config("msg_user_start", value=msg)
+
+    status = USERS_DB.edit_str_config("msg_user_start", value=message.html_text)
     if not status:
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
         return
@@ -541,12 +538,7 @@ def users_bot_settings_notif_reminder_days(message: Message):
 def users_bot_settings_panel_manual(message: Message, db_key):
     if is_it_cancel(message):
         return
-    if message.entities:
-        msg = message_to_html(message)
-    else:
-        msg = message.text
-
-    status = USERS_DB.edit_str_config(db_key, value=msg)
+    status = USERS_DB.edit_str_config(db_key, value=message.html_text)
     if not status:
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
         return

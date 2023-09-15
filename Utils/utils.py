@@ -491,7 +491,7 @@ def toman_to_rial(toman):
 
 
 def rial_to_toman(rial):
-    return int(int(rial) / 10)
+    return "{:,.0f}".format(int(int(rial) / 10))
 
 
 # def search_by_property(list, **kwargs):
