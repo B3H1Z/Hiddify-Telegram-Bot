@@ -97,6 +97,7 @@ sleep 5
 
 # If version.py does not exist, offer to reinstall the bot; otherwise, update it
 if [ ! -f /opt/Hiddify-Telegram-Bot/version.py ]; then
+
   reinstall_bot
 else
   update_bot

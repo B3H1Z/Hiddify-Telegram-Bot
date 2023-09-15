@@ -11,3 +11,4 @@ config.json
 *.pyc
 *.pyo!/qodana.yaml
 qodana.yaml
+check-host.py
