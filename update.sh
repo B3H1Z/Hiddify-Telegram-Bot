@@ -51,7 +51,6 @@ function reinstall_bot() {
 
 
 branch="main"
-
 if [ "$0" == "--pre-release" ]; then
     branch="pre-release"
 fi
@@ -77,8 +76,8 @@ function update_bot() {
   fi
 }
 
-# Stop the bot gracefully before proceeding
-stop_bot
+## Stop the bot gracefully before proceeding
+#stop_bot
 
 # Wait for a few seconds
 display_message "Please wait for 5 seconds ..."
