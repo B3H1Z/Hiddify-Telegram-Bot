@@ -479,7 +479,7 @@ def users_bot_settings_channel_id(message: Message):
 def users_bot_settings_welcome_msg(message: Message):
     if is_it_cancel(message):
         return
-
+    
     status = USERS_DB.edit_str_config("msg_user_start", value=message.html_text)
     if not status:
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())

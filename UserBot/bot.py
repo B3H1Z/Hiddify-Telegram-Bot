@@ -136,8 +136,8 @@ def renewal_from_wallet_confirm(message: Message):
 
     wallet = USERS_DB.find_wallet(telegram_id=message.chat.id)
     if not wallet:
-        bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
-                         reply_markup=main_menu_keyboard_markup())
+        # Wallet not created
+        bot.send_message(message.chat.id, MESSAGES['LACK_OF_WALLET_BALANCE'])
 
     wallet = wallet[0]
     plan_info = USERS_DB.find_plan(id=plan_id)
@@ -211,9 +211,10 @@ def renewal_from_wallet_confirm(message: Message):
     update_info_subscription(message, uuid)
     link = f"{BASE_URL}/{urlparse(PANEL_URL).path.split('/')[1]}/{uuid}/"
     user_name = f"<a href='{link}'> {user_info_process['name']} </a>"
+    sub = utils.find_order_subscription_by_uuid(uuid)
     for ADMIN in ADMINS_ID:
         admin_bot.send_message(ADMIN,
-                               f"{MESSAGES['ADMIN_NOTIFY_NEW_RENEWAL']} {user_name} {MESSAGES['SUBSCRIPTION']}\n{MESSAGES['ORDER_ID']} {order_id}")
+                               f"{MESSAGES['ADMIN_NOTIFY_NEW_RENEWAL']} {user_name} {MESSAGES['ADMIN_NOTIFY_NEW_RENEWAL_2']}\n{MESSAGES['INFO_ID']} <code>{sub['id']}</code>")
 
 
 # Next Step Buy Plan - Send Screenshot
@@ -321,7 +322,7 @@ def next_step_send_name_for_buy_from_wallet(message: Message, plan):
     user_name = f"<a href='{link}'> {name} </a>"
     for ADMIN in ADMINS_ID:
         admin_bot.send_message(ADMIN,
-                               f"{MESSAGES['ADMIN_NOTIFY_NEW_SUB']} {user_name} {MESSAGES['ADMIN_NOTIFY_CONFIRM']}\n{MESSAGES['ORDER_ID']} {order_id}")
+                               f"{MESSAGES['ADMIN_NOTIFY_NEW_SUB']} {user_name} {MESSAGES['ADMIN_NOTIFY_CONFIRM']}\n{MESSAGES['INFO_ID']} <code>{sub_id}</code>")
 
 
 # ----------------------------------- Get Free Test Area -----------------------------------
@@ -363,7 +364,7 @@ def next_step_send_name_for_get_free_test(message: Message):
     user_name = f"<a href='{link}'> {name} </a>"
     for ADMIN in ADMINS_ID:
         admin_bot.send_message(ADMIN,
-                               f"{MESSAGES['ADMIN_NOTIFY_NEW_FREE_TEST']} {user_name} {MESSAGES['ADMIN_NOTIFY_CONFIRM']}")
+                               f"{MESSAGES['ADMIN_NOTIFY_NEW_FREE_TEST']} {user_name} {MESSAGES['ADMIN_NOTIFY_CONFIRM']}\n{MESSAGES['INFO_ID']} <code>{non_order_id}</code>")
 
 
 # ----------------------------------- To QR Area -----------------------------------
@@ -812,8 +813,23 @@ def callback_query(call: CallbackQuery):
 
     # Back To Plans
     elif key == "back_to_plans":
-        bot.delete_message(call.message.chat.id, call.message.message_id)
-        buy_subscription(call.message)
+        plans = USERS_DB.select_plans()
+        if not plans:
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                             reply_markup=main_menu_keyboard_markup())
+            return
+        bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id,
+                                      text= MESSAGES['PLANS_LIST'], reply_markup=plans_list_markup(plans))
+
+     # Back To Renewal Plans
+    elif key == "back_to_renewal_plans":
+        plans = USERS_DB.select_plans()
+        if not plans:
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                             reply_markup=main_menu_keyboard_markup())
+            return
+        bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,
+                                      reply_markup=plans_list_markup(plans, renewal=True))
 
     # Delete Message
     elif key == "del_msg":

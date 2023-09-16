@@ -67,7 +67,7 @@
         "ADMIN_NOTIFY_CONFIRM" : "",
         "ADMIN_NOTIFY_NEW_FREE_TEST" : "A new free tesst subscription was registered with the name of:",
         "ADMIN_NOTIFY_NEW_RENEWAL" : "",
-        "SUBSCRIPTION" : "subscription was extended",
+        "ADMIN_NOTIFY_NEW_RENEWAL_2" : "subscription was extended",
         "FREE_TEST_NOT_AVAILABLE" : "Free test is not available at the moment",
         "REQUEST_SELECT_OS_MANUAL": "📥Please select your operating system:",
         "MANUAL_ANDROID": "\uD83D\uDCE5Android:\n<a href='https://play.google.com/store/apps/details?id=com.v2ray.ang'>V2RayNG</a>\n<a href='https://play.google.com/store/apps/details?id=ang.hiddify.com'>HiddifyNG</a>",
@@ -144,8 +144,8 @@
         "ADMIN_NOTIFY_NEW_SUB" : "اشتراک جدیدی با نام:",
         "ADMIN_NOTIFY_CONFIRM" : "ثبت شد",
         "ADMIN_NOTIFY_NEW_FREE_TEST" : "اشتراک تست رایگان جدیدی با نام:",
-        "ADMIN_NOTIFY_NEW_RENEWAL" : "تمدید شد",
-        "SUBSCRIPTION" : "اشتراک",
+        "ADMIN_NOTIFY_NEW_RENEWAL_2" : "تمدید شد",
+        "ADMIN_NOTIFY_NEW_RENEWAL" : "اشتراک",
         "FREE_TEST_NOT_AVAILABLE" : "اکانت تست رایگان در حال حاضر در دسترس نمی‌باشد",
         "REQUEST_SELECT_OS_MANUAL": "📥لطفا سیستم عامل خود را انتخاب کنید:",
         "MANUAL_ANDROID": "\uD83D\uDCE5Android:\n<a href='https://play.google.com/store/apps/details?id=com.v2ray.ang'>V2RayNG</a>\n<a href='https://play.google.com/store/apps/details?id=ang.hiddify.com'>HiddifyNG</a>",
