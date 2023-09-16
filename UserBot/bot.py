@@ -813,8 +813,13 @@ def callback_query(call: CallbackQuery):
 
     # Back To Plans
     elif key == "back_to_plans":
-        bot.delete_message(call.message.chat.id, call.message.message_id)
-        buy_subscription(call.message)
+        plans = USERS_DB.select_plans()
+        if not plans:
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                             reply_markup=main_menu_keyboard_markup())
+            return
+        bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id,
+                                      text= MESSAGES['PLANS_LIST'], reply_markup=plans_list_markup(plans))
 
      # Back To Renewal Plans
     elif key == "back_to_renewal_plans":
