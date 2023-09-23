@@ -1,11 +1,15 @@
 import json
 import sqlite3
-# from version import __version__
-import config
 import argparse
+import logging
+import os
+USERS_DB_LOC = os.path.join(os.getcwd(), "Database", "hidyBot.db")
 
-USERS_DB_LOC = config.USERS_DB_LOC
-logging = config.logging
+LOG_LOC = os.path.join(os.getcwd(), "Logs", "update.log")
+logging.basicConfig(handlers=[logging.FileHandler(filename=LOG_LOC,
+                                                  encoding='utf-8', mode='w')],
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.DEBUG)
 
 def version():
     parser = argparse.ArgumentParser(description='Update script')
