@@ -96,7 +96,7 @@ sleep 5
 if [ ! -f /opt/Hiddify-Telegram-Bot/version.py ]; then
   reinstall_bot
 else
-  current_version=$(python /opt/Hiddify-Telegram-Bot/version.py --version)  
+  current_version=$(python3 /opt/Hiddify-Telegram-Bot/version.py --version)  
   
   update_bot
 
@@ -111,8 +111,11 @@ else
 
   # Add cron job to run every 3 hours
   add_cron_job_if_not_exists "0 */3 * * * cd $install_dir && python3 crontab.py --backup-bot"
+
+  echo -e "${YELLOW}Current version: $current_version${RESET}"
+  echo -e "${YELLOW}Target version: $target_version${RESET}"
   
-  if python /opt/Hiddify-Telegram-Bot/update.py --current-version "$current_version" --target-version "$target_version"; then
+  if python3 /opt/Hiddify-Telegram-Bot/update.py --current-version "$current_version" --target-version "$target_version"; then
       echo "update.py has been run."
   else
       echo "update.py has not been run."
