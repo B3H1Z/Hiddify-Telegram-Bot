@@ -241,7 +241,8 @@ def next_step_send_screenshot(message, charge_wallet):
 
     file_info = bot.get_file(message.photo[-1].file_id)
     downloaded_file = bot.download_file(file_info.file_path)
-    path_recp = os.path.join(os.getcwd(), 'UserBot', 'Receiptions', f"{message.chat.id}-{charge_wallet['id']}.jpg")
+    file_name = f"{message.chat.id}-{charge_wallet['id']}.jpg"
+    path_recp = os.path.join(os.getcwd(), 'UserBot', 'Receiptions', file_name)
     if not os.path.exists(os.path.join(os.getcwd(), 'UserBot', 'Receiptions')):
         os.makedirs(os.path.join(os.getcwd(), 'UserBot', 'Receiptions'))
     with open(path_recp, 'wb') as new_file:
@@ -252,7 +253,7 @@ def next_step_send_screenshot(message, charge_wallet):
     payment_method = "Card"
 
     status = USERS_DB.add_payment(charge_wallet['id'], message.chat.id,
-                                  charge_wallet['amount'], payment_method, path_recp,
+                                  charge_wallet['amount'], payment_method, file_name,
                                   message.from_user.full_name,
                                   created_at)
     if status:

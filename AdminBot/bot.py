@@ -407,11 +407,12 @@ def users_bot_order_status(message: Message):
     else:
         is_it_accepted = MESSAGES['PAYMENT_ACCEPT_STATUS_WAITING']
     # check is image exist
-    if not os.path.exists(payment['payment_image']):
-        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'],
-                         reply_markup=markups.main_menu_keyboard_markup())
-        return
-    bot.send_photo(message.chat.id, photo=open(payment['payment_image'], 'rb'),
+    # if not os.path.exists(payment['payment_image']):
+    #     bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'],
+    #                      reply_markup=markups.main_menu_keyboard_markup())
+    #     return
+    photo_path = path_recp = os.path.join(os.getcwd(), 'UserBot', 'Receiptions', payment['payment_image'])
+    bot.send_photo(message.chat.id, photo=open(photo_path, 'rb'),
                    caption=payment_received_template(payment,
                                                      footer=f"{MESSAGES['PAYMENT_ACCEPT_STATUS']} {is_it_accepted}\n{MESSAGES['CREATED_AT']} {payment['created_at']}"),
                    reply_markup=markups.main_menu_keyboard_markup())
