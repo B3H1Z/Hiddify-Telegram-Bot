@@ -112,8 +112,7 @@ def update_v4_v5():
         # Add test_subscription bool default 0 to users table
         try:
             cur = conn.cursor()
-            if not cur.execute("SELECT test_subscription FROM users").fetchone():
-                cur.execute("ALTER TABLE users ADD COLUMN test_subscription BOOLEAN DEFAULT 0")
+            cur.execute("ALTER TABLE users ADD COLUMN test_subscription BOOLEAN DEFAULT 0")
             conn.commit()
         except sqlite3.Error as e:
             logging.error("Database error: %s" % e)
@@ -150,7 +149,7 @@ def update_v4_v5():
                     cur.execute(
                         "CREATE TABLE IF NOT EXISTS servers (id INTEGER PRIMARY KEY AUTOINCREMENT, url TEXT NOT NULL, title TEXT, description TEXT,default_server BOOLEAN NOT NULL DEFAULT 0)")
                     server_url = config["url"]
-                    cur.execute("INSERT INTO servers VALUES (?,?, ?, ?)", (None, server_url, None, None))
+                    cur.execute("INSERT INTO servers VALUES (?,?,?,?,?)", (None, server_url, None, None,True))
 
                     conn.commit()
                 except sqlite3.Error as e:
