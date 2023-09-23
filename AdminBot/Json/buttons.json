@@ -1,0 +1,160 @@
+{
+  "EN": {
+    "CONFIRM": "✅Confirm",
+    "CANCEL": "❌Cancel",
+    "USERS_LIST": "👤Users Management",
+    "USERS_SEARCH": "🔍Search User",
+    "ADD_USER": "➕Add User",
+    "SERVER_BACKUP": "📥Panel Backup",
+    "SERVER_STATUS": "📈Server Status",
+    "USERS_BOT_MANAGEMENT": "🤖Users Bot Management",
+    "NEXT_PAGE": "➡️",
+    "PREV_PAGE": "⬅️",
+    "CONFIGS_USER": "Configs",
+    "EDIT_USER": "Edit User",
+    "DELETE_USER": "Delete User",
+    "EDIT_NAME": "👤Edit Name",
+    "EDIT_USAGE": "📊Edit Usage",
+    "RESET_USAGE": "🔄Reset Usage",
+    "EDIT_DAYS": "📆Edit Days",
+    "RESET_DAYS": "🔄Reset Days",
+    "EDIT_COMMENT": "📝Edit Comment",
+    "UPDATE_MESSAGE": "🔄Update Message",
+    "BACK": "🔙Back",
+    "CONFIGS_DIR": "Configs",
+    "CONFIGS_SUB_AUTO": "Auto Subscription",
+    "CONFIGS_SUB": "Subscription Link",
+    "CONFIGS_SUB_B64": "Subscription Link b64",
+    "CONFIGS_CLASH": "Clash Subscription",
+    "CONFIGS_HIDDIFY": "Hiddify Subscription",
+    "CONFIGS_SING_BOX": "Sing-box",
+    "CONFIGS_FULL_SING_BOX": "Full Sing-box",
+    "SEARCH_USER_NAME": "Search by Name",
+    "SEARCH_USER_UUID": "Search by UUID",
+    "SEARCH_USER_CONFIG": "Search by Config",
+    "SEARCH_EXPIRED_USERS": "Expired Users List",
+    "USERS_BOT_ADD_PLAN": "➕Add Plan",
+    "USERS_BOT_DEL_PLAN": "➖Delete Plan",
+    "USERS_BOT_OWNER_INFO": "👤Owner Info",
+    "USERS_BOT_OWNER_INFO_EDIT": "👤Edit Owner Info",
+    "USERS_BOT_ORDERS_STATUS": "📈Payment Status",
+    "USERS_BOT_SUB_STATUS": "📈Subscription Status",
+    "USERS_BOT_OWNER_INFO_EDIT_CARD_NAME": "Edit Card Holder Name",
+    "USERS_BOT_OWNER_INFO_EDIT_CARD_NUMBER": "Edit Card Number",
+    "USERS_BOT_OWNER_INFO_EDIT_USERNAME": "Edit Support Username",
+    "USERS_BOT_SEND_MESSAGE_TO_USERS": "📩Send Message to Users",
+    "USERS_BOT_SETTINGS": "⚙️Settings",
+    "USERS_BOT_SETTINGS_SHOW_HIDI_LINK": "User Page Hyperlink",
+    "USERS_BOT_SETTINGS_SHOW_THREE_RAND": "Random 3 Digit Price",
+    "USERS_BOT_SETTINGS_MIN_DEPO": "Minimum Deposit",
+    "USERS_BOT_SETTINGS_PNL_V8_FEATURES": "Panel V8 Features",
+    "USERS_BOT_SETTINGS_CHANNEL_ID": "Support Channel",
+    "USERS_BOT_SETTINGS_CHANNEL_ّFORCE_JOIN": "Force Join",
+    "USERS_BOT_SETTINGS_VISIBLE_SUBS": "Visible Subscriptions",
+    "USERS_BOT_SETTINGS_SET_WELCOME_MSG": "Welcome Message",
+    "USERS_BOT_SETTINGS_TEST_SUB": "Test Subscription",
+    "USERS_BOT_SETTINGS_TEST_SUB_DAYS": "Test Subscription Days",
+    "USERS_BOT_SETTINGS_TEST_SUB_SIZE": "Test Subscription Size",
+    "USERS_BOT_SETTINGS_NOTIF_REMINDER": "Subscription Reminder",
+    "USERS_BOT_SETTINGS_NOTIF_REMINDER_USAGE": "Usage Reminder",
+    "USERS_BOT_SETTINGS_NOTIF_REMINDER_DAYS": "Days Reminder",
+    "USERS_BOT_SETTINGS_PANEL_AUTO_BACKUP": "Panel Auto Backup",
+    "USERS_BOT_SETTINGS_PANEL_MANUAL": "Manual",
+    "USERS_BOT_SETTINGS_PANEL_MANUAL_ANDROID": "Android Manual",
+    "USERS_BOT_SETTINGS_PANEL_MANUAL_IOS": "IOS Manual",
+    "USERS_BOT_SETTINGS_PANEL_MANUAL_WIN": "Windows Manual",
+    "USERS_BOT_SETTINGS_PANEL_MANUAL_MAC": "Mac Manual",
+    "USERS_BOT_SETTINGS_PANEL_MANUAL_LIN": "Linux Manual",
+    "USERS_BOT_SETTINGS_BACKUP_BOT": "Backup Bot",
+    "USERS_BOT_SETTINGS_RESTORE_BOT": "Restore Bot",
+    "USERS_BOT_SETTINGS_BUY_SUBSCRIPTION_STATUS": "Buy Subscription",
+    "USERS_BOT_SETTINGS_RENEWAL_SUBSCRIPTION_STATUS": "Renewal Subscription",
+    "USERS_BOT_SETTINGS_RENEWAL_METHOD": "Renewal Method",
+    "USERS_BOT_SETTINGS_RENEWAL_METHOD_DEFAULT": "Default",
+    "USERS_BOT_SETTINGS_RENEWAL_METHOD_ADVANCED": "Advanced",
+    "USERS_BOT_SETTINGS_RENEWAL_METHOD_ADVANCED_DAYS": "Maximum Days for Renewal",
+    "USERS_BOT_SETTINGS_RENEWAL_METHOD_ADVANCED_USAGE": "Maximum Usage for Renewal",
+    "ABOUT_BOT": "ℹ️",
+    "TO_QR": "ً🖼QR",
+    "SUPPORT_GROUP": "Support Group"
+  },
+  "FA": {
+    "CONFIRM": "✅تأیید",
+    "CANCEL": "❌لغو",
+    "USERS_LIST": "👤مدیریت کاربران",
+    "USERS_SEARCH": "🔍جستجوی کاربر",
+    "ADD_USER": "➕افزودن کاربر",
+    "SERVER_BACKUP": "📥بکاپ پنل",
+    "SERVER_STATUS": "📈وضعیت سرور",
+    "USERS_BOT_MANAGEMENT": "🤖مدیریت ربات کاربران",
+    "NEXT_PAGE": "➡️",
+    "PREV_PAGE": "⬅️",
+    "CONFIGS_USER": "کانفیگ ها",
+    "EDIT_USER": "ویرایش کاربر",
+    "DELETE_USER": "حذف کاربر",
+    "EDIT_NAME": "👤ویرایش نام",
+    "EDIT_USAGE": "📊ویرایش حجم",
+    "RESET_USAGE": "🔄بازنشانی حجم",
+    "EDIT_DAYS": "📆ویرایش مدت",
+    "RESET_DAYS": "🔄بازنشانی مدت",
+    "EDIT_COMMENT": "📝ویرایش یادداشت",
+    "UPDATE_MESSAGE": "🔄به‌روزرسانی پیام",
+    "BACK": "🔙بازگشت",
+    "CONFIGS_DIR": "کانفیگ مستقیم",
+    "CONFIGS_SUB_AUTO": "اشتراک خودکار",
+    "CONFIGS_SUB": "لینک اشتراک",
+    "CONFIGS_SUB_B64": "لینک اشتراک b64",
+    "CONFIGS_CLASH": "اشتراک Clash",
+    "CONFIGS_HIDDIFY": "اشتراک Hiddify",
+    "CONFIGS_SING_BOX": "Sing-box",
+    "CONFIGS_FULL_SING_BOX": "Full Sing-box",
+    "SEARCH_USER_NAME": "جستجو با نام",
+    "SEARCH_USER_UUID": "جستجو با UUID",
+    "SEARCH_USER_CONFIG": "جستجو با کانفیگ",
+    "SEARCH_EXPIRED_USERS": "لیست کاربران منقضی",
+    "USERS_BOT_ADD_PLAN": "➕افزودن پلن",
+    "USERS_BOT_DEL_PLAN": "➖حذف پلن",
+    "USERS_BOT_OWNER_INFO": "👤اطلاعات مالک",
+    "USERS_BOT_OWNER_INFO_EDIT": "ویرایش اطلاعات مالک",
+    "USERS_BOT_ORDERS_STATUS": "📊پیگیری تراکنش",
+    "USERS_BOT_SUB_STATUS": "📊پیگیری اشتراک",
+    "USERS_BOT_OWNER_INFO_EDIT_USERNAME": "ویرایش نام کاربری پشتیبان",
+    "USERS_BOT_OWNER_INFO_EDIT_CARD_NUMBER": "ویرایش شماره کارت",
+    "USERS_BOT_OWNER_INFO_EDIT_CARD_NAME": "ویرایش نام صاحب کارت",
+    "USERS_BOT_SEND_MESSAGE_TO_USERS": "📩ارسال پیام همگانی",
+    "USERS_BOT_SETTINGS": "⚙️تنظیمات",
+    "USERS_BOT_SETTINGS_SHOW_HIDI_LINK": "هایپرلینک هیدیفای",
+    "USERS_BOT_SETTINGS_SHOW_THREE_RAND": "مشخصه تصادفی پرداخت",
+    "USERS_BOT_SETTINGS_MIN_DEPO": "محدودیت حداقل پرداخت",
+    "USERS_BOT_SETTINGS_PNL_V8_FEATURES": "اشتراک های نسخه 8",
+    "USERS_BOT_SETTINGS_CHANNEL_ID": "تنظیم کانال پشتیبانی",
+    "USERS_BOT_SETTINGS_CHANNEL_ّFORCE_JOIN": "عضویت اجباری",
+    "USERS_BOT_SETTINGS_VISIBLE_SUBS": "وضعیت نمایش اشتراک ها",
+    "USERS_BOT_SETTINGS_SET_WELCOME_MSG": "پیام خوش آمدگویی",
+    "USERS_BOT_SETTINGS_TEST_SUB": "مشخصات اشتراک تستی",
+    "USERS_BOT_SETTINGS_TEST_SUB_DAYS": "مدت اشتراک تستی",
+    "USERS_BOT_SETTINGS_TEST_SUB_SIZE": "حجم اشتراک تستی",
+    "USERS_BOT_SETTINGS_NOTIF_REMINDER": "یادآور وضعیت اشتراک",
+    "USERS_BOT_SETTINGS_NOTIF_REMINDER_USAGE": "یادآور وضعیت مصرف",
+    "USERS_BOT_SETTINGS_NOTIF_REMINDER_DAYS": "یادآور وضعیت زمان",
+    "USERS_BOT_SETTINGS_PANEL_AUTO_BACKUP": "بکاپ خودکار پنل",
+    "USERS_BOT_SETTINGS_PANEL_MANUAL": "متن راهنما",
+    "USERS_BOT_SETTINGS_PANEL_MANUAL_ANDROID": "راهنمای اندروید",
+    "USERS_BOT_SETTINGS_PANEL_MANUAL_IOS": "راهنمای IOS",
+    "USERS_BOT_SETTINGS_PANEL_MANUAL_WIN": "راهنمای ویندوز",
+    "USERS_BOT_SETTINGS_PANEL_MANUAL_MAC": "راهنمای مک",
+    "USERS_BOT_SETTINGS_PANEL_MANUAL_LIN": "راهنمای لینوکس",
+    "USERS_BOT_SETTINGS_BACKUP_BOT": "پشتیبان گیری ربات",
+    "USERS_BOT_SETTINGS_RESTORE_BOT": "بازیابی ربات",
+    "USERS_BOT_SETTINGS_BUY_SUBSCRIPTION_STATUS": "خرید اشتراک",
+    "USERS_BOT_SETTINGS_RENEWAL_SUBSCRIPTION_STATUS": "تمدید اشتراک",
+    "USERS_BOT_SETTINGS_RENEWAL_METHOD": "شیوه تمدید",
+    "USERS_BOT_SETTINGS_RENEWAL_METHOD_DEFAULT": "حالت پیشفرض",
+    "USERS_BOT_SETTINGS_RENEWAL_METHOD_ADVANCED": "حالت پیشرفته",
+    "USERS_BOT_SETTINGS_RENEWAL_METHOD_ADVANCED_DAYS": "حداکثر زمان مجاز برای تمدید",
+    "USERS_BOT_SETTINGS_RENEWAL_METHOD_ADVANCED_USAGE": "حداکثر مصرف مجاز برای تمدید",
+    "ABOUT_BOT": "ℹ️",
+    "TO_QR": "ً🖼کیوآر",
+    "SUPPORT_GROUP": "گروه پشتیبانی"
+  }
+}
