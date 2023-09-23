@@ -86,6 +86,16 @@ function update_bot() {
   fi
 }
 
+# get backup of Database/hidyBot.db
+function get_backup() {
+  display_message "${GREEN}Getting backup of Database/hidyBot.db...${RESET}"
+  if cp /opt/Hiddify-Telegram-Bot/Database/hidyBot.db /opt/Hiddify-Telegram-Bot/Database/hidyBot.db.bak; then
+    display_message "${GREEN}Backup of Database/hidyBot.db has been taken.${RESET}"
+  else
+    display_message "${RED}Failed to get backup of Database/hidyBot.db.${RESET}"
+  fi
+}
+
 # Stop the bot gracefully before proceeding
 stop_bot
 
@@ -96,13 +106,9 @@ sleep 5
 if [ ! -f /opt/Hiddify-Telegram-Bot/version.py ]; then
   reinstall_bot
 else
-  # if can get current version, update bot
-  if ! python3 /opt/Hiddify-Telegram-Bot/version.py --version; then
-    echo "Failed to get current version."
-    exit 1
-  fi
+
   current_version=$(python3 /opt/Hiddify-Telegram-Bot/version.py --version)  
-  
+  get_backup
   update_bot
 
   # Add cron job for reboot
