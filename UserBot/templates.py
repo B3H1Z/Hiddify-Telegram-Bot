@@ -1,41 +1,32 @@
 # Description: This file contains all the templates used in the bot.
-from config import LANG
-from UserBot.content import MESSAGES
-from Utils.utils import rial_to_toman, toman_to_rial,all_configs_settings
-from Database.dbManager import USERS_DB
+from config import LANG, USERS_DB
+from UserBot.messages import MESSAGES
+
+
 # User Subscription Info Template
 def user_info_template(sub_id, usr, header=""):
-    settings = USERS_DB.find_bool_config(key='visible_hiddify_hyperlink')
+    settings = USERS_DB.select_settings()
     if settings:
         settings = settings[0]
-        if settings['value']:
+        if settings['visible_hiddify_hyperlink']:
             user_name = f"<a href='{usr['link']}'> {usr['name']} </a>"
         else:
             user_name = usr['name']
     else:
         user_name = usr['name']
-    # if usr['enable'] == 1:
-    #     status = MESSAGES['ACTIVE_SUBSCRIPTION_STATUS']
-    # else:
-    #     status = MESSAGES['DEACTIVE_SUBSCRIPTION_STATUS']
+    if usr['enable'] == 1:
+        status = MESSAGES['ACTIVE_SUBSCRIPTION_STATUS']
+    else:
+        status = MESSAGES['DEACTIVE_SUBSCRIPTION_STATUS']
     return f"""
 {header}
 
 {MESSAGES['USER_NAME']} {user_name}
 {MESSAGES['INFO_USAGE']} {usr['usage']['current_usage_GB']} {MESSAGES['OF']} {usr['usage']['usage_limit_GB']} {MESSAGES['GB']}
 {MESSAGES['INFO_REMAINING_DAYS']} {usr['remaining_day']} {MESSAGES['DAY_EXPIRE']}
+{MESSAGES['SUBSCRIPTION_STATUS']} {status}
 {MESSAGES['INFO_ID']} <code>{sub_id}</code>
 """
-# {MESSAGES['SUBSCRIPTION_STATUS']} {status}
-
-# Wallet Info Template
-def wallet_info_template(balance):
-    if balance == 0:
-        return MESSAGES['ZERO_BALANCE']
-    else:
-        return f"""
-         {MESSAGES['WALLET_INFO_PART_1']} {rial_to_toman(balance)} {MESSAGES['WALLET_INFO_PART_2']}
-         """
 
 
 # Plan Info Template
@@ -46,12 +37,12 @@ def plan_info_template(plan, header=""):
 
 {MESSAGES['PLAN_INFO_SIZE']} {plan['size_gb']} {MESSAGES['GB']}
 {MESSAGES['PLAN_INFO_DAYS']} {plan['days']} {MESSAGES['DAY_EXPIRE']}
-{MESSAGES['PLAN_INFO_PRICE']} {rial_to_toman(plan['price'])} {MESSAGES['TOMAN']}
+{MESSAGES['PLAN_INFO_PRICE']} {plan['price']} {MESSAGES['TOMAN']}
 """
 
 
 # Owner Info Template (For Payment)
-def owner_info_template(card_number, card_holder_name, price, header=""):
+def owner_info_template(plan, card_number, card_holder_name, price, header=""):
     card_number = card_number if card_number else "-"
     card_holder_name = card_holder_name if card_holder_name else "-"
 
@@ -59,10 +50,9 @@ def owner_info_template(card_number, card_holder_name, price, header=""):
         return f"""
 {header}
 
-💰لطفا دقیقا مبلغ: <code>{price}</code> {MESSAGES['RIAL']}
-💴معادل: {rial_to_toman(price)} {MESSAGES['TOMAN']}
+💰لطفا دقیقا مبلغ: <code>{price}</code> {MESSAGES['TOMAN']}
 💳را به شماره کارت: <code>{card_number}</code>
-👤به نام <b>{card_holder_name}</b> واریز کنید.
+به نام <b>{card_holder_name}</b> واریز کنید.
 
 ❗️بعد از واریز مبلغ، اسکرین شات از تراکنش را برای ما ارسال کنید.
 """
@@ -79,16 +69,20 @@ Card owner <b>{card_holder_name}</b>
 
 
 # Payment Received Template - Send to Admin
-def payment_received_template(payment, header="", footer=""):
+def payment_received_template(plan, name, paid_amount, order_id, header="", footer=""):
     if LANG == 'FA':
         return f"""
 {header}
 
-شماره تراکنش: <code>{payment['id']}</code>
-نام کاربر: <b>{payment['user_name']}</b>
-هزینه پرداخت شده: <b>{rial_to_toman(payment['payment_amount'])}</b> {MESSAGES['TOMAN']}
+شماره سفارش: <code>{order_id}</code>
+نام ثبت شده: <b>{name}</b>
+هزینه پرداخت شده: <b>{paid_amount}</b> {MESSAGES['TOMAN']}
 ---------------------
-⬇️درخواست افزایش موجودی کیف پول⬇️
+اطلاعات پلن خریداری شده
+شناسه پلن: <b>{plan['id']}</b>
+حجم پلن: <b>{plan['size_gb']}</b> {MESSAGES['GB']}
+مدت اعتبار پلن: <b>{plan['days']}</b> {MESSAGES['DAY_EXPIRE']}
+هزینه پلن: <b>{plan['price']}</b> {MESSAGES['TOMAN']}
 
 {footer}
 """
@@ -96,12 +90,17 @@ def payment_received_template(payment, header="", footer=""):
         return f"""
 {header}
 
-Payment number: <b>{payment['id']}</b>
-Registered name: <b>{payment['user_name']}</b>
-Paid amount: <b>{payment['payment_amount']}</b> {MESSAGES['TOMAN']}
+Order number: <b>{plan['id']}</b>
+Registered name: <b>{name}</b>
+Paid amount: <b>{paid_amount}</b> {MESSAGES['TOMAN']}
 ---------------------
-⬇️Request to increase wallet balance⬇️
+⬇️Purchased plan information⬇️
+Plan ID: <b>{plan['id']}</b>
+Plan size: <b>{plan['size_gb']}</b> {MESSAGES['GB']}
+Plan validity period: <b>{plan['days']}</b> {MESSAGES['DAY_EXPIRE']}
+Plan price: <b>{plan['price']}</b> {MESSAGES['TOMAN']}
 
+{footer}
 """
 
 
@@ -159,9 +158,8 @@ def connection_help_template(header=""):
 # Support Info Template
 def support_template(owner_info, header=""):
     username = None
-    owner_info = all_configs_settings()
     if owner_info:
-        username = owner_info['support_username'] if owner_info['support_username'] else "-"
+        username = owner_info['telegram_username'] if owner_info['telegram_username'] else "-"
     else:
         username = "-"
 
@@ -201,29 +199,13 @@ def package_size_end_soon_template(sub_id, remaining_size):
     if LANG == 'FA':
         return f"""
 تنها {remaining_size} گیگابایت تا اتمام اعتبار پکیج شما باقی مانده است.
-لطفا برای تمدید پکیج اقدام کنید.
+لطفا برای خرید پکیج جدید اقدام کنید.
 
 شناسه پکیج شما: <code>{sub_id}</code>
 """
     elif LANG == 'EN':
         return f"""
 Only {remaining_size} GB left until your package expires.
-Please renewal package.
+Please purchase a new package.
 Your package ID: <code>{sub_id}</code>
-"""
-
-def renewal_unvalable_template(settings):
-    if LANG == 'FA':
-        return f"""
-🛑در حال حاضر شما امکان تمدید اشتراک خود را ندارید.
-جهت تمدید اشتراک باید یکی از شروط زیر برقرار باشد:
-1- کمتر از {settings['advanced_renewal_days']} روز تا اتمام اشتراک شما باقی مانده باشد.
-2- حجم باقی مانده اشتراک شما کمتر از {settings['advanced_renewal_usage']} گیگابایت باشد.
-"""
-    elif LANG == 'EN':
-        return f"""
-🛑You cannot renew your subscription at this time.
-To renew your subscription, one of the following conditions must be met:
-1- Less than {settings['advanced_renewal_days']} days left until your subscription expires.
-2- The remaining volume of your subscription is less than {settings['advanced_renewal_usage']} GB.
 """

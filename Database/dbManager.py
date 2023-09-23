@@ -1,24 +1,196 @@
 import datetime
-import json
 import logging
-import os
 import sqlite3
 from sqlite3 import Error
+
+
+class AdminDBManager:
+    def __init__(self, db_file):
+        self.conn = self.create_connection(db_file)
+
+    def create_connection(self, db_file):
+        """ Create a database connection to a SQLite database """
+        try:
+            conn = sqlite3.connect(db_file, check_same_thread=False)
+            return conn
+        except Error as e:
+            logging.error(f"Error while connecting to database \n Error:{e}")
+            return None
+
+    def select_users(self):
+        cur = self.conn.cursor()
+        try:
+            cur.execute("SELECT * FROM user")
+            rows = cur.fetchall()
+            return rows
+        except Error as e:
+            logging.error(f"Error while selecting all users \n Error:{e}")
+            return None
+
+    def find_user(self, only_one=False, **kwargs):
+        if len(kwargs) != 1:
+            logging.warning("You can only use one key to find user!")
+            return None
+        rows = []
+        cur = self.conn.cursor()
+        try:
+            for key, value in kwargs.items():
+                cur.execute(f"SELECT * FROM user WHERE {key}=?", (value,))
+                rows = cur.fetchall()
+            if len(rows) == 0:
+                logging.info(f"User {kwargs} not found!")
+                return None
+            if only_one:
+                return rows[0]
+            return rows
+        except Error as e:
+            logging.error(f"Error while finding user {kwargs} \n Error:{e}")
+            return None
+
+    def delete_user(self, **kwargs):
+        if len(kwargs) != 1:
+            logging.warning("You can only use one key to delete user!")
+            return False
+        cur = self.conn.cursor()
+        try:
+            for key, value in kwargs.items():
+                cur.execute(f"DELETE FROM user WHERE {key}=?", (value,))
+                self.conn.commit()
+            logging.info(f"User {kwargs} deleted successfully!")
+            return True
+        except Error as e:
+            logging.error(f"Error while deleting user {kwargs} \n Error:{e}")
+            return False
+
+    def edit_user(self, uuid, **kwargs):
+        cur = self.conn.cursor()
+
+        for key, value in kwargs.items():
+            try:
+                cur.execute(f"UPDATE user SET {key}=? WHERE uuid=?", (value, uuid))
+                self.conn.commit()
+                logging.info(f"User [{uuid}] successfully update [{key}] to [{value}]")
+            except Error as e:
+                logging.error(f"Error while updating user [{uuid}] [{key}] to [{value}] \n Error: {e}")
+                return False
+
+        return True
+
+    def add_user(self, uuid, name, last_online, expiry_time, usage_limit_GB, package_days, mode, monthly, start_date,
+                 current_usage_GB, last_reset_time, comment, telegram_id, added_by, max_ips, enable):
+        cur = self.conn.cursor()
+        try:
+            cur.execute("INSERT INTO user(uuid, name, last_online, expiry_time, usage_limit_GB, package_days, mode, "
+                        "monthly, start_date, current_usage_GB, last_reset_time, comment, telegram_id, added_by, "
+                        "max_ips, enable) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                        (uuid, name, last_online, expiry_time, usage_limit_GB, package_days, mode, monthly, start_date,
+                         current_usage_GB, last_reset_time, comment, telegram_id, added_by, max_ips, enable))
+            self.conn.commit()
+            logging.info(f"User [{uuid}] added successfully!")
+            return True
+
+        except Error as e:
+            logging.error(f"Error while adding user [{uuid}] \n Error: {e}")
+            return False
+
+    def add_user_detail(self, user_id, last_online, current_usage_GB, connected_ips='', child_id=0):
+        cur = self.conn.cursor()
+        try:
+            cur.execute("INSERT INTO user_detail(user_id, last_online, current_usage_GB, connected_ips, child_id) "
+                        "VALUES(?,?,?,?,?)", (user_id, last_online, current_usage_GB, connected_ips, child_id))
+            self.conn.commit()
+            logging.info(f"User details [{user_id}] added successfully!")
+            return True
+
+        except Error as e:
+            logging.error(f"Error while adding user details [{user_id}] \n Error: {e}")
+            return False
+
+    def add_default_user(self, name, package_days, usage_limit_GB, added_by, comment=None, mode='no_reset', monthly=0,
+                         max_ips=100, enable=1, telegram_id=None):
+        import uuid
+        uuid = str(uuid.uuid4())
+        logging.info(f"Adding default user [{uuid}]")
+        last_online = '0001-01-01 00:00:00.000000'
+        expiry_time = (datetime.datetime.now() + datetime.timedelta(days=180)).strftime("%Y-%m-%d")
+        start_date = None
+        current_usage_GB = 0
+        last_reset_time = datetime.datetime.now().strftime("%Y-%m-%d")
+        user_added = self.add_user(uuid, name, last_online, expiry_time, usage_limit_GB, package_days, mode, monthly,
+                                   start_date,
+                                   current_usage_GB, last_reset_time, comment, telegram_id, added_by, max_ips, enable)
+        if user_added:
+            logging.info(f"User [{uuid}] added successfully!")
+            self.add_user_detail(self.find_user(uuid=uuid)[0][0], last_online, current_usage_GB)
+            return uuid
+        else:
+            logging.error(f"Error while adding user [{uuid}]")
+            self.delete_user(uuid=uuid)
+            return None
+
+    def reset_package_days(self, uuid):
+        logging.info(f"Resetting package days for user [{uuid}]")
+        user = self.find_user(uuid=uuid)
+        if user is None:
+            return False
+        status = self.edit_user(uuid, start_date=datetime.datetime.now().strftime("%Y-%m-%d"))
+        if status:
+            logging.info(f"Package days for user [{uuid}] reset successfully!")
+            return True
+        else:
+            logging.error(f"Error while resetting package days for user [{uuid}]")
+            return False
+
+    def reset_package_usage(self, uuid):
+        logging.info(f"Resetting package usage for user [{uuid}]")
+        user = self.find_user(uuid=uuid)
+        if user is None:
+            return False
+        status = self.edit_user(uuid, current_usage_GB=0)
+        if status:
+            logging.info(f"Package usage for user [{uuid}] reset successfully!")
+            return True
+        else:
+            logging.error(f"Error while resetting package usage for user [{uuid}]")
+            return False
+
+    def select_admins(self):
+        logging.info(f"Selecting all admins")
+        cur = self.conn.cursor()
+        try:
+            cur.execute("SELECT * FROM admin_user")
+            rows = cur.fetchall()
+            return rows
+        except Error as e:
+            logging.error(f"Error while selecting all admins \n Error:{e}")
+            return None
+
+    def find_admins(self, **kwargs):
+        logging.info(f"Finding admin {kwargs}")
+        if len(kwargs) != 1:
+            logging.error(f"Error while finding admin {kwargs} \n Error: You can only use one key to find admin!")
+            return None
+        rows = []
+        cur = self.conn.cursor()
+        try:
+            for key, value in kwargs.items():
+                cur.execute(f"SELECT * FROM admin_user WHERE {key}=?", (value,))
+                rows = cur.fetchall()
+            if len(rows) == 0:
+                logging.info(f"Admin {kwargs} not found!")
+                return None
+            return rows
+        except Error as e:
+            logging.error(f"Error while finding admin {kwargs} \n Error:{e}")
+            return None
+
 
 class UserDBManager:
     def __init__(self, db_file):
         self.conn = self.create_connection(db_file)
         self.create_user_table()
-        #self.set_default_configs()
-    
-    #close connection
-    def __del__(self):
-        self.conn.close()
-    
-    def close(self):
-        self.conn.close()
-        
-        
+        self.set_default_settings()
+        self.set_default_owner_info()
 
     def create_connection(self, db_file):
         """ Create a database connection to a SQLite database """
@@ -35,7 +207,6 @@ class UserDBManager:
             cur.execute("CREATE TABLE IF NOT EXISTS users ("
                         "id INTEGER PRIMARY KEY AUTOINCREMENT,"
                         "telegram_id INTEGER NOT NULL UNIQUE,"
-                        "test_subscription BOOLEAN NOT NULL DEFAULT 0,"
                         "created_at TEXT NOT NULL)")
             self.conn.commit()
             logging.info("User table created successfully!")
@@ -55,6 +226,10 @@ class UserDBManager:
                         "telegram_id INTEGER NOT NULL,"
                         "user_name TEXT NOT NULL,"
                         "plan_id INTEGER NOT NULL,"
+                        "paid_amount TEXT NOT NULL,"
+                        "payment_method TEXT NOT NULL,"
+                        "approved BOOLEAN NULL,"
+                        "payment_image TEXT NOT NULL,"
                         "created_at TEXT NOT NULL,"
                         "FOREIGN KEY (telegram_id) REFERENCES user (telegram_id),"
                         "FOREIGN KEY (plan_id) REFERENCES plans (id))")
@@ -77,51 +252,18 @@ class UserDBManager:
             self.conn.commit()
             logging.info("Non order subscriptions table created successfully!")
 
-            cur.execute("CREATE TABLE IF NOT EXISTS str_config ("
-                        "key TEXT NOT NULL UNIQUE,"
-                        "value TEXT NULL)")
+            cur.execute("CREATE TABLE IF NOT EXISTS owner_info ("
+                        "card_number TEXT NULL,"
+                        "card_owner TEXT NULL,"
+                        "telegram_username TEXT NULL)")
             self.conn.commit()
-            logging.info("str_config table created successfully!")
+            logging.info("Owner info table created successfully!")
 
-            cur.execute("CREATE TABLE IF NOT EXISTS int_config ("
-                        "key TEXT NOT NULL UNIQUE,"
-                        "value INTEGER NOT NULL)")
+            cur.execute("CREATE TABLE IF NOT EXISTS settings ("
+                        "visible_hiddify_hyperlink BOOLEAN NOT NULL DEFAULT 1)")
             self.conn.commit()
-            logging.info("int_config table created successfully!")
+            logging.info("Settings table created successfully!")
 
-            cur.execute("CREATE TABLE IF NOT EXISTS bool_config ("
-                        "key TEXT NOT NULL UNIQUE,"
-                        "value BOOLEAN NOT NULL)")
-            self.conn.commit()
-            logging.info("bool_config table created successfully!")
-
-            cur.execute("CREATE TABLE IF NOT EXISTS wallet ("
-                        "telegram_id INTEGER NOT NULL UNIQUE,"
-                        "balance INTEGER NOT NULL DEFAULT 0,"
-                        "FOREIGN KEY (telegram_id) REFERENCES users (telegram_id))")
-            self.conn.commit()
-            logging.info("wallet table created successfully!")
-
-            cur.execute("CREATE TABLE IF NOT EXISTS payments ("
-                        "id INTEGER PRIMARY KEY,"
-                        "telegram_id INTEGER NOT NULL,"
-                        "payment_amount INTEGER NOT NULL,"
-                        "payment_method TEXT NOT NULL,"
-                        "payment_image TEXT NOT NULL,"
-                        "user_name TEXT NOT NULL,"
-                        "approved BOOLEAN NULL,"
-                        "created_at TEXT NOT NULL,"
-                        "FOREIGN KEY (telegram_id) REFERENCES users (telegram_id))")
-            self.conn.commit()
-            logging.info("Payments table created successfully!")
-
-            cur.execute("CREATE TABLE IF NOT EXISTS servers ("
-                        "id INTEGER PRIMARY KEY AUTOINCREMENT,"
-                        "url TEXT NOT NULL,"
-                        "title TEXT, description TEXT,"
-                        "default_server BOOLEAN NOT NULL DEFAULT 0)")
-            self.conn.commit()
-            logging.info("Servers table created successfully!")
 
 
         except Error as e:
@@ -191,8 +333,7 @@ class UserDBManager:
     def add_user(self, telegram_id, created_at):
         cur = self.conn.cursor()
         try:
-            cur.execute("INSERT INTO users(telegram_id, created_at) VALUES(?,?)",
-                        (telegram_id, created_at))
+            cur.execute("INSERT INTO users(telegram_id,created_at) VALUES(?,?)", (telegram_id, created_at))
             self.conn.commit()
             logging.info(f"User [{telegram_id}] added successfully!")
             return True
@@ -217,7 +358,7 @@ class UserDBManager:
     def select_plans(self):
         cur = self.conn.cursor()
         try:
-            cur.execute("SELECT * FROM plans ORDER BY price ASC")
+            cur.execute("SELECT * FROM plans")
             rows = cur.fetchall()
             rows = [dict(zip([key[0] for key in cur.description], row)) for row in rows]
             return rows
@@ -273,12 +414,58 @@ class UserDBManager:
 
         return True
 
-    def add_order(self, order_id, telegram_id, user_name, plan_id, created_at):
+    def edit_owner_info(self, **kwargs):
+
+        # There is only one row in owner_info table
+        cur = self.conn.cursor()
+        try:
+            for key, value in kwargs.items():
+                cur.execute(f"UPDATE owner_info SET {key}=?", (value,))
+                self.conn.commit()
+                logging.info(f"Owner info successfully update [{key}] to [{value}]")
+            return True
+        except Error as e:
+            logging.error(f"Error while updating owner info [{key}] to [{value}] \n Error: {e}")
+            return False
+
+    def select_owner_info(self):
+        cur = self.conn.cursor()
+        try:
+            cur.execute("SELECT * FROM owner_info")
+            rows = cur.fetchall()
+            # rows to dict
+            rows = [dict(zip([key[0] for key in cur.description], row)) for row in rows]
+            return rows
+        except Error as e:
+            logging.error(f"Error while selecting all owner info \n Error:{e}")
+            return None
+
+    def set_default_owner_info(self):
+        rows = self.select_owner_info()
+        if not rows:
+            cur = self.conn.cursor()
+            try:
+                cur.execute("INSERT INTO owner_info VALUES(?,?,?)",
+                            (None, None, None))
+                self.conn.commit()
+                logging.info(f"Owner info added successfully!")
+                return True
+
+            except Error as e:
+                logging.error(f"Error while adding owner info \n Error: {e}")
+                return False
+        else:
+            logging.info("Owner info already exists!")
+            return False
+
+    def add_order(self, order_id, telegram_id, user_name, plan_id, paid_amount, payment_method, payment_image,
+                  created_at, approved=None):
         cur = self.conn.cursor()
         try:
             cur.execute(
-                "INSERT INTO orders(id,telegram_id,user_name, plan_id,created_at) VALUES(?,?,?,?,?)",
-                (order_id, telegram_id, user_name, plan_id, created_at))
+                "INSERT INTO orders(id,telegram_id,user_name, plan_id,paid_amount,payment_method, approved,payment_image,created_at) VALUES(?,?,?,?,?,?,?,?,?)",
+                (order_id, telegram_id, user_name, plan_id, paid_amount, payment_method, approved, payment_image,
+                 created_at))
             self.conn.commit()
             logging.info(f"Order [{order_id}] added successfully!")
             return True
@@ -400,7 +587,7 @@ class UserDBManager:
             logging.error(f"Error while deleting order [{order_id}] \n Error: {e}")
             return False
 
-    def add_non_order_subscription(self, non_sub_id, telegram_id, uuid):
+    def add_non_order_subscriptions(self, non_sub_id, telegram_id, uuid):
         cur = self.conn.cursor()
         try:
             cur.execute(
@@ -456,58 +643,10 @@ class UserDBManager:
             logging.error(f"Error while deleting order [{kwargs}] \n Error: {e}")
             return False
 
-    def edit_bool_config(self, key_row, **kwargs):
-        cur = self.conn.cursor()
-        for key, value in kwargs.items():
-            try:
-                cur.execute(f"UPDATE bool_config SET {key}=? WHERE key=?", (value, key_row))
-                self.conn.commit()
-                logging.info(f"Settings [{key}] successfully update [{key}] to [{value}]")
-            except Error as e:
-                logging.error(f"Error while updating settings [{key}] [{key}] to [{value}] \n Error: {e}")
-                return False
-
-        return True
-
-    def find_bool_config(self, **kwargs):
-        if len(kwargs) != 1:
-            logging.warning("You can only use one key to find settings!")
-            return None
-        rows = []
+    def select_settings(self):
         cur = self.conn.cursor()
         try:
-            for key, value in kwargs.items():
-                cur.execute(f"SELECT * FROM bool_config WHERE {key}=?", (value,))
-                rows = cur.fetchall()
-            if len(rows) == 0:
-                logging.info(f"Settings {kwargs} not found!")
-                return None
-            rows = [dict(zip([key[0] for key in cur.description], row)) for row in rows]
-            return rows
-        except Error as e:
-            logging.error(f"Error while finding settings {kwargs} \n Error:{e}")
-            return None
-
-    def add_bool_config(self, key, value):
-        cur = self.conn.cursor()
-        try:
-            cur.execute(
-                "INSERT INTO bool_config(key,value) VALUES(?,?)",
-                (key, value))
-            self.conn.commit()
-            logging.info(f"Settings [{key}] added successfully!")
-            return True
-        except Error as e:
-            logging.error(f"Error while adding settings [{key}] \n Error: {e}")
-            return False
-        finally:
-            cur.close()
-            
-
-    def select_bool_config(self):
-        cur = self.conn.cursor()
-        try:
-            cur.execute("SELECT * FROM bool_config")
+            cur.execute("SELECT * FROM settings")
             rows = cur.fetchall()
             rows = [dict(zip([key[0] for key in cur.description], row)) for row in rows]
             return rows
@@ -515,406 +654,34 @@ class UserDBManager:
             logging.error(f"Error while selecting all settings \n Error:{e}")
             return None
 
-    def select_str_config(self):
-        cur = self.conn.cursor()
-        try:
-            cur.execute("SELECT * FROM str_config")
-            rows = cur.fetchall()
-            rows = [dict(zip([key[0] for key in cur.description], row)) for row in rows]
-            return rows
-        except Error as e:
-            logging.error(f"Error while selecting all settings \n Error:{e}")
-            return None
-
-    def find_str_config(self, **kwargs):
-        if len(kwargs) != 1:
-            logging.warning("You can only use one key to find settings!")
-            return None
-        rows = []
+    def edit_settings(self, **kwargs):
+        # There is only one row in settings table
         cur = self.conn.cursor()
         try:
             for key, value in kwargs.items():
-                cur.execute(f"SELECT * FROM str_config WHERE {key}=?", (value,))
-                rows = cur.fetchall()
-            if len(rows) == 0:
-                logging.info(f"Settings {kwargs} not found!")
-                return None
-            rows = [dict(zip([key[0] for key in cur.description], row)) for row in rows]
-            return rows
-        except Error as e:
-            logging.error(f"Error while finding settings {kwargs} \n Error:{e}")
-            return None
-
-    def edit_str_config(self, key_row, **kwargs):
-        cur = self.conn.cursor()
-        for key, value in kwargs.items():
-            try:
-                cur.execute(f"UPDATE str_config SET {key}=? WHERE key=?", (value, key_row))
+                cur.execute(f"UPDATE settings SET {key}=?", (value,))
                 self.conn.commit()
-                logging.info(f"Settings [{key}] successfully update [{key}] to [{value}]")
-            except Error as e:
-                logging.error(f"Error while updating settings [{key}] [{key}] to [{value}] \n Error: {e}")
-                return False
-
-        return True
-
-    def add_str_config(self, key, value):
-        cur = self.conn.cursor()
-        try:
-            cur.execute(
-                "INSERT INTO str_config(key,value) VALUES(?,?)",
-                (key, value))
-            self.conn.commit()
-            logging.info(f"Settings [{key}] added successfully!")
+                logging.info(f"settings successfully update [{key}] to [{value}]")
             return True
         except Error as e:
-            logging.error(f"Error while adding settings [{key}] \n Error: {e}")
-            return False
-        finally:
-            cur.close()
-
-    def select_int_config(self):
-        cur = self.conn.cursor()
-        try:
-            cur.execute("SELECT * FROM int_config")
-            rows = cur.fetchall()
-            rows = [dict(zip([key[0] for key in cur.description], row)) for row in rows]
-            return rows
-        except Error as e:
-            logging.error(f"Error while selecting all settings \n Error:{e}")
-            return None
-
-    def find_int_config(self, **kwargs):
-        if len(kwargs) != 1:
-            logging.warning("You can only use one key to find settings!")
-            return None
-        rows = []
-        cur = self.conn.cursor()
-        try:
-            for key, value in kwargs.items():
-                cur.execute(f"SELECT * FROM int_config WHERE {key}=?", (value,))
-                rows = cur.fetchall()
-            if len(rows) == 0:
-                logging.info(f"Settings {kwargs} not found!")
-                return None
-            rows = [dict(zip([key[0] for key in cur.description], row)) for row in rows]
-            return rows
-        except Error as e:
-            logging.error(f"Error while finding settings {kwargs} \n Error:{e}")
-            return None
-
-    def edit_int_config(self, key_row, **kwargs):
-        cur = self.conn.cursor()
-        for key, value in kwargs.items():
-            try:
-                cur.execute(f"UPDATE int_config SET {key}=? WHERE key=?", (value, key_row))
-                self.conn.commit()
-                logging.info(f"Settings [{key}] successfully update [{key}] to [{value}]")
-            except Error as e:
-                logging.error(f"Error while updating settings [{key}] [{key}] to [{value}] \n Error: {e}")
-                return False
-
-        return True
-
-    def add_int_config(self, key, value):
-        cur = self.conn.cursor()
-        try:
-            cur.execute(
-                "INSERT INTO int_config(key,value) VALUES(?,?)",
-                (key, value))
-            self.conn.commit()
-            logging.info(f"Settings [{key}] added successfully!")
-            return True
-        except Error as e:
-            logging.error(f"Error while adding settings [{key}] \n Error: {e}")
-            return False
-        finally:
-            cur.close()
-
-    def set_default_configs(self):
-        
-        self.add_bool_config("visible_hiddify_hyperlink", True)
-        self.add_bool_config("three_random_num_price", True)
-        self.add_bool_config("force_join_channel", False)
-        self.add_bool_config("panel_auto_backup", True)
-        self.add_bool_config("test_subscription", True)
-        self.add_bool_config("reminder_notification", True)
-        
-        self.add_bool_config("renewal_subscription_status", True)
-        self.add_bool_config("buy_subscription_status", True)
-
-
-        self.add_bool_config("visible_conf_dir", False)
-        self.add_bool_config("visible_conf_sub_auto", True)
-        self.add_bool_config("visible_conf_sub_url", False)
-        self.add_bool_config("visible_conf_sub_url_b64", False)
-        self.add_bool_config("visible_conf_clash", False)
-        self.add_bool_config("visible_conf_hiddify", False)
-        self.add_bool_config("visible_conf_sub_sing_box", False)
-        self.add_bool_config("visible_conf_sub_full_sing_box", False)
-
-        self.add_str_config("bot_admin_id", None)
-        self.add_str_config("bot_token_admin", None)
-        self.add_str_config("bot_token_client", None)
-        self.add_str_config("bot_lang", None)
-
-        self.add_str_config("card_number", None)
-        self.add_str_config("card_holder", None)
-        self.add_str_config("support_username", None)
-        self.add_str_config("channel_id", None)
-        self.add_str_config("msg_user_start", None)
-
-        self.add_str_config("msg_manual_android", None)
-        self.add_str_config("msg_manual_ios", None)
-        self.add_str_config("msg_manual_windows", None)
-        self.add_str_config("msg_manual_mac", None)
-        self.add_str_config("msg_manual_linux", None)
-
-        self.add_int_config("min_deposit_amount", 10000)
-
-        self.add_int_config("reminder_notification_days", 3)
-        self.add_int_config("reminder_notification_usage", 3)
-
-        self.add_int_config("test_sub_days", 1)
-        self.add_int_config("test_sub_size_gb", 1)
-        
-        self.add_int_config("advanced_renewal_days", 3)
-        self.add_int_config("advanced_renewal_usage", 3)
-        
-        self.add_int_config("renewal_method", 1)
-
-
-
-    def add_wallet(self, telegram_id):
-        cur = self.conn.cursor()
-        try:
-            cur.execute(
-                "INSERT INTO wallet(telegram_id) VALUES(?)",
-                (telegram_id,))
-            self.conn.commit()
-            logging.info(f"Balance [{telegram_id}] added successfully!")
-            return True
-
-        except Error as e:
-            logging.error(f"Error while adding balance [{telegram_id}] \n Error: {e}")
+            logging.error(f"Error while updating settings [{key}] to [{value}] \n Error: {e}")
             return False
 
-    def select_wallet(self):
-        cur = self.conn.cursor()
-        try:
-            cur.execute("SELECT * FROM wallet")
-            rows = cur.fetchall()
-            rows = [dict(zip([key[0] for key in cur.description], row)) for row in rows]
-            return rows
-        except Error as e:
-            logging.error(f"Error while selecting all balance \n Error:{e}")
-            return None
-
-    def find_wallet(self, **kwargs):
-        if len(kwargs) != 1:
-            logging.warning("You can only use one key to find balance!")
-            return None
-        rows = []
-        cur = self.conn.cursor()
-        try:
-            for key, value in kwargs.items():
-                cur.execute(f"SELECT * FROM wallet WHERE {key}=?", (value,))
-                rows = cur.fetchall()
-            if len(rows) == 0:
-                logging.info(f"Balance {kwargs} not found!")
-                return None
-            rows = [dict(zip([key[0] for key in cur.description], row)) for row in rows]
-            return rows
-        except Error as e:
-            logging.error(f"Error while finding balance {kwargs} \n Error:{e}")
-            return None
-
-    def edit_wallet(self, telegram_id, **kwargs):
-        cur = self.conn.cursor()
-        try:
-            for key, value in kwargs.items():
-                cur.execute(f"UPDATE wallet SET {key}=? WHERE telegram_id=?", (value, telegram_id,))
-                self.conn.commit()
-                logging.info(f"balance successfully update [{key}] to [{value}]")
-            return True
-        except Error as e:
-            logging.error(f"Error while updating balance [{key}] to [{value}] \n Error: {e}")
-            return False
-
-    def add_payment(self, payment_id, telegram_id, payment_amount, payment_method, payment_image, user_name,
-                    created_at):
-        cur = self.conn.cursor()
-        try:
-            cur.execute(
-                "INSERT INTO payments(id,telegram_id, payment_amount,payment_method,payment_image,user_name,created_at) VALUES(?,?,?,?,?,?,?)",
-                (payment_id, telegram_id, payment_amount, payment_method, payment_image, user_name, created_at))
-            self.conn.commit()
-            logging.info(f"Payment [{payment_id}] added successfully!")
-            return True
-
-        except Error as e:
-            logging.error(f"Error while adding payment [{payment_id}] \n Error: {e}")
-            return False
-
-    def edit_payment(self, payment_id, **kwargs):
-        cur = self.conn.cursor()
-        try:
-            for key, value in kwargs.items():
-                cur.execute(f"UPDATE payments SET {key}=? WHERE id=?", (value, payment_id))
-                self.conn.commit()
-                logging.info(f"payment successfully update [{key}] to [{value}]")
-            return True
-        except Error as e:
-            logging.error(f"Error while updating payment [{key}] to [{value}] \n Error: {e}")
-            return False
-
-    def find_payment(self, **kwargs):
-        if len(kwargs) != 1:
-            logging.warning("You can only use one key to find payment!")
-            return None
-        rows = []
-        cur = self.conn.cursor()
-        try:
-            for key, value in kwargs.items():
-                cur.execute(f"SELECT * FROM payments WHERE {key}=?", (value,))
-                rows = cur.fetchall()
-            if len(rows) == 0:
-                logging.info(f"Payment {kwargs} not found!")
-                return None
-            rows = [dict(zip([key[0] for key in cur.description], row)) for row in rows]
-            return rows
-        except Error as e:
-            logging.error(f"Error while finding payment {kwargs} \n Error:{e}")
-            return None
-
-    def select_servers(self):
-        cur = self.conn.cursor()
-        try:
-            cur.execute("SELECT * FROM servers")
-            rows = cur.fetchall()
-            rows = [dict(zip([key[0] for key in cur.description], row)) for row in rows]
-            return rows
-        except Error as e:
-            logging.error(f"Error while selecting all servers \n Error:{e}")
-            return None
-
-    def add_server(self, url, title=None, description=None, default_server=False):
-        cur = self.conn.cursor()
-        try:
-            cur.execute(
-                "INSERT INTO servers(url,title,description,default_server) VALUES(?,?,?,?)",
-                (url, title, description, default_server))
-            self.conn.commit()
-            logging.info(f"Server [{url}] added successfully!")
-            return True
-        except Error as e:
-            logging.error(f"Error while adding server [{url}] \n Error: {e}")
-            return False
-
-    def edit_server(self, server_id, **kwargs):
-        cur = self.conn.cursor()
-        try:
-            for key, value in kwargs.items():
-                cur.execute(f"UPDATE servers SET {key}=? WHERE id=?", (value, server_id))
-                self.conn.commit()
-                logging.info(f"Server [{server_id}] successfully update [{key}] to [{value}]")
-            return True
-        except Error as e:
-            logging.error(f"Error while updating server [{server_id}] [{key}] to [{value}] \n Error: {e}")
-            return False
-
-    def find_server(self, **kwargs):
-        if len(kwargs) != 1:
-            logging.warning("You can only use one key to find server!")
-            return None
-        rows = []
-        cur = self.conn.cursor()
-        try:
-            for key, value in kwargs.items():
-                cur.execute(f"SELECT * FROM servers WHERE {key}=?", (value,))
-                rows = cur.fetchall()
-            if len(rows) == 0:
-                logging.info(f"Server {kwargs} not found!")
-                return None
-            rows = [dict(zip([key[0] for key in cur.description], row)) for row in rows]
-            return rows
-        except Error as e:
-            logging.error(f"Error while finding server {kwargs} \n Error:{e}")
-            return None
-
-    def backup_to_json(self, backup_dir):
-        try:
-
-            backup_data = {}  # Store backup data in a dictionary
-
-            # List of tables to backup
-            tables = ['users', 'plans', 'orders', 'order_subscriptions', 'non_order_subscriptions',
-                      'str_config', 'int_config', 'bool_config', 'wallet', 'payments', 'servers']
-
-            for table in tables:
-                cur = self.conn.cursor()
-                cur.execute(f"SELECT * FROM {table}")
-                rows = cur.fetchall()
-
-                # Convert rows to list of dictionaries
-                table_data = []
-                for row in rows:
-                    columns = [column[0] for column in cur.description]
-                    table_data.append(dict(zip(columns, row)))
-
-                backup_data[table] = table_data
-            return backup_data
-
-        except sqlite3.Error as e:
-            logging.error('SQLite error:', str(e))
-            return False
-    def restore_from_json(self, backup_file):
-        logging.info(f"Restoring database from {backup_file}...")
-        try:
+    def set_default_settings(self):
+        rows = self.select_settings()
+        if not rows:
+            # insert an empty row
             cur = self.conn.cursor()
-
-            with open(backup_file, 'r') as json_file:
-                backup_data = json.load(json_file)
-
-            if not isinstance(backup_data, dict):
-                logging.error('Backup data should be a dictionary.')
-                print('Backup data should be a dictionary.')
-                return
-
-            self.conn.execute('BEGIN TRANSACTION')
-
-            for table, data in backup_data.items():
-                if table == 'version':
-                    continue
-                logging.info(f"Restoring table {table}...")
-                for entry in data:
-                    if not isinstance(entry, dict):
-                        logging.error('Invalid entry format. Expected a dictionary.')
-                        print('Invalid entry format. Expected a dictionary.')
-                        continue
-
-                    keys = ', '.join(entry.keys())
-                    placeholders = ', '.join(['?' for _ in entry.values()])
-                    values = tuple(entry.values())
-                    query = f"INSERT OR REPLACE INTO {table} ({keys}) VALUES ({placeholders})"
-                    logging.info(f"Query: {query}")
-                    
-                    try:
-                        cur.execute(query, values)
-                    except sqlite3.Error as e:
-                        logging.error('SQLite error:', str(e))
-                        logging.error('Entry:', entry)
-                        print('SQLite error:', str(e))
-                        print('Entry:', entry)
-
-            self.conn.commit()
-            logging.info('Database restored successfully.')
-            return True
-
-        except sqlite3.Error as e:
-            logging.error('SQLite error:', str(e))
+            try:
+                cur.execute(
+                    "INSERT INTO Settings(visible_hiddify_hyperlink) VALUES(?)",
+                    (True,))
+                self.conn.commit()
+                logging.info(f"Default settings added successfully!")
+                return True
+            except Error as e:
+                logging.error(f"Error while adding default settings \n Error: {e}")
+                return False
+        else:
+            logging.info("Settings already exists!")
             return False
-    
-
-USERS_DB_LOC = os.path.join(os.getcwd(), "Database", "hidyBot.db")
-USERS_DB = UserDBManager(USERS_DB_LOC)
