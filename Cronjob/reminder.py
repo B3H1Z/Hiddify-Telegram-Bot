@@ -3,8 +3,9 @@ from UserBot.bot import bot
 from config import CLIENT_TOKEN
 from UserBot.templates import package_size_end_soon_template, package_days_expire_soon_template
 
-ALERT_PACKAGE_GB = 3
-ALERT_PACKAGE_DAYS = 3
+settings = all_configs_settings()
+ALERT_PACKAGE_GB = settings.get('reminder_notification_usage', 3)
+ALERT_PACKAGE_DAYS = settings.get('reminder_notification_days', 3)
 
 
 def alert_package_gb(package_remaining_gb):
@@ -22,6 +23,8 @@ def alert_package_days(package_remaining_days):
 # Send a reminder to users about their packages
 def cron_reminder():
     if not CLIENT_TOKEN:
+        return
+    if not settings['reminder_notification']:
         return
 
     telegram_users = USERS_DB.select_users()

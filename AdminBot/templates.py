@@ -1,6 +1,6 @@
 # Description: This file contains all the templates used in the bot.
 from config import LANG, VERSION
-from AdminBot.messages import MESSAGES
+from AdminBot.content import MESSAGES
 
 
 # Single User Info Message Template
@@ -113,18 +113,11 @@ def about_template():
         return f"""
 🤖هیدی بات، راحت تر از همیشه!
 
-<a href='https://github.com/B3H1Z/Hiddify-Telegram-Bot'> لینک پروژه </a>|<a href='https://t.me/HidyBotGroup'> گروه پشتیبانی </a>
+<a href='https://github.com/B3H1Z/Hiddify-Telegram-Bot'> لینک پروژه </a>
 
-این پروژه به صورت رایگان توسعه داده شده و جهت ادامه توسعه رایگان، حمایت مالی شما میتواند انگیزه بخش باشد❤️
+<a href='https://t.me/HidyBotGroup'> گروه پشتیبانی </a> | <a href='https://t.me/HidyBotChannel'> کانال اطلاع رسانی </a>
 
-📌حمایت مالی:
-TRX: <code>TSTtpPFgzNhXgDRpZLKkjHvoHC6CtQA8V9</code>
-
-DOGE: <code>DGfd18UX9vazdyMj1bTsVSufSbQvEMvT56</code>
-
-USDT: <code>0xB1120148eB1c34C4Dd4c531f558B6D5708c40623</code>
-
-BNB: <code>bnb13fevgfzjp4am2ejvk7ly2xdpdldhz5xwd350a2</code>
+این پروژه به صورت رایگان توسعه داده شده و جهت ادامه توسعه رایگان، حمایت های شما میتواند انگیزه بخش باشد❤️
 
 نسخه: {VERSION}
 """
@@ -135,15 +128,6 @@ BNB: <code>bnb13fevgfzjp4am2ejvk7ly2xdpdldhz5xwd350a2</code>
 <a href='https://github.com/B3H1Z/Hiddify-Telegram-Bot'> Project </a>|<a href='https://t.me/HidyBotGroup'> Support Group </a>
 
 This project is developed for free and your financial support can be motivating for further development❤️
-
-📌Financial Support:
-TRX: <code>TSTtpPFgzNhXgDRpZLKkjHvoHC6CtQA8V9</code>
-
-DOGE: <code>DGfd18UX9vazdyMj1bTsVSufSbQvEMvT56</code>
-
-USDT: <code>0xB1120148eB1c34C4Dd4c531f558B6D5708c40623</code>
-
-BNB: <code>bnb13fevgfzjp4am2ejvk7ly2xdpdldhz5xwd350a2</code>
 
 Version: {VERSION}
 """
