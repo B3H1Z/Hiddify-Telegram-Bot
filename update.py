@@ -132,17 +132,11 @@ def update_v4_v5():
                     cur.execute("CREATE TABLE IF NOT EXISTS str_config (key TEXT PRIMARY KEY, value TEXT)")
                     admin_ids = config["admin_id"]
                     admin_ids = json.dumps(admin_ids)
-                    # if bot_admin_id is not exists, create it
-                    if not cur.execute("SELECT * FROM str_config WHERE key = 'bot_admin_id'").fetchone():
-                        cur.execute("INSERT INTO str_config VALUES (?, ?)", ("bot_admin_id", admin_ids))
-                    # if bot_token_admin is not exists, create it
-                    if not cur.execute("SELECT * FROM str_config WHERE key = 'bot_token_admin'").fetchone():
-                        cur.execute("INSERT INTO str_config VALUES (?, ?)", ("bot_token_admin", config["token"]))
-                    if not cur.execute("SELECT * FROM str_config WHERE key = 'bot_token_client'").fetchone():
-                        cur.execute("INSERT INTO str_config VALUES (?, ?)",
-                                    ("bot_token_client", config["client_token"]))
-                    if not cur.execute("SELECT * FROM str_config WHERE key = 'bot_lang'").fetchone():
-                        cur.execute("INSERT INTO str_config VALUES (?, ?)", ("bot_lang", config["lang"]))
+                    cur.execute("INSERT OR REPLACE INTO str_config VALUES (?, ?)", ("bot_admin_id", admin_ids))
+                    cur.execute("INSERT OR REPLACE INTO str_config VALUES (?, ?)", ("bot_token_admin", config["token"]))
+                    cur.execute("INSERT OR REPLACE INTO str_config VALUES (?, ?)",
+                                ("bot_token_client", config["client_token"]))
+                    cur.execute("INSERT OR REPLACE INTO str_config VALUES (?, ?)", ("bot_lang", config["lang"]))
                     conn.commit()
 
                     # if servers is not exists, create it
