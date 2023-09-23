@@ -387,11 +387,7 @@ def non_order_user_info(telegram_id):
     non_ordered_subscriptions = USERS_DB.find_non_order_subscription(telegram_id=telegram_id)
     if non_ordered_subscriptions:
         for subscription in non_ordered_subscriptions:
-            # non_order_user = ADMIN_DB.find_user(uuid=subscription['uuid'])
             non_order_user = api.find(subscription['uuid'])
-            # print(f"non_order_user:{non_order_user}")
-            # non_order_user = search_by_property(non_order_user, uuid=subscription['uuid'])
-
             if non_order_user:
                 non_order_user = users_to_dict([non_order_user])
                 non_order_user = dict_process(non_order_user, subscription['id'])
@@ -411,8 +407,6 @@ def order_user_info(telegram_id):
             if ordered_subscriptions:
                 for subscription in ordered_subscriptions:
                     order_user = api.find(subscription['uuid'])
-                    # print(f"order_user:{order_user}")
-                    # order_user = search_by_property(order_user, uuid=subscription['uuid'])
                     if order_user:
                         order_user = users_to_dict([order_user])
                         order_user = dict_process(order_user, subscription['id'])
@@ -437,15 +431,6 @@ def privacy_friendly_logging_request(url):
     url = urlparse(url)
     url = url.scheme + "://" + "panel.private.com" + url.path
     return url
-
-
-# def settings_config_to_dict(configs):
-#     dict_configs = {}
-#     for entry in configs:
-#         key = entry['key']
-#         value = entry['value']
-#         dict_configs[key] = value
-#     return dict_configs
 
 
 def all_configs_settings():

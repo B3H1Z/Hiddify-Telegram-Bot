@@ -1,26 +1,36 @@
 import json
 import sqlite3
-from version import __version__
+# from version import __version__
 from config import *
-
 import argparse
 
 
 def version():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--update-v4-v5", action="store_true", help="Update database from version 4 to 5")
+    parser = argparse.ArgumentParser(description='Update script')
+    # parser.add_argument("--update-v4-v5", action="store_true", help="Update database from version 4 to 5")
+    parser.add_argument('--current-version', type=str, help='Current version')
+    parser.add_argument('--target-version', type=str, help='Target version')
     args = parser.parse_args()
     return args
 
+def is_version_less(version1, version2):
+    v1_parts = list(map(int, version1.split('.')))
+    v2_parts = list(map(int, version2.split('.')))
+
+    for part1, part2 in zip(v1_parts, v2_parts):
+        if part1 < part2:
+            return True
+        elif part1 > part2:
+            return False
+
+    # If both versions are identical up to the available parts
+    return False
 
 conn = sqlite3.connect(USERS_DB_LOC)
 
 
 def drop_columns_from_table(table_name, columns_to_drop):
     try:
-        # Connect to the SQLite database
-
-        # Create a cursor object to execute SQL commands
         cur = conn.cursor()
 
         # Create a list of column names to keep
@@ -44,26 +54,18 @@ def drop_columns_from_table(table_name, columns_to_drop):
 
     except sqlite3.Error as e:
         # Handle any database errors that may occur
-        print("SQLite error:", e)
+        logging.error("Database error: %s" % e)
         return False
 
-    # finally:
-    #     # Close the cursor and database connection to release resources
-    #     if cur:
-    #         cur.close()
-    #     if conn:
-    #         conn.close()
-
-
-main_version = __version__.split(".")[0]
-print("main_version", main_version)
-
+# main_version = __version__.split(".")[0]
+# print("main_version", main_version)
+# logging.info("main_version %s" % main_version)
 
 def update_v4_v5():
-    if main_version != "4":
-        print("No update is needed")
-        return
+    print("Updating database from version v4 to v5")
+    logging.info("Updating database from version 4 to 5")
     with sqlite3.connect(USERS_DB_LOC) as conn:
+        logging.info("Updating database from version 4 to 5")
         print("Updating database from version 4 to 5")
 
         # Changes in orders table
@@ -72,33 +74,24 @@ def update_v4_v5():
             cur.execute("DELETE FROM orders WHERE approved = 0")
             conn.commit()
         except sqlite3.Error as e:
+            logging.error("Database error: %s" % e)
             print("SQLite error:", e)
+            
         try:
             cur = conn.cursor()
             cur.execute("DELETE FROM orders WHERE approved IS NULL")
             conn.commit()
         except sqlite3.Error as e:
+            logging.error("Database error: %s" % e)
             print("SQLite error:", e)
         drop_columns_from_table('orders', ['payment_image', 'payment_method', 'approved'])
-
-        # Changes in owner_info table
-        # try:
-        #     cur = conn.cursor()
-        #     cur.execute("SELECT * FROM owner_info")
-        #     owner_info = cur.fetchone()
-        #     if owner_info:
-        #         cur.execute("UPDATE str_config SET value = ? WHERE key = 'card_number'", (owner_info[0],))
-        #         cur.execute("UPDATE str_config SET value = ? WHERE key = 'card_holder'", (owner_info[1],))
-        #         cur.execute("UPDATE str_config SET value = ? WHERE key = 'support_username'", (owner_info[2],))
-        #         conn.commit()
-        # except sqlite3.Error as e:
-        #     print("SQLite error:", e)
 
         try:
             cur = conn.cursor()
             cur.execute("DROP TABLE owner_info")
             conn.commit()
         except sqlite3.Error as e:
+            logging.error("Database error: %s" % e)
             print("SQLite error:", e)
 
         # Drop settings table
@@ -107,6 +100,7 @@ def update_v4_v5():
             cur.execute("DROP TABLE settings")
             conn.commit()
         except sqlite3.Error as e:
+            logging.error("Database error: %s" % e)
             print("SQLite error:", e)
 
         # Add test_subscription bool default 0 to users table
@@ -116,8 +110,12 @@ def update_v4_v5():
                 cur.execute("ALTER TABLE users ADD COLUMN test_subscription BOOLEAN DEFAULT 0")
             conn.commit()
         except sqlite3.Error as e:
+            logging.error("Database error: %s" % e)
             print("SQLite error:", e)
+        
+        # image path to basename
 
+            
         # move config.json to db
         CONF_LOC = os.path.join(os.getcwd(), "config.json")
         if os.path.exists(CONF_LOC):
@@ -150,13 +148,32 @@ def update_v4_v5():
 
                     conn.commit()
                 except sqlite3.Error as e:
+                    logging.error("Database error: %s" % e)
                     print("SQLite error:", e)
             os.remove(CONF_LOC)
+        
+def update_by_version(current_version, target_version):
+    if is_version_less(current_version, target_version):
+        print("Updating started...")
+        logging.info("Updating started...")
+        # if current_version is less than 5, update to 5.0.0
+        if is_version_less(current_version, "5.0.0"):
+            update_v4_v5()
+    else:
+        print("No update is needed")
+        logging.info("No update is needed")
 
 
 if __name__ == "__main__":
     args = version()
-    if args.update_v4_v5:
-        update_v4_v5()
+    if args.current_version and args.target_version:
+        current_version = args.current_version
+        target_version = args.target_version
+        if current_version.find("-pre"):
+            current_version = current_version.split("-pre")[0]
+        print(f"current-version: {current_version} -> target-version: {target_version}")
+        logging.info(f"current-version: {current_version} -> target-version: {target_version}")
+        update_by_version(current_version, target_version)
     else:
+        logging.info("No update is needed")
         print("No update is needed")

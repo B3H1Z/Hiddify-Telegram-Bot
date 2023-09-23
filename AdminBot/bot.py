@@ -549,7 +549,6 @@ def users_bot_settings_restore_bot(message: Message):
     # save file
     file_name = message.document.file_name
     file_info = bot.get_file(message.document.file_id)
-    print(file_info)
     downloaded_file = bot.download_file(file_info.file_path)
     file_save_path = os.path.join(BOT_BACKUP_LOC,"Restore")
     if not os.path.exists(file_save_path):
@@ -870,7 +869,6 @@ def callback_query(call: CallbackQuery):
         )
     # User Configs - Subscription Configs For Hiddify Callback
     elif key == "conf_hiddify":
-        print(value)
         sub = utils.sub_links(value)
         if not sub:
             bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
@@ -1479,7 +1477,6 @@ def start():
             telebot.types.BotCommand("/start", BOT_COMMANDS['START']),
         ])
     except telebot.apihelper.ApiTelegramException as e:
-        print(e.result.json())
         if e.result.status_code == 401:
             logging.error("Invalid Telegram Bot Token!")
             exit(1)

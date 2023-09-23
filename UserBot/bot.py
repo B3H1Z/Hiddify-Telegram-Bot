@@ -78,7 +78,7 @@ def user_channel_status(user_id):
         else:
             return True
     except telebot.apihelper.ApiException as e:
-        print(e)
+        logging.error("ApiException: %s" % e)
         return False
 
 
@@ -613,7 +613,6 @@ def callback_query(call: CallbackQuery):
                              reply_markup=main_menu_keyboard_markup())
             return
         user_info_process = user_info_process[0]
-        print(user_info_process)
         if settings['renewal_method'] == 2:
             if user_info_process['remaining_day'] >= settings['advanced_renewal_days'] and user_info_process['usage']['remaining_usage_GB'] >= settings['advanced_renewal_usage']:
                 bot.send_message(call.message.chat.id, renewal_unvalable_template(settings),

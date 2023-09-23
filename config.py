@@ -100,7 +100,6 @@ def set_config_variables(configs, server_url):
     LANG = configs["bot_lang"]
     # PANEL_ADMIN_ID = ADMIN_DB.find_admins(uuid=urlparse(PANEL_URL).path.split('/')[2])
     PANEL_ADMIN_ID = urlparse(PANEL_URL).path.split('/')[2]
-    print("PANEL_ADMIN_ID", PANEL_ADMIN_ID)
     if not PANEL_ADMIN_ID:
         print(colored("Admin panel UUID is not valid!", "red"))
         raise Exception(f"Admin panel UUID is not valid!\nBe in touch with {HIDY_BOT_ID}")

@@ -21,7 +21,7 @@ class API:
             res = Utils.utils.dict_process(Utils.utils.users_to_dict(response.json()))
             return res
         except Exception as e:
-            print(e)
+            logging.error("API error: %s" % e)
             return None
 
     def find(self, uuid, endpoint="/user/"):
@@ -36,7 +36,7 @@ class API:
                 return None
             return jr[0]
         except Exception as e:
-            print(e)
+            logging.error("API error: %s" % e)
             return None
 
     def insert(self, name, usage_limit_GB, package_days, last_reset_time=None, added_by_uuid=None, mode="no_reset",
@@ -70,7 +70,7 @@ class API:
             response = requests.post(self.url + endpoint, data=jdata, headers={'Content-Type': 'application/json'})
             return uuid
         except Exception as e:
-            print(e)
+            logging.error("API error: %s" % e)
             return None
 
     def update(self, uuid, endpoint="/user/", **kwargs, ):
@@ -85,16 +85,8 @@ class API:
                                      headers={'Content-Type': 'application/json'})
             return uuid
         except Exception as e:
-            print(e)
+            logging.error("API error: %s" % e)
             return None
 
 
 api = API(PANEL_URL + API_PATH)
-
-# api.select("/user/")
-# api.find("/user/", {"uuid": "6ebd2ea8-4d41-48b7-8fc2-7d6570"})
-# api.insert("/user/", {"example": "data"})
-# api.update("/user/", {"example": "data"})
-
-
-# print(dict_process(users_to_dict(api.select("/user/"))))
