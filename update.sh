@@ -49,8 +49,18 @@ function reinstall_bot() {
   esac
 }
 
+# current_version_first_part=$(echo "current_version" | cut -d '.' -f 1)
+# target_version_first_part=$(echo "target_version" | cut -d '.' -f 1)
 
+# if [ "$current_version_first_part" = "4" ] && [ "$target_version_first_part" = "5" ]; then
+#     echo "Version is 4, running update.py to update to version 5."
+#     python3 /opt/Hiddify-Telegram-Bot/update.py --update-v4-v5
+#     echo "Update.py has been run."
+# else
+#     echo "Version is not 4."
+# fi
 branch="main"
+
 if [ "$0" == "--pre-release" ]; then
     branch="pre-release"
 fi
@@ -76,16 +86,37 @@ function update_bot() {
   fi
 }
 
-## Stop the bot gracefully before proceeding
-#stop_bot
-#
-## Wait for a few seconds
-#display_message "Please wait for 5 seconds ..."
-#sleep 5
+# Stop the bot gracefully before proceeding
+stop_bot
 
+# Wait for a few seconds
+display_message "Please wait for 5 seconds ..."
+sleep 5
 # If version.py does not exist, offer to reinstall the bot; otherwise, update it
 if [ ! -f /opt/Hiddify-Telegram-Bot/version.py ]; then
   reinstall_bot
 else
+  current_version=$(python /opt/Hiddify-Telegram-Bot/version.py --version)  
+  
   update_bot
+
+  # Add cron job for reboot
+  add_cron_job_if_not_exists "@reboot cd $install_dir && ./restart.sh"
+
+  # Add cron job to run every 6 hours
+  add_cron_job_if_not_exists "0 */6 * * * cd $install_dir && python3 crontab.py --backup"
+
+  # Add cron job to run at 12:00 PM daily
+  add_cron_job_if_not_exists "0 12 * * * cd $install_dir && python3 crontab.py --reminder"
+
+  # Add cron job to run every 3 hours
+  add_cron_job_if_not_exists "0 */3 * * * cd $install_dir && python3 crontab.py --backup-bot"
+  
+  if python /opt/Hiddify-Telegram-Bot/update.py --current-version "$current_version" --target-version "$target_version"; then
+      echo "update.py has been run."
+  else
+      echo "update.py has not been run."
+      exit 1
+  fi
+
 fi

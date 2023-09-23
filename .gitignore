@@ -10,3 +10,5 @@ config.json
 
 *.pyc
 *.pyo
+check-host.py
+.vscode/launch.json
