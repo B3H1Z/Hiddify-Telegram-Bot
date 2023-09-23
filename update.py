@@ -1,9 +1,11 @@
 import json
 import sqlite3
 # from version import __version__
-from config import USERS_DB_LOC,logging
+import config
 import argparse
 
+USERS_DB_LOC = config.USERS_DB_LOC
+logging = config.logging
 
 def version():
     parser = argparse.ArgumentParser(description='Update script')

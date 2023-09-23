@@ -96,6 +96,11 @@ sleep 5
 if [ ! -f /opt/Hiddify-Telegram-Bot/version.py ]; then
   reinstall_bot
 else
+  # if can get current version, update bot
+  if ! python3 /opt/Hiddify-Telegram-Bot/version.py --version; then
+    echo "Failed to get current version."
+    exit 1
+  fi
   current_version=$(python3 /opt/Hiddify-Telegram-Bot/version.py --version)  
   
   update_bot
