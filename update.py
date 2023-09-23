@@ -1,7 +1,7 @@
 import json
 import sqlite3
 # from version import __version__
-from config import *
+from config import USERS_DB_LOC,logging
 import argparse
 
 
