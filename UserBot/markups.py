@@ -3,8 +3,7 @@ from telebot import types
 from telebot.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
 from UserBot.content import KEY_MARKUP, MESSAGES
 from UserBot.content import MESSAGES
-from AdminBot.markups import sub_url_user_list_markup, sub_user_list_markup
-from Utils.utils import rial_to_toman
+from Utils.utils import rial_to_toman,all_configs_settings
 
 
 # Main Menu Reply Keyboard Markup
@@ -29,6 +28,42 @@ def user_info_markup(uuid):
     return markup
 
 
+# Subscription URL Inline Keyboard Markup
+def sub_url_user_list_markup(uuid):
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 2
+    settings = all_configs_settings()
+    if settings['visible_conf_dir']:
+        markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_DIR'], callback_data=f"conf_dir:{uuid}"))
+    if settings['visible_conf_sub_auto']:
+        markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_SUB_AUTO'], callback_data=f"conf_sub_auto:{uuid}"))
+    if settings['visible_conf_sub_url']:
+        markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_SUB'], callback_data=f"conf_sub_url:{uuid}"))
+    if settings['visible_conf_sub_url_b64']:
+        markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_SUB_B64'], callback_data=f"conf_sub_url_b64:{uuid}"))
+    if settings['visible_conf_clash']:
+        markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_CLASH'], callback_data=f"conf_clash:{uuid}"))
+    if settings['visible_conf_hiddify']:
+        markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_HIDDIFY'], callback_data=f"conf_hiddify:{uuid}"))
+    if settings['visible_conf_sub_sing_box']:
+        markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_SING_BOX'], callback_data=f"conf_sub_sing_box:{uuid}"))
+    if settings['visible_conf_sub_full_sing_box']:
+        markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_FULL_SING_BOX'],
+                                        callback_data=f"conf_sub_full_sing_box:{uuid}"))
+
+    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_user_panel:{uuid}"))
+
+    return markup
+
+# Subscription Configs Inline Keyboard Markup
+def sub_user_list_markup(uuid):
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 1
+    markup.add(InlineKeyboardButton('Vless', callback_data=f"conf_dir_vless:{uuid}"))
+    markup.add(InlineKeyboardButton('Vmess', callback_data=f"conf_dir_vmess:{uuid}"))
+    markup.add(InlineKeyboardButton('Trojan', callback_data=f"conf_dir_trojan:{uuid}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_user_panel:{uuid}"))
+    return markup
 
 def user_info_non_sub_markup(uuid):
     markup = InlineKeyboardMarkup()
@@ -49,13 +84,13 @@ def confirm_subscription_markup(uuid):
     return markup
 
 
-def confirm_buy_plan_markup(plan_id, renewal=False):
+def confirm_buy_plan_markup(plan_id, renewal=False,uuid=None):
     markup = InlineKeyboardMarkup()
     markup.row_width = 1
     callback = "confirm_buy_from_wallet" if not renewal else "confirm_renewal_from_wallet"
     markup.add(InlineKeyboardButton(KEY_MARKUP['BUY_FROM_WALLET'], callback_data=f"{callback}:{plan_id}"))
     if renewal:
-        markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_renewal_plans:None"))
+        markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_renewal_plans:{uuid}"))
     else:
         markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_plans:None"))
     return markup
@@ -69,7 +104,7 @@ def send_screenshot_markup(plan_id):
     return markup
 
 
-def plans_list_markup(plans, renewal=False):
+def plans_list_markup(plans, renewal=False,uuid=None):
     markup = InlineKeyboardMarkup(row_width=1)
     callback = "renewal_plan_selected" if renewal else "plan_selected"
     keys = []
@@ -81,7 +116,9 @@ def plans_list_markup(plans, renewal=False):
     if len(keys) == 0:
         return None
     if renewal:
-        keys.append(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_user_panel:None"))
+        keys.append(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_user_panel:{uuid}"))
+    else:
+        keys.append(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"del_msg:None"))
     markup.add(*keys)
     return markup
 

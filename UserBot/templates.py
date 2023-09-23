@@ -211,3 +211,19 @@ Only {remaining_size} GB left until your package expires.
 Please renewal package.
 Your package ID: <code>{sub_id}</code>
 """
+
+def renewal_unvalable_template(settings):
+    if LANG == 'FA':
+        return f"""
+🛑در حال حاضر شما امکان تمدید اشتراک خود را ندارید.
+جهت تمدید اشتراک باید یکی از شروط زیر برقرار باشد:
+1- کمتر از {settings['advanced_renewal_days']} روز تا اتمام اشتراک شما باقی مانده باشد.
+2- حجم باقی مانده اشتراک شما کمتر از {settings['advanced_renewal_usage']} گیگابایت باشد.
+"""
+    elif LANG == 'EN':
+        return f"""
+🛑You cannot renew your subscription at this time.
+To renew your subscription, one of the following conditions must be met:
+1- Less than {settings['advanced_renewal_days']} days left until your subscription expires.
+2- The remaining volume of your subscription is less than {settings['advanced_renewal_usage']} GB.
+"""

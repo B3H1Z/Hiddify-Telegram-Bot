@@ -93,6 +93,10 @@
     "USERS_BOT_SETTINGS_NOTIF_REMINDER_DAYS": "Set the number of days before the end of the subscription to send a reminder message:",
     "USERS_BOT_SETTINGS_NOTIF_REMINDER_USAGE": "Set the remaining GB to send a reminder message:",
     "USERS_BOT_SETTINGS_PANEL_MANUAL": "Please enter the manual text to show in the user panel:",
+    "USERS_BOT_SETTINGS_BACKUP_BOT": "Backup Bot File",
+    "USERS_BOT_SETTINGS_RESTORE_BOT": "This feature is under test, so be careful when using it and ask your questions from the support group.\nRestore Bot Backup File",
+    "USERS_BOT_SETTINGS_RENEWAL_METHOD_ADVANCED_DAYS":"Set the number of days before the end of the subscription to allow the user to renew the subscription:",
+    "USERS_BOT_SETTINGS_RENEWAL_METHOD_ADVANCED_USAGE":"Set the remaining GB to allow the user to renew the subscription:",
     "ERROR_INVALID_USERNAME": "❌Invalid username\nUsername must start with @",
     "ERROR_INVALID_CARD_NUMBER": "❌Invalid card number",
     "PAYMENT_CONFIRMED": "✅Payment confirmed",
@@ -114,7 +118,9 @@
     "CREATED_AT": "Created:",
     "WALLET_PAYMENT_CONFIRMED": "✅Payment confirmed\nYour wallet balance has increased.",
     "FEATUR_UNAVAILABLE": "❌This feature is not available at the moment.",
-    "REQUEST_JOIN_HIDY": "Please join the support group to get the latest information."
+    "REQUEST_JOIN_HIDY": "Please join the support group to get the latest information.",
+    "WELCOME_TO_ADMIN": "Hiddify Management Bot has been successfully launched.\nTo start working, send the /start command.",
+    "SUCCESS_RESTORE_BOT": "✅Bot restored successfully"
   },
   "FA": {
     "WELCOME": "به ربات مدیریت هیدی بات خوش آمدید.",
@@ -209,6 +215,10 @@
     "USERS_BOT_SETTINGS_NOTIF_REMINDER_DAYS": "تعیین کنید که چند روز قبل از اتمام اشتراک پیام یادآوری تمدید اشتراک ارسال شود:",
     "USERS_BOT_SETTINGS_NOTIF_REMINDER_USAGE": "تعیین کنید که چند گیگ مانده به اتمام اشتراک پیام یادآوری تمدید اشتراک ارسال شود:",
     "USERS_BOT_SETTINGS_PANEL_MANUAL": "لطفا متن راهنمای مورد نظر را برای نمایش در پنل کاربران وارد کنید:",
+    "USERS_BOT_SETTINGS_BACKUP_BOT": "فایل پشتیبان ربات",
+    "USERS_BOT_SETTINGS_RESTORE_BOT": "📥 لطفا فایل پشتیبان خود را ارسال کنید: \n توجه داشته باشید که این قابلیت حساس میباشد و در صورت وجود هرگونه سوال یا شبهه، ابتدا با گروه پشتیبانی در ارتباط باشید.",
+    "USERS_BOT_SETTINGS_RENEWAL_METHOD_ADVANCED_DAYS":"تعیین کنید که چند روز مانده به پایان اشتراک، کاربر مجاز به تمدید اشتراک باشد:",
+    "USERS_BOT_SETTINGS_RENEWAL_METHOD_ADVANCED_USAGE":"تعیین کنید که چند گیگ مانده به پایان اشتراک، کاربر مجاز به تمدید اشتراک باشد:",
     "SUCCESS_UPDATE_DATA": "✅اطلاعات با موفقیت به روز شد",
     "ERROR_INVALID_USERNAME": "❌آیدی نامعتبر است\n آیدی باید با @ شروع شود",
     "ERROR_INVALID_CARD_NUMBER": "❌شماره کارت نامعتبر است\nشماره کارت باید 16 رقمی باشد",
@@ -231,7 +241,9 @@
     "CREATED_AT": "تاریخ ایجاد:",
     "WALLET_PAYMENT_CONFIRMED": "✅پرداخت شما تایید شد\n از طریق دکمه [💰کیف پول] میتوانید به موجودی کیف پول خود دسترسی داشته باشید.",
     "FEATUR_UNAVAILABLE": "❌این قابلیت در حال حاضر در دسترس نیست.",
-    "REQUEST_JOIN_HIDY": "📍جهت دریافت آخرین اطلاعات، در گروه پشتیبانی عضو شوید."
+    "REQUEST_JOIN_HIDY": "📍جهت دریافت آخرین اطلاعات، در گروه پشتیبانی عضو شوید.",
+    "WELCOME_TO_ADMIN": "ربات مدیریت هیدی بات با موفقیت راه‌اندازی شد.\nبرای شروع کار، دستور /start را ارسال کنید.",
+    "SUCCESS_RESTORE_BOT": "✅ربات با موفقیت بازیابی شد"
 
 
   }

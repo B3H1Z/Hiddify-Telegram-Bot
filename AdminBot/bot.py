@@ -4,9 +4,10 @@ import html
 import logging
 import time
 import telebot
+import os
 from telebot.types import Message, CallbackQuery
 
-from config import TELEGRAM_TOKEN, ADMINS_ID, PANEL_ADMIN_ID, CLIENT_TOKEN
+from config import TELEGRAM_TOKEN, ADMINS_ID, PANEL_ADMIN_ID, CLIENT_TOKEN, BOT_BACKUP_LOC
 from AdminBot.content import BOT_COMMANDS, MESSAGES, KEY_MARKUP
 from AdminBot import markups
 from AdminBot import templates
@@ -20,27 +21,20 @@ bot = telebot.TeleBot(TELEGRAM_TOKEN, parse_mode="HTML")
 bot.delete_webhook()
 if CLIENT_TOKEN:
     user_bot = user_bot()
-# Bot Start Commands
-try:
-    bot.set_my_commands([
-        telebot.types.BotCommand("/start", BOT_COMMANDS['START']),
-    ])
-except telebot.apihelper.ApiTelegramException as e:
-    print(e.result.json())
-    if e.result.status_code == 401:
-        logging.error("Invalid Telegram Bot Token!")
-        exit(1)
-
-
+USERS_DB.set_default_configs()
 # ----------------------------------- Helper Functions -----------------------------------
 # Check if message is digit
-def is_it_digit(message: Message, response=MESSAGES['ERROR_INVALID_NUMBER'],
+def is_it_digit(message: Message,allow_float=False, response=MESSAGES['ERROR_INVALID_NUMBER'],
                 markup=markups.main_menu_keyboard_markup()):
-    if not message.text.isdigit():
+    if not message.text:
         bot.send_message(message.chat.id, response, reply_markup=markup)
         return False
-    return True
-
+    try:
+        value = float(message.text) if allow_float else int(message.text)
+        return True
+    except ValueError:
+        bot.send_message(message.chat.id, response, reply_markup=markup)
+        return False
 
 # Check if message is cancel
 def is_it_cancel(message: Message, response=MESSAGES['CANCELED']):
@@ -378,11 +372,11 @@ def users_bot_send_msg_users(message: Message):
 
 
 # Users Bot - Settings - Update Message
-def users_bot_settings_update_message(message: Message, markup):
+def users_bot_settings_update_message(message: Message, markup,title=MESSAGES['USERS_BOT_SETTINGS']):
     settings = utils.all_configs_settings()
 
     bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id,
-                          text=f"{MESSAGES['USERS_BOT_SETTINGS']}",
+                          text=title,
                           reply_markup=markup)
 
 
@@ -412,7 +406,11 @@ def users_bot_order_status(message: Message):
         is_it_accepted = MESSAGES['PAYMENT_ACCEPT_STATUS_CONFIRMED']
     else:
         is_it_accepted = MESSAGES['PAYMENT_ACCEPT_STATUS_WAITING']
-
+    # check is image exist
+    if not os.path.exists(payment['payment_image']):
+        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'],
+                         reply_markup=markups.main_menu_keyboard_markup())
+        return
     bot.send_photo(message.chat.id, photo=open(payment['payment_image'], 'rb'),
                    caption=payment_received_template(payment,
                                                      footer=f"{MESSAGES['PAYMENT_ACCEPT_STATUS']} {is_it_accepted}\n{MESSAGES['CREATED_AT']} {payment['created_at']}"),
@@ -490,7 +488,7 @@ def users_bot_settings_welcome_msg(message: Message):
 def users_bot_settings_test_sub_size(message: Message):
     if is_it_cancel(message):
         return
-    if not is_it_digit(message):
+    if not is_it_digit(message,allow_float=True):
         return
     status = USERS_DB.edit_int_config("test_sub_size_gb", value=message.text)
     if not status:
@@ -544,7 +542,47 @@ def users_bot_settings_panel_manual(message: Message, db_key):
         return
     bot.send_message(message.chat.id, MESSAGES['SUCCESS_UPDATE_DATA'], reply_markup=markups.main_menu_keyboard_markup())
 
+def users_bot_settings_restore_bot(message: Message):
+    if is_it_cancel(message):
+        return
+    # save file
+    file_name = message.document.file_name
+    file_info = bot.get_file(message.document.file_id)
+    print(file_info)
+    downloaded_file = bot.download_file(file_info.file_path)
+    file_save_path = os.path.join(BOT_BACKUP_LOC,"Restore")
+    if not os.path.exists(file_save_path):
+        os.makedirs(file_save_path)
+        
+    # save in Backup/bot/restore
+    
+    with open(os.path.join(file_save_path,file_name), 'wb') as new_file:
+        new_file.write(downloaded_file)
+        
+    restore_status = utils.restore_json_bot(os.path.join(file_save_path,file_name))
+    if not restore_status:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
+        return
+    bot.send_message(message.chat.id, MESSAGES['SUCCESS_RESTORE_BOT'], reply_markup=markups.main_menu_keyboard_markup())
 
+def users_bot_settings_renewal_method_advanced_days(message: Message):
+    if is_it_cancel(message):
+        return
+    if not is_it_digit(message):
+        return
+    status = USERS_DB.edit_int_config("advanced_renewal_days", value=message.text)
+    if not status:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
+    bot.send_message(message.chat.id, MESSAGES['SUCCESS_UPDATE_DATA'], reply_markup=markups.main_menu_keyboard_markup())
+def users_bot_settings_renewal_method_advanced_usage(message: Message):
+    if is_it_cancel(message):
+        return
+    if not is_it_digit(message):
+        return
+    status = USERS_DB.edit_int_config("advanced_renewal_usage", value=message.text)
+    if not status:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
+    bot.send_message(message.chat.id, MESSAGES['SUCCESS_UPDATE_DATA'], reply_markup=markups.main_menu_keyboard_markup())
 # ----------------------------------- Callbacks -----------------------------------
 # Callback Handler for Inline Buttons
 @bot.callback_query_handler(func=lambda call: True)
@@ -1200,7 +1238,75 @@ def callback_query(call: CallbackQuery):
                          f"{MESSAGES['CURRENT_VALUE']}: {settings[value]}\n{MESSAGES['USERS_BOT_SETTINGS_PANEL_MANUAL']}",
                          reply_markup=markups.while_edit_user_markup())
         bot.register_next_step_handler(call.message, users_bot_settings_panel_manual, value)
+    elif key == "users_bot_settings_backup_bot":
+        backup_file = utils.backup_json_bot()
+        if not backup_file:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+            return
+        bot.send_document(call.message.chat.id, open(backup_file, 'rb'),caption=MESSAGES['USERS_BOT_SETTINGS_BACKUP_BOT'])
+    
+    elif key == "users_bot_settings_restore_bot":
+        bot.send_message(call.message.chat.id, MESSAGES['USERS_BOT_SETTINGS_RESTORE_BOT'], reply_markup=markups.while_edit_user_markup())
+        bot.register_next_step_handler(call.message, users_bot_settings_restore_bot)
+    
+    elif key == "users_bot_settings_buy_sub_status":
+        if value == "1":
+            edit_config = USERS_DB.edit_bool_config("buy_subscription_status", value=False)
+            if not edit_config:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+                return
+        elif value == "0":
+            edit_config = USERS_DB.edit_bool_config("buy_subscription_status", value=True)
+            if not edit_config:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+                return
+        settings = utils.all_configs_settings()
+        users_bot_settings_update_message(call.message, markups.users_bot_management_settings_markup(settings))
 
+    elif key == "users_bot_settings_renewal_sub_status":
+        if value == "1":
+            edit_config = USERS_DB.edit_bool_config("renewal_subscription_status", value=False)
+            if not edit_config:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+                return
+        elif value == "0":
+            edit_config = USERS_DB.edit_bool_config("renewal_subscription_status", value=True)
+            if not edit_config:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+                return
+        settings = utils.all_configs_settings()
+        users_bot_settings_update_message(call.message, markups.users_bot_management_settings_markup(settings))
+    
+    elif key == "users_bot_settings_renewal_method_menu":
+        settings = utils.all_configs_settings()
+        bot.send_message(call.message.chat.id, KEY_MARKUP['USERS_BOT_SETTINGS_RENEWAL_METHOD'], reply_markup=markups.users_bot_management_settings_renewal_method_markup(settings))
+    
+    elif key == "users_bot_settings_renewal_method":
+        if value == "1":
+            edit_config = USERS_DB.edit_int_config("renewal_method", value=2)
+            if not edit_config:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+                return
+        elif value == "2":
+            edit_config = USERS_DB.edit_int_config("renewal_method", value=1)
+            if not edit_config:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+                return
+        settings = utils.all_configs_settings()
+        users_bot_settings_update_message(call.message, markups.users_bot_management_settings_renewal_method_markup(settings))
+    
+    elif key == "users_bot_settings_renewal_method_advanced_days":
+        settings = utils.all_configs_settings()
+        bot.send_message(call.message.chat.id,
+                         f"{MESSAGES['CURRENT_VALUE']}: {settings['advanced_renewal_days']} {MESSAGES['DAY']}\n{MESSAGES['USERS_BOT_SETTINGS_RENEWAL_METHOD_ADVANCED_DAYS']}",
+                         reply_markup=markups.while_edit_user_markup())
+        bot.register_next_step_handler(call.message, users_bot_settings_renewal_method_advanced_days)
+    elif key == "users_bot_settings_renewal_method_advanced_usage":
+        settings = utils.all_configs_settings()
+        bot.send_message(call.message.chat.id,
+                         f"{MESSAGES['CURRENT_VALUE']}: {settings['advanced_renewal_usage']} {MESSAGES['GB']}\n{MESSAGES['USERS_BOT_SETTINGS_RENEWAL_METHOD_ADVANCED_USAGE']}",
+                         reply_markup=markups.while_edit_user_markup())
+        bot.register_next_step_handler(call.message, users_bot_settings_renewal_method_advanced_usage)
     # User Bot Settings  - Order Status Callback
     elif key == "users_bot_orders_status":
         bot.send_message(call.message.chat.id, f"{MESSAGES['USERS_BOT_ORDER_NUMBER_REQUEST']}")
@@ -1282,7 +1388,6 @@ def callback_query(call: CallbackQuery):
         msg = templates.user_info_template(usr)
         bot.edit_message_text(msg, call.message.chat.id, call.message.message_id,
                               reply_markup=markups.user_info_markup(usr['uuid']))
-
 
 # Check Admin Permission
 @bot.message_handler(func=lambda message: message.chat.id not in ADMINS_ID)
@@ -1367,6 +1472,24 @@ def about_bot(message: Message):
 # ----------------------------------- Main -----------------------------------
 # Start Bot
 def start():
+    # Bot Start Commands
+    try:
+        bot.set_my_commands([
+            telebot.types.BotCommand("/start", BOT_COMMANDS['START']),
+        ])
+    except telebot.apihelper.ApiTelegramException as e:
+        print(e.result.json())
+        if e.result.status_code == 401:
+            logging.error("Invalid Telegram Bot Token!")
+            exit(1)
+
+    # Welcome to Admin
+    for admin in ADMINS_ID:
+        try:
+            bot.send_message(admin, MESSAGES['WELCOME_TO_ADMIN'])
+        except Exception as e:
+            logging.warning(f"Error in send message to admin {admin}: {e}")
+
     bot.enable_save_next_step_handlers()
     bot.load_next_step_handlers()
     bot.infinity_polling()
