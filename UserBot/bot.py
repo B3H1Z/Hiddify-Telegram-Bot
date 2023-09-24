@@ -829,9 +829,9 @@ def callback_query(call: CallbackQuery):
         settings = utils.all_configs_settings()
         android_msg = settings['msg_manual_android'] if settings['msg_manual_android'] else MESSAGES['MANUAL_ANDROID']
         ios_msg = settings['msg_manual_ios'] if settings['msg_manual_ios'] else MESSAGES['MANUAL_IOS']
-        win_msg = settings['msg_manual_win'] if settings['msg_manual_windows'] else MESSAGES['MANUAL_WIN']
+        win_msg = settings['msg_manual_windows'] if settings['msg_manual_windows'] else MESSAGES['MANUAL_WIN']
         mac_msg = settings['msg_manual_mac'] if settings['msg_manual_mac'] else MESSAGES['MANUAL_MAC']
-        linux_msg = settings['msg_manual_lin'] if settings['msg_manual_linux'] else MESSAGES['MANUAL_LIN']
+        linux_msg = settings['msg_manual_linux'] if settings['msg_manual_linux'] else MESSAGES['MANUAL_LIN']
         if value == 'android':
             bot.send_message(call.message.chat.id, android_msg, reply_markup=main_menu_keyboard_markup())
         elif value == 'ios':
