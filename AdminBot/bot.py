@@ -21,7 +21,6 @@ bot = telebot.TeleBot(TELEGRAM_TOKEN, parse_mode="HTML")
 bot.delete_webhook()
 if CLIENT_TOKEN:
     user_bot = user_bot()
-USERS_DB.set_default_configs()
 # ----------------------------------- Helper Functions -----------------------------------
 # Check if message is digit
 def is_it_digit(message: Message,allow_float=False, response=MESSAGES['ERROR_INVALID_NUMBER'],

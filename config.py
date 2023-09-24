@@ -287,6 +287,7 @@ if __name__ == '__main__':
     db.close()
 
 db = UserDBManager(USERS_DB_LOC)
+db.set_default_configs()
 conf = load_config(db)
 server_url = load_server_url(db)
 set_config_variables(conf, server_url)
