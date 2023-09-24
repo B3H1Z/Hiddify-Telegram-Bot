@@ -12,9 +12,11 @@ from Database.dbManager import USERS_DB
 import psutil
 import qrcode
 import requests
-from config import PANEL_URL, BACKUP_LOC, CLIENT_TOKEN, API_PATH
+from config import PANEL_URL, BACKUP_LOC, CLIENT_TOKEN, USERS_DB_LOC,RECEIPTIONS_LOC,BOT_BACKUP_LOC, API_PATH
 import AdminBot.templates
 from Utils import api
+from version import __version__
+import zipfile
 # Global variables
 # Make Session for requests
 session = requests.session()
@@ -68,20 +70,6 @@ def post_request(url, data):
         logging.exception(f"General Exception: {e}")
         return False
 
-
-# Change user data format
-# def users_to_dict(users_dict):
-#     if not users_dict:
-#         return False
-#     users_array = []
-#     for user in users_dict:
-#         users_array.append({'id': user[0], 'uuid': user[1], 'name': user[2], 'last_online': user[3],
-#                             'expiry_time': user[4],
-#                             'usage_limit_GB': user[5], 'package_days': user[6], 'mode': user[7],
-#                             'monthly': user[8], 'start_date': user[9], 'current_usage_GB': user[10],
-#                             'last_reset_time': user[11], 'comment': user[12], 'telegram_id': user[13],
-#                             'added_by': user[14], 'max_ips': user[15], 'enable': user[16]})
-#     return users_array
 
 def users_to_dict(users_dict):
     if not users_dict:
@@ -425,10 +413,7 @@ def non_order_user_info(telegram_id):
                 server = server[0]
                 if server['status']:
                     URL = server['url'] + API_PATH
-                # non_order_user = ADMIN_DB.find_user(uuid=subscription['uuid'])
                     non_order_user = api.find(URL, subscription['uuid'])
-                # print(f"non_order_user:{non_order_user}")
-                # non_order_user = search_by_property(non_order_user, uuid=subscription['uuid'])
                     if non_order_user:
                         non_order_user = users_to_dict([non_order_user])
                         non_order_user = dict_process(URL, non_order_user, subscription['id'])
@@ -454,8 +439,6 @@ def order_user_info(telegram_id):
                         if server['status']:
                             URL = server['url'] + API_PATH
                             order_user = api.find(URL, subscription['uuid'])
-                            # print(f"order_user:{order_user}")
-                            # order_user = search_by_property(order_user, uuid=subscription['uuid'])
                             if order_user:
                                 order_user = users_to_dict([order_user])
                                 order_user = dict_process(URL, order_user, subscription['id'])
@@ -480,15 +463,6 @@ def privacy_friendly_logging_request(url):
     url = urlparse(url)
     url = url.scheme + "://" + "panel.private.com" + url.path
     return url
-
-
-# def settings_config_to_dict(configs):
-#     dict_configs = {}
-#     for entry in configs:
-#         key = entry['key']
-#         value = entry['value']
-#         dict_configs[key] = value
-#     return dict_configs
 
 
 def all_configs_settings():
@@ -526,9 +500,57 @@ def rial_to_toman(rial):
     return "{:,.0f}".format(int(int(rial) / 10))
 
 
-# def search_by_property(list, **kwargs):
-#     for item in list:
-#         if all(item[key] == value for key, value in kwargs.items()):
-#             print(f"item:{item}")
-#             return item
-#     return None
+def backup_json_bot():
+    back_dir = BOT_BACKUP_LOC
+    if not os.path.exists(back_dir):
+        os.makedirs(back_dir)
+    bk_json_data = USERS_DB.backup_to_json(back_dir)
+    if not bk_json_data:
+        return False
+    bk_json_data['version'] = __version__
+    now = datetime.now()
+    dt_string = now.strftime("%d-%m-%Y_%H-%M-%S")
+    bk_json_file = os.path.join(back_dir, f"Backup_Bot_{dt_string}.json")
+    with open(bk_json_file, 'w+') as f:
+        json.dump(bk_json_data, f, indent=4)
+    zip_file = os.path.join(back_dir, f"Backup_Bot_{dt_string}.zip")
+    with zipfile.ZipFile(zip_file, 'w') as zip:
+        zip.write(bk_json_file,os.path.basename(bk_json_file))
+        zip.write(USERS_DB_LOC,os.path.basename(USERS_DB_LOC))
+        for file in os.listdir(RECEIPTIONS_LOC):
+            zip.write(os.path.join(RECEIPTIONS_LOC, file),os.path.join(os.path.basename(RECEIPTIONS_LOC),file))
+    os.remove(bk_json_file)
+    return zip_file
+
+
+def restore_json_bot(file):
+    extract_path = os.path.join(os.getcwd(), "Backup", "Bot", "tmp", os.path.basename(file).replace(".zip", ""))
+    if not os.path.exists(file):
+        return False
+    with zipfile.ZipFile(file, 'r') as zip:
+        zip.extractall(extract_path)
+    bk_json_file = os.path.join(extract_path, os.path.basename(file).replace(".zip", ".json"))
+    # with open(bk_json_file, 'r') as f:
+    #     bk_json_data = json.load(f)
+    status_db = USERS_DB.restore_from_json(bk_json_file)
+    if not status_db:
+        return False
+    # move reception files
+    for file in os.listdir(os.path.join(extract_path, os.path.basename(RECEIPTIONS_LOC))):
+        try:
+            os.rename(os.path.join(extract_path, os.path.basename(RECEIPTIONS_LOC), file),
+                    os.path.join(RECEIPTIONS_LOC, file))
+        except Exception as e:
+            logging.exception(f"Exception: {e}")
+    # remove tmp folder
+    os.remove(bk_json_file)
+    # remove RECEIPTIONS all files
+    for file in os.listdir(os.path.join(extract_path, os.path.basename(RECEIPTIONS_LOC))):
+        os.remove(os.path.join(extract_path, os.path.basename(RECEIPTIONS_LOC), file))
+    os.rmdir(os.path.join(extract_path, os.path.basename(RECEIPTIONS_LOC)))
+    # romove hidyBot.db
+    os.remove(os.path.join(extract_path, os.path.basename(USERS_DB_LOC)))
+    os.rmdir(extract_path)
+    
+    return True
+

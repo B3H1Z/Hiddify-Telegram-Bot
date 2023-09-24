@@ -1,219 +1,28 @@
 import datetime
+import json
 import logging
+import os
 import sqlite3
 from sqlite3 import Error
 from urllib.parse import urlparse
-
-# import config
-# from Utils.utils import PANEL_URL,API_PATH
 from Utils import api
 from config import PANEL_URL, API_PATH, USERS_DB_LOC
-
-
-class AdminDBManager:
-    def __init__(self, db_file):
-        self.conn = self.create_connection(db_file)
-
-    def create_connection(self, db_file):
-        """ Create a database connection to a SQLite database """
-        try:
-            conn = sqlite3.connect(db_file, check_same_thread=False)
-            return conn
-        except Error as e:
-            logging.error(f"Error while connecting to database \n Error:{e}")
-            return None
-
-    def select_users(self, url):
-        return api.select(url)
-        cur = self.conn.cursor()
-        try:
-            cur.execute("SELECT * FROM user")
-            rows = cur.fetchall()
-            return rows
-        except Error as e:
-            logging.error(f"Error while selecting all users \n Error:{e}")
-            return None
-
-    def find_user(self, url, only_one=False, **kwargs):
-        return api.find(url, kwargs['uuid'])
-        if len(kwargs) != 1:
-            logging.warning("You can only use one key to find user!")
-            return None
-        rows = []
-        cur = self.conn.cursor()
-        try:
-            for key, value in kwargs.items():
-                cur.execute(f"SELECT * FROM user WHERE {key}=?", (value,))
-                rows = cur.fetchall()
-            if len(rows) == 0:
-                logging.info(f"User {kwargs} not found!")
-                return None
-            if only_one:
-                return rows[0]
-            return rows
-        except Error as e:
-            logging.error(f"Error while finding user {kwargs} \n Error:{e}")
-            return None
-
-    def delete_user(self, **kwargs):
-        if len(kwargs) != 1:
-            logging.warning("You can only use one key to delete user!")
-            return False
-        cur = self.conn.cursor()
-        try:
-            for key, value in kwargs.items():
-                cur.execute(f"DELETE FROM user WHERE {key}=?", (value,))
-                self.conn.commit()
-            logging.info(f"User {kwargs} deleted successfully!")
-            return True
-        except Error as e:
-            logging.error(f"Error while deleting user {kwargs} \n Error:{e}")
-            return False
-
-    def edit_user(self, url, uuid, **kwargs):
-        get_old_data = self.find_user(uuid=uuid)
-        if get_old_data is None:
-            print("User not found!")
-            return False
-        for key, value in kwargs.items():
-            if key not in get_old_data.keys():
-                print(f"Invalid key [{key}]")
-                return False
-
-        return api.update(url, uuid, kwargs)
-        cur = self.conn.cursor()
-
-        for key, value in kwargs.items():
-            try:
-                cur.execute(f"UPDATE user SET {key}=? WHERE uuid=?", (value, uuid))
-                self.conn.commit()
-                logging.info(f"User [{uuid}] successfully update [{key}] to [{value}]")
-            except Error as e:
-                logging.error(f"Error while updating user [{uuid}] [{key}] to [{value}] \n Error: {e}")
-                return False
-
-        return True
-
-    def add_user(self, uuid, name, last_online, expiry_time, usage_limit_GB, package_days, mode, monthly, start_date,
-                 current_usage_GB, last_reset_time, comment, telegram_id, added_by, max_ips, enable):
-
-        cur = self.conn.cursor()
-        try:
-            cur.execute("INSERT INTO user(uuid, name, last_online, expiry_time, usage_limit_GB, package_days, mode, "
-                        "monthly, start_date, current_usage_GB, last_reset_time, comment, telegram_id, added_by, "
-                        "max_ips, enable) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                        (uuid, name, last_online, expiry_time, usage_limit_GB, package_days, mode, monthly, start_date,
-                         current_usage_GB, last_reset_time, comment, telegram_id, added_by, max_ips, enable))
-            self.conn.commit()
-            logging.info(f"User [{uuid}] added successfully!")
-            return True
-
-        except Error as e:
-            logging.error(f"Error while adding user [{uuid}] \n Error: {e}")
-            return False
-
-    def add_user_detail(self, user_id, last_online, current_usage_GB, connected_ips='', child_id=0):
-        cur = self.conn.cursor()
-        try:
-            cur.execute("INSERT INTO user_detail(user_id, last_online, current_usage_GB, connected_ips, child_id) "
-                        "VALUES(?,?,?,?,?)", (user_id, last_online, current_usage_GB, connected_ips, child_id))
-            self.conn.commit()
-            logging.info(f"User details [{user_id}] added successfully!")
-            return True
-
-        except Error as e:
-            logging.error(f"Error while adding user details [{user_id}] \n Error: {e}")
-            return False
-
-    def add_default_user(self, url, name, package_days, usage_limit_GB, added_by=None, comment=None, mode='no_reset',
-                         monthly=0,
-                         max_ips=100, enable=1, telegram_id=None):
-
-        # logging.info(f"Adding default user [{uuid}]")
-
-        import uuid
-        uuid = str(uuid.uuid4())
-        last_online = '0001-01-01 00:00:00.000000'
-        expiry_time = (datetime.datetime.now() + datetime.timedelta(days=180)).strftime("%Y-%m-%d")
-        start_date = None
-        current_usage_GB = 0
-        added_by = urlparse(PANEL_URL).path.split('/')[2]
-        last_reset_time = datetime.datetime.now().strftime("%Y-%m-%d")
-        return api.insert(url, uuid, name, usage_limit_GB, package_days, added_by, last_reset_time)
-        user_added = self.add_user(uuid, name, last_online, expiry_time, usage_limit_GB, package_days, mode, monthly,
-                                   start_date,
-                                   current_usage_GB, last_reset_time, comment, telegram_id, added_by, max_ips, enable)
-        if user_added:
-            logging.info(f"User [{uuid}] added successfully!")
-            self.add_user_detail(self.find_user(uuid=uuid)[0][0], last_online, current_usage_GB)
-            return uuid
-        else:
-            logging.error(f"Error while adding user [{uuid}]")
-            self.delete_user(uuid=uuid)
-            return None
-
-    def reset_package_days(self, uuid):
-        logging.info(f"Resetting package days for user [{uuid}]")
-        user = self.find_user(uuid=uuid)
-        if user is None:
-            return False
-        status = self.edit_user(uuid, start_date=datetime.datetime.now().strftime("%Y-%m-%d"))
-        if status:
-            logging.info(f"Package days for user [{uuid}] reset successfully!")
-            return True
-        else:
-            logging.error(f"Error while resetting package days for user [{uuid}]")
-            return False
-
-    def reset_package_usage(self, uuid):
-        logging.info(f"Resetting package usage for user [{uuid}]")
-        user = self.find_user(uuid=uuid)
-        if user is None:
-            return False
-        status = self.edit_user(uuid, current_usage_GB=0)
-        if status:
-            logging.info(f"Package usage for user [{uuid}] reset successfully!")
-            return True
-        else:
-            logging.error(f"Error while resetting package usage for user [{uuid}]")
-            return False
-
-    def select_admins(self):
-        logging.info(f"Selecting all admins")
-        cur = self.conn.cursor()
-        try:
-            cur.execute("SELECT * FROM admin_user")
-            rows = cur.fetchall()
-            return rows
-        except Error as e:
-            logging.error(f"Error while selecting all admins \n Error:{e}")
-            return None
-
-    def find_admins(self, **kwargs):
-        logging.info(f"Finding admin {kwargs}")
-        if len(kwargs) != 1:
-            logging.error(f"Error while finding admin {kwargs} \n Error: You can only use one key to find admin!")
-            return None
-        rows = []
-        cur = self.conn.cursor()
-        try:
-            for key, value in kwargs.items():
-                cur.execute(f"SELECT * FROM admin_user WHERE {key}=?", (value,))
-                rows = cur.fetchall()
-            if len(rows) == 0:
-                logging.info(f"Admin {kwargs} not found!")
-                return None
-            return rows
-        except Error as e:
-            logging.error(f"Error while finding admin {kwargs} \n Error:{e}")
-            return None
-
 
 class UserDBManager:
     def __init__(self, db_file):
         self.conn = self.create_connection(db_file)
         self.create_user_table()
-        self.set_default_configs()
+        #self.set_default_configs()
+    
+    #close connection
+    def __del__(self):
+        self.conn.close()
+    
+    def close(self):
+        self.conn.close()
+
+    
+
 
     def create_connection(self, db_file):
         """ Create a database connection to a SQLite database """
@@ -252,10 +61,6 @@ class UserDBManager:
                         "telegram_id INTEGER NOT NULL,"
                         "user_name TEXT NOT NULL,"
                         "plan_id INTEGER NOT NULL,"
-                        # "paid_amount TEXT NOT NULL,"
-                        # "payment_method TEXT NOT NULL,"
-                        # "approved BOOLEAN NULL,"
-                        # "payment_image TEXT NOT NULL,"
                         "created_at TEXT NOT NULL,"
                         "FOREIGN KEY (telegram_id) REFERENCES user (telegram_id),"
                         "FOREIGN KEY (plan_id) REFERENCES plans (id))")
@@ -284,10 +89,11 @@ class UserDBManager:
 
             cur.execute("CREATE TABLE IF NOT EXISTS servers ("
                         "id INTEGER PRIMARY KEY,"
-                        "title TEXT NOT NULL,"
+                        "title TEXT, description TEXT,"
                         "url TEXT NOT NULL,"
                         "user_limit INTEGER NOT NULL,"
-                        "status BOOLEAN NOT NULL)")
+                        "status BOOLEAN NOT NULL,"
+                        "default_server BOOLEAN NOT NULL DEFAULT 0)")
             self.conn.commit()
             logging.info("servers table created successfully!")
 
@@ -310,7 +116,7 @@ class UserDBManager:
             logging.info("bool_config table created successfully!")
 
             cur.execute("CREATE TABLE IF NOT EXISTS wallet ("
-                        "telegram_id INTEGER NOT NULL,"
+                        "telegram_id INTEGER NOT NULL UNIQUE,"
                         "balance INTEGER NOT NULL DEFAULT 0,"
                         "FOREIGN KEY (telegram_id) REFERENCES users (telegram_id))")
             self.conn.commit()
@@ -328,7 +134,6 @@ class UserDBManager:
                         "FOREIGN KEY (telegram_id) REFERENCES users (telegram_id))")
             self.conn.commit()
             logging.info("Payments table created successfully!")
-
 
         except Error as e:
             logging.error(f"Error while creating user table \n Error:{e}")
@@ -779,6 +584,9 @@ class UserDBManager:
         except Error as e:
             logging.error(f"Error while adding settings [{key}] \n Error: {e}")
             return False
+        finally:
+            cur.close()
+            
 
     def select_bool_config(self):
         cur = self.conn.cursor()
@@ -846,6 +654,8 @@ class UserDBManager:
         except Error as e:
             logging.error(f"Error while adding settings [{key}] \n Error: {e}")
             return False
+        finally:
+            cur.close()
 
     def select_int_config(self):
         cur = self.conn.cursor()
@@ -902,50 +712,62 @@ class UserDBManager:
         except Error as e:
             logging.error(f"Error while adding settings [{key}] \n Error: {e}")
             return False
+        finally:
+            cur.close()
 
     def set_default_configs(self):
-        # rows = self.select_bool_config()
-        # if not rows:
-        try:
-            self.add_bool_config("visible_hiddify_hyperlink", True)
-            self.add_bool_config("three_random_num_price", True)
-            self.add_bool_config("force_join_channel", False)
-            self.add_bool_config("panel_auto_backup", True)
-            self.add_bool_config("test_subscription", True)
-            self.add_bool_config("reminder_notification", True)
+        
+        self.add_bool_config("visible_hiddify_hyperlink", True)
+        self.add_bool_config("three_random_num_price", True)
+        self.add_bool_config("force_join_channel", False)
+        self.add_bool_config("panel_auto_backup", True)
+        self.add_bool_config("test_subscription", True)
+        self.add_bool_config("reminder_notification", True)
+        
+        self.add_bool_config("renewal_subscription_status", True)
+        self.add_bool_config("buy_subscription_status", True)
 
-            self.add_bool_config("visible_conf_dir", False)
-            self.add_bool_config("visible_conf_sub_auto", True)
-            self.add_bool_config("visible_conf_sub_url", False)
-            self.add_bool_config("visible_conf_sub_url_b64", False)
-            self.add_bool_config("visible_conf_clash", False)
-            self.add_bool_config("visible_conf_hiddify", False)
-            self.add_bool_config("visible_conf_sub_sing_box", False)
-            self.add_bool_config("visible_conf_sub_full_sing_box", False)
 
-            self.add_str_config("card_number", None)
-            self.add_str_config("card_holder", None)
-            self.add_str_config("support_username", None)
-            self.add_str_config("channel_id", None)
-            self.add_str_config("msg_user_start", None)
+        self.add_bool_config("visible_conf_dir", False)
+        self.add_bool_config("visible_conf_sub_auto", True)
+        self.add_bool_config("visible_conf_sub_url", False)
+        self.add_bool_config("visible_conf_sub_url_b64", False)
+        self.add_bool_config("visible_conf_clash", False)
+        self.add_bool_config("visible_conf_hiddify", False)
+        self.add_bool_config("visible_conf_sub_sing_box", False)
+        self.add_bool_config("visible_conf_sub_full_sing_box", False)
 
-            self.add_str_config("msg_manual_android", None)
-            self.add_str_config("msg_manual_ios", None)
-            self.add_str_config("msg_manual_windows", None)
-            self.add_str_config("msg_manual_mac", None)
-            self.add_str_config("msg_manual_linux", None)
+        self.add_str_config("bot_admin_id", None)
+        self.add_str_config("bot_token_admin", None)
+        self.add_str_config("bot_token_client", None)
+        self.add_str_config("bot_lang", None)
 
-            self.add_int_config("min_deposit_amount", 10000)
+        self.add_str_config("card_number", None)
+        self.add_str_config("card_holder", None)
+        self.add_str_config("support_username", None)
+        self.add_str_config("channel_id", None)
+        self.add_str_config("msg_user_start", None)
 
-            self.add_int_config("reminder_notification_days", 3)
-            self.add_int_config("reminder_notification_usage", 3)
+        self.add_str_config("msg_manual_android", None)
+        self.add_str_config("msg_manual_ios", None)
+        self.add_str_config("msg_manual_windows", None)
+        self.add_str_config("msg_manual_mac", None)
+        self.add_str_config("msg_manual_linux", None)
 
-            self.add_int_config("test_sub_days", 1)
-            self.add_int_config("test_sub_size_gb", 1)
+        self.add_int_config("min_deposit_amount", 10000)
 
-        except Error as e:
-            logging.error(f"Error while setting default configs \n Error:{e}")
-            return False
+        self.add_int_config("reminder_notification_days", 3)
+        self.add_int_config("reminder_notification_usage", 3)
+
+        self.add_int_config("test_sub_days", 1)
+        self.add_int_config("test_sub_size_gb", 1)
+        
+        self.add_int_config("advanced_renewal_days", 3)
+        self.add_int_config("advanced_renewal_usage", 3)
+        
+        self.add_int_config("renewal_method", 1)
+
+
 
     def add_wallet(self, telegram_id):
         cur = self.conn.cursor()
@@ -1049,6 +871,79 @@ class UserDBManager:
             logging.error(f"Error while finding payment {kwargs} \n Error:{e}")
             return None
 
+    def backup_to_json(self, backup_dir):
+        try:
 
-# ADMIN_DB = AdminDBManager(MAIN_DB_LOC)
+            backup_data = {}  # Store backup data in a dictionary
+
+            # List of tables to backup
+            tables = ['users', 'plans', 'orders', 'order_subscriptions', 'non_order_subscriptions',
+                      'str_config', 'int_config', 'bool_config', 'wallet', 'payments', 'servers']
+
+            for table in tables:
+                cur = self.conn.cursor()
+                cur.execute(f"SELECT * FROM {table}")
+                rows = cur.fetchall()
+
+                # Convert rows to list of dictionaries
+                table_data = []
+                for row in rows:
+                    columns = [column[0] for column in cur.description]
+                    table_data.append(dict(zip(columns, row)))
+
+                backup_data[table] = table_data
+            return backup_data
+
+        except sqlite3.Error as e:
+            logging.error('SQLite error:', str(e))
+            return False
+    def restore_from_json(self, backup_file):
+        logging.info(f"Restoring database from {backup_file}...")
+        try:
+            cur = self.conn.cursor()
+
+            with open(backup_file, 'r') as json_file:
+                backup_data = json.load(json_file)
+
+            if not isinstance(backup_data, dict):
+                logging.error('Backup data should be a dictionary.')
+                print('Backup data should be a dictionary.')
+                return
+
+            self.conn.execute('BEGIN TRANSACTION')
+
+            for table, data in backup_data.items():
+                if table == 'version':
+                    continue
+                logging.info(f"Restoring table {table}...")
+                for entry in data:
+                    if not isinstance(entry, dict):
+                        logging.error('Invalid entry format. Expected a dictionary.')
+                        print('Invalid entry format. Expected a dictionary.')
+                        continue
+
+                    keys = ', '.join(entry.keys())
+                    placeholders = ', '.join(['?' for _ in entry.values()])
+                    values = tuple(entry.values())
+                    query = f"INSERT OR REPLACE INTO {table} ({keys}) VALUES ({placeholders})"
+                    logging.info(f"Query: {query}")
+                    
+                    try:
+                        cur.execute(query, values)
+                    except sqlite3.Error as e:
+                        logging.error('SQLite error:', str(e))
+                        logging.error('Entry:', entry)
+                        print('SQLite error:', str(e))
+                        print('Entry:', entry)
+
+            self.conn.commit()
+            logging.info('Database restored successfully.')
+            return True
+
+        except sqlite3.Error as e:
+            logging.error('SQLite error:', str(e))
+            return False
+    
+
+USERS_DB_LOC = os.path.join(os.getcwd(), "Database", "hidyBot.db")
 USERS_DB = UserDBManager(USERS_DB_LOC)

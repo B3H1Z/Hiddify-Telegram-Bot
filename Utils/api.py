@@ -19,8 +19,9 @@ def select(url, endpoint="/user/"):
         res = Utils.utils.dict_process(url, Utils.utils.users_to_dict(response.json()))
         return res
     except Exception as e:
-        print(e)
+        logging.error("API error: %s" % e)
         return None
+
 
 def find(url, uuid, endpoint="/user/"):
     try:
@@ -34,8 +35,9 @@ def find(url, uuid, endpoint="/user/"):
             return None
         return jr[0]
     except Exception as e:
-        print(e)
+        logging.error("API error: %s" % e)
         return None
+
 
 def insert(url, name, usage_limit_GB, package_days, last_reset_time=None, added_by_uuid=None, mode="no_reset",
             last_online="1-01-01 00:00:00", telegram_id=None,
@@ -68,7 +70,7 @@ def insert(url, name, usage_limit_GB, package_days, last_reset_time=None, added_
         response = requests.post(url + endpoint, data=jdata, headers={'Content-Type': 'application/json'})
         return uuid
     except Exception as e:
-        print(e)
+        logging.error("API error: %s" % e)
         return None
 
 def update(url, uuid, endpoint="/user/", **kwargs, ):
@@ -83,7 +85,7 @@ def update(url, uuid, endpoint="/user/", **kwargs, ):
                                     headers={'Content-Type': 'application/json'})
         return uuid
     except Exception as e:
-        print(e)
+        logging.error("API error: %s" % e)
         return None
 
 

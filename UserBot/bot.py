@@ -23,14 +23,16 @@ BASE_URL = urlparse(PANEL_URL).scheme + "://" + urlparse(PANEL_URL).netloc
 
 # *********************************** Helper Functions ***********************************
 # Check if message is digit
-def is_it_digit(message: Message, response=MESSAGES['ERROR_INVALID_NUMBER'], markup=main_menu_keyboard_markup()):
+def is_it_digit(message: Message,allow_float=False, response=MESSAGES['ERROR_INVALID_NUMBER'], markup=main_menu_keyboard_markup()):
     if not message.text:
         bot.send_message(message.chat.id, response, reply_markup=markup)
         return False
-    if not message.text.isdigit():
+    try:
+        value = float(message.text) if allow_float else int(message.text)
+        return True
+    except ValueError:
         bot.send_message(message.chat.id, response, reply_markup=markup)
         return False
-    return True
 
 
 # Check if message is cancel
@@ -76,7 +78,7 @@ def user_channel_status(user_id):
         else:
             return True
     except telebot.apihelper.ApiException as e:
-        print(e)
+        logging.error("ApiException: %s" % e)
         return False
 
 
@@ -139,7 +141,9 @@ def renewal_from_wallet_confirm(message: Message):
     wallet = USERS_DB.find_wallet(telegram_id=message.chat.id)
     if not wallet:
         # Wallet not created
-        bot.send_message(message.chat.id, MESSAGES['LACK_OF_WALLET_BALANCE'])
+        bot.send_message(message.chat.id, MESSAGES['LACK_OF_WALLET_BALANCE'],
+                             reply_markup=main_menu_keyboard_markup())
+        return
 
     wallet = wallet[0]
     plan_info = USERS_DB.find_plan(id=plan_id)
@@ -189,17 +193,21 @@ def renewal_from_wallet_confirm(message: Message):
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
         return
+    settings = utils.all_configs_settings()
+    if settings['renewal_method'] == 1:
+        if user_info_process['remaining_day'] <= 0 or user_info_process['usage']['remaining_usage_GB'] <= 0:
+            new_usage_limit = plan_info['size_gb']
+            new_package_days = plan_info['days']
+        else:
+            new_usage_limit = user_info['usage_limit_GB'] + plan_info['size_gb']
+            new_package_days = plan_info['days']
+            
+    elif settings['renewal_method'] == 2:
+            new_usage_limit = plan_info['size_gb']
+            new_package_days = plan_info['days']
+    last_reset_time = datetime.datetime.now().strftime("%Y-%m-%d")
+    api.update(URL, uuid=uuid, usage_limit_GB=new_usage_limit, start_date=last_reset_time)
 
-    if user_info_process['remaining_day'] <= 0 or user_info_process['usage']['remaining_usage_GB'] <= 0:
-        new_usage_limit = plan_info['size_gb']
-        new_package_days = plan_info['days']
-        last_reset_time = datetime.datetime.now().strftime("%Y-%m-%d")
-        api.update(URL, uuid=uuid, usage_limit_GB=new_usage_limit, start_date=last_reset_time)
-    # ADMIN_DB.reset_package_usage(uuid=uuid)
-    # ADMIN_DB.reset_package_days(uuid=uuid)
-    else:
-        new_usage_limit = user_info['usage_limit_GB'] + plan_info['size_gb']
-        new_package_days = user_info['package_days'] + plan_info['days']
 
     # Add New Order
     order_id = random.randint(1000000, 9999999)
@@ -245,8 +253,11 @@ def next_step_send_screenshot(message, charge_wallet):
 
     file_info = bot.get_file(message.photo[-1].file_id)
     downloaded_file = bot.download_file(file_info.file_path)
-    path = os.path.join(os.getcwd(), 'UserBot', 'Receiptions', f"{message.chat.id}-{charge_wallet['id']}.jpg")
-    with open(path, 'wb') as new_file:
+    file_name = f"{message.chat.id}-{charge_wallet['id']}.jpg"
+    path_recp = os.path.join(os.getcwd(), 'UserBot', 'Receiptions', file_name)
+    if not os.path.exists(os.path.join(os.getcwd(), 'UserBot', 'Receiptions')):
+        os.makedirs(os.path.join(os.getcwd(), 'UserBot', 'Receiptions'))
+    with open(path_recp, 'wb') as new_file:
         new_file.write(downloaded_file)
 
     created_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -254,7 +265,7 @@ def next_step_send_screenshot(message, charge_wallet):
     payment_method = "Card"
 
     status = USERS_DB.add_payment(charge_wallet['id'], message.chat.id,
-                                  charge_wallet['amount'], payment_method, path,
+                                  charge_wallet['amount'], payment_method, file_name,
                                   message.from_user.full_name,
                                   created_at)
     if status:
@@ -265,7 +276,7 @@ def next_step_send_screenshot(message, charge_wallet):
             return
         payment = payment[0]
         for ADMIN in ADMINS_ID:
-            admin_bot.send_photo(ADMIN, open(path, 'rb'),
+            admin_bot.send_photo(ADMIN, open(path_recp, 'rb'),
                                  caption=payment_received_template(payment),
                                  reply_markup=confirm_payment_by_admin(charge_wallet['id']))
         bot.send_message(message.chat.id, MESSAGES['WAIT_FOR_ADMIN_CONFIRMATION'],
@@ -489,20 +500,22 @@ def next_step_increase_wallet_balance(message):
                      reply_markup=send_screenshot_markup(plan_id=charge_wallet['id']))
 
 
-def update_info_subscription(message: Message, uuid):
+def update_info_subscription(message: Message, uuid,markup=None):
     value = uuid
     sub = utils.find_order_subscription_by_uuid(value)
     if not sub:
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
         return
-
-    if sub.get('telegram_id', None):
-        # Non-Order Subscription markup
-        mrkup = user_info_non_sub_markup(sub['uuid'])
+    if not markup:
+        if sub.get('telegram_id', None):
+            # Non-Order Subscription markup
+            mrkup = user_info_non_sub_markup(sub['uuid'])
+        else:
+            # Ordered Subscription markup
+            mrkup = user_info_markup(sub['uuid'])
     else:
-        # Ordered Subscription markup
-        mrkup = user_info_markup(sub['uuid'])
+        mrkup = markup
 
     server_id = sub['server_id']
     server = USERS_DB.find_server(id=server_id)
@@ -574,13 +587,6 @@ def callback_query(call: CallbackQuery):
 
     # ----------------------------------- Buy Plan Area -----------------------------------
     elif key == 'server_selected':
-        # server = USERS_DB.find_server(id=int(value))
-        # if not server:
-        #     bot.send_message(call.message.chat.id, MESSAGES['ERROR_SERVER_NOT_FOUND'])
-        #     return
-        # server = server[0]
-        # URL = server['url'] + API_PATH
-        # selected_server_id = server['id'] 
         plans = USERS_DB.find_plan(server_id=int(value))
         if not plans:
             bot.send_message(call.message.chat.id, MESSAGES['PLANS_NOT_FOUND'], reply_markup=main_menu_keyboard_markup())
@@ -644,18 +650,50 @@ def callback_query(call: CallbackQuery):
 
 
     elif key == 'renewal_subscription':
+        settings = utils.all_configs_settings()
+        if not settings['renewal_subscription_status']:
+            bot.send_message(call.message.chat.id, MESSAGES['RENEWAL_SUBSCRIPTION_CLOSED'],
+                             reply_markup=main_menu_keyboard_markup())
+            return
+        
+        servers = USERS_DB.select_servers()
+        server_id = 0
+        user= []
+        URL = "url"
+        if servers:
+            for server in servers:
+                user = api.find(server['url'] + API_PATH, value)
+                if user:
+                    server_id = server['id']
+                    URL = server['url'] + API_PATH
+                    break
+        if not user:
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                             reply_markup=main_menu_keyboard_markup())
+            return
+        user_info = utils.users_to_dict([user])
+        if not user_info:
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                             reply_markup=main_menu_keyboard_markup())
+            return
+
+        user_info_process = utils.dict_process(URL, user_info)
+        if not user_info_process:
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                             reply_markup=main_menu_keyboard_markup())
+            return
+        user_info_process = user_info_process[0]
+        if settings['renewal_method'] == 2:
+            if user_info_process['remaining_day'] >= settings['advanced_renewal_days'] and user_info_process['usage']['remaining_usage_GB'] >= settings['advanced_renewal_usage']:
+                bot.send_message(call.message.chat.id, renewal_unvalable_template(settings),
+                                 reply_markup=main_menu_keyboard_markup())
+                return
+
         renew_subscription_dict[call.message.chat.id] = {
             'uuid': None,
             'plan_id': None,
         }
-        servers = USERS_DB.select_servers()
-        server_id = 0
-        if servers:
-            for server in servers:
-                users_list = api.find(server['url'] + API_PATH, value)
-                if users_list:
-                    server_id = server['id']
-                    break
+        
         plans = USERS_DB.find_plan(server_id=server_id)
         if not plans:
             bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'],
@@ -663,7 +701,7 @@ def callback_query(call: CallbackQuery):
             return
         renew_subscription_dict[call.message.chat.id]['uuid'] = value
         bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,
-                                      reply_markup=plans_list_markup(plans, renewal=True))
+                                      reply_markup=plans_list_markup(plans, renewal=True,uuid=user_info_process['uuid']))
 
     elif key == 'renewal_plan_selected':
         plan = USERS_DB.find_plan(id=value)[0]
@@ -674,7 +712,7 @@ def callback_query(call: CallbackQuery):
         renew_subscription_dict[call.message.chat.id]['plan_id'] = plan['id']
         bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id,
                               text=plan_info_template(plan),
-                              reply_markup=confirm_buy_plan_markup(plan['id'], renewal=True))
+                              reply_markup=confirm_buy_plan_markup(plan['id'], renewal=True,uuid=renew_subscription_dict[call.message.chat.id]['uuid']))
 
     elif key == 'cancel_increase_wallet_balance':
         bot.delete_message(call.message.chat.id, call.message.message_id)
@@ -885,6 +923,7 @@ def callback_query(call: CallbackQuery):
     elif key == "back_to_user_panel":
         bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,
                                       reply_markup=user_info_markup(value))
+        
 
     # Back To Plans
     elif key == "back_to_plans":
@@ -894,17 +933,18 @@ def callback_query(call: CallbackQuery):
                              reply_markup=main_menu_keyboard_markup())
             return
         bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id,
-                                      text= MESSAGES['PLANS_LIST'], reply_markup=plans_list_markup(plans))
+                              text=MESSAGES['PLANS_LIST'], reply_markup=plans_list_markup(plans))
 
-     # Back To Renewal Plans
+    # Back To Renewal Plans
     elif key == "back_to_renewal_plans":
         plans = USERS_DB.select_plans()
         if not plans:
             bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                              reply_markup=main_menu_keyboard_markup())
             return
-        bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,
-                                      reply_markup=plans_list_markup(plans, renewal=True))
+        # bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,
+        #                               reply_markup=plans_list_markup(plans, renewal=True,uuid=value))
+        update_info_subscription(call.message, value,plans_list_markup(plans, renewal=True,uuid=value))
 
     # Delete Message
     elif key == "del_msg":
@@ -979,6 +1019,10 @@ def buy_subscription(message: Message):
     join_status = is_user_in_channel(message.chat.id)
     if not join_status:
         return
+    settings = utils.all_configs_settings()
+    if not settings['buy_subscription_status']:
+        bot.send_message(message.chat.id, MESSAGES['BUY_SUBSCRIPTION_CLOSED'], reply_markup=main_menu_keyboard_markup())
+        return
     msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=main_menu_keyboard_markup())
     servers = USERS_DB.select_servers()
     server_list = []
@@ -998,15 +1042,7 @@ def buy_subscription(message: Message):
     #                                   text= MESSAGES['SERVERS_LIST'], reply_markup=servers_list_markup(server_list))
     bot.delete_message(message.chat.id, msg_wait.message_id)
     bot.send_message(message.chat.id, MESSAGES['SERVERS_LIST'], reply_markup=servers_list_markup(server_list))
-    # plans = USERS_DB.select_plans()
-    # if not plans:
-    #     bot.send_message(message.chat.id, MESSAGES['PLANS_NOT_FOUND'], reply_markup=main_menu_keyboard_markup())
-    #     return
-    # plan_markup = plans_list_markup(plans)
-    # if not plan_markup:
-    #     bot.send_message(message.chat.id, MESSAGES['PLANS_NOT_FOUND'], reply_markup=main_menu_keyboard_markup())
-    #     return
-    # bot.send_message(message.chat.id, MESSAGES['PLANS_LIST'], reply_markup=plan_markup)
+
 
 
 # Config To QR Message Handler
@@ -1138,7 +1174,12 @@ def start():
         if e.result.status_code == 401:
             logging.error("Invalid Telegram Bot Token!")
             exit(1)
-
+    # Welcome to Admin
+    for admin in ADMINS_ID:
+        try:
+            bot.send_message(admin, MESSAGES['WELCOME_TO_ADMIN'])
+        except Exception as e:
+            logging.warning(f"Error in send message to admin {admin}: {e}")
     bot.enable_save_next_step_handlers()
     bot.load_next_step_handlers()
     bot.infinity_polling()
