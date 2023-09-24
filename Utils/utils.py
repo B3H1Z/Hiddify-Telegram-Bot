@@ -12,9 +12,9 @@ from Database.dbManager import USERS_DB
 import psutil
 import qrcode
 import requests
-from config import PANEL_URL, BACKUP_LOC, CLIENT_TOKEN
+from config import PANEL_URL, BACKUP_LOC, CLIENT_TOKEN, API_PATH
 import AdminBot.templates
-from Utils.api import api
+from Utils import api
 # Global variables
 # Make Session for requests
 session = requests.session()
@@ -141,7 +141,8 @@ def calculate_remaining_last_online(last_online_date_time):
 
 
 # Process users data - return list of users
-def dict_process(users_dict, sub_id=None):
+def dict_process(url, users_dict, sub_id=None):
+    BASE_URL = urlparse(url,).scheme + "://" + urlparse(url,).netloc
     logging.info(f"Parse users page")
     if not users_dict:
         return False
@@ -158,7 +159,7 @@ def dict_process(users_dict, sub_id=None):
             "comment": user['comment'],
             "last_connection": calculate_remaining_last_online(user['last_online']) if user['last_online'] else None,
             "uuid": user['uuid'],
-            "link": f"{BASE_URL}/{urlparse(PANEL_URL).path.split('/')[1]}/{user['uuid']}/",
+            "link": f"{BASE_URL}/{urlparse(url).path.split('/')[1]}/{user['uuid']}/",
             "mode": user['mode'],
             "enable": user['enable'],
             "sub_id": sub_id
@@ -168,9 +169,9 @@ def dict_process(users_dict, sub_id=None):
 
 
 # Get single user info - return dict of user info
-def user_info(uuid):
+def user_info(url, uuid):
     logging.info(f"Get info of user single user - {uuid}")
-    lu = api.select()
+    lu = api.select(url)
     if not lu:
         return False
     for user in lu:
@@ -180,10 +181,20 @@ def user_info(uuid):
 
 
 # Get sub links - return dict of sub links
-def sub_links(uuid):
+def sub_links(uuid, url= None):
+    if not url:
+        servers = USERS_DB.select_servers()
+        if servers:
+            for server in servers:
+                users_list = api.find(server['url'] + API_PATH, uuid)
+                if users_list:
+                    url = server['url']
+                    break
+    print(url)
+    BASE_URL = urlparse(url).scheme + "://" + urlparse(url).netloc
     logging.info(f"Get sub links of user - {uuid}")
     sub = {}
-    PANEL_DIR = urlparse(PANEL_URL).path.split('/')
+    PANEL_DIR = urlparse(url).path.split('/')
     # Clash open app: clash://install-config?url=
     # Hidden open app: clashmeta://install-config?url=
     sub['clash_configs'] = f"{BASE_URL}/{PANEL_DIR[1]}/{uuid}/clash/all.yml"
@@ -278,9 +289,9 @@ def system_status():
 
 
 # Search user by name
-def search_user_by_name(name):
+def search_user_by_name(url, name):
     # users = dict_process(users_to_dict(ADMIN_DB.select_users()))
-    users = api.select()
+    users = api.select(url)
     if not users:
         return False
     res = []
@@ -293,9 +304,9 @@ def search_user_by_name(name):
 
 
 # Search user by uuid
-def search_user_by_uuid(uuid):
+def search_user_by_uuid(url, uuid):
     # users = dict_process(users_to_dict(ADMIN_DB.select_users()))
-    users = api.select()
+    users = api.select(url)
     if not users:
         return False
     for user in users:
@@ -317,18 +328,18 @@ def base64decoder(s):
 
 
 # Search user by config
-def search_user_by_config(config):
+def search_user_by_config(url, config):
     if config.startswith("vmess://"):
         config = config.replace("vmess://", "")
         config = base64decoder(config)
         if config:
             uuid = config['id']
-            user = search_user_by_uuid(uuid)
+            user = search_user_by_uuid(url, uuid)
             if user:
                 return user
     uuid = extract_uuid_from_config(config)
     if uuid:
-        user = search_user_by_uuid(uuid)
+        user = search_user_by_uuid(url, uuid)
         if user:
             return user
     return False
@@ -347,13 +358,23 @@ def is_it_config_or_sub(config):
 
 
 # Users bot add plan
-def users_bot_add_plan(size, days, price):
+def users_bot_add_plan(size, days, price, server_id):
     if not CLIENT_TOKEN:
         return False
     # randon 4 digit number
     plan_id = random.randint(10000, 99999)
-    plan_status = USERS_DB.add_plan(plan_id, size, days, price)
+    plan_status = USERS_DB.add_plan(plan_id, size, days, price, server_id)
     if not plan_status:
+        return False
+    return True
+
+#--------------------------Server area ----------------------------
+# add server
+def add_server(title, url, user_limit):
+    # randon 5 digit number
+    server_id = random.randint(10000, 99999)
+    server_status = USERS_DB.add_server(server_id, title, url, user_limit)
+    if not server_status:
         return False
     return True
 
@@ -398,17 +419,22 @@ def non_order_user_info(telegram_id):
     non_ordered_subscriptions = USERS_DB.find_non_order_subscription(telegram_id=telegram_id)
     if non_ordered_subscriptions:
         for subscription in non_ordered_subscriptions:
-            # non_order_user = ADMIN_DB.find_user(uuid=subscription['uuid'])
-            non_order_user = api.find(subscription['uuid'])
-            # print(f"non_order_user:{non_order_user}")
-            # non_order_user = search_by_property(non_order_user, uuid=subscription['uuid'])
-
-            if non_order_user:
-                non_order_user = users_to_dict([non_order_user])
-                non_order_user = dict_process(non_order_user, subscription['id'])
-                if non_order_user:
-                    non_order_user = non_order_user[0]
-                    users_list.append(non_order_user)
+            server_id = subscription['server_id']
+            server = USERS_DB.find_server(id=server_id)
+            if server:
+                server = server[0]
+                if server['status']:
+                    URL = server['url'] + API_PATH
+                # non_order_user = ADMIN_DB.find_user(uuid=subscription['uuid'])
+                    non_order_user = api.find(URL, subscription['uuid'])
+                # print(f"non_order_user:{non_order_user}")
+                # non_order_user = search_by_property(non_order_user, uuid=subscription['uuid'])
+                    if non_order_user:
+                        non_order_user = users_to_dict([non_order_user])
+                        non_order_user = dict_process(URL, non_order_user, subscription['id'])
+                        if non_order_user:
+                            non_order_user = non_order_user[0]
+                            users_list.append(non_order_user)
     return users_list
 
 
@@ -421,15 +447,21 @@ def order_user_info(telegram_id):
             ordered_subscriptions = USERS_DB.find_order_subscription(order_id=order['id'])
             if ordered_subscriptions:
                 for subscription in ordered_subscriptions:
-                    order_user = api.find(subscription['uuid'])
-                    # print(f"order_user:{order_user}")
-                    # order_user = search_by_property(order_user, uuid=subscription['uuid'])
-                    if order_user:
-                        order_user = users_to_dict([order_user])
-                        order_user = dict_process(order_user, subscription['id'])
-                        if order_user:
-                            order_user = order_user[0]
-                            users_list.append(order_user)
+                    server_id = subscription['server_id']
+                    server = USERS_DB.find_server(id=server_id)
+                    if server:
+                        server = server[0]
+                        if server['status']:
+                            URL = server['url'] + API_PATH
+                            order_user = api.find(URL, subscription['uuid'])
+                            # print(f"order_user:{order_user}")
+                            # order_user = search_by_property(order_user, uuid=subscription['uuid'])
+                            if order_user:
+                                order_user = users_to_dict([order_user])
+                                order_user = dict_process(URL, order_user, subscription['id'])
+                                if order_user:
+                                    order_user = order_user[0]
+                                    users_list.append(order_user)
     return users_list
 
 

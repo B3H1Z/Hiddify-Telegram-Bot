@@ -1,7 +1,7 @@
 # Description: This file contains all the templates used in the bot.
-from config import LANG, VERSION
+from config import LANG, VERSION, API_PATH
 from AdminBot.content import MESSAGES
-
+from Utils import api
 
 # Single User Info Message Template
 def user_info_template(usr, header=""):
@@ -15,13 +15,52 @@ def user_info_template(usr, header=""):
     return f"""
 {header}
 {MESSAGES['INFO_USER']} <a href='{usr['link']}'> {usr['name']} </a>
---------------------------------
+❖⬩╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍⬩❖
 {MESSAGES['INFO_USAGE']} {usr['usage']['current_usage_GB']} {MESSAGES['OF']} {usr['usage']['usage_limit_GB']} {MESSAGES['GB']}
 {MESSAGES['INFO_REMAINING_DAYS']} {usr['remaining_day']}
 {MESSAGES['INFO_LAST_CONNECTION']} {usr['last_connection']}
 {MESSAGES['INFO_COMMENT']} {usr['comment']}
 """
 
+# Server Info Message Template
+def server_info_template(server, plans, header=""):
+    plans_num = 0
+    user_index = 0
+    URL = server['url'] + API_PATH
+    users_list = api.select(URL)
+    if users_list:
+        user_index = len(users_list)
+    if plans:
+        for plan in plans:
+            if plan['status']:
+                if plan['server_id'] == server['id']:
+                    plans_num += 1
+
+    return f"""
+{header}
+{MESSAGES['INFO_SERVER']} <a href='{server['url']}\\admin'> {server['title']} </a>
+❖⬩╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍⬩❖
+{MESSAGES['INFO_SERVER_USER_NUMBER']} {user_index} {MESSAGES['OF']} {server['user_limit']}
+{MESSAGES['INFO_SERVER_USER_PLAN']} {plans_num}
+"""
+# Server Info Message Template
+def plan_info_template(plan, orders, header=""):
+    num_orders = 0
+    if orders:
+        for order in orders:
+            num_orders += 1
+    sale = num_orders * plan['price']
+
+    return f"""
+{header}
+{MESSAGES['INFO_PLAN_ID']} {plan['id']}
+❖⬩╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍⬩❖
+{MESSAGES['INFO_PLAN_USAGE']} {plan['size_gb']} 
+{MESSAGES['INFO_PLAN_DAYS']} {plan['days']} 
+{MESSAGES['INFO_PLAN_PRICE']} {plan['price']} 
+{MESSAGES['INFO_PLAN_NUM_ORDER']} {num_orders} 
+{MESSAGES['INFO_PLAN_TOTAL_SALE']} {sale} 
+"""
 
 # Users List Message Template
 def users_list_template(users, heder=""):

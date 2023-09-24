@@ -6,10 +6,8 @@ from urllib.parse import urlparse
 
 # import config
 # from Utils.utils import PANEL_URL,API_PATH
-from Utils.api import API
+from Utils import api
 from config import PANEL_URL, API_PATH, USERS_DB_LOC
-
-API = API(PANEL_URL + API_PATH)
 
 
 class AdminDBManager:
@@ -25,8 +23,8 @@ class AdminDBManager:
             logging.error(f"Error while connecting to database \n Error:{e}")
             return None
 
-    def select_users(self):
-        return API.select()
+    def select_users(self, url):
+        return api.select(url)
         cur = self.conn.cursor()
         try:
             cur.execute("SELECT * FROM user")
@@ -36,8 +34,8 @@ class AdminDBManager:
             logging.error(f"Error while selecting all users \n Error:{e}")
             return None
 
-    def find_user(self, only_one=False, **kwargs):
-        return API.find(kwargs['uuid'])
+    def find_user(self, url, only_one=False, **kwargs):
+        return api.find(url, kwargs['uuid'])
         if len(kwargs) != 1:
             logging.warning("You can only use one key to find user!")
             return None
@@ -72,7 +70,7 @@ class AdminDBManager:
             logging.error(f"Error while deleting user {kwargs} \n Error:{e}")
             return False
 
-    def edit_user(self, uuid, **kwargs):
+    def edit_user(self, url, uuid, **kwargs):
         get_old_data = self.find_user(uuid=uuid)
         if get_old_data is None:
             print("User not found!")
@@ -82,7 +80,7 @@ class AdminDBManager:
                 print(f"Invalid key [{key}]")
                 return False
 
-        return API.update(uuid, kwargs)
+        return api.update(url, uuid, kwargs)
         cur = self.conn.cursor()
 
         for key, value in kwargs.items():
@@ -127,7 +125,7 @@ class AdminDBManager:
             logging.error(f"Error while adding user details [{user_id}] \n Error: {e}")
             return False
 
-    def add_default_user(self, name, package_days, usage_limit_GB, added_by=None, comment=None, mode='no_reset',
+    def add_default_user(self, url, name, package_days, usage_limit_GB, added_by=None, comment=None, mode='no_reset',
                          monthly=0,
                          max_ips=100, enable=1, telegram_id=None):
 
@@ -141,7 +139,7 @@ class AdminDBManager:
         current_usage_GB = 0
         added_by = urlparse(PANEL_URL).path.split('/')[2]
         last_reset_time = datetime.datetime.now().strftime("%Y-%m-%d")
-        return API.insert(uuid, name, usage_limit_GB, package_days, added_by, last_reset_time)
+        return api.insert(url, uuid, name, usage_limit_GB, package_days, added_by, last_reset_time)
         user_added = self.add_user(uuid, name, last_online, expiry_time, usage_limit_GB, package_days, mode, monthly,
                                    start_date,
                                    current_usage_GB, last_reset_time, comment, telegram_id, added_by, max_ips, enable)
@@ -242,8 +240,10 @@ class UserDBManager:
                         "size_gb INTEGER NOT NULL,"
                         "days INTEGER NOT NULL,"
                         "price INTEGER NOT NULL,"
+                        "server_id INTEGER NOT NULL,"
                         "description TEXT NULL,"
-                        "status BOOLEAN NOT NULL)")
+                        "status BOOLEAN NOT NULL,"
+                        "FOREIGN KEY (server_id) REFERENCES server (id))")
             self.conn.commit()
             logging.info("Plans table created successfully!")
 
@@ -266,6 +266,8 @@ class UserDBManager:
                         "id INTEGER PRIMARY KEY,"
                         "order_id INTEGER NOT NULL,"
                         "uuid TEXT NOT NULL,"
+                        "server_id INTEGER NOT NULL,"
+                        "FOREIGN KEY (server_id) REFERENCES server (id),"
                         "FOREIGN KEY (order_id) REFERENCES orders (id))")
             self.conn.commit()
             logging.info("Order subscriptions table created successfully!")
@@ -274,9 +276,20 @@ class UserDBManager:
                         "id INTEGER PRIMARY KEY,"
                         "telegram_id INTEGER NOT NULL,"
                         "uuid TEXT NOT NULL UNIQUE,"
+                        "server_id INTEGER NOT NULL,"
+                        "FOREIGN KEY (server_id) REFERENCES server (id),"
                         "FOREIGN KEY (telegram_id) REFERENCES user (telegram_id))")
             self.conn.commit()
             logging.info("Non order subscriptions table created successfully!")
+
+            cur.execute("CREATE TABLE IF NOT EXISTS servers ("
+                        "id INTEGER PRIMARY KEY,"
+                        "title TEXT NOT NULL,"
+                        "url TEXT NOT NULL,"
+                        "user_limit INTEGER NOT NULL,"
+                        "status BOOLEAN NOT NULL)")
+            self.conn.commit()
+            logging.info("servers table created successfully!")
 
             cur.execute("CREATE TABLE IF NOT EXISTS str_config ("
                         "key TEXT NOT NULL UNIQUE,"
@@ -394,11 +407,11 @@ class UserDBManager:
             logging.error(f"Error while adding user [{telegram_id}] \n Error: {e}")
             return False
 
-    def add_plan(self, plan_id, size_gb, days, price, description=None, status=True):
+    def add_plan(self, plan_id, size_gb, days, price, server_id, description=None, status=True):
         cur = self.conn.cursor()
         try:
-            cur.execute("INSERT INTO plans(id,size_gb, days, price, description, status) VALUES(?,?,?,?,?,?)",
-                        (plan_id, size_gb, days, price, description, status))
+            cur.execute("INSERT INTO plans(id,size_gb, days, price, server_id, description, status) VALUES(?,?,?,?,?,?,?)",
+                        (plan_id, size_gb, days, price, server_id, description, status))
             self.conn.commit()
             logging.info(f"Plan [{size_gb}GB] added successfully!")
             return True
@@ -465,7 +478,80 @@ class UserDBManager:
                 return False
 
         return True
+    
+    #-----------------------server
+    def add_server(self, server_id, title, url, user_limit, status=True):
+        cur = self.conn.cursor()
+        try:
+            cur.execute("INSERT INTO servers(id,title, url, user_limit, status) VALUES(?,?,?,?,?)",
+                        (server_id, title, url, user_limit, status))
+            self.conn.commit()
+            logging.info(f"server [{title}] added successfully!")
+            return True
 
+        except Error as e:
+            logging.error(f"Error while adding server [{title}] \n Error: {e}")
+            return False
+
+    def select_servers(self):
+        cur = self.conn.cursor()
+        try:
+            cur.execute("SELECT * FROM servers")
+            rows = cur.fetchall()
+            rows = [dict(zip([key[0] for key in cur.description], row)) for row in rows]
+            return rows
+        except Error as e:
+            logging.error(f"Error while selecting all servers \n Error:{e}")
+            return None
+
+    def find_server(self, **kwargs):
+        if len(kwargs) != 1:
+            logging.warning("You can only use one key to find server!")
+            return None
+        rows = []
+        cur = self.conn.cursor()
+        try:
+            for key, value in kwargs.items():
+                cur.execute(f"SELECT * FROM servers WHERE {key}=?", (value,))
+                rows = cur.fetchall()
+            if len(rows) == 0:
+                logging.info(f"server {kwargs} not found!")
+                return None
+            rows = [dict(zip([key[0] for key in cur.description], row)) for row in rows]
+            return rows
+        except Error as e:
+            logging.error(f"Error while finding server {kwargs} \n Error:{e}")
+            return None
+
+    def delete_server(self, **kwargs):
+        if len(kwargs) != 1:
+            logging.warning("You can only use one key to delete server!")
+            return False
+        cur = self.conn.cursor()
+        try:
+            for key, value in kwargs.items():
+                cur.execute(f"DELETE FROM servers WHERE {key}=?", (value,))
+                self.conn.commit()
+            logging.info(f"server {kwargs} deleted successfully!")
+            return True
+        except Error as e:
+            logging.error(f"Error while deleting server {kwargs} \n Error:{e}")
+            return False
+
+    def edit_server(self, server_id, **kwargs):
+        cur = self.conn.cursor()
+
+        for key, value in kwargs.items():
+            try:
+                cur.execute(f"UPDATE servers SET {key}=? WHERE id=?", (value, server_id))
+                self.conn.commit()
+                logging.info(f"server [{server_id}] successfully update [{key}] to [{value}]")
+            except Error as e:
+                logging.error(f"Error while updating server [{server_id}] [{key}] to [{value}] \n Error: {e}")
+                return False
+
+        return True
+    
     def add_order(self, order_id, telegram_id, user_name, plan_id, created_at):
         cur = self.conn.cursor()
         try:
@@ -524,12 +610,12 @@ class UserDBManager:
 
         return True
 
-    def add_order_subscription(self, sub_id, order_id, uuid):
+    def add_order_subscription(self, sub_id, order_id, uuid, server_id):
         cur = self.conn.cursor()
         try:
             cur.execute(
-                "INSERT INTO order_subscriptions(id,order_id,uuid) VALUES(?,?,?)",
-                (sub_id, order_id, uuid))
+                "INSERT INTO order_subscriptions(id,order_id,uuid,server_id) VALUES(?,?,?,?)",
+                (sub_id, order_id, uuid, server_id))
             self.conn.commit()
             logging.info(f"Order [{order_id}] added successfully!")
             return True
@@ -593,12 +679,12 @@ class UserDBManager:
             logging.error(f"Error while deleting order [{order_id}] \n Error: {e}")
             return False
 
-    def add_non_order_subscription(self, non_sub_id, telegram_id, uuid):
+    def add_non_order_subscription(self, non_sub_id, telegram_id, uuid, server_id):
         cur = self.conn.cursor()
         try:
             cur.execute(
-                "INSERT INTO non_order_subscriptions(id,telegram_id,uuid) VALUES(?,?,?)",
-                (non_sub_id, telegram_id, uuid))
+                "INSERT INTO non_order_subscriptions(id,telegram_id,uuid,server_id) VALUES(?,?,?,?)",
+                (non_sub_id, telegram_id, uuid, server_id))
             self.conn.commit()
             logging.info(f"Order [{telegram_id}] added successfully!")
             return True
