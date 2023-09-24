@@ -29,7 +29,7 @@ if not os.path.exists(os.path.join(os.getcwd(), "Logs")):
 logging.basicConfig(handlers=[logging.FileHandler(filename=LOG_LOC,
                                                   encoding='utf-8', mode='w')],
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.DEBUG)
+                    level=logging.INFO)
 
 
 def setup_users_db():
