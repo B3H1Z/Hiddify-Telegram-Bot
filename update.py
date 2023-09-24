@@ -169,10 +169,7 @@ if __name__ == "__main__":
         current_version = args.current_version
         target_version = args.target_version
         if current_version.find("-pre"):
-            # can't update from pre version
-            print("Can't update from pre version")
-            logging.info("Can't update from pre version")
-            exit(1)
+            current_version = current_version.split("-pre")[0]
         print(f"current-version: {current_version} -> target-version: {target_version}")
         logging.info(f"current-version: {current_version} -> target-version: {target_version}")
         update_by_version(current_version, target_version)
