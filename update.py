@@ -1,9 +1,15 @@
 import json
 import sqlite3
-# from version import __version__
-from config import *
 import argparse
+import logging
+import os
+USERS_DB_LOC = os.path.join(os.getcwd(), "Database", "hidyBot.db")
 
+LOG_LOC = os.path.join(os.getcwd(), "Logs", "update.log")
+logging.basicConfig(handlers=[logging.FileHandler(filename=LOG_LOC,
+                                                  encoding='utf-8', mode='w')],
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.DEBUG)
 
 def version():
     parser = argparse.ArgumentParser(description='Update script')
@@ -106,8 +112,7 @@ def update_v4_v5():
         # Add test_subscription bool default 0 to users table
         try:
             cur = conn.cursor()
-            if not cur.execute("SELECT test_subscription FROM users").fetchone():
-                cur.execute("ALTER TABLE users ADD COLUMN test_subscription BOOLEAN DEFAULT 0")
+            cur.execute("ALTER TABLE users ADD COLUMN test_subscription BOOLEAN DEFAULT 0")
             conn.commit()
         except sqlite3.Error as e:
             logging.error("Database error: %s" % e)
@@ -127,24 +132,18 @@ def update_v4_v5():
                     cur.execute("CREATE TABLE IF NOT EXISTS str_config (key TEXT PRIMARY KEY, value TEXT)")
                     admin_ids = config["admin_id"]
                     admin_ids = json.dumps(admin_ids)
-                    # if bot_admin_id is not exists, create it
-                    if not cur.execute("SELECT * FROM str_config WHERE key = 'bot_admin_id'").fetchone():
-                        cur.execute("INSERT INTO str_config VALUES (?, ?)", ("bot_admin_id", admin_ids))
-                    # if bot_token_admin is not exists, create it
-                    if not cur.execute("SELECT * FROM str_config WHERE key = 'bot_token_admin'").fetchone():
-                        cur.execute("INSERT INTO str_config VALUES (?, ?)", ("bot_token_admin", config["token"]))
-                    if not cur.execute("SELECT * FROM str_config WHERE key = 'bot_token_client'").fetchone():
-                        cur.execute("INSERT INTO str_config VALUES (?, ?)",
-                                    ("bot_token_client", config["client_token"]))
-                    if not cur.execute("SELECT * FROM str_config WHERE key = 'bot_lang'").fetchone():
-                        cur.execute("INSERT INTO str_config VALUES (?, ?)", ("bot_lang", config["lang"]))
+                    cur.execute("INSERT OR REPLACE INTO str_config VALUES (?, ?)", ("bot_admin_id", admin_ids))
+                    cur.execute("INSERT OR REPLACE INTO str_config VALUES (?, ?)", ("bot_token_admin", config["token"]))
+                    cur.execute("INSERT OR REPLACE INTO str_config VALUES (?, ?)",
+                                ("bot_token_client", config["client_token"]))
+                    cur.execute("INSERT OR REPLACE INTO str_config VALUES (?, ?)", ("bot_lang", config["lang"]))
                     conn.commit()
 
                     # if servers is not exists, create it
                     cur.execute(
                         "CREATE TABLE IF NOT EXISTS servers (id INTEGER PRIMARY KEY AUTOINCREMENT, url TEXT NOT NULL, title TEXT, description TEXT,default_server BOOLEAN NOT NULL DEFAULT 0)")
                     server_url = config["url"]
-                    cur.execute("INSERT INTO servers VALUES (?,?, ?, ?)", (None, server_url, None, None))
+                    cur.execute("INSERT INTO servers VALUES (?,?,?,?,?)", (None, server_url, None, None,True))
 
                     conn.commit()
                 except sqlite3.Error as e:
@@ -170,7 +169,10 @@ if __name__ == "__main__":
         current_version = args.current_version
         target_version = args.target_version
         if current_version.find("-pre"):
-            current_version = current_version.split("-pre")[0]
+            # can't update from pre version
+            print("Can't update from pre version")
+            logging.info("Can't update from pre version")
+            exit(1)
         print(f"current-version: {current_version} -> target-version: {target_version}")
         logging.info(f"current-version: {current_version} -> target-version: {target_version}")
         update_by_version(current_version, target_version)

@@ -19,6 +19,25 @@ function stop_bot() {
   pkill -15 -f hiddifyTelegramBot.py
 }
 
+add_cron_job_if_not_exists() {
+  local cron_job="$1"
+  local current_crontab
+
+  # Normalize the cron job formatting (remove extra spaces)
+  cron_job=$(echo "$cron_job" | sed -e 's/^[ \t]*//' -e 's/[ \t]*$//')
+
+  # Check if the cron job already exists in the current user's crontab
+  current_crontab=$(crontab -l 2>/dev/null || true)
+
+  if [[ -z "$current_crontab" ]]; then
+    # No existing crontab, so add the new cron job
+    (echo "$cron_job") | crontab -
+  elif ! (echo "$current_crontab" | grep -Fq "$cron_job"); then
+    # Cron job doesn't exist, so append it to the crontab
+    (echo "$current_crontab"; echo "$cron_job") | crontab -
+  fi
+}
+
 # Function to reinstall the bot
 function reinstall_bot() {
   display_message "${YELLOW}This version is deprecated, and you need to reinstall the bot.${RESET}"
@@ -86,6 +105,16 @@ function update_bot() {
   fi
 }
 
+# get backup of Database/hidyBot.db
+function get_backup() {
+  display_message "${GREEN}Getting backup of Database/hidyBot.db...${RESET}"
+  if cp /opt/Hiddify-Telegram-Bot/Database/hidyBot.db /opt/Hiddify-Telegram-Bot/Database/hidyBot.db.bak; then
+    display_message "${GREEN}Backup of Database/hidyBot.db has been taken.${RESET}"
+  else
+    display_message "${RED}Failed to get backup of Database/hidyBot.db.${RESET}"
+  fi
+}
+
 # Stop the bot gracefully before proceeding
 stop_bot
 
@@ -96,8 +125,9 @@ sleep 5
 if [ ! -f /opt/Hiddify-Telegram-Bot/version.py ]; then
   reinstall_bot
 else
-  current_version=$(python /opt/Hiddify-Telegram-Bot/version.py --version)  
-  
+
+  current_version=$(python3 /opt/Hiddify-Telegram-Bot/version.py --version)  
+  get_backup
   update_bot
 
   # Add cron job for reboot
@@ -111,8 +141,11 @@ else
 
   # Add cron job to run every 3 hours
   add_cron_job_if_not_exists "0 */3 * * * cd $install_dir && python3 crontab.py --backup-bot"
+
+  echo -e "${YELLOW}Current version: $current_version${RESET}"
+  echo -e "${YELLOW}Target version: $target_version${RESET}"
   
-  if python /opt/Hiddify-Telegram-Bot/update.py --current-version "$current_version" --target-version "$target_version"; then
+  if python3 /opt/Hiddify-Telegram-Bot/update.py --current-version "$current_version" --target-version "$target_version"; then
       echo "update.py has been run."
   else
       echo "update.py has not been run."
