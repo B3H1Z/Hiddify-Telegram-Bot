@@ -7,6 +7,7 @@ GREEN='\033[0;32m'
 RED='\033[0;31m'
 YELLOW='\033[0;33m'
 RESET='\033[0m' # Reset text color
+install_dir="/opt/Hiddify-Telegram-Bot"
 
 # Function to display colored messages
 function display_message() {
