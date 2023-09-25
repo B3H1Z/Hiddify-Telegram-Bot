@@ -78,7 +78,16 @@
     "USERS_BOT_SETTINGS_RENEWAL_METHOD_ADVANCED_USAGE": "Maximum Usage for Renewal",
     "ABOUT_BOT": "ℹ️",
     "TO_QR": "ً🖼QR",
-    "SUPPORT_GROUP": "Support Group"
+    "SUPPORT_GROUP": "Support Group",
+    "SERVERS_MANAGEMENT":"🖥Servers Management",
+    "ADD_SERVER": "➕Add Server",
+    "EDIT_SERVER": "Edit Server",
+    "DELETE_SERVER": "➖Delete Server",
+    "SERVER_LIST_OF_USERS": "👤Users List",
+    "SERVER_LIST_OF_PLANS": "Plans List",
+    "SERVER_EDIT_TITLE": "Edit title",
+    "SERVER_EDIT_USER_LIMIT": "Edit User Limit",
+    "SERVER_EDIT_URL": "Edit URL"
   },
   "FA": {
     "CONFIRM": "✅تأیید",
@@ -159,6 +168,15 @@
     "USERS_BOT_SETTINGS_RENEWAL_METHOD_ADVANCED_USAGE": "حداکثر مصرف مجاز برای تمدید",
     "ABOUT_BOT": "ℹ️",
     "TO_QR": "ً🖼کیوآر",
-    "SUPPORT_GROUP": "گروه پشتیبانی"
+    "SUPPORT_GROUP": "گروه پشتیبانی",
+    "SERVERS_MANAGEMENT":"🖥 مدیریت سرورها",
+    "ADD_SERVER": "➕افزودن سرور",
+    "EDIT_SERVER": "ویرایش سرور",
+    "DELETE_SERVER": "➖حذف سرور",
+    "SERVER_LIST_OF_USERS": "👤لیست کاربران",
+    "SERVER_LIST_OF_PLANS": "لیست پلن‌ها",
+    "SERVER_EDIT_TITLE": "ویرایش عنوان",
+    "SERVER_EDIT_USER_LIMIT": "ویرایش محدودیت کاربر",
+    "SERVER_EDIT_URL": "ویرایش لینک"
   }
 }

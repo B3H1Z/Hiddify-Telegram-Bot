@@ -120,7 +120,27 @@
     "FEATUR_UNAVAILABLE": "❌This feature is not available at the moment.",
     "REQUEST_JOIN_HIDY": "Please join the support group to get the latest information.",
     "WELCOME_TO_ADMIN": "Hiddify Management Bot has been successfully launched.\nTo start working, send the /start command.",
-    "SUCCESS_RESTORE_BOT": "✅Bot restored successfully"
+    "SUCCESS_RESTORE_BOT": "✅Bot restored successfully",
+    "ADD_SERVER": "Please complete the following information to add a server",
+    "ADD_SERVER_TITLE": "Please enter the title of Server: ",
+    "ADD_SERVER_USER_LIMIT": "Please enter the user limit of the Server: ",
+    "ADD_SERVER_URL": "Please enter the url of the Server: ",
+    "ERROR_ADD_SERVER_URL": "Please enter the valid url of the Server: ",
+    "ADD_SERVER_SUCCESS": "✅Server added",
+    "INFO_SERVER": "Server:",
+    "INFO_SERVER_USER_NUMBER": "Number of Users:",
+    "INFO_SERVER_USER_PLAN": "Number of Plan:",
+    "DELETE_SERVER_QUESTION": "Are you sure you want to delete the server?\n⚠️After deleting subscriptions related to this server, it is not visible to users.",
+    "ERROR_SERVER_NOT_FOUND": "❌Server not found",
+    "INFO_PLAN_ID": "Plan ID:",
+    "INFO_PLAN_USAGE": "Usage limit(GB):",
+    "INFO_PLAN_DAYS": "Time limitation:",
+    "INFO_PLAN_PRICE": "Price",
+    "INFO_PLAN_NUM_ORDER": "Purchases",
+    "INFO_PLAN_TOTAL_SALE": "Total sales",
+    "SUCCESS_SERVER_TITLE_EDITED":"✅Title edited to:",
+    "SUCCESS_SERVER_USER_LIMIT_EDITED" : "✅User limit edited to:",
+    "SUCCESS_SERVER_URL_EDITED": "✅URL edited to:"
   },
   "FA": {
     "WELCOME": "به ربات مدیریت هیدی بات خوش آمدید.",
@@ -243,7 +263,27 @@
     "FEATUR_UNAVAILABLE": "❌این قابلیت در حال حاضر در دسترس نیست.",
     "REQUEST_JOIN_HIDY": "📍جهت دریافت آخرین اطلاعات، در گروه پشتیبانی عضو شوید.",
     "WELCOME_TO_ADMIN": "ربات مدیریت هیدی بات با موفقیت راه‌اندازی شد.\nبرای شروع کار، دستور /start را ارسال کنید.",
-    "SUCCESS_RESTORE_BOT": "✅ربات با موفقیت بازیابی شد"
+    "SUCCESS_RESTORE_BOT": "✅ربات با موفقیت بازیابی شد",
+    "ADD_SERVER": "لطفا اطلاعات زیر را برای افزودن سرور وارد کنید",
+    "ADD_SERVER_TITLE": "لطفا عنوانی را برای سرور وارد کنید:",
+    "ADD_SERVER_USER_LIMIT": "لطفا محدودیت تعداد کاربر سرور را وارد کنید:",
+    "ADD_SERVER_URL": "لطفا لینک سرور را وارد کنید:",
+    "ERROR_ADD_SERVER_URL": "لطفا لینک معتبر ارسال کنید: ",
+    "ADD_SERVER_SUCCESS": "✅سرور با موفقیت افزوده شد",
+    "INFO_SERVER": "سرور:",
+    "INFO_SERVER_USER_NUMBER": "تعداد کاربر:",
+    "INFO_SERVER_USER_PLAN": "تعداد پلن:",
+    "DELETE_SERVER_QUESTION": "آیا از حذف سرور مطمئن هستید؟\n⚠️بعد از حذف اشتراک‌های مربوط به این سرور برای کاربران قابل مشاهده نمی‌باشد.",
+    "ERROR_SERVER_NOT_FOUND": "❌سرور یافت نشد",
+    "INFO_PLAN_ID": "آی دی:",
+    "INFO_PLAN_USAGE": "محدودیت مصرف(GB):",
+    "INFO_PLAN_DAYS": "محدودیت زمان(روز):",
+    "INFO_PLAN_PRICE": "قیمت:",
+    "INFO_PLAN_NUM_ORDER": "تعداد سفارش:",
+    "INFO_PLAN_TOTAL_SALE": "مجموع فروش:",
+    "SUCCESS_SERVER_TITLE_EDITED":"✅عنوان سرور ویرایش شد به:",
+    "SUCCESS_SERVER_USER_LIMIT_EDITED" : "✅محدودیت کاربر ویرایش شد به:",
+    "SUCCESS_SERVER_URL_EDITED": "✅لینک سرور ویرایش شد به:"
 
 
   }

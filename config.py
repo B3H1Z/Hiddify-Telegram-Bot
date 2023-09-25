@@ -238,15 +238,15 @@ def set_config_in_db(db, admin_ids, token, url, lang, client_token):
             db.edit_str_config("bot_lang", value=lang)
         # if servers is not exists, create it
         if not db.select_servers():
-            db.add_server(url, default_server=True)
+            db.add_server(url, 2000, title="Main Server", default_server=True)
         else:
             # find default server
             default_server = db.find_server(default_server=True)
             default_server_id = default_server[0]['id']
             if default_server:
-                db.edit_server(default_server_id, url=url, default_server=True)
+                db.edit_server(default_server_id, url=url, user_limit=2000, title="Main Server", default_server=True)
             else:
-                db.add_server(url, default_server=True)
+                db.add_server(url, 2000, title="Main Server", default_server=True)
     except Exception as e:
         logging.error(f"Error while inserting config to database \n Error:{e}")
         raise Exception(f"Error while inserting config to database \nBe in touch with {HIDY_BOT_ID}")

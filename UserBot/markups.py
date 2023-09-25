@@ -123,6 +123,20 @@ def plans_list_markup(plans, renewal=False,uuid=None):
     return markup
 
 
+# Server List - Server List - Inline Keyboard Markup
+def servers_list_markup(servers, free_test=False):
+    markup = InlineKeyboardMarkup(row_width=1)
+    callback = "free_test_server_selected" if free_test else "server_selected"
+    keys = []
+    if servers:
+        for server in servers:
+            keys.append(InlineKeyboardButton(f"{server['title']}",
+                                             callback_data=f"{callback}:{server['id']}"))
+    if len(keys) == 0:
+        return None
+    markup.add(*keys)
+    return markup
+
 def confirm_payment_by_admin(order_id):
     markup = InlineKeyboardMarkup()
     markup.row_width = 1
