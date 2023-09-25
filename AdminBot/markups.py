@@ -9,8 +9,10 @@ from Utils.utils import all_configs_settings, rial_to_toman
 # Main Menu Reply Keyboard Markup
 def main_menu_keyboard_markup():
     markup = ReplyKeyboardMarkup(row_width=3, resize_keyboard=True)
-    markup.add(KeyboardButton(KEY_MARKUP['USERS_LIST']))
-    markup.add(KeyboardButton(KEY_MARKUP['USERS_SEARCH']), KeyboardButton(KEY_MARKUP['ADD_USER']))
+    #markup.add(KeyboardButton(KEY_MARKUP['USERS_LIST']))
+    #markup.add(KeyboardButton(KEY_MARKUP['USERS_SEARCH']), KeyboardButton(KEY_MARKUP['ADD_USER']))
+    markup.add(KeyboardButton(KEY_MARKUP['SERVERS_MANAGEMENT']))
+    markup.add(KeyboardButton(KEY_MARKUP['USERS_SEARCH']))
     if CLIENT_TOKEN:
         markup.add(KeyboardButton(KEY_MARKUP['USERS_BOT_MANAGEMENT']))
     markup.add()
@@ -21,7 +23,7 @@ def main_menu_keyboard_markup():
 
 
 # Users List Inline Keyboard Markup
-def users_list_markup(users, page=1):
+def users_list_markup(server_id, users, page=1):
     markup = InlineKeyboardMarkup(row_width=3)
     USER_PER_PAGE = 20
     start = (page - 1) * USER_PER_PAGE
@@ -45,6 +47,9 @@ def users_list_markup(users, page=1):
         markup.add(InlineKeyboardButton(KEY_MARKUP['NEXT_PAGE'], callback_data=f"next:{page + 1}"), row_width=2)
     if page > 1:
         markup.add(InlineKeyboardButton(KEY_MARKUP['PREV_PAGE'], callback_data=f"next:{page - 1}"), row_width=1)
+    markup.add(InlineKeyboardButton(KEY_MARKUP['ADD_USER'], callback_data=f"server_add_user:{server_id}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_SEARCH'], callback_data=f"server_search_user:{server_id}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_server_selected:{server_id}"))
     return markup
 
 
@@ -135,13 +140,14 @@ def sub_user_list_markup(uuid):
 
 
 # Search User Inline Keyboard Markup
-def search_user_markup():
+def search_user_markup(server_id):
     markup = InlineKeyboardMarkup()
     markup.row_width = 1
-    markup.add(InlineKeyboardButton(KEY_MARKUP['SEARCH_USER_NAME'], callback_data=f"search_name:name"))
-    markup.add(InlineKeyboardButton(KEY_MARKUP['SEARCH_USER_UUID'], callback_data=f"search_uuid:uuid"))
-    markup.add(InlineKeyboardButton(KEY_MARKUP['SEARCH_USER_CONFIG'], callback_data=f"search_config:config"))
-    markup.add(InlineKeyboardButton(KEY_MARKUP['SEARCH_EXPIRED_USERS'], callback_data=f"search_expired:expired"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['SEARCH_USER_NAME'], callback_data=f"search_name:{server_id}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['SEARCH_USER_UUID'], callback_data=f"search_uuid:{server_id}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['SEARCH_USER_CONFIG'], callback_data=f"search_config:{server_id}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['SEARCH_EXPIRED_USERS'], callback_data=f"search_expired:{server_id}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_server_user_list:{server_id}"))
     return markup
 
 
@@ -152,8 +158,8 @@ def users_bot_management_markup(value=None):
     markup.add(
         InlineKeyboardButton(KEY_MARKUP['USERS_BOT_ORDERS_STATUS'], callback_data=f"users_bot_orders_status:None"),
         InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SUB_STATUS'], callback_data=f"users_bot_sub_status:None"))
-    markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_ADD_PLAN'], callback_data=f"users_bot_add_plan:None"),
-               InlineKeyboardButton(KEY_MARKUP['USERS_BOT_DEL_PLAN'], callback_data=f"users_bot_list_plans:None"))
+    # markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_ADD_PLAN'], callback_data=f"users_bot_add_plan:None"),
+    #            InlineKeyboardButton(KEY_MARKUP['USERS_BOT_DEL_PLAN'], callback_data=f"users_bot_list_plans:None"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SEND_MESSAGE_TO_USERS'],
                                     callback_data=f"users_bot_send_msg_users:None"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_OWNER_INFO'], callback_data=f"users_bot_owner_info:None"))
@@ -292,18 +298,83 @@ def users_bot_edit_owner_info_markup():
     return markup
 
 
-# Users Bot Management - Plans List - Inline Keyboard Markup
-def plans_list_markup(plans):
+# Server Management - Server List - Inline Keyboard Markup
+def servers_management_markup(servers):
     markup = InlineKeyboardMarkup(row_width=1)
     keys = []
-    for plan in plans:
-        if plan['status']:
+    if servers:
+        for server in servers:
+            if server['status']:
+                keys.append(InlineKeyboardButton(
+                    f"{server['title']}",
+                    callback_data=f"server_selected:{server['id']}"))
+    keys.append(InlineKeyboardButton(
+                KEY_MARKUP['ADD_SERVER'],
+                callback_data=f"add_server:None"))
+    markup.add(*keys)
+    return markup
+
+# Server Management - Server List - Inline Keyboard Markup
+def server_selected_markup(server_id):
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 1
+    markup.add(InlineKeyboardButton(KEY_MARKUP['EDIT_SERVER'],
+                                    callback_data=f"edit_server:{server_id}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['SERVER_LIST_OF_USERS'],
+                                    callback_data=f"server_list_of_users:{server_id}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['SERVER_LIST_OF_PLANS'],
+                                    callback_data=f"server_list_of_plans:{server_id}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['DELETE_SERVER'],
+                                    callback_data=f"delete_server:{server_id}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_server_management:None"))
+    
+    return markup
+
+# Server Management - Server Delete - Inline Keyboard Markup
+def server_delete_markup(server_id):
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 1
+    markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIRM'],
+                                    callback_data=f"confirm_delete_server:{server_id}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['CANCEL'],
+                                    callback_data=f"server_selected:{server_id}"))
+    return markup
+
+
+# Server Management - Server Edit - Inline Keyboard Markup
+def server_edit_markup(server_id):
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 1
+    markup.add(InlineKeyboardButton(KEY_MARKUP['SERVER_EDIT_TITLE'],
+                                    callback_data=f"server_edit_title:{server_id}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['SERVER_EDIT_USER_LIMIT'],
+                                    callback_data=f"server_edit_user_limit:{server_id}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['SERVER_EDIT_URL'],
+                                    callback_data=f"server_edit_url:{server_id}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_server_selected:{server_id}"))
+    return markup
+# Users Bot Management - Plans List - Inline Keyboard Markup
+def plans_list_markup(plans, server_id, delete_mode=False):
+    markup = InlineKeyboardMarkup(row_width=1)
+    plan_selected_callback_data = "users_bot_del_plan:" if delete_mode else "info_plan_selected:" 
+    back_callback_data = "back_to_server_list_of_plans:" if delete_mode else "back_to_server_selected:"
+    keys = []
+    if plans:
+        for plan in plans:
             keys.append(InlineKeyboardButton(
                 f"{plan['size_gb']}{MESSAGES['GB']} | {plan['days']}{MESSAGES['DAY']} | {rial_to_toman(plan['price'])} {MESSAGES['TOMAN']}",
-                callback_data=f"users_bot_del_plan:{plan['id']}"))
-    if len(keys) == 0:
-        return None
+                callback_data = f"{plan_selected_callback_data}{plan['id']}"))
+    if not delete_mode:
+        keys.append(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_ADD_PLAN'], callback_data=f"users_bot_add_plan:{server_id}"))
+        keys.append(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_DEL_PLAN'], callback_data=f"users_bot_list_plans:{server_id}"))
+    keys.append(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"{back_callback_data}{server_id}"))
     markup.add(*keys)
+    return markup
+
+def plan_info_selected_markup(server_id):
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 1
+    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_server_list_of_plans:{server_id}"))
     return markup
 
 

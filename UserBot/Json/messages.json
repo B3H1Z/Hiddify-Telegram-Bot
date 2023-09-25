@@ -23,7 +23,9 @@
         "USER_NOT_FOUND": "User not found!",
         "USER_NAME": "👤Name:",
         "PLANS_LIST": "📋Plans List:",
+        "SERVERS_LIST": "🖥Server List:",
         "PLANS_NOT_FOUND": "Plans not found!",
+        "SERVERS_NOT_FOUND": "Servers not found!",
         "PLAN_ADD_NAME": "Please enter your name:",
         "SUBSCRIPTION_SUCCESS_ADDED": "Your subscription has been successfully added.",
         "PLAN_INFO": "📄Plan Info:",
@@ -101,7 +103,9 @@
         "SUBSCRIPTION_UNLINKED": "✅اشتراک از ربات جداسازی شد",
         "USER_NAME": "👤نام:",
         "PLANS_LIST": "📋لیست پلن ها:",
+        "SERVERS_LIST": "🖥لیست سرورها:",
         "PLANS_NOT_FOUND": "❌پلنی یافت نشد!",
+        "SERVERS_NOT_FOUND": "❌سروری یافت نشد!",
         "PLAN_ADD_NAME": "لطفا نام خود را وارد کنید:",
         "SUBSCRIPTION_SUCCESS_ADDED": "✅اشتراک شما با موفقیت اضافه شد.",
         "PLAN_INFO": "📋اطلاعات پلن انتخاب شده",

@@ -13,11 +13,15 @@ from AdminBot import templates
 from Utils import utils
 from Shared.common import user_bot
 from Database.dbManager import USERS_DB
-from Utils.api import api
+from Utils import api
+from config import panel_url_validator, API_PATH
 
 # Initialize Bot
 bot = telebot.TeleBot(TELEGRAM_TOKEN, parse_mode="HTML")
 bot.delete_webhook()
+
+URL = 'url'
+selected_server_id = 0
 if CLIENT_TOKEN:
     user_bot = user_bot()
 # Bot Start Commands
@@ -80,45 +84,46 @@ add_user_data = {}
 
 
 # Add User - Name
-def add_user_name(message: Message):
+def add_user_name(message: Message, server_id):
     if is_it_cancel(message):
         return
     add_user_data['name'] = message.text
     bot.send_message(message.chat.id, MESSAGES['ADD_USER_USAGE_LIMIT'], reply_markup=markups.while_add_user_markup())
-    bot.register_next_step_handler(message, add_user_limit)
+    bot.register_next_step_handler(message, add_user_limit, server_id)
 
 
 # Add User - Usage Limit
-def add_user_limit(message: Message):
+def add_user_limit(message: Message, server_id):
     if is_it_cancel(message):
         return
     if not is_it_digit(message, f"{MESSAGES['ERROR_INVALID_NUMBER']}\n{MESSAGES['ADD_USER_USAGE_LIMIT']}",
                        markups.while_add_user_markup()):
-        bot.register_next_step_handler(message, add_user_limit)
+        bot.register_next_step_handler(message, add_user_limit, server_id)
         return
     add_user_data['limit'] = message.text
     bot.send_message(message.chat.id, MESSAGES['ADD_USER_DAYS'], reply_markup=markups.while_add_user_markup())
-    bot.register_next_step_handler(message, add_user_usage_days)
+    bot.register_next_step_handler(message, add_user_usage_days, server_id)
 
 
 # Add User - Usage Days
-def add_user_usage_days(message: Message):
+def add_user_usage_days(message: Message, server_id):
     if is_it_cancel(message, MESSAGES['CANCEL_ADD_USER']):
         return
     if not is_it_digit(message, f"{MESSAGES['ERROR_INVALID_NUMBER']}\n{MESSAGES['ADD_USER_DAYS']}",
                        markups.while_add_user_markup()):
-        bot.register_next_step_handler(message, add_user_usage_days)
+        bot.register_next_step_handler(message, add_user_usage_days, server_id)
         return
     add_user_data['usage_days'] = message.text
     bot.send_message(message.chat.id,
                      f"{MESSAGES['ADD_USER_CONFIRM']}\n\n{MESSAGES['INFO_USER']} {add_user_data['name']}\n"
                      f"{MESSAGES['INFO_USAGE']} {add_user_data['limit']} {MESSAGES['GB']}\n{MESSAGES['INFO_REMAINING_DAYS']} {add_user_data['usage_days']} {MESSAGES['DAY']}",
                      reply_markup=markups.confirm_add_user_markup())
-    bot.register_next_step_handler(message, confirm_add_user)
+    bot.register_next_step_handler(message, confirm_add_user, server_id)
 
 
 # Add User - Confirm to add user
-def confirm_add_user(message: Message):
+def confirm_add_user(message: Message, server_id):
+    
     if message.text == KEY_MARKUP['CANCEL']:
         bot.send_message(message.chat.id, MESSAGES['CANCEL_ADD_USER'], reply_markup=markups.main_menu_keyboard_markup())
         return
@@ -126,12 +131,18 @@ def confirm_add_user(message: Message):
         msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'])
         # res = ADMIN_DB.add_default_user(name=add_user_data['name'], package_days=int(add_user_data['usage_days']),
         #                                 usage_limit_GB=int(add_user_data['limit']))
-        res = api.insert(name=add_user_data['name'], package_days=int(add_user_data['usage_days']),
+        server = USERS_DB.find_server(id=int(server_id))
+        if not server:
+            bot.send_message(message.chat.id, MESSAGES['ERROR_SERVER_NOT_FOUND'])
+            return
+        server = server[0]
+        URL = server['url'] + API_PATH
+        res = api.insert(URL, name=add_user_data['name'], package_days=int(add_user_data['usage_days']),
                          usage_limit_GB=int(add_user_data['limit']))
         if res:
             bot.send_message(message.chat.id, MESSAGES['SUCCESS_ADD_USER'],
                              reply_markup=markups.main_menu_keyboard_markup())
-            usr = utils.user_info(res)
+            usr = utils.user_info(URL, res)
             if not usr:
                 bot.send_message(message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'])
                 return
@@ -153,7 +164,7 @@ def edit_user_name(message: Message, uuid):
         return
     msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=markups.while_edit_user_markup())
     # status = ADMIN_DB.edit_user(uuid, name=message.text)
-    status = api.update(uuid, name=message.text)
+    status = api.update(URL, uuid, name=message.text)
     bot.delete_message(message.chat.id, msg_wait.message_id)
     if not status:
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
@@ -170,7 +181,7 @@ def edit_user_usage(message: Message, uuid):
         return
     msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=markups.while_edit_user_markup())
     # status = ADMIN_DB.edit_user(uuid, usage_limit_GB=int(message.text))
-    status = api.update(uuid, usage_limit_GB=int(message.text))
+    status = api.update(URL, uuid, usage_limit_GB=int(message.text))
     bot.delete_message(message.chat.id, msg_wait.message_id)
     if not status:
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
@@ -187,7 +198,7 @@ def edit_user_days(message: Message, uuid):
         return
     msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=markups.while_edit_user_markup())
     # status = ADMIN_DB.edit_user(uuid, package_days=int(message.text))
-    status = api.update(uuid, package_days=int(message.text))
+    status = api.update(URL, uuid, package_days=int(message.text))
     bot.delete_message(message.chat.id, msg_wait.message_id)
     if not status:
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
@@ -203,7 +214,7 @@ def edit_user_comment(message: Message, uuid):
         return
     msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=markups.while_edit_user_markup())
     # status = ADMIN_DB.edit_user(uuid, comment=message.text)
-    status = api.update(uuid, comment=message.text)
+    status = api.update(URL, uuid, comment=message.text)
     bot.delete_message(message.chat.id, msg_wait.message_id)
     if not status:
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
@@ -214,11 +225,11 @@ def edit_user_comment(message: Message, uuid):
 
 # ----------------------------------- Search User Area -----------------------------------
 # Search User - Name
-def search_user_name(message: Message):
+def search_user_name(message: Message, server_id):
     if is_it_cancel(message):
         return
     msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=markups.while_edit_user_markup())
-    users = utils.search_user_by_name(message.text)
+    users = utils.search_user_by_name(URL, message.text)
     bot.delete_message(message.chat.id, msg_wait.message_id)
     if not users:
         bot.send_message(message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'],
@@ -227,15 +238,15 @@ def search_user_name(message: Message):
     bot.send_message(message.chat.id, MESSAGES['SUCCESS_SEARCH_USER'], reply_markup=markups.main_menu_keyboard_markup())
 
     bot.send_message(message.chat.id, templates.users_list_template(users, MESSAGES['SEARCH_RESULT']),
-                     reply_markup=markups.users_list_markup(users))
+                     reply_markup=markups.users_list_markup(server_id, users))
 
 
 # Search User - UUID
-def search_user_uuid(message: Message):
+def search_user_uuid(message: Message, server_id):
     if is_it_cancel(message):
         return
     msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=markups.while_edit_user_markup())
-    user = utils.search_user_by_uuid(message.text)
+    user = utils.search_user_by_uuid(URL, message.text)
     bot.delete_message(message.chat.id, msg_wait.message_id)
     if not user:
         bot.send_message(message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'],
@@ -247,11 +258,11 @@ def search_user_uuid(message: Message):
 
 
 # Search User - Config
-def search_user_config(message: Message):
+def search_user_config(message: Message, server_id):
     if is_it_cancel(message):
         return
     msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=markups.while_edit_user_markup())
-    user = utils.search_user_by_config(message.text)
+    user = utils.search_user_by_config(URL, message.text)
     bot.delete_message(message.chat.id, msg_wait.message_id)
     if not user:
         bot.send_message(message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'],
@@ -306,6 +317,183 @@ def users_bot_add_plan_price(message: Message):
     bot.send_message(message.chat.id, MESSAGES['USERS_BOT_ADD_PLAN_SUCCESS'],
                      reply_markup=markups.main_menu_keyboard_markup())
 
+
+# ----------------------------------- Server Management Area -----------------------------------
+add_server_data = {}
+
+
+# Add Server - Title
+def add_server_title(message: Message):
+    if is_it_cancel(message):
+        return
+    add_server_data['title'] = message.text
+    bot.send_message(message.chat.id, MESSAGES['ADD_SERVER_URL'],
+                     reply_markup=markups.while_edit_user_markup())
+    bot.register_next_step_handler(message, add_server_url)
+
+
+# Add Server - url
+def add_server_url(message: Message):
+    if is_it_cancel(message):
+        return
+    msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=markups.while_edit_user_markup())
+    url = panel_url_validator(message.text)
+    bot.delete_message(message.chat.id, msg_wait.message_id)
+    if not url:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_ADD_SERVER_URL'],
+                     reply_markup=markups.while_edit_user_markup())
+        bot.register_next_step_handler(message, add_server_url)
+        return
+    add_server_data['url'] = url
+    bot.send_message(message.chat.id, MESSAGES['ADD_SERVER_USER_LIMIT'],
+                     reply_markup=markups.while_edit_user_markup())
+    bot.register_next_step_handler(message, add_server_user_limit)
+
+
+# Add Server - User Limit
+def add_server_user_limit(message: Message):
+    if is_it_cancel(message):
+        return
+    if not is_it_digit(message, markup=markups.while_edit_user_markup()):
+        bot.register_next_step_handler(message, add_server_user_limit)
+        return
+    add_server_data['user_limit'] = int(message.text)
+    msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=markups.while_edit_user_markup())
+    status = utils.add_server(add_server_data['title'], add_server_data['url'], add_server_data['user_limit'])
+    bot.delete_message(message.chat.id, msg_wait.message_id)
+    if not status:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
+        return
+    bot.send_message(message.chat.id, MESSAGES['ADD_SERVER_SUCCESS'],
+                     reply_markup=markups.main_menu_keyboard_markup())
+    servers = USERS_DB.select_servers()
+    bot.send_message(message.chat.id, KEY_MARKUP['SERVERS_MANAGEMENT'],
+                     reply_markup=markups.servers_management_markup(servers))
+    
+# Edit Server - Server Title
+def edit_server_title(message: Message, server_id):
+    if is_it_cancel(message):
+        return
+    status = USERS_DB.edit_server(int(server_id), title=message.text)
+    if not status:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+    server = USERS_DB.find_server(id=int(server_id))
+    if not server:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_SERVER_NOT_FOUND'])
+        return
+    server = server[0]
+    bot.send_message(message.chat.id, f"{MESSAGES['SUCCESS_SERVER_TITLE_EDITED']}{server['title']}",
+                     reply_markup=markups.main_menu_keyboard_markup())
+    plans = USERS_DB.select_plans()
+    msg = templates.server_info_template(server,plans)
+    bot.send_message(message.chat.id, msg,
+                     reply_markup=markups.server_edit_markup(server_id))
+    
+# Edit Server - Server User Limit
+def edit_server_user_limit(message: Message, server_id):
+    if is_it_cancel(message):
+        return
+    if not is_it_digit(message, markup=markups.while_edit_user_markup()):
+        bot.register_next_step_handler(message, edit_server_user_limit, server_id)
+        return
+    status = USERS_DB.edit_server(int(server_id), user_limit=int(message.text))
+    if not status:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+    server = USERS_DB.find_server(id=int(server_id))
+    if not server:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_SERVER_NOT_FOUND'])
+        return
+    server = server[0]
+    bot.send_message(message.chat.id, f"{MESSAGES['SUCCESS_SERVER_USER_LIMIT_EDITED']}{server['user_limit']}",
+                     reply_markup=markups.main_menu_keyboard_markup())
+    plans = USERS_DB.select_plans()
+    msg = templates.server_info_template(server,plans)
+    bot.send_message(message.chat.id, msg,
+                     reply_markup=markups.server_edit_markup(server_id))
+
+# Edit Server - Server Url
+def edit_server_url(message: Message, server_id):
+    if is_it_cancel(message):
+        return
+    msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=markups.while_edit_user_markup())
+    url = panel_url_validator(message.text)
+    bot.delete_message(message.chat.id, msg_wait.message_id)
+    if not url:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_ADD_SERVER_URL'],
+                     reply_markup=markups.while_edit_user_markup())
+        bot.register_next_step_handler(message, edit_server_url, server_id )
+        return
+    status = USERS_DB.edit_server(int(server_id), url=url)
+    if not status:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+    server = USERS_DB.find_server(id=int(server_id))
+    if not server:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_SERVER_NOT_FOUND'])
+        return
+    server = server[0]
+    bot.send_message(message.chat.id, f"{MESSAGES['SUCCESS_SERVER_URL_EDITED']}/n{server['url']}",
+                     reply_markup=markups.main_menu_keyboard_markup())
+    plans = USERS_DB.select_plans()
+    msg = templates.server_info_template(server,plans)
+    bot.send_message(message.chat.id, msg,
+                     reply_markup=markups.server_edit_markup(server_id))
+
+
+# ----------------------------------- Users Bot Management Area -----------------------------------
+add_plan_data = {}
+
+
+# Add Plan - Size
+def users_bot_add_plan_usage(message: Message):
+    if is_it_cancel(message):
+        return
+    if not is_it_digit(message):
+        return
+    add_plan_data['usage'] = int(message.text)
+    bot.send_message(message.chat.id, MESSAGES['USERS_BOT_ADD_PLAN_DAYS'],
+                     reply_markup=markups.while_edit_user_markup())
+    bot.register_next_step_handler(message, users_bot_add_plan_days)
+
+
+# Add Plan - Days
+def users_bot_add_plan_days(message: Message):
+    if is_it_cancel(message):
+        return
+    if not is_it_digit(message):
+        return
+    add_plan_data['days'] = int(message.text)
+    bot.send_message(message.chat.id, MESSAGES['USERS_BOT_ADD_PLAN_PRICE'],
+                     reply_markup=markups.while_edit_user_markup())
+    bot.register_next_step_handler(message, users_bot_add_plan_price)
+
+
+# Add Plan - Price
+def users_bot_add_plan_price(message: Message):
+    if is_it_cancel(message):
+        return
+    if not is_it_digit(message):
+        return
+    add_plan_data['price'] = utils.toman_to_rial(message.text)
+    msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=markups.while_edit_user_markup())
+    status = utils.users_bot_add_plan(add_plan_data['usage'], add_plan_data['days'],
+                                      add_plan_data['price'], add_plan_data['server_id'])
+    bot.delete_message(message.chat.id, msg_wait.message_id)
+    if not status:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
+        return
+    bot.send_message(message.chat.id, MESSAGES['USERS_BOT_ADD_PLAN_SUCCESS'],
+                     reply_markup=markups.main_menu_keyboard_markup())
+    plans_list = []
+    plans = USERS_DB.select_plans()
+    if plans:
+        for plan in plans:
+            if plan['status']:
+                if plan['server_id'] == int(add_plan_data['server_id']):
+                        plans_list.append(plan)
+        plans_markup = markups.plans_list_markup(plans_list,add_plan_data['server_id'])
+        bot.send_message(message.chat.id, {MESSAGES['USERS_BOT_PLANS_LIST']},
+                         reply_markup=plans_markup)
+    
 
 # Users Bot - Edit Owner Info - Username
 def users_bot_edit_owner_info_username(message: Message):
@@ -440,7 +628,7 @@ def users_bot_sub_status(message: Message):
         return
     user_uuid = user[0]['uuid']
 
-    usr = utils.user_info(user_uuid)
+    usr = utils.user_info(URL, user_uuid)
     if not usr:
         bot.send_message(message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'])
         return
@@ -559,11 +747,12 @@ def callback_query(call: CallbackQuery):
     data = call.data.split(':')
     key = data[0]
     value = data[1]
-
+    global selected_server_id
+    global URL
     # ----------------------------------- Users List Area Callbacks -----------------------------------
     # Single User Info Callback
     if key == "info":
-        usr = utils.user_info(value)
+        usr = utils.user_info(URL, value)
         if not usr:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'])
             return
@@ -574,12 +763,13 @@ def callback_query(call: CallbackQuery):
     # Next Page Callback
     elif key == "next":
         # users_list = utils.dict_process(utils.users_to_dict(ADMIN_DB.select_users()))
-        users_list = api.select()
+        
+        users_list = api.select(URL)
         if not users_list:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'])
             return
         bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,
-                                      reply_markup=markups.users_list_markup(users_list, int(value)))
+                                      reply_markup=markups.users_list_markup(selected_server_id, users_list, int(value)))
 
     # ----------------------------------- Single User Info Area Callbacks -----------------------------------
     # Delete User Callback
@@ -597,6 +787,7 @@ def callback_query(call: CallbackQuery):
                          reply_markup=markups.main_menu_keyboard_markup())
     # Edit User Main Button Callback
     elif key == "user_edit":
+        print(value)
         bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,
                                       reply_markup=markups.edit_user_markup(value))
 
@@ -609,7 +800,8 @@ def callback_query(call: CallbackQuery):
     # ----------------------------------- Edit User Area Callbacks -----------------------------------
     # Edit User - Update Message Callback
     elif key == "user_edit_update":
-        usr = utils.user_info(value)
+        print(value)
+        usr = utils.user_info(URL, value)
         if not usr:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
             return
@@ -623,7 +815,7 @@ def callback_query(call: CallbackQuery):
         bot.register_next_step_handler(call.message, edit_user_usage, value)
     # Edit User - Reset Usage Callback
     elif key == "user_edit_reset_usage":
-        status = api.update(uuid=value, current_usage_GB=0)
+        status = api.update(URL, uuid=value, current_usage_GB=0)
         if not status:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'],
                              reply_markup=markups.main_menu_keyboard_markup())
@@ -639,7 +831,7 @@ def callback_query(call: CallbackQuery):
     elif key == "user_edit_reset_days":
         # status = ADMIN_DB.reset_package_days(uuid=value)
         last_reset_time = datetime.datetime.now().strftime("%Y-%m-%d")
-        status = api.update(uuid=value, start_date=last_reset_time)
+        status = api.update(URL, uuid=value, start_date=last_reset_time)
         # api.insert()
         if not status:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'],
@@ -653,6 +845,7 @@ def callback_query(call: CallbackQuery):
         bot.register_next_step_handler(call.message, edit_user_comment, value)
     # Edit User - Edit Name Callback
     elif key == "user_edit_name":
+        print(value)
         bot.send_message(call.message.chat.id, MESSAGES['ENTER_NEW_NAME'],
                          reply_markup=markups.while_edit_user_markup())
         bot.register_next_step_handler(call.message, edit_user_name, value)
@@ -665,7 +858,7 @@ def callback_query(call: CallbackQuery):
                                       reply_markup=markups.sub_user_list_markup(value))
     # User Configs - VLESS Configs Callback
     elif key == "conf_dir_vless":
-        sub = utils.sub_links(value)
+        sub = utils.sub_links(value, URL)
         if not sub:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
             return
@@ -683,7 +876,7 @@ def callback_query(call: CallbackQuery):
                                  reply_markup=markups.main_menu_keyboard_markup())
     # User Configs - VMess Configs Callback
     elif key == "conf_dir_vmess":
-        sub = utils.sub_links(value)
+        sub = utils.sub_links(value, URL)
         if not sub:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
             return
@@ -701,7 +894,7 @@ def callback_query(call: CallbackQuery):
                                  reply_markup=markups.main_menu_keyboard_markup())
     # User Configs - Trojan Configs Callback
     elif key == "conf_dir_trojan":
-        sub = utils.sub_links(value)
+        sub = utils.sub_links(value, URL)
         if not sub:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
             return
@@ -728,7 +921,7 @@ def callback_query(call: CallbackQuery):
                                       reply_markup=markups.sub_user_list_markup(value))
     # User Configs - Vless Configs Callback
     elif key == "conf_dir_vless":
-        sub = utils.sub_links(value)
+        sub = utils.sub_links(value, URL)
         if not sub:
             bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
             return
@@ -746,7 +939,7 @@ def callback_query(call: CallbackQuery):
                                  reply_markup=markups.main_menu_keyboard_markup())
     # User Configs - VMess Configs Callback
     elif key == "conf_dir_vmess":
-        sub = utils.sub_links(value)
+        sub = utils.sub_links(value, URL)
         if not sub:
             bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
             return
@@ -764,7 +957,7 @@ def callback_query(call: CallbackQuery):
                                  reply_markup=markups.main_menu_keyboard_markup())
     # User Configs - Trojan Configs Callback
     elif key == "conf_dir_trojan":
-        sub = utils.sub_links(value)
+        sub = utils.sub_links(value, URL)
         if not sub:
             bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
             return
@@ -783,7 +976,7 @@ def callback_query(call: CallbackQuery):
 
     # User Configs - Subscription Configs Callback
     elif key == "conf_sub_url":
-        sub = utils.sub_links(value)
+        sub = utils.sub_links(value, URL)
         if not sub:
             bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
             return
@@ -799,7 +992,7 @@ def callback_query(call: CallbackQuery):
         )
     # User Configs - Base64 Subscription Configs Callback
     elif key == "conf_sub_url_b64":
-        sub = utils.sub_links(value)
+        sub = utils.sub_links(value, URL)
         if not sub:
             bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
             return
@@ -815,7 +1008,7 @@ def callback_query(call: CallbackQuery):
         )
     # User Configs - Subscription Configs For Clash Callback
     elif key == "conf_clash":
-        sub = utils.sub_links(value)
+        sub = utils.sub_links(value, URL)
         if not sub:
             bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
             return
@@ -832,7 +1025,7 @@ def callback_query(call: CallbackQuery):
     # User Configs - Subscription Configs For Hiddify Callback
     elif key == "conf_hiddify":
         print(value)
-        sub = utils.sub_links(value)
+        sub = utils.sub_links(value, URL)
         if not sub:
             bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
             return
@@ -848,7 +1041,7 @@ def callback_query(call: CallbackQuery):
         )
 
     elif key == "conf_sub_auto":
-        sub = utils.sub_links(value)
+        sub = utils.sub_links(value, URL)
         if not sub:
             bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
             return
@@ -864,7 +1057,7 @@ def callback_query(call: CallbackQuery):
         )
 
     elif key == "conf_sub_sing_box":
-        sub = utils.sub_links(value)
+        sub = utils.sub_links(value, URL)
         if not sub:
             bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
             return
@@ -880,7 +1073,7 @@ def callback_query(call: CallbackQuery):
         )
 
     elif key == "conf_sub_full_sing_box":
-        sub = utils.sub_links(value)
+        sub = utils.sub_links(value, URL)
         if not sub:
             bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
             return
@@ -903,27 +1096,117 @@ def callback_query(call: CallbackQuery):
     if key == "search_name":
         bot.send_message(call.message.chat.id, MESSAGES['SEARCH_USER_NAME'],
                          reply_markup=markups.while_edit_user_markup())
-        bot.register_next_step_handler(call.message, search_user_name)
+        bot.register_next_step_handler(call.message, search_user_name, value)
     # Search User - UUID Callback
     elif key == "search_uuid":
         bot.send_message(call.message.chat.id, MESSAGES['SEARCH_USER_UUID'],
                          reply_markup=markups.while_edit_user_markup())
-        bot.register_next_step_handler(call.message, search_user_uuid)
+        bot.register_next_step_handler(call.message, search_user_uuid, value)
     # Search User - Config Callback
     elif key == "search_config":
         bot.send_message(call.message.chat.id, MESSAGES['SEARCH_USER_CONFIG'],
                          reply_markup=markups.while_edit_user_markup())
-        bot.register_next_step_handler(call.message, search_user_config)
+        bot.register_next_step_handler(call.message, search_user_config, value)
     # Search User - Expired Callback
     elif key == "search_expired":
         # users_list = utils.dict_process(utils.users_to_dict(ADMIN_DB.select_users()))
-        users_list = api.select()
+        users_list = api.select(URL)
         users_list = utils.expired_users_list(users_list)
         if not users_list:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'])
             return
         msg = templates.users_list_template(users_list, MESSAGES['EXPIRED_USERS_LIST'])
-        bot.send_message(call.message.chat.id, msg, reply_markup=markups.users_list_markup(users_list))
+        bot.send_message(call.message.chat.id, msg, reply_markup=markups.users_list_markup(value, users_list))
+
+    # ----------------------------------- Server Management Callbacks -----------------------------------
+    elif key == "server_selected":
+        server = USERS_DB.find_server(id=int(value))
+        if not server:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_SERVER_NOT_FOUND'])
+            return
+        server = server[0]
+        URL = server['url'] + API_PATH
+        selected_server_id = server['id'] 
+        plans = USERS_DB.select_plans()
+        msg = templates.server_info_template(server,plans)
+        bot.edit_message_text(msg, call.message.chat.id, call.message.message_id,
+                                    reply_markup=markups.server_selected_markup(value))
+
+    # Server Management - Add Server Callback
+    elif key == "add_server":
+        bot.send_message(call.message.chat.id, MESSAGES['ADD_SERVER'],
+                         reply_markup=markups.while_edit_user_markup())
+        bot.send_message(call.message.chat.id, MESSAGES['ADD_SERVER_TITLE'])
+        bot.register_next_step_handler(call.message, add_server_title)
+
+    # Server Management - Delete Server Callback
+    elif key == "delete_server":
+        bot.edit_message_text(MESSAGES['DELETE_SERVER_QUESTION'], call.message.chat.id, call.message.message_id,
+                                    reply_markup=markups.server_delete_markup(value))
+    
+    # Server Management - Edit Server Callback
+    elif key == "edit_server":
+        bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,
+                                    reply_markup=markups.server_edit_markup(value))
+        
+    # Server Management - Edit Title Server Callback
+    elif key == "server_edit_title":
+        bot.send_message(call.message.chat.id, MESSAGES['ADD_SERVER_TITLE'],
+                         reply_markup=markups.while_edit_user_markup())
+        bot.register_next_step_handler(call.message, edit_server_title, value)
+        
+    # Server Management - Edit User Limit Server Callback
+    elif key == "server_edit_user_limit":
+        bot.send_message(call.message.chat.id, MESSAGES['ADD_SERVER_USER_LIMIT'],
+                         reply_markup=markups.while_edit_user_markup())
+        bot.register_next_step_handler(call.message, edit_server_user_limit, value)
+
+    # Server Management - Edit Url Server Callback
+    elif key == "server_edit_url":
+        bot.send_message(call.message.chat.id, MESSAGES['ADD_SERVER_URL'],
+                         reply_markup=markups.while_edit_user_markup())
+        bot.register_next_step_handler(call.message, edit_server_url, value)
+    # Server Management - Confirm Delete Server Callback
+    elif key == "confirm_delete_server":
+        status = USERS_DB.edit_server(value, status=0)
+        if not status:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+            
+        servers = USERS_DB.select_servers()
+        bot.edit_message_text(KEY_MARKUP['SERVERS_MANAGEMENT'], call.message.chat.id, call.message.message_id,
+                                    reply_markup=markups.servers_management_markup(servers)) 
+        
+    # Server Management - List of Plans for Server Callback
+    elif key == "server_list_of_plans":
+        plans_list = []
+        plans = USERS_DB.select_plans()
+        if plans:
+            for plan in plans:
+                if plan['status']:
+                    if plan['server_id'] == int(value):
+                        plans_list.append(plan)
+        plans_markup = markups.plans_list_markup(plans_list,value)
+        bot.edit_message_text({MESSAGES['USERS_BOT_PLANS_LIST']}, call.message.chat.id, call.message.message_id,
+                         reply_markup=plans_markup)
+        
+    elif key == "server_list_of_users":
+        users_list = api.select(URL)
+        print(URL)
+        if not users_list:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'])
+            return
+        msg = templates.users_list_template(users_list)
+        bot.edit_message_text(msg, call.message.chat.id, call.message.message_id,
+                              reply_markup=markups.users_list_markup(value, users_list))
+    
+    elif key == "server_add_user":
+        global add_user_data
+        bot.send_message(call.message.chat.id, MESSAGES['ADD_USER_NAME'], reply_markup=markups.while_add_user_markup())
+        bot.register_next_step_handler(call.message, add_user_name, value)
+
+    elif key == "server_search_user":
+        bot.edit_message_text(MESSAGES['SEARCH_USER'],call.message.chat.id, call.message.message_id, 
+                              reply_markup=markups.search_user_markup(value))
 
     # ----------------------------------- Users Bot Management Callbacks -----------------------------------
     elif key == "users_bot_management_menu":
@@ -935,29 +1218,57 @@ def callback_query(call: CallbackQuery):
         bot.send_message(call.message.chat.id, MESSAGES['USERS_BOT_ADD_PLAN'],
                          reply_markup=markups.while_edit_user_markup())
         bot.send_message(call.message.chat.id, MESSAGES['USERS_BOT_ADD_PLAN_USAGE'])
+        add_plan_data['server_id'] = int(value)
         bot.register_next_step_handler(call.message, users_bot_add_plan_usage)
+
+    # Plan Management - Info Plan Callback
+    elif key == "info_plan_selected":
+        plans= USERS_DB.find_plan(id=value)
+        if not plans:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+            return
+        orders = USERS_DB.find_order(plan_id=value)
+        plan = plans[0]
+        msg = templates.plan_info_template(plan, orders)
+        bot.edit_message_text(msg, call.message.chat.id, call.message.message_id,
+                                    reply_markup=markups.plan_info_selected_markup(plan['server_id']))
+
+
 
     # Plan Management - Edit Plan Callback
     elif key == "users_bot_del_plan":
         status = USERS_DB.edit_plan(value, status=0)
         if status:
-            bot.send_message(call.message.chat.id, MESSAGES['USERS_BOT_PLAN_DELETED'])
-            bot.delete_message(call.message.chat.id, call.message.message_id)
+            plans= USERS_DB.find_plan(id=value)
+            if not plans:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+                return
+            del_plan = plans[0]
+            server_id = del_plan['server_id']
+            plans_list = []
+            plans = USERS_DB.select_plans()
+            if plans:
+                for plan in plans:
+                    if plan['status']:
+                        if plan['server_id'] == server_id:
+                            plans_list.append(plan)
+            plans_markup = markups.plans_list_markup(plans_list, server_id,delete_mode = True)
+            bot.edit_message_text({MESSAGES['USERS_BOT_SELECT_PLAN_TO_DELETE']}, call.message.chat.id, call.message.message_id,
+                         reply_markup=plans_markup)
         else:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
 
     # Plan Management - List Plans Callback
     elif key == "users_bot_list_plans":
+        plans_list = []
         plans = USERS_DB.select_plans()
-        if not plans:
-            bot.send_message(call.message.chat.id, MESSAGES['ERROR_PLAN_NOT_FOUND'])
-            return
-        plans_markup = markups.plans_list_markup(plans)
-        if not plans_markup:
-            bot.send_message(call.message.chat.id, MESSAGES['ERROR_PLAN_NOT_FOUND'])
-            return
-        bot.send_message(call.message.chat.id,
-                         f"{MESSAGES['USERS_BOT_PLANS_LIST']}\n{MESSAGES['USERS_BOT_SELECT_PLAN_TO_DELETE']}",
+        if plans:
+            for plan in plans:
+                if plan['status']:
+                    if plan['server_id'] == int(value):
+                        plans_list.append(plan)
+        plans_markup = markups.plans_list_markup(plans_list,value,delete_mode = True)
+        bot.edit_message_text({MESSAGES['USERS_BOT_SELECT_PLAN_TO_DELETE']}, call.message.chat.id, call.message.message_id,
                          reply_markup=plans_markup)
 
     # Owner Info - Edit Owner Info Callback
@@ -1275,13 +1586,52 @@ def callback_query(call: CallbackQuery):
 
     # Back to User Panel Callback
     elif key == "back_to_user_panel":
-        usr = utils.user_info(value)
+        usr = utils.user_info(URL, value)
         if not usr:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'])
             return
         msg = templates.user_info_template(usr)
         bot.edit_message_text(msg, call.message.chat.id, call.message.message_id,
                               reply_markup=markups.user_info_markup(usr['uuid']))
+        
+    elif key == "back_to_server_management":
+        servers = USERS_DB.select_servers()
+        bot.edit_message_text(KEY_MARKUP['SERVERS_MANAGEMENT'], call.message.chat.id, call.message.message_id,
+                                    reply_markup=markups.servers_management_markup(servers))
+    
+    elif key == "back_to_server_list_of_plans":
+        plans_list = []
+        plans = USERS_DB.select_plans()
+        if plans:
+            for plan in plans:
+                if plan['status']:
+                    if plan['server_id'] == int(value):
+                        plans_list.append(plan)
+        plans_markup = markups.plans_list_markup(plans_list,value)
+        bot.edit_message_text({MESSAGES['USERS_BOT_PLANS_LIST']}, call.message.chat.id, call.message.message_id,
+                         reply_markup=plans_markup)
+        
+    elif key == "back_to_server_selected":
+        print(value)
+        server = USERS_DB.find_server(id=int(value))
+        if not server:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_SERVER_NOT_FOUND'])
+            return
+        server = server[0]
+        plans = USERS_DB.select_plans()
+        msg = templates.server_info_template(server,plans)
+        bot.edit_message_text(msg, call.message.chat.id, call.message.message_id,
+                                    reply_markup=markups.server_selected_markup(value))
+
+    elif key == "back_to_server_user_list":
+        users_list = api.select(URL)
+        print(URL)
+        if not users_list:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'])
+            return
+        msg = templates.users_list_template(users_list)
+        bot.edit_message_text(msg, call.message.chat.id, call.message.message_id,
+                              reply_markup=markups.users_list_markup(value, users_list))
 
 
 # Check Admin Permission
@@ -1298,23 +1648,23 @@ def send_welcome(message: Message):
 
 
 # Send users list Message Handler
-@bot.message_handler(func=lambda message: message.text == KEY_MARKUP['USERS_LIST'])
-def all_users_list(message: Message):
-    # users_list = utils.dict_process(utils.users_to_dict(ADMIN_DB.select_users()))
-    users_list = api.select()
-    if not users_list:
-        bot.send_message(message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'])
-        return
-    msg = templates.users_list_template(users_list)
-    bot.send_message(message.chat.id, msg, reply_markup=markups.users_list_markup(users_list))
+# @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['USERS_LIST'])
+# def all_users_list(message: Message):
+#     # users_list = utils.dict_process(utils.users_to_dict(ADMIN_DB.select_users()))
+#     users_list = api.select(URL)
+#     if not users_list:
+#         bot.send_message(message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'])
+#         return
+#     msg = templates.users_list_template(users_list)
+#     bot.send_message(message.chat.id, msg, reply_markup=markups.users_list_markup(users_list))
 
 
 # Add User Message Handler
-@bot.message_handler(func=lambda message: message.text == KEY_MARKUP['ADD_USER'])
-def add_user(message: Message):
-    global add_user_data
-    bot.send_message(message.chat.id, MESSAGES['ADD_USER_NAME'], reply_markup=markups.while_add_user_markup())
-    bot.register_next_step_handler(message, add_user_name)
+# @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['ADD_USER'])
+# def add_user(message: Message):
+#     global add_user_data
+#     bot.send_message(message.chat.id, MESSAGES['ADD_USER_NAME'], reply_markup=markups.while_add_user_markup())
+#     bot.register_next_step_handler(message, add_user_name)
 
 
 # Panel Backup Message Handler
@@ -1356,7 +1706,13 @@ def users_bot_management(message: Message):
         return
     bot.send_message(message.chat.id, KEY_MARKUP['USERS_BOT_MANAGEMENT'],
                      reply_markup=markups.users_bot_management_markup())
-
+    
+# Server Management Message Handler
+@bot.message_handler(func=lambda message: message.text == KEY_MARKUP['SERVERS_MANAGEMENT'])
+def servers_management(message: Message):
+    servers = USERS_DB.select_servers()
+    bot.send_message(message.chat.id, KEY_MARKUP['SERVERS_MANAGEMENT'],
+                     reply_markup=markups.servers_management_markup(server_list))
 
 # About Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['ABOUT_BOT'])
