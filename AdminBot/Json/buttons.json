@@ -59,12 +59,23 @@
     "USERS_BOT_SETTINGS_NOTIF_REMINDER_USAGE": "Usage Reminder",
     "USERS_BOT_SETTINGS_NOTIF_REMINDER_DAYS": "Days Reminder",
     "USERS_BOT_SETTINGS_PANEL_AUTO_BACKUP": "Panel Auto Backup",
+    "USERS_BOT_SETTINGS_BOT_AUTO_BACKUP": "Bot Auto Backup",
     "USERS_BOT_SETTINGS_PANEL_MANUAL": "Manual",
     "USERS_BOT_SETTINGS_PANEL_MANUAL_ANDROID": "Android Manual",
     "USERS_BOT_SETTINGS_PANEL_MANUAL_IOS": "IOS Manual",
     "USERS_BOT_SETTINGS_PANEL_MANUAL_WIN": "Windows Manual",
     "USERS_BOT_SETTINGS_PANEL_MANUAL_MAC": "Mac Manual",
     "USERS_BOT_SETTINGS_PANEL_MANUAL_LIN": "Linux Manual",
+    "USERS_BOT_SETTINGS_BACKUP_BOT": "Backup Bot",
+    "USERS_BOT_SETTINGS_RESTORE_BOT": "Restore Bot",
+    "USERS_BOT_SETTINGS_BUY_SUBSCRIPTION_STATUS": "Buy Subscription",
+    "USERS_BOT_SETTINGS_RENEWAL_SUBSCRIPTION_STATUS": "Renewal Subscription",
+    "USERS_BOT_SETTINGS_RENEWAL_METHOD": "Renewal Method",
+    "USERS_BOT_SETTINGS_RENEWAL_METHOD_DEFAULT": "Default",
+    "USERS_BOT_SETTINGS_RENEWAL_METHOD_ADVANCED": "Advanced",
+    "USERS_BOT_SETTINGS_RENEWAL_METHOD_FAIRLY": "Fairly",
+    "USERS_BOT_SETTINGS_RENEWAL_METHOD_ADVANCED_DAYS": "Maximum Days for Renewal",
+    "USERS_BOT_SETTINGS_RENEWAL_METHOD_ADVANCED_USAGE": "Maximum Usage for Renewal",
     "ABOUT_BOT": "ℹ️",
     "TO_QR": "ً🖼QR",
     "SUPPORT_GROUP": "Support Group",
@@ -138,12 +149,23 @@
     "USERS_BOT_SETTINGS_NOTIF_REMINDER_USAGE": "یادآور وضعیت مصرف",
     "USERS_BOT_SETTINGS_NOTIF_REMINDER_DAYS": "یادآور وضعیت زمان",
     "USERS_BOT_SETTINGS_PANEL_AUTO_BACKUP": "بکاپ خودکار پنل",
+    "USERS_BOT_SETTINGS_BOT_AUTO_BACKUP": "بکاپ خودکار ربات",
     "USERS_BOT_SETTINGS_PANEL_MANUAL": "متن راهنما",
     "USERS_BOT_SETTINGS_PANEL_MANUAL_ANDROID": "راهنمای اندروید",
     "USERS_BOT_SETTINGS_PANEL_MANUAL_IOS": "راهنمای IOS",
     "USERS_BOT_SETTINGS_PANEL_MANUAL_WIN": "راهنمای ویندوز",
     "USERS_BOT_SETTINGS_PANEL_MANUAL_MAC": "راهنمای مک",
     "USERS_BOT_SETTINGS_PANEL_MANUAL_LIN": "راهنمای لینوکس",
+    "USERS_BOT_SETTINGS_BACKUP_BOT": "پشتیبان گیری ربات",
+    "USERS_BOT_SETTINGS_RESTORE_BOT": "بازیابی ربات",
+    "USERS_BOT_SETTINGS_BUY_SUBSCRIPTION_STATUS": "خرید اشتراک",
+    "USERS_BOT_SETTINGS_RENEWAL_SUBSCRIPTION_STATUS": "تمدید اشتراک",
+    "USERS_BOT_SETTINGS_RENEWAL_METHOD": "شیوه تمدید",
+    "USERS_BOT_SETTINGS_RENEWAL_METHOD_DEFAULT": "پیشفرض",
+    "USERS_BOT_SETTINGS_RENEWAL_METHOD_ADVANCED": "پیشرفته",
+    "USERS_BOT_SETTINGS_RENEWAL_METHOD_FAIRLY": "منصفانه",
+    "USERS_BOT_SETTINGS_RENEWAL_METHOD_ADVANCED_DAYS": "حداکثر زمان مجاز برای تمدید",
+    "USERS_BOT_SETTINGS_RENEWAL_METHOD_ADVANCED_USAGE": "حداکثر مصرف مجاز برای تمدید",
     "ABOUT_BOT": "ℹ️",
     "TO_QR": "ً🖼کیوآر",
     "SUPPORT_GROUP": "گروه پشتیبانی",

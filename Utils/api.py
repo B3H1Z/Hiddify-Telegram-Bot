@@ -19,7 +19,7 @@ def select(url, endpoint="/user/"):
         res = Utils.utils.dict_process(url, Utils.utils.users_to_dict(response.json()))
         return res
     except Exception as e:
-        print(e)
+        logging.error("API error: %s" % e)
         return None
 
 def find(url, uuid, endpoint="/user/"):
@@ -34,7 +34,7 @@ def find(url, uuid, endpoint="/user/"):
             return None
         return jr[0]
     except Exception as e:
-        print(e)
+        logging.error("API error: %s" % e)
         return None
 
 def insert(url, name, usage_limit_GB, package_days, last_reset_time=None, added_by_uuid=None, mode="no_reset",
@@ -46,7 +46,7 @@ def insert(url, name, usage_limit_GB, package_days, last_reset_time=None, added_
     # expiry_time = (datetime.datetime.now() + datetime.timedelta(days=180)).strftime("%Y-%m-%d")
     # start_date = None
     # current_usage_GB = 0
-    added_by_uuid = urlparse(PANEL_URL).path.split('/')[2]
+    added_by_uuid = urlparse(url).path.split('/')[2]
     last_reset_time = datetime.datetime.now().strftime("%Y-%m-%d")
 
     data = {
@@ -68,7 +68,7 @@ def insert(url, name, usage_limit_GB, package_days, last_reset_time=None, added_
         response = requests.post(url + endpoint, data=jdata, headers={'Content-Type': 'application/json'})
         return uuid
     except Exception as e:
-        print(e)
+        logging.error("API error: %s" % e)
         return None
 
 def update(url, uuid, endpoint="/user/", **kwargs, ):
@@ -83,16 +83,6 @@ def update(url, uuid, endpoint="/user/", **kwargs, ):
                                     headers={'Content-Type': 'application/json'})
         return uuid
     except Exception as e:
-        print(e)
+        logging.error("API error: %s" % e)
         return None
 
-
-#api = API(PANEL_URL + API_PATH)
-
-# api.select("/user/")
-# api.find("/user/", {"uuid": "6ebd2ea8-4d41-48b7-8fc2-7d6570"})
-# api.insert("/user/", {"example": "data"})
-# api.update("/user/", {"example": "data"})
-
-
-# print(dict_process(users_to_dict(api.select("/user/"))))

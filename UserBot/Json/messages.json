@@ -77,7 +77,10 @@
         "MANUAL_WIN": "\uD83D\uDCE5Windows:\n<a href='https://github.com/MatsuriDayo/nekoray/releases'>Nekoray</a>\n<a href='https://github.com/2dust/v2rayN/releases'>V2rayN</a>\n<a href='https://github.com/hiddify/HiddifyN/releases'>HiddifyN</a>",
         "MANUAL_MAC": "📥Linux:<a href='https://github.com/MatsuriDayo/nekoray/releases'>Nekoray</a>",
         "MANUAL_LIN": "📥Mac:<a href='https://github.com/MatsuriDayo/nekoray/releases'>Nekoray</a>",
-        "MANUAL_HDR": "⭕Connection Guide"
+        "MANUAL_HDR": "⭕Connection Guide",
+        "WELCOME_TO_ADMIN": "Users bot has been successfully launched.\nPlease send /start command to start working.",
+        "BUY_SUBSCRIPTION_CLOSED": "Buy subscription is not available at the moment.",
+        "RENEWAL_SUBSCRIPTION_CLOSED": "Renewal subscription is not available at the moment."
     },
     "FA": {
         "WELCOME": "به ربات کاربران خوش آمدید",
@@ -157,6 +160,9 @@
         "MANUAL_WIN": "\uD83D\uDCE5Windows:\n<a href='https://github.com/MatsuriDayo/nekoray/releases'>Nekoray</a>\n<a href='https://github.com/2dust/v2rayN/releases'>V2rayN</a>\n<a href='https://github.com/hiddify/HiddifyN/releases'>HiddifyN</a>",
         "MANUAL_MAC": "📥Linux:\n<a href='https://github.com/MatsuriDayo/nekoray/releases'>Nekoray</a>",
         "MANUAL_LIN": "📥Mac:\n<a href='https://github.com/MatsuriDayo/nekoray/releases'>Nekoray</a>",
-        "MANUAL_HDR": "لطفا سیستم عامل خود را انتخاب کنید"
+        "MANUAL_HDR": "لطفا سیستم عامل خود را انتخاب کنید",
+        "WELCOME_TO_ADMIN": "ربات کاربران هیدی بات با موفقیت راه‌اندازی شد.\nبرای شروع کار، دستور /start را ارسال کنید.",
+        "BUY_SUBSCRIPTION_CLOSED": "در حال حاضر امکان خرید اشتراک وجود ندارد.",
+        "RENEWAL_SUBSCRIPTION_CLOSED": "در حال حاضر امکان تمدید اشتراک وجود ندارد."
     }
 }

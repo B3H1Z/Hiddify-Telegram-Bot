@@ -5,45 +5,31 @@ import os
 from urllib.parse import urlparse
 import requests
 from termcolor import colored
-from version import __version__
 
+# import Utils.utils
+from version import __version__
 
 # PANEL_URL, API_PATH = None, None
 
 # Bypass proxy
 os.environ['no_proxy'] = '*'
-# DEBUG = True
 
 VERSION = __version__
 
-# if DEBUG:
-#     MAIN_DB_LOC = os.path.join(os.getcwd(), "hiddifypanel.db")
-# else:
-#     MAIN_DB_LOC = "/opt/hiddify-config/hiddify-panel/hiddifypanel.db"
-
 USERS_DB_LOC = os.path.join(os.getcwd(), "Database", "hidyBot.db")
-CONF_LOC = os.path.join(os.getcwd(), "config.json")
 LOG_LOC = os.path.join(os.getcwd(), "Logs", "hidyBot.log")
 BACKUP_LOC = os.path.join(os.getcwd(), "Backup")
+RECEIPTIONS_LOC = os.path.join(os.getcwd(), "UserBot", "Receiptions")
+BOT_BACKUP_LOC = os.path.join(os.getcwd(), "Backup", "Bot")
 API_PATH = "/api/v1"
 HIDY_BOT_ID = "@HidyBotGroup"
-
+# if Logs directory not exists, create it
+if not os.path.exists(os.path.join(os.getcwd(), "Logs")):
+    os.mkdir(os.path.join(os.getcwd(), "Logs"))
 logging.basicConfig(handlers=[logging.FileHandler(filename=LOG_LOC,
                                                   encoding='utf-8', mode='w')],
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
-
-# try:
-#     # Check is database file exists
-#     if not os.path.exists(MAIN_DB_LOC):
-#         logging.error(f"Database file not found in {MAIN_DB_LOC} directory!")
-#         raise FileNotFoundError("Database file not found!")
-#     # ADMIN_DB = Database.dbManager.AdminDBManager(MAIN_DB_LOC)
-# except Exception as e:
-#     logging.error(f"Error while connecting to database \n Error:{e}")
-#     raise Exception("Error while connecting to database")
-
-# USERS_DB = None
 
 
 def setup_users_db():
@@ -51,7 +37,6 @@ def setup_users_db():
     try:
         if not os.path.exists(USERS_DB_LOC):
             logging.error(f"Database file not found in {USERS_DB_LOC} directory!")
-            # Create database file
             with open(USERS_DB_LOC, "w") as f:
                 pass
         # USERS_DB = Database.dbManager.UserDBManager(USERS_DB_LOC)
@@ -61,50 +46,60 @@ def setup_users_db():
     # return USERS_DB
 
 
-def is_config_exists():
+setup_users_db()
+from Database.dbManager import UserDBManager
+
+
+def load_config(db):
     try:
-        with open(CONF_LOC, "r") as f:
-            return True
-    except FileNotFoundError:
-        return False
+        config = db.select_str_config()
+        if not config:
+            db.set_default_configs()
+            config = db.select_str_config()
+        configs = {}
+        for conf in config:
+            configs[conf['key']] = conf['value']
+
+        return configs
+    except Exception as e:
+        logging.error(f"Error while loading config \n Error:{e}")
+        raise Exception(f"Error while loading config \nBe in touch with {HIDY_BOT_ID}")
 
 
-def create_config_file(admin_id, token, url, lang, client_token):
-    with open(CONF_LOC, "w") as f:
-        json.dump({
-            "admin_id": admin_id,
-            "token": token,
-            "url": url,
-            "lang": lang,
-            "client_token": client_token
-        }, f, indent=4)
-
-
-def read_config_file():
-    if not is_config_exists():
-        print(colored("Config file not found! Please run config.py script first!", "red"))
-        raise FileNotFoundError(f"{CONF_LOC} file not found!\nBe in touch with {HIDY_BOT_ID}")
-    with open(CONF_LOC, "r") as f:
-        return json.load(f)
+def load_server_url(db):
+    try:
+        panel_url = db.select_servers()
+        if not panel_url:
+            return None
+        return panel_url[0]['url']
+    except Exception as e:
+        logging.error(f"Error while loading panel_url \n Error:{e}")
+        raise Exception(f"Error while loading panel_url \nBe in touch with {HIDY_BOT_ID}")
 
 
 ADMINS_ID, TELEGRAM_TOKEN, CLIENT_TOKEN, PANEL_URL, LANG, PANEL_ADMIN_ID = None, None, None, None, None, None
-def set_variables(json):
+
+
+def set_config_variables(configs, server_url):
+    if not conf['bot_admin_id'] and not conf['bot_token_admin'] and not conf['bot_lang'] or not server_url:
+        print(colored("Config is not set! , Please run config.py first", "red"))
+        raise Exception(f"Config is not set!\nBe in touch with {HIDY_BOT_ID}")
+
     global ADMINS_ID, TELEGRAM_TOKEN, PANEL_URL, LANG, PANEL_ADMIN_ID, CLIENT_TOKEN
-    ADMINS_ID = json["admin_id"]
-    TELEGRAM_TOKEN = json["token"]
+    json_admin_ids = configs["bot_admin_id"]
+    ADMINS_ID = json.loads(json_admin_ids)
+    TELEGRAM_TOKEN = configs["bot_token_admin"]
     try:
-        CLIENT_TOKEN = json["client_token"]
+        CLIENT_TOKEN = configs["bot_token_client"]
     except KeyError:
         CLIENT_TOKEN = None
 
     if CLIENT_TOKEN:
         setup_users_db()
-    PANEL_URL = json["url"]
-    LANG = json["lang"]
+    PANEL_URL = server_url
+    LANG = configs["bot_lang"]
     # PANEL_ADMIN_ID = ADMIN_DB.find_admins(uuid=urlparse(PANEL_URL).path.split('/')[2])
     PANEL_ADMIN_ID = urlparse(PANEL_URL).path.split('/')[2]
-    print("PANEL_ADMIN_ID", PANEL_ADMIN_ID)
     if not PANEL_ADMIN_ID:
         print(colored("Admin panel UUID is not valid!", "red"))
         raise Exception(f"Admin panel UUID is not valid!\nBe in touch with {HIDY_BOT_ID}")
@@ -133,12 +128,23 @@ def panel_url_validator(url):
         return False
     elif request.status_code == 200:
         print(colored("URL is valid!", "green"))
-    # admin_url_uuid = urlparse(url).path.split('/')[2]
-    # # status = ADMIN_DB.find_admins(uuid=admin_url_uuid)
-    # if not status:
-    #     print(colored("Admin URL UUID is not valid!", "red"))
-    #     return False
     return url
+
+
+def bot_token_validator(token):
+    print(colored("Checking Bot Token...", "yellow"))
+    try:
+        request = requests.get(f"https://api.telegram.org/bot{token}/getMe")
+    except requests.exceptions.ConnectionError:
+        print(colored("Bot Token is not valid! Error in connection", "red"))
+        return False
+    if request.status_code != 200:
+        print(colored("Bot Token is not valid!", "red"))
+        return False
+    elif request.status_code == 200:
+        print(colored("Bot Token is valid!", "green"))
+        print(colored("Bot Username:", "green"), "@"+request.json()['result']['username'])
+    return True
 
 
 def set_by_user():
@@ -147,7 +153,7 @@ def set_by_user():
         colored("Example: 123456789\nIf you have more than one admin, split with comma(,)\n[get it from @userinfobot]",
                 "yellow"))
     while True:
-        admin_id = input("Enter Telegram Admin Number IDs: ")
+        admin_id = input("[+] Enter Telegram Admin Number IDs: ")
         admin_ids = admin_id.split(',')
         admin_ids = [admin_id.strip() for admin_id in admin_ids]
         if not all(admin_id.isdigit() for admin_id in admin_ids):
@@ -158,11 +164,14 @@ def set_by_user():
     print()
     print(colored("Example: 123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ\n[get it from @BotFather]", "yellow"))
     while True:
-        token = input("Enter your Admin bot token: ")
+        token = input("[+] Enter your Admin bot token: ")
         if not token:
-            print(colored("Token is required!", "red"))
+            print(colored("Token is required", "red"))
+            continue
+        if not bot_token_validator(token):
             continue
         break
+
     print()
     print(colored("You can use the bot as a userbot for your clients!", "yellow"))
     while True:
@@ -175,12 +184,14 @@ def set_by_user():
         print()
         print(colored("Example: 123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ\n[get it from @BotFather]", "yellow"))
         while True:
-            client_token = input("Enter your client (For Users) bot token: ")
+            client_token = input("[+] Enter your client (For Users) bot token: ")
             if not client_token:
                 print(colored("Token is required!", "red"))
                 continue
             if client_token == token:
                 print(colored("Client token must be different from Admin token!", "red"))
+                continue
+            if not bot_token_validator(client_token):
                 continue
             break
     else:
@@ -190,7 +201,7 @@ def set_by_user():
         "Example: https://panel.example.com/7frgemkvtE0/78854985-68dp-425c-989b-7ap0c6kr9bd4\n[exactly like this!]",
         "yellow"))
     while True:
-        url = input("Enter your panel URL:")
+        url = input("[+] Enter your panel URL:")
         if not url:
             print(colored("URL is required!", "red"))
             continue
@@ -202,7 +213,7 @@ def set_by_user():
     print(colored("Example: EN (default: FA)\n[It is better that the language of the bot is the same as the panel]",
                   "yellow"))
     while True:
-        lang = input("Select your language (EN(English), FA(Persian)): ") or "FA"
+        lang = input("[+] Select your language (EN(English), FA(Persian)): ") or "FA"
         if lang not in ["EN", "FA"]:
             print(colored("Language must be EN or FA!", "red"))
             continue
@@ -211,31 +222,73 @@ def set_by_user():
     return admin_ids, token, url, lang, client_token
 
 
+def set_config_in_db(db, admin_ids, token, url, lang, client_token):
+    try:
+        # if str_config is not exists, create it
+        if not db.select_str_config():
+            db.add_str_config("bot_admin_id", value=json.dumps(admin_ids))
+            db.add_str_config("bot_token_admin", value=token)
+            db.add_str_config("bot_token_client", value=client_token)
+            db.add_str_config("bot_lang", value=lang)
+        else:
+            print(json.dumps(admin_ids))
+            db.edit_str_config("bot_admin_id", value=json.dumps(admin_ids))
+            db.edit_str_config("bot_token_admin", value=token)
+            db.edit_str_config("bot_token_client", value=client_token)
+            db.edit_str_config("bot_lang", value=lang)
+        # if servers is not exists, create it
+        if not db.select_servers():
+            db.add_server(url, default_server=True)
+        else:
+            # find default server
+            default_server = db.find_server(default_server=True)
+            default_server_id = default_server[0]['id']
+            if default_server:
+                db.edit_server(default_server_id, url=url, default_server=True)
+            else:
+                db.add_server(url, default_server=True)
+    except Exception as e:
+        logging.error(f"Error while inserting config to database \n Error:{e}")
+        raise Exception(f"Error while inserting config to database \nBe in touch with {HIDY_BOT_ID}")
+
+
+def print_current_conf(conf, server_url):
+    print()
+    print(colored("Current configration data:", "yellow"))
+    print(f"[+] Admin IDs: {conf['bot_admin_id']}")
+    print(f"[+] Admin Bot Token: {conf['bot_token_admin']}")
+    print(f"[+] Client Bot Token: {conf['bot_token_client']}")
+    print(f"[+] Panel URL: {server_url}")
+    print(f"[+] Language: {conf['bot_lang']}")
+    print()
+
+
 if __name__ == '__main__':
-    if not is_config_exists():
-        logging.info("Config file not found, creating...")
-
-        # Create config file
-        create_config_file(*set_by_user())
-        print(colored("Config file created successfully!", "green"))
-        logging.info("Config file created successfully!")
+    db = UserDBManager(USERS_DB_LOC)
+    conf = load_config(db)
+    server_url = load_server_url(db)
+    if conf['bot_admin_id'] and conf['bot_token_admin'] and conf['bot_lang'] and server_url:
+        print("Config is already set!")
+        print_current_conf(conf, server_url)
+        print("Do you want to change config? (y/n): ")
+        if input().lower() == "y":
+            admin_ids, token, url, lang, client_token = set_by_user()
+            set_config_in_db(db, admin_ids, token, url, lang, client_token)
+            conf = load_config(db)
+            server_url = load_server_url(db)
+            set_config_variables(conf, server_url)
     else:
-        logging.info("Config file found!")
-        print(colored("Config file is exist!", "green"))
-        set_variables(read_config_file())
-        # Show current configration data
-        print()
-        print(colored("Current configration data:", "yellow"))
-        print(f"Admin IDs: {ADMINS_ID}")
-        print(f"Admin Bot Token: {TELEGRAM_TOKEN}")
-        print(f"Client Bot Token: {CLIENT_TOKEN}")
-        print(f"Panel URL: {PANEL_URL}")
-        print(f"Language: {LANG}")
-        print()
-        if input("Do you want to change config? (y/n): ").lower() == "y":
-            # Create config file
-            create_config_file(*set_by_user())
-            print(colored("Config file updated successfully!"))
-            logging.info("Config file updated successfully!")
+        admin_ids, token, url, lang, client_token = set_by_user()
+        set_config_in_db(db, admin_ids, token, url, lang, client_token)
+        conf = load_config(db)
+        server_url = load_server_url(db)
+    set_config_variables(conf, server_url)
+    # close database connection
+    db.close()
 
-set_variables(read_config_file())
+db = UserDBManager(USERS_DB_LOC)
+db.set_default_configs()
+conf = load_config(db)
+server_url = load_server_url(db)
+set_config_variables(conf, server_url)
+db.close()
