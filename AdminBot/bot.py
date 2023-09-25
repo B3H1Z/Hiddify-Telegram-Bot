@@ -352,7 +352,7 @@ def add_server_user_limit(message: Message):
         return
     add_server_data['user_limit'] = int(message.text)
     msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=markups.while_edit_user_markup())
-    status = utils.add_server(add_server_data['title'], add_server_data['url'], add_server_data['user_limit'])
+    status = utils.add_server(url=add_server_data['url'], user_limit=add_server_data['user_limit'], title=add_server_data['title'])
     bot.delete_message(message.chat.id, msg_wait.message_id)
     if not status:
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())

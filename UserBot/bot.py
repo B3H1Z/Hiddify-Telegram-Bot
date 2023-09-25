@@ -1032,7 +1032,7 @@ def buy_subscription(message: Message):
     if not settings['buy_subscription_status']:
         bot.send_message(message.chat.id, MESSAGES['BUY_SUBSCRIPTION_CLOSED'], reply_markup=main_menu_keyboard_markup())
         return
-    msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=main_menu_keyboard_markup())
+    #msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=main_menu_keyboard_markup())
     servers = USERS_DB.select_servers()
     server_list = []
     if not servers:
@@ -1049,7 +1049,7 @@ def buy_subscription(message: Message):
     # bad request telbot api
     # bot.edit_message_text(chat_id=message.chat.id, message_id=msg_wait.message_id,
     #                                   text= MESSAGES['SERVERS_LIST'], reply_markup=servers_list_markup(server_list))
-    bot.delete_message(message.chat.id, msg_wait.message_id)
+    #bot.delete_message(message.chat.id, msg_wait.message_id)
     bot.send_message(message.chat.id, MESSAGES['SERVERS_LIST'], reply_markup=servers_list_markup(server_list))
 
 

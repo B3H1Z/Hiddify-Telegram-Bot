@@ -1,10 +1,11 @@
 # from config import *
 # from Utils.utils import *
 import json
+import logging
 from urllib.parse import urlparse
 import datetime
 import requests
-from config import API_PATH, PANEL_URL
+from config import API_PATH
 import Utils
 
 

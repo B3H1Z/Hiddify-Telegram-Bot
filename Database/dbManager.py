@@ -805,7 +805,6 @@ class UserDBManager:
             return None
 
     
-
     def select_servers(self):
         cur = self.conn.cursor()
         try:
@@ -816,92 +815,20 @@ class UserDBManager:
         except Error as e:
             logging.error(f"Error while selecting all servers \n Error:{e}")
             return None
-
-    def find_server(self, **kwargs):
-        if len(kwargs) != 1:
-            logging.warning("You can only use one key to find server!")
-            return None
-        rows = []
-        cur = self.conn.cursor()
-        try:
-            for key, value in kwargs.items():
-                cur.execute(f"SELECT * FROM servers WHERE {key}=?", (value,))
-                rows = cur.fetchall()
-            if len(rows) == 0:
-                logging.info(f"server {kwargs} not found!")
-                return None
-            rows = [dict(zip([key[0] for key in cur.description], row)) for row in rows]
-            return rows
-        except Error as e:
-            logging.error(f"Error while finding server {kwargs} \n Error:{e}")
-            return None
-
-    def delete_server(self, **kwargs):
-        if len(kwargs) != 1:
-            logging.warning("You can only use one key to delete server!")
-            return False
-        cur = self.conn.cursor()
-        try:
-            for key, value in kwargs.items():
-                cur.execute(f"DELETE FROM servers WHERE {key}=?", (value,))
-                self.conn.commit()
-            logging.info(f"server {kwargs} deleted successfully!")
-            return True
-        except Error as e:
-            logging.error(f"Error while deleting server {kwargs} \n Error:{e}")
-            return False
-
-    def edit_server(self, server_id, **kwargs):
-        cur = self.conn.cursor()
-
-        for key, value in kwargs.items():
-            try:
-                cur.execute(f"UPDATE servers SET {key}=? WHERE id=?", (value, server_id))
-                self.conn.commit()
-                logging.info(f"server [{server_id}] successfully update [{key}] to [{value}]")
-            except Error as e:
-                logging.error(f"Error while updating server [{server_id}] [{key}] to [{value}] \n Error: {e}")
-                return False
-
-        return True
-    
-    def select_servers(self):
-        cur = self.conn.cursor()
-        try:
-            cur.execute("SELECT * FROM servers")
-            rows = cur.fetchall()
-            rows = [dict(zip([key[0] for key in cur.description], row)) for row in rows]
-            return rows
-        except Error as e:
-            logging.error(f"Error while selecting all servers \n Error:{e}")
-            return None
-
-    #-----------------------server
-    def add_server(self, server_id, title, url, user_limit, status=True):
-        cur = self.conn.cursor()
-        try:
-            cur.execute("INSERT INTO servers(id,title, url, user_limit, status) VALUES(?,?,?,?,?)",
-                        (server_id, title, url, user_limit, status))
-            self.conn.commit()
-            logging.info(f"server [{title}] added successfully!")
-            return True
-
-        except Error as e:
-            logging.error(f"Error while adding server [{title}] \n Error: {e}")
-            return False
+        
     def add_server(self, url, user_limit, title=None, description=None, status=True, default_server=False):
         cur = self.conn.cursor()
         try:
             cur.execute(
-                "INSERT INTO servers(url,title,description,user_limit,default_server) VALUES(?,?,?,?)",
-                (url, title, description, default_server))
+                "INSERT INTO servers(url,title,description,user_limit,status,default_server) VALUES(?,?,?,?,?,?)",
+                (url, title, description, user_limit, status, default_server))
             self.conn.commit()
             logging.info(f"Server [{url}] added successfully!")
             return True
         except Error as e:
             logging.error(f"Error while adding server [{url}] \n Error: {e}")
             return False
-
+    
     def edit_server(self, server_id, **kwargs):
         cur = self.conn.cursor()
         try:
@@ -913,7 +840,7 @@ class UserDBManager:
         except Error as e:
             logging.error(f"Error while updating server [{server_id}] [{key}] to [{value}] \n Error: {e}")
             return False
-
+    
     def find_server(self, **kwargs):
         if len(kwargs) != 1:
             logging.warning("You can only use one key to find server!")
@@ -932,7 +859,23 @@ class UserDBManager:
         except Error as e:
             logging.error(f"Error while finding server {kwargs} \n Error:{e}")
             return None
-
+        
+    def delete_server(self, **kwargs):
+        if len(kwargs) != 1:
+            logging.warning("You can only use one key to delete server!")
+            return False
+        cur = self.conn.cursor()
+        try:
+            for key, value in kwargs.items():
+                cur.execute(f"DELETE FROM servers WHERE {key}=?", (value,))
+                self.conn.commit()
+            logging.info(f"server {kwargs} deleted successfully!")
+            return True
+        except Error as e:
+            logging.error(f"Error while deleting server {kwargs} \n Error:{e}")
+            return False
+        
+    
     def backup_to_json(self, backup_dir):
         try:
 
