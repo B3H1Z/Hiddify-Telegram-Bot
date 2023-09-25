@@ -140,6 +140,7 @@ def renewal_from_wallet_confirm(message: Message):
     if not wallet:
         # Wallet not created
         bot.send_message(message.chat.id, MESSAGES['LACK_OF_WALLET_BALANCE'])
+        return
 
     wallet = wallet[0]
     plan_info = USERS_DB.find_plan(id=plan_id)
@@ -174,7 +175,6 @@ def renewal_from_wallet_confirm(message: Message):
                          reply_markup=main_menu_keyboard_markup())
         return
     user_info_process = user_info_process[0]
-
     new_balance = int(wallet['balance']) - int(plan_info['price'])
     edit_wallet = USERS_DB.edit_wallet(message.chat.id, balance=new_balance)
     if not edit_wallet:
@@ -186,16 +186,29 @@ def renewal_from_wallet_confirm(message: Message):
         if user_info_process['remaining_day'] <= 0 or user_info_process['usage']['remaining_usage_GB'] <= 0:
             new_usage_limit = plan_info['size_gb']
             new_package_days = plan_info['days']
+            current_usage_GB = 0
         else:
             new_usage_limit = user_info['usage_limit_GB'] + plan_info['size_gb']
             new_package_days = plan_info['days']
+            current_usage_GB = user_info['current_usage_GB']
             
     elif settings['renewal_method'] == 2:
             new_usage_limit = plan_info['size_gb']
             new_package_days = plan_info['days']
+            current_usage_GB = 0
+    
+    elif settings['renewal_method'] == 3:
+        if user_info_process['remaining_day'] <= 0 or user_info_process['usage']['remaining_usage_GB'] <= 0:
+            new_usage_limit = plan_info['size_gb']
+            new_package_days = plan_info['days']
+            current_usage_GB = 0
+        else:
+            new_usage_limit = user_info['usage_limit_GB'] + plan_info['size_gb']
+            new_package_days = user_info['package_days'] + plan_info['days']
+            current_usage_GB = user_info['current_usage_GB']
             
     last_reset_time = datetime.datetime.now().strftime("%Y-%m-%d")        
-    api.update(uuid=uuid, usage_limit_GB=new_usage_limit, start_date=last_reset_time)
+    api.update(uuid=uuid, usage_limit_GB=new_usage_limit, start_date=last_reset_time, package_days=new_package_days, current_usage_GB=current_usage_GB)
 
 
     # Add New Order
@@ -438,7 +451,6 @@ def next_step_increase_wallet_balance(message):
     minimum_deposit_amount = utils.all_configs_settings()
     minimum_deposit_amount = minimum_deposit_amount['min_deposit_amount']
     amount = utils.toman_to_rial(message.text)
-
     if amount < minimum_deposit_amount:
         bot.send_message(message.chat.id,
                          f"{MESSAGES['INCREASE_WALLET_BALANCE_AMOUNT']}\n{MESSAGES['MINIMUM_DEPOSIT_AMOUNT']}: "
@@ -614,10 +626,11 @@ def callback_query(call: CallbackQuery):
             return
         user_info_process = user_info_process[0]
         if settings['renewal_method'] == 2:
-            if user_info_process['remaining_day'] >= settings['advanced_renewal_days'] and user_info_process['usage']['remaining_usage_GB'] >= settings['advanced_renewal_usage']:
+            if user_info_process['remaining_day'] > settings['advanced_renewal_days'] and user_info_process['usage']['remaining_usage_GB'] > settings['advanced_renewal_usage']:
                 bot.send_message(call.message.chat.id, renewal_unvalable_template(settings),
                                  reply_markup=main_menu_keyboard_markup())
                 return
+        
 
         renew_subscription_dict[call.message.chat.id] = {
             'uuid': None,
@@ -625,7 +638,7 @@ def callback_query(call: CallbackQuery):
         }
         plans = USERS_DB.select_plans()
         if not plans:
-            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+            bot.send_message(call.message.chat.id, MESSAGES['PLANS_NOT_FOUND'],
                              reply_markup=main_menu_keyboard_markup())
             return
         renew_subscription_dict[call.message.chat.id]['uuid'] = value

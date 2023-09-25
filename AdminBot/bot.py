@@ -1080,6 +1080,20 @@ def callback_query(call: CallbackQuery):
                 return
         settings = utils.all_configs_settings()
         users_bot_settings_update_message(call.message, markups.users_bot_management_settings_markup(settings))
+    
+    elif key == "users_bot_settings_bot_auto_backup": 
+        if value == "1":
+            edit_config = USERS_DB.edit_bool_config("bot_auto_backup", value=False)
+            if not edit_config:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+                return
+        elif value == "0":
+            edit_config = USERS_DB.edit_bool_config("bot_auto_backup", value=True)
+            if not edit_config:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+                return
+        settings = utils.all_configs_settings()
+        users_bot_settings_update_message(call.message, markups.users_bot_management_settings_markup(settings))
 
     elif key == "users_bot_settings_min_depo":
         settings = utils.all_configs_settings()
@@ -1277,16 +1291,22 @@ def callback_query(call: CallbackQuery):
     
     elif key == "users_bot_settings_renewal_method_menu":
         settings = utils.all_configs_settings()
-        bot.send_message(call.message.chat.id, KEY_MARKUP['USERS_BOT_SETTINGS_RENEWAL_METHOD'], reply_markup=markups.users_bot_management_settings_renewal_method_markup(settings))
+        bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,
+                                      reply_markup=markups.users_bot_management_settings_renewal_method_markup(settings))
     
     elif key == "users_bot_settings_renewal_method":
         if value == "1":
-            edit_config = USERS_DB.edit_int_config("renewal_method", value=2)
+            edit_config = USERS_DB.edit_int_config("renewal_method", value=1)
             if not edit_config:
                 bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
                 return
         elif value == "2":
-            edit_config = USERS_DB.edit_int_config("renewal_method", value=1)
+            edit_config = USERS_DB.edit_int_config("renewal_method", value=2)
+            if not edit_config:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+                return
+        elif value == "3":
+            edit_config = USERS_DB.edit_int_config("renewal_method", value=3)
             if not edit_config:
                 bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
                 return

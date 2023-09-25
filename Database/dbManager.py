@@ -606,6 +606,7 @@ class UserDBManager:
     def edit_int_config(self, key_row, **kwargs):
         cur = self.conn.cursor()
         for key, value in kwargs.items():
+            value = int(value)
             try:
                 cur.execute(f"UPDATE int_config SET {key}=? WHERE key=?", (value, key_row))
                 self.conn.commit()
@@ -617,6 +618,7 @@ class UserDBManager:
         return True
 
     def add_int_config(self, key, value):
+        value = int(value)
         cur = self.conn.cursor()
         try:
             cur.execute(
@@ -637,6 +639,7 @@ class UserDBManager:
         self.add_bool_config("three_random_num_price", True)
         self.add_bool_config("force_join_channel", False)
         self.add_bool_config("panel_auto_backup", True)
+        self.add_bool_config("bot_auto_backup", True)
         self.add_bool_config("test_subscription", True)
         self.add_bool_config("reminder_notification", True)
         

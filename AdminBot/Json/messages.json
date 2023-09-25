@@ -208,7 +208,7 @@
     "USERS_BOT_SUB_ID_REQUEST": "لطفا شناسه اشتراک را وارد کنید:",
     "USERS_BOT_SETTING_MIN_DEPO": "لطفا حداقل مبلغ واریزی را تعیین کنید:",
     "USERS_BOT_SETTING_CHANNEL_ID": "لطفا آیدی کانال را وارد کنید:",
-    "USERS_BOT_SETTING_FORCE_JOIN_HELP": "⭕لطفا برای اجرای این قابلیت، حتما ربات را به کانال خود اضافه و آن را ادمین کنید!",
+    "USERS_BOT_SETTING_FORCE_JOIN_HELP": "⭕لطفا برای اجرای این قابلیت، حتما [ربات کاربران] را به کانال خود اضافه و آن را ادمین کنید!",
     "USERS_BOT_SETTING_WELCOME_MSG": "لطفا پیام خوش آمدگویی را تنظیم کنید:",
     "USERS_BOT_SETTINGS_TEST_SUB_DAYS": "لطفا تعداد روزهای اشتراک تست را تنظیم کنید:",
     "USERS_BOT_SETTINGS_TEST_SUB_USAGE": "لطفا حجم(گیگابایت) اشتراک تست را تنظیم کنید:",

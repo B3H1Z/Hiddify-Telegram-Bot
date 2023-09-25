@@ -159,6 +159,7 @@ def users_bot_management_settings_markup(settings):
     status_hyperlink = "✅" if settings['visible_hiddify_hyperlink'] else "❌"
     status_three_rand = "✅" if settings['three_random_num_price'] else "❌"
     status_panel_auto_backup = "✅" if settings['panel_auto_backup'] else "❌"
+    status_bot_auto_backup = "✅" if settings['bot_auto_backup'] else "❌"
     status_force_join = "✅" if settings['force_join_channel'] else "❌"
     status_buy_sub = "✅" if settings['buy_subscription_status'] else "❌"
     status_renewal_sub = "✅" if settings['renewal_subscription_status'] else "❌"
@@ -168,7 +169,10 @@ def users_bot_management_settings_markup(settings):
     markup.add(InlineKeyboardButton(f"{KEY_MARKUP['USERS_BOT_SETTINGS_SHOW_THREE_RAND']} | {status_three_rand}",
                                     callback_data=f"users_bot_settings_three_rand_price:{settings['three_random_num_price']}"))
     markup.add(InlineKeyboardButton(f"{KEY_MARKUP['USERS_BOT_SETTINGS_PANEL_AUTO_BACKUP']} | {status_panel_auto_backup}",
-                             callback_data=f"users_bot_settings_panel_auto_backup:{settings['panel_auto_backup']}"))
+                             callback_data=f"users_bot_settings_panel_auto_backup:{settings['panel_auto_backup']}"),
+               InlineKeyboardButton(f"{KEY_MARKUP['USERS_BOT_SETTINGS_BOT_AUTO_BACKUP']} | {status_bot_auto_backup}",
+                                    callback_data=f"users_bot_settings_bot_auto_backup:{settings['bot_auto_backup']}")
+               )
     
     markup.add(InlineKeyboardButton(f"{KEY_MARKUP['USERS_BOT_SETTINGS_BUY_SUBSCRIPTION_STATUS']} | {status_buy_sub}",
                                     callback_data=f"users_bot_settings_buy_sub_status:{settings['buy_subscription_status']}"),
@@ -203,18 +207,25 @@ def users_bot_management_settings_markup(settings):
 
 def users_bot_management_settings_renewal_method_markup(settings):
     markup = InlineKeyboardMarkup()
-    markup.row_width = 2
+    markup.row_width = 3
+    default, advanced, fairly = "❌", "❌", "❌"
+    
     if settings['renewal_method'] == 1:
         default = "✅"
-        advanced = "❌"
     elif settings['renewal_method'] == 2:
-        default = "❌"
         advanced = "✅"
+    elif settings['renewal_method'] == 3:
+        fairly = "✅"
+        
         
     markup.add(InlineKeyboardButton(f"{KEY_MARKUP['USERS_BOT_SETTINGS_RENEWAL_METHOD_DEFAULT']} | {default}",
-                                    callback_data=f"users_bot_settings_renewal_method:{settings['renewal_method']}"),
-               InlineKeyboardButton(f"{KEY_MARKUP['USERS_BOT_SETTINGS_RENEWAL_METHOD_ADVANCED']} | {advanced}",
-                                    callback_data=f"users_bot_settings_renewal_method:{settings['renewal_method']}"))
+                                    callback_data=f"users_bot_settings_renewal_method:1"),
+                InlineKeyboardButton(f"{KEY_MARKUP['USERS_BOT_SETTINGS_RENEWAL_METHOD_ADVANCED']} | {advanced}",
+                                    callback_data=f"users_bot_settings_renewal_method:2"),
+                InlineKeyboardButton(f"{KEY_MARKUP['USERS_BOT_SETTINGS_RENEWAL_METHOD_FAIRLY']} | {fairly}",
+                      callback_data=f"users_bot_settings_renewal_method:3"),
+    )
+               
     if settings['renewal_method'] == 2:
         markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_RENEWAL_METHOD_ADVANCED_DAYS'],
                                         callback_data=f"users_bot_settings_renewal_method_advanced_days:None"))
