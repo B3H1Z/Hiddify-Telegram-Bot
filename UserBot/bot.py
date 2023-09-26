@@ -320,7 +320,7 @@ def next_step_send_name_for_buy_from_wallet(message: Message, plan):
     server_id = plan['server_id']
     server = USERS_DB.find_server(id=server_id)
     if not server:
-        bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+        bot.send_message(message.chat.id, f"{MESSAGES['UNKNOWN_ERROR']}:Server Not Found",
                          reply_markup=main_menu_keyboard_markup())
         return
     server = server[0]
@@ -330,21 +330,21 @@ def next_step_send_name_for_buy_from_wallet(message: Message, plan):
     value = api.insert(URL, name=name, usage_limit_GB=plan['size_gb'], package_days=plan['days'])
     if not value:
         bot.send_message(message.chat.id,
-                         f"{MESSAGES['UNKNOWN_ERROR']}\n{MESSAGES['ORDER_ID']} {order_id}",
+                         f"{MESSAGES['UNKNOWN_ERROR']}:Create User Error\n{MESSAGES['ORDER_ID']} {order_id}",
                          reply_markup=main_menu_keyboard_markup())
         return
     sub_id = random.randint(1000000, 9999999)
     add_sub_status = USERS_DB.add_order_subscription(sub_id, order_id, value, server_id)
     if not add_sub_status:
         bot.send_message(message.chat.id,
-                         f"{MESSAGES['UNKNOWN_ERROR']}\n{MESSAGES['ORDER_ID']} {order_id}",
+                         f"{MESSAGES['UNKNOWN_ERROR']}:Add Subscription Error\n{MESSAGES['ORDER_ID']} {order_id}",
                          reply_markup=main_menu_keyboard_markup())
         return
     status = USERS_DB.add_order(order_id, message.chat.id, name, plan['id'], created_at)
 
     if not status:
         bot.send_message(message.chat.id,
-                         f"{MESSAGES['UNKNOWN_ERROR']}\n{MESSAGES['ORDER_ID']} {order_id}",
+                         f"{MESSAGES['UNKNOWN_ERROR']}:Add Order Error\n{MESSAGES['ORDER_ID']} {order_id}",
                          reply_markup=main_menu_keyboard_markup())
         return
     wallet = USERS_DB.find_wallet(telegram_id=message.chat.id)
@@ -354,12 +354,21 @@ def next_step_send_name_for_buy_from_wallet(message: Message, plan):
         user_info = USERS_DB.edit_wallet(message.chat.id, balance=wallet_balance)
         if not user_info:
             bot.send_message(message.chat.id,
-                             f"{MESSAGES['UNKNOWN_ERROR']}\n{MESSAGES['ORDER_ID']} {order_id}",
+                             f"{MESSAGES['UNKNOWN_ERROR']}:Edit Wallet Balance Error\n{MESSAGES['ORDER_ID']} {order_id}",
                              reply_markup=main_menu_keyboard_markup())
             return
     bot.send_message(message.chat.id,
                      f"{MESSAGES['PAYMENT_CONFIRMED']}\n{MESSAGES['ORDER_ID']} {order_id}",
                      reply_markup=main_menu_keyboard_markup())
+    
+    user_info = api.find(URL, value)
+    user_info = utils.users_to_dict([user_info])
+    user_info = utils.dict_process(URL, user_info)
+    user_info = user_info[0]
+    api_user_data = user_info_template(sub_id, user_info, MESSAGES['INFO_USER'])
+    bot.send_message(message.chat.id, api_user_data,
+                                 reply_markup=user_info_markup(user_info['uuid']))
+    
     BASE_URL = urlparse(server['url']).scheme + "://" + urlparse(server['url']).netloc
     link = f"{BASE_URL}/{urlparse(server['url']).path.split('/')[1]}/{value}/"
     user_name = f"<a href='{link}'> {name} </a>"
@@ -409,6 +418,13 @@ def next_step_send_name_for_get_free_test(message: Message, server_id):
         return
     bot.send_message(message.chat.id, MESSAGES['GET_FREE_CONFIRMED'],
                      reply_markup=main_menu_keyboard_markup())
+    user_info = api.find(URL, uuid)
+    user_info = utils.users_to_dict([user_info])
+    user_info = utils.dict_process(URL, user_info)
+    user_info = user_info[0]
+    api_user_data = user_info_template(non_order_id, user_info, MESSAGES['INFO_USER'])
+    bot.send_message(message.chat.id, api_user_data,
+                                 reply_markup=user_info_markup(user_info['uuid']))
     BASE_URL = urlparse(server['url']).scheme + "://" + urlparse(server['url']).netloc
     link = f"{BASE_URL}/{urlparse(server['url']).path.split('/')[1]}/{uuid}/"
     user_name = f"<a href='{link}'> {name} </a>"
@@ -609,9 +625,16 @@ def callback_query(call: CallbackQuery):
                                     reply_markup=plan_markup)
         
     elif key == 'free_test_server_selected':
-        bot.send_message(call.message.chat.id, MESSAGES['REQUEST_SEND_NAME'], reply_markup=cancel_markup())
-        bot.register_next_step_handler(call.message, next_step_send_name_for_get_free_test, value)
-
+        users = USERS_DB.find_user(telegram_id=call.message.chat.id)
+        if users:
+            user = users[0]
+            if user['test_subscription']:
+                bot.send_message(call.message.chat.id, MESSAGES['ALREADY_RECEIVED_FREE'],
+                                reply_markup=main_menu_keyboard_markup())
+                return
+            bot.delete_message(call.message.chat.id, call.message.message_id)
+            bot.send_message(call.message.chat.id, MESSAGES['REQUEST_SEND_NAME'], reply_markup=cancel_markup())
+            bot.register_next_step_handler(call.message, next_step_send_name_for_get_free_test, value)
     # Send Asked Plan Info
     elif key == 'plan_selected':
         plan = USERS_DB.find_plan(id=value)[0]
@@ -627,6 +650,7 @@ def callback_query(call: CallbackQuery):
     elif key == 'confirm_buy_from_wallet':
         plan = USERS_DB.find_plan(id=value)[0]
         buy_from_wallet_confirm(call.message, plan)
+        bot.delete_message(call.message.chat.id, call.message.message_id)
     elif key == 'confirm_renewal_from_wallet':
         plan = USERS_DB.find_plan(id=value)[0]
         renewal_from_wallet_confirm(call.message)
