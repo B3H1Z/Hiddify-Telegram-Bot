@@ -107,7 +107,7 @@ def set_config_variables(configs, server_url):
 
 
 def panel_url_validator(url):
-    if not url.startswith("https://" or "http://"):
+    if not (url.startswith("https://") or url.startswith("http://")):
         print(colored("URL must start with http:// or https://", "red"))
         return False
     if url.endswith("/"):
@@ -119,12 +119,14 @@ def panel_url_validator(url):
     print(colored("Checking URL...", "yellow"))
     try:
         request = requests.get(f"{url}/admin/")
-    except requests.exceptions.ConnectionError:
+    except requests.exceptions.ConnectionError as e:
         print(colored("URL is not valid! Error in connection", "red"))
-
+        print(colored(f"Error: {e}", "red"))
         return False
+    
     if request.status_code != 200:
         print(colored("URL is not valid!", "red"))
+        print(colored(f"Error: {request.status_code}", "red"))
         return False
     elif request.status_code == 200:
         print(colored("URL is valid!", "green"))

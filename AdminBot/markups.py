@@ -353,14 +353,12 @@ def servers_management_markup(servers):
 def server_selected_markup(server_id):
     markup = InlineKeyboardMarkup()
     markup.row_width = 1
-    markup.add(InlineKeyboardButton(KEY_MARKUP['EDIT_SERVER'],
-                                    callback_data=f"edit_server:{server_id}"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['SERVER_LIST_OF_USERS'],
                                     callback_data=f"server_list_of_users:{server_id}"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['SERVER_LIST_OF_PLANS'],
                                     callback_data=f"server_list_of_plans:{server_id}"))
-    markup.add(InlineKeyboardButton(KEY_MARKUP['DELETE_SERVER'],
-                                    callback_data=f"delete_server:{server_id}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['EDIT_SERVER'],
+                                    callback_data=f"edit_server:{server_id}"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_server_management:None"))
     
     return markup
@@ -386,7 +384,10 @@ def server_edit_markup(server_id):
                                     callback_data=f"server_edit_user_limit:{server_id}"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['SERVER_EDIT_URL'],
                                     callback_data=f"server_edit_url:{server_id}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['DELETE_SERVER'],
+                                    callback_data=f"delete_server:{server_id}"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_server_selected:{server_id}"))
+
     return markup
 # Users Bot Management - Plans List - Inline Keyboard Markup
 def plans_list_markup(plans, server_id, delete_mode=False):
