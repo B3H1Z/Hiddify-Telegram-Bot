@@ -170,6 +170,8 @@ if __name__ == "__main__":
         target_version = args.target_version
         if current_version.find("-pre"):
             current_version = current_version.split("-pre")[0]
+        if target_version.find("-pre"):
+            target_version = target_version.split("-pre")[0]
         print(f"current-version: {current_version} -> target-version: {target_version}")
         logging.info(f"current-version: {current_version} -> target-version: {target_version}")
         update_by_version(current_version, target_version)
