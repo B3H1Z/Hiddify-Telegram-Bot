@@ -1110,8 +1110,6 @@ def wallet_balance(message: Message):
 
         wallet = USERS_DB.find_wallet(telegram_id=message.chat.id)
         wallet = wallet[0]
-        wallet_balance = 1000000
-        user_info = USERS_DB.edit_wallet(message.chat.id, balance=wallet_balance)
         telegram_user_data = wallet_info_template(wallet['balance'])
 
         bot.send_message(message.chat.id, telegram_user_data,
