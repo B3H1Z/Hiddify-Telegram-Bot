@@ -25,13 +25,9 @@
 
 با استفاده از این ربات می‌توانید پنل هیدیفای خود را از طریق تلگرام مدیریت کنید.
 
-این ربات را **در همان سرور** پنل هیدیفای خود نصب کنید.
-
-> ما در نسخه آزمایشی (BETA) هستیم و در حال بهبود آن هستیم. لطفاً اگر باگ یا مشکلی دیدید، با ما در ارتباط باشید.
-
-لطفاً توجه داشته باشید که این ربات <b>رسمی نیست</b> و ارتباطی با تیم هیدیفای ندارد.
-
 بعضی از ویژگی‌ها عبارتند از:
+-  مدیریت چند پنل
+-  فروش کانفیگ
 -  افزودن کاربران
 -  حذف کاربران
 -  ویرایش کاربران
@@ -41,6 +37,8 @@
 -  نمایش پیکربندی‌ها و لینک‌های اشتراک کاربر
 -  دریافت پشتیبان از پنل شما
 -  نمایش وضعیت سرور (رم، پردازنده، دیسک)
+- چند زبانه (انگلیسی، فارسی)
+- ربات کاربران
 
 ## نصب 
 برای نصب ربات دستور زیر را اجرا کنید:
@@ -54,11 +52,11 @@ sudo bash -c "$(curl -Lfo- https://raw.githubusercontent.com/B3H1Z/Hiddify-Teleg
 1. `شناسه تلگرام ادمین` : آن را از ربات[ User Info Bot](https://t.me/userinfobot) بگیرید (مثال: `123456789`)
 2. `توکن ربات ادمین` : آن را از ربات [BotFather](https://t.me/BotFather) بگیرید (
    مثال: `1234567890:ABCdEfGhIjKlMnOpQrStUvWxYz`)
-3. `آدرس پنل هیدیفای` : آدرس پنل هیدیفای خود را وارد کنید (
-   مثال: `https://panel.example.com/7frgemkvtE0/78854985-68dp-425c-989b-7ap0c6kr9bd4`) <b>دقیقاً مانند این الگو!</b>
-4. `زبان ربات` : گزینه‌ها `en` و `fa` می‌باشند [پیش‌فرض `fa`]
-5. `توکن ربات کاربران(اختیاری)` : آن را از ربات [BotFather](https://t.me/BotFather) بگیرید (
+3. `توکن ربات کاربران` : آن را از ربات [BotFather](https://t.me/BotFather) بگیرید (
    مثال: `1234567890:ABCdEfGhIjKlMnOpQrStUvWxYz`)
+4. `آدرس پنل هیدیفای` : آدرس پنل هیدیفای خود را وارد کنید (
+   مثال: `https://panel.example.com/7frgemkvtE0/78854985-68dp-425c-989b-7ap0c6kr9bd4`)
+5. `زبان ربات` : گزینه‌ها `en` و `fa` می‌باشند [پیش‌فرض `fa`]
 
 حالا می‌توانید با ارسال دستور `/start` از ربات در تلگرام استفاده کنید.
 
@@ -77,15 +75,11 @@ cd /opt/Hiddify-Telegram-Bot/ && chmod +x restart.sh && ./restart.sh
 ```bash
 pkill -9 -f hiddifyTelegramBot.py
 ```
- دریافت لاگ های ربات
+ مشاهده لاگ های ربات
 ```bash
 cat /opt/Hiddify-Telegram-Bot/Logs/hidyBot.log
 ```
- اطلاعات پیکربندی ربات
-```bash
-cat /opt/Hiddify-Telegram-Bot/config.json
-```
- تغییر پیکربندی ربات
+ مشاهده و تغییر پیکربندی ربات
 ```bash
 cd /opt/Hiddify-Telegram-Bot/ && python3 config.py && chmod +x restart.sh && ./restart.sh
 ```
@@ -93,6 +87,11 @@ cd /opt/Hiddify-Telegram-Bot/ && python3 config.py && chmod +x restart.sh && ./r
 ```bash
 cd /opt/ && rm -rf /opt/Hiddify-Telegram-Bot/ && sudo bash -c "$(curl -Lfo- https://raw.githubusercontent.com/B3H1Z/Hiddify-Telegram-Bot/main/install.sh)"
 ```
+  حذف ربات
+```bash
+cd /opt/Hiddify-Telegram-Bot/ && chmod +x uninstall.sh && ./uninstall.sh
+```
+
 ## اسکرین شات‌ها
 #### ربات کاربران 
 - <img src="https://github.com/B3H1Z/Hiddify-Telegram-Bot/blob/main/Screenshots/scr-u-1.jpg?raw=True" width=35% height=35%>

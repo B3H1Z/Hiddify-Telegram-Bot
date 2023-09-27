@@ -616,11 +616,9 @@ class UserDBManager:
         except Error as e:
             logging.error(f"Error while finding settings {kwargs} \n Error:{e}")
             return None
-
     def edit_int_config(self, key_row, **kwargs):
         cur = self.conn.cursor()
-        for key, value in kwargs.items():
-            value = int(value)
+        for key, value in kwargs.items():            
             try:
                 cur.execute(f"UPDATE int_config SET {key}=? WHERE key=?", (value, key_row))
                 self.conn.commit()
@@ -632,7 +630,6 @@ class UserDBManager:
         return True
 
     def add_int_config(self, key, value):
-        value = int(value)
         cur = self.conn.cursor()
         try:
             cur.execute(

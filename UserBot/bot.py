@@ -93,7 +93,6 @@ def is_user_in_channel(user_id):
             return False
     return True
 
-
 # Next Step Buy From Wallet - Confirm
 def buy_from_wallet_confirm(message: Message, plan):
     if not plan:
