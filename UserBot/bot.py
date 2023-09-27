@@ -568,6 +568,7 @@ def update_info_subscription(message: Message, uuid,markup=None):
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call: CallbackQuery):
     bot.answer_callback_query(call.id, MESSAGES['WAIT'])
+    bot.clear_step_handler(call.message)
     # Split Callback Data to Key(Command) and UUID
     data = call.data.split(':')
     key = data[0]
