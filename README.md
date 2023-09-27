@@ -15,13 +15,9 @@
 
 Hidy Bot is a Telegram bot that allows you to manage your Hiddify panel directly from Telegram.
 
-Install Hidy Bot on the **SAME SERVER** as your Hiddify panel.
-
-**Please note:** This project is currently in BETA, and we are actively working to make it even better. If you encounter any bugs or issues, we appreciate your feedback and bug reports.
-
-> Disclaimer: This bot is **not official** and is not affiliated with Hiddify team.
-
 ## Features
+- [x] Multi panel support
+- [x] Sell config
 - [x] Add users
 - [x] Remove users
 - [x] Edit user details
@@ -34,8 +30,7 @@ Install Hidy Bot on the **SAME SERVER** as your Hiddify panel.
 - [x] Multi language (English, Persian)
 - [x] Client bot
 - [x] and more...
-## To do list
-- [ ] Empty
+
 ## Installation
 
 To install the bot, run the following command:
@@ -50,12 +45,11 @@ Make sure you have the following information ready:
 1. `Admin Telegram Number ID` : Get it from [User info bot](https://t.me/userinfobot) (Example: `123456789`)
 2. `Admin Telgram Bot Token` : Get it from [BotFather](https://t.me/BotFather) (
    Example: `1234567890:ABCdEfGhIjKlMnOpQrStUvWxYz`)
-3. `Hiddify Panel URL` : The url of your Hiddify panel (
-   Example: `https://panel.example.com/7frgemkvtE0/78854985-68dp-425c-989b-7ap0c6kr9bd4`) <b>exactly like this
-   pattern!</b>
-4. `Bot Language` : Options are `en` and `fa` [default is `fa`]
-5. Optional: `Client(Users) Telegram Bot Token` : Get it from [BotFather](https://t.me/BotFather) (
-   Example: `1234567890:ABCdEfGhIjKlMnOpQrStUvWxYz`) if you want set up a bot for your users
+3. `Client Telegram Bot Token` : Get it from [BotFather](https://t.me/BotFather) (
+   Example: `1234567890:ABCdEfGhIjKlMnOpQrStUvWxYz`)
+4. `Hiddify Panel URL` : The url of your Hiddify panel (
+   Example: `https://panel.example.com/7frgemkvtE0/78854985-68dp-425c-989b-7ap0c6kr9bd4`)
+5. `Bot Language` : Options are `en` and `fa` [default is `fa`]
 
 
 Now you can use the bot in Telegram by sending the `/start` command.
@@ -80,17 +74,17 @@ pkill -9 -f hiddifyTelegramBot.py
 ```bash
 cat /opt/Hiddify-Telegram-Bot/Logs/hidyBot.log
 ```
-- ### Get bot configs
-```bash
-cat /opt/Hiddify-Telegram-Bot/config.json
-```
-- ### Change bot configs
+- ### Edit bot configs
 ```bash
 cd /opt/Hiddify-Telegram-Bot/ && python3 config.py && chmod +x restart.sh && ./restart.sh
 ```
 - ### Reinstall bot
 ```bash
 cd /opt/ && rm -rf /opt/Hiddify-Telegram-Bot/ && sudo bash -c "$(curl -Lfo- https://raw.githubusercontent.com/B3H1Z/Hiddify-Telegram-Bot/main/install.sh)"
+```
+- ### Uninstall bot
+```bash
+cd /opt/Hiddify-Telegram-Bot/ && chmod +x uninstall.sh && ./uninstall.sh
 ```
 
 ## Screenshots
