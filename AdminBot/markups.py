@@ -47,9 +47,10 @@ def users_list_markup(server_id, users, page=1):
         markup.add(InlineKeyboardButton(KEY_MARKUP['NEXT_PAGE'], callback_data=f"next:{page + 1}"), row_width=2)
     if page > 1:
         markup.add(InlineKeyboardButton(KEY_MARKUP['PREV_PAGE'], callback_data=f"next:{page - 1}"), row_width=1)
-    markup.add(InlineKeyboardButton(KEY_MARKUP['ADD_USER'], callback_data=f"server_add_user:{server_id}"))
-    markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_SEARCH'], callback_data=f"server_search_user:{server_id}"))
-    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_server_selected:{server_id}"))
+    if server_id != "None":
+        markup.add(InlineKeyboardButton(KEY_MARKUP['ADD_USER'], callback_data=f"server_add_user:{server_id}"))
+        markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_SEARCH'], callback_data=f"server_search_user:{server_id}"))
+        markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_server_selected:{server_id}"))
     return markup
 
 
@@ -131,14 +132,16 @@ def sub_user_list_markup(uuid):
 
 
 # Search User Inline Keyboard Markup
-def search_user_markup(server_id):
+def search_user_markup(server_id=None):
+    callback_data = server_id if server_id else "None"
     markup = InlineKeyboardMarkup()
     markup.row_width = 1
-    markup.add(InlineKeyboardButton(KEY_MARKUP['SEARCH_USER_NAME'], callback_data=f"search_name:{server_id}"))
-    markup.add(InlineKeyboardButton(KEY_MARKUP['SEARCH_USER_UUID'], callback_data=f"search_uuid:{server_id}"))
-    markup.add(InlineKeyboardButton(KEY_MARKUP['SEARCH_USER_CONFIG'], callback_data=f"search_config:{server_id}"))
-    markup.add(InlineKeyboardButton(KEY_MARKUP['SEARCH_EXPIRED_USERS'], callback_data=f"search_expired:{server_id}"))
-    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_server_user_list:{server_id}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['SEARCH_USER_NAME'], callback_data=f"search_name:{callback_data}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['SEARCH_USER_UUID'], callback_data=f"search_uuid:{callback_data}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['SEARCH_USER_CONFIG'], callback_data=f"search_config:{callback_data}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['SEARCH_EXPIRED_USERS'], callback_data=f"search_expired:{callback_data}"))
+    if server_id:
+        markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_server_user_list:{server_id}"))
     return markup
 
 
