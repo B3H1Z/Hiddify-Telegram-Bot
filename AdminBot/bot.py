@@ -406,10 +406,20 @@ def add_server_url(message: Message):
     url = panel_url_validator(message.text)
     bot.delete_message(message.chat.id, msg_wait.message_id)
     if not url:
-        bot.send_message(message.chat.id, MESSAGES['ERROR_ADD_SERVER_URL'],
+        bot.reply_to(message, MESSAGES['ERROR_ADD_SERVER_URL'],
                      reply_markup=markups.while_edit_user_markup())
         bot.register_next_step_handler(message, add_server_url)
         return
+    servers = USERS_DB.select_servers()
+    if servers:
+        for server in servers:
+            previous = server['url']
+            if previous == url:
+                bot.reply_to(message, MESSAGES['ERROR_SAME_SERVER_URL'],
+                            reply_markup=markups.while_edit_user_markup())
+                bot.register_next_step_handler(message, add_server_url)
+                return
+                
     add_server_data['url'] = url
     bot.send_message(message.chat.id, MESSAGES['ADD_SERVER_USER_LIMIT'],
                      reply_markup=markups.while_edit_user_markup())
