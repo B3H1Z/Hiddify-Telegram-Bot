@@ -776,6 +776,7 @@ def callback_query(call: CallbackQuery):
     if call.from_user.id not in ADMINS_ID:
         bot.answer_callback_query(call.id, MESSAGES['ERROR_NOT_ADMIN'])
         return
+    bot.clear_step_handler(call.message)
     # Split Callback Data to Key(Command) and UUID
     data = call.data.split(':')
     key = data[0]
