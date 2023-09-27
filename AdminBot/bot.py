@@ -637,6 +637,7 @@ def users_bot_settings_min_depo(message: Message):
     if not is_it_digit(message):
         return
     new_min_depo = utils.toman_to_rial(message.text)
+    new_min_depo = int(new_min_depo)
     status = USERS_DB.edit_int_config("min_deposit_amount", value=new_min_depo)
     if not status:
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
@@ -674,7 +675,12 @@ def users_bot_settings_test_sub_size(message: Message):
         return
     if not is_it_digit(message,allow_float=True):
         return
-    status = USERS_DB.edit_int_config("test_sub_size_gb", value=message.text)
+    # if float convert float else convert int
+    if '.' in message.text:
+        new_test_sub_size = float(message.text)
+    else:
+        new_test_sub_size = int(message.text)  
+    status = USERS_DB.edit_int_config("test_sub_size_gb", value=new_test_sub_size)
     if not status:
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
         return
@@ -686,7 +692,8 @@ def users_bot_settings_test_sub_days(message: Message):
         return
     if not is_it_digit(message):
         return
-    status = USERS_DB.edit_int_config("test_sub_days", value=message.text)
+    new_test_sub_days = int(message.text)
+    status = USERS_DB.edit_int_config("test_sub_days", value=new_test_sub_days)
     if not status:
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
         return
@@ -696,9 +703,13 @@ def users_bot_settings_test_sub_days(message: Message):
 def users_bot_settings_notif_reminder_usage(message: Message):
     if is_it_cancel(message):
         return
-    if not is_it_digit(message):
+    if not is_it_digit(message,allow_float=True):
         return
-    status = USERS_DB.edit_int_config("reminder_notification_usage", value=message.text)
+    if '.' in message.text:
+        new_reminder_usage = float(message.text)
+    else:
+        new_reminder_usage = int(message.text)
+    status = USERS_DB.edit_int_config("reminder_notification_usage", value=new_reminder_usage)
     if not status:
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
         return
@@ -710,7 +721,8 @@ def users_bot_settings_notif_reminder_days(message: Message):
         return
     if not is_it_digit(message):
         return
-    status = USERS_DB.edit_int_config("reminder_notification_days", value=message.text)
+    new_test_sub_days = int(message.text)
+    status = USERS_DB.edit_int_config("reminder_notification_days", value=new_test_sub_days)
     if not status:
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
         return
@@ -753,16 +765,21 @@ def users_bot_settings_renewal_method_advanced_days(message: Message):
         return
     if not is_it_digit(message):
         return
-    status = USERS_DB.edit_int_config("advanced_renewal_days", value=message.text)
+    new_test_sub_days = int(message.text)
+    status = USERS_DB.edit_int_config("advanced_renewal_days", value=new_test_sub_days)
     if not status:
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
     bot.send_message(message.chat.id, MESSAGES['SUCCESS_UPDATE_DATA'], reply_markup=markups.main_menu_keyboard_markup())
 def users_bot_settings_renewal_method_advanced_usage(message: Message):
     if is_it_cancel(message):
         return
-    if not is_it_digit(message):
+    if not is_it_digit(message,allow_float=True):
         return
-    status = USERS_DB.edit_int_config("advanced_renewal_usage", value=message.text)
+    if '.' in message.text:
+        new_renewal_usage = float(message.text)
+    else:
+        new_renewal_usage = int(message.text)
+    status = USERS_DB.edit_int_config("advanced_renewal_usage", value=new_renewal_usage)
     if not status:
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
     bot.send_message(message.chat.id, MESSAGES['SUCCESS_UPDATE_DATA'], reply_markup=markups.main_menu_keyboard_markup())
