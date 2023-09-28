@@ -246,7 +246,8 @@ def set_config_in_db(db, admin_ids, token, url, lang, client_token):
             default_server = db.find_server(default_server=True)
             default_server_id = default_server[0]['id']
             if default_server:
-                db.edit_server(default_server_id, url=url, user_limit=2000, title="Main Server", default_server=True)
+                if default_server['url'] != url:
+                    db.edit_server(default_server_id, url=url)
             else:
                 db.add_server(url, 2000, title="Main Server", default_server=True)
     except Exception as e:
