@@ -1084,12 +1084,12 @@ def buy_subscription(message: Message):
         return
     for server in servers:
         user_index = 0
-        if server['status']:
-            users_list = api.select(server['url'] + API_PATH)
-            if users_list:
-                user_index = len(users_list)
-            if server['user_limit'] > user_index:
-                server_list.append(server)
+        #if server['status']:
+        users_list = api.select(server['url'] + API_PATH)
+        if users_list:
+            user_index = len(users_list)
+        if server['user_limit'] > user_index:
+            server_list.append(server)
     # bad request telbot api
     # bot.edit_message_text(chat_id=message.chat.id, message_id=msg_wait.message_id,
     #                                   text= MESSAGES['SERVERS_LIST'], reply_markup=servers_list_markup(server_list))
@@ -1190,12 +1190,12 @@ def free_test(message: Message):
                 return
             for server in servers:
                 user_index = 0
-                if server['status']:
-                    users_list = api.select(server['url'] + API_PATH)
-                    if users_list:
-                        user_index = len(users_list)
-                    if server['user_limit'] > user_index:
-                        server_list.append(server)
+                #if server['status']:
+                users_list = api.select(server['url'] + API_PATH)
+                if users_list:
+                    user_index = len(users_list)
+                if server['user_limit'] > user_index:
+                    server_list.append(server)
             # bad request telbot api
             # bot.edit_message_text(chat_id=message.chat.id, message_id=msg_wait.message_id,
             #                                   text= MESSAGES['SERVERS_LIST'], reply_markup=servers_list_markup(server_list))

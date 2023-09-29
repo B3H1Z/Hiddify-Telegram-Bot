@@ -342,13 +342,11 @@ def servers_management_markup(servers):
     keys = []
     if servers:
         for server in servers:
-            if server['status']:
-                keys.append(InlineKeyboardButton(
-                    f"{server['title']}",
-                    callback_data=f"server_selected:{server['id']}"))
-    keys.append(InlineKeyboardButton(
-                KEY_MARKUP['ADD_SERVER'],
-                callback_data=f"add_server:None"))
+            #if server['status']:
+            keys.append(InlineKeyboardButton(f"{server['title']}",
+                                             callback_data=f"server_selected:{server['id']}"))
+    keys.append(InlineKeyboardButton(KEY_MARKUP['ADD_SERVER'],
+                                     callback_data=f"add_server:None"))
     markup.add(*keys)
     return markup
 

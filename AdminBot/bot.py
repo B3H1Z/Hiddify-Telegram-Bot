@@ -1340,7 +1340,8 @@ def callback_query(call: CallbackQuery):
         bot.register_next_step_handler(call.message, edit_server_url, value)
     # Server Management - Confirm Delete Server Callback
     elif key == "confirm_delete_server":
-        status = USERS_DB.edit_server(value, status=0)
+        #status = USERS_DB.edit_server(value, status=0)
+        status = USERS_DB.delete_server(server_id=int(value))
         if not status:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
             

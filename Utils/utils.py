@@ -413,15 +413,15 @@ def non_order_user_info(telegram_id):
             server = USERS_DB.find_server(id=server_id)
             if server:
                 server = server[0]
-                if server['status']:
-                    URL = server['url'] + API_PATH
-                    non_order_user = api.find(URL, subscription['uuid'])
+                #if server['status']:
+                URL = server['url'] + API_PATH
+                non_order_user = api.find(URL, subscription['uuid'])
+                if non_order_user:
+                    non_order_user = users_to_dict([non_order_user])
+                    non_order_user = dict_process(URL, non_order_user, subscription['id'],server_id)
                     if non_order_user:
-                        non_order_user = users_to_dict([non_order_user])
-                        non_order_user = dict_process(URL, non_order_user, subscription['id'],server_id)
-                        if non_order_user:
-                            non_order_user = non_order_user[0]
-                            users_list.append(non_order_user)
+                        non_order_user = non_order_user[0]
+                        users_list.append(non_order_user)
     return users_list
 
 
@@ -438,15 +438,15 @@ def order_user_info(telegram_id):
                     server = USERS_DB.find_server(id=server_id)
                     if server:
                         server = server[0]
-                        if server['status']:
-                            URL = server['url'] + API_PATH
-                            order_user = api.find(URL, subscription['uuid'])
+                        #if server['status']:
+                        URL = server['url'] + API_PATH
+                        order_user = api.find(URL, subscription['uuid'])
+                        if order_user:
+                            order_user = users_to_dict([order_user])
+                            order_user = dict_process(URL, order_user, subscription['id'], server_id)
                             if order_user:
-                                order_user = users_to_dict([order_user])
-                                order_user = dict_process(URL, order_user, subscription['id'], server_id)
-                                if order_user:
-                                    order_user = order_user[0]
-                                    users_list.append(order_user)
+                                order_user = order_user[0]
+                                users_list.append(order_user)
     return users_list
 
 
