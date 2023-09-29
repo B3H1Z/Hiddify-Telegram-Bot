@@ -127,7 +127,7 @@ def sub_user_list_markup(uuid):
     markup.add(InlineKeyboardButton('Vless', callback_data=f"conf_dir_vless:{uuid}"))
     markup.add(InlineKeyboardButton('Vmess', callback_data=f"conf_dir_vmess:{uuid}"))
     markup.add(InlineKeyboardButton('Trojan', callback_data=f"conf_dir_trojan:{uuid}"))
-    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_user_panel:{uuid}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_sub_url_user_list:{uuid}"))
     return markup
 
 
@@ -342,13 +342,11 @@ def servers_management_markup(servers):
     keys = []
     if servers:
         for server in servers:
-            if server['status']:
-                keys.append(InlineKeyboardButton(
-                    f"{server['title']}",
-                    callback_data=f"server_selected:{server['id']}"))
-    keys.append(InlineKeyboardButton(
-                KEY_MARKUP['ADD_SERVER'],
-                callback_data=f"add_server:None"))
+            #if server['status']:
+            keys.append(InlineKeyboardButton(f"{server['title']}",
+                                             callback_data=f"server_selected:{server['id']}"))
+    keys.append(InlineKeyboardButton(KEY_MARKUP['ADD_SERVER'],
+                                     callback_data=f"add_server:None"))
     markup.add(*keys)
     return markup
 

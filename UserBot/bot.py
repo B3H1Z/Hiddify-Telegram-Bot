@@ -244,7 +244,9 @@ def renewal_from_wallet_confirm(message: Message):
     sub = utils.find_order_subscription_by_uuid(uuid)
     for ADMIN in ADMINS_ID:
         admin_bot.send_message(ADMIN,
-                               f"{MESSAGES['ADMIN_NOTIFY_NEW_RENEWAL']} {user_name} {MESSAGES['ADMIN_NOTIFY_NEW_RENEWAL_2']}\n{MESSAGES['INFO_ID']} <code>{sub['id']}</code>")
+                               f"""{MESSAGES['ADMIN_NOTIFY_NEW_RENEWAL']} {user_name} {MESSAGES['ADMIN_NOTIFY_NEW_RENEWAL_2']}
+{MESSAGES['SERVER']}<a href='{server['url']}/admin'> {server['title']} </a>
+{MESSAGES['INFO_ID']} <code>{sub['id']}</code>""")
 
 
 # Next Step Buy Plan - Send Screenshot
@@ -364,7 +366,7 @@ def next_step_send_name_for_buy_from_wallet(message: Message, plan):
     user_info = utils.users_to_dict([user_info])
     user_info = utils.dict_process(URL, user_info)
     user_info = user_info[0]
-    api_user_data = user_info_template(sub_id, user_info, MESSAGES['INFO_USER'])
+    api_user_data = user_info_template(sub_id, server, user_info, MESSAGES['INFO_USER'])
     bot.send_message(message.chat.id, api_user_data,
                                  reply_markup=user_info_markup(user_info['uuid']))
     
@@ -373,7 +375,9 @@ def next_step_send_name_for_buy_from_wallet(message: Message, plan):
     user_name = f"<a href='{link}'> {name} </a>"
     for ADMIN in ADMINS_ID:
         admin_bot.send_message(ADMIN,
-                               f"{MESSAGES['ADMIN_NOTIFY_NEW_SUB']} {user_name} {MESSAGES['ADMIN_NOTIFY_CONFIRM']}\n{MESSAGES['INFO_ID']} <code>{sub_id}</code>")
+                               f"""{MESSAGES['ADMIN_NOTIFY_NEW_SUB']} {user_name} {MESSAGES['ADMIN_NOTIFY_CONFIRM']}
+{MESSAGES['SERVER']}<a href='{server['url']}/admin'> {server['title']} </a>
+{MESSAGES['INFO_ID']} <code>{sub_id}</code>""")
 
 
 # ----------------------------------- Get Free Test Area -----------------------------------
@@ -421,7 +425,7 @@ def next_step_send_name_for_get_free_test(message: Message, server_id):
     user_info = utils.users_to_dict([user_info])
     user_info = utils.dict_process(URL, user_info)
     user_info = user_info[0]
-    api_user_data = user_info_template(non_order_id, user_info, MESSAGES['INFO_USER'])
+    api_user_data = user_info_template(non_order_id, server, user_info, MESSAGES['INFO_USER'])
     bot.send_message(message.chat.id, api_user_data,
                                  reply_markup=user_info_markup(user_info['uuid']))
     BASE_URL = urlparse(server['url']).scheme + "://" + urlparse(server['url']).netloc
@@ -429,7 +433,9 @@ def next_step_send_name_for_get_free_test(message: Message, server_id):
     user_name = f"<a href='{link}'> {name} </a>"
     for ADMIN in ADMINS_ID:
         admin_bot.send_message(ADMIN,
-                               f"{MESSAGES['ADMIN_NOTIFY_NEW_FREE_TEST']} {user_name} {MESSAGES['ADMIN_NOTIFY_CONFIRM']}\n{MESSAGES['INFO_ID']} <code>{non_order_id}</code>")
+                               f"""{MESSAGES['ADMIN_NOTIFY_NEW_FREE_TEST']} {user_name} {MESSAGES['ADMIN_NOTIFY_CONFIRM']}
+{MESSAGES['SERVER']}<a href='{server['url']}/admin'> {server['title']} </a>
+{MESSAGES['INFO_ID']} <code>{non_order_id}</code>""")
 
 
 # ----------------------------------- To QR Area -----------------------------------
@@ -558,7 +564,7 @@ def update_info_subscription(message: Message, uuid,markup=None):
     user = utils.dict_process(URL, utils.users_to_dict([user]))[0]
     try:
         bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id,
-                              text=user_info_template(sub['id'], user, MESSAGES['INFO_USER']),
+                              text=user_info_template(sub['id'], server, user, MESSAGES['INFO_USER']),
                               reply_markup=mrkup)
     except:
         pass
@@ -1035,13 +1041,27 @@ def subscription_status(message: Message):
     if non_order_subs:
         for non_order_sub in non_order_subs:
             if non_order_sub:
-                api_user_data = user_info_template(non_order_sub['sub_id'], non_order_sub, MESSAGES['INFO_USER'])
+                server_id = non_order_sub['server_id']
+                server = USERS_DB.find_server(id=server_id)
+                if not server:
+                    bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                                    reply_markup=main_menu_keyboard_markup())
+                    return
+                server = server[0]
+                api_user_data = user_info_template(non_order_sub['sub_id'], server, non_order_sub, MESSAGES['INFO_USER'])
                 bot.send_message(message.chat.id, api_user_data,
                                  reply_markup=user_info_non_sub_markup(non_order_sub['uuid']))
     if order_subs:
         for order_sub in order_subs:
             if order_sub:
-                api_user_data = user_info_template(order_sub['sub_id'], order_sub, MESSAGES['INFO_USER'])
+                server_id = order_sub['server_id']
+                server = USERS_DB.find_server(id=server_id)
+                if not server:
+                    bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                                    reply_markup=main_menu_keyboard_markup())
+                    return
+                server = server[0]
+                api_user_data = user_info_template(order_sub['sub_id'], server, order_sub, MESSAGES['INFO_USER'])
                 bot.send_message(message.chat.id, api_user_data,
                                  reply_markup=user_info_markup(order_sub['uuid']))
 
@@ -1064,12 +1084,12 @@ def buy_subscription(message: Message):
         return
     for server in servers:
         user_index = 0
-        if server['status']:
-            users_list = api.select(server['url'] + API_PATH)
-            if users_list:
-                user_index = len(users_list)
-            if server['user_limit'] > user_index:
-                server_list.append(server)
+        #if server['status']:
+        users_list = api.select(server['url'] + API_PATH)
+        if users_list:
+            user_index = len(users_list)
+        if server['user_limit'] > user_index:
+            server_list.append(server)
     # bad request telbot api
     # bot.edit_message_text(chat_id=message.chat.id, message_id=msg_wait.message_id,
     #                                   text= MESSAGES['SERVERS_LIST'], reply_markup=servers_list_markup(server_list))
@@ -1170,12 +1190,12 @@ def free_test(message: Message):
                 return
             for server in servers:
                 user_index = 0
-                if server['status']:
-                    users_list = api.select(server['url'] + API_PATH)
-                    if users_list:
-                        user_index = len(users_list)
-                    if server['user_limit'] > user_index:
-                        server_list.append(server)
+                #if server['status']:
+                users_list = api.select(server['url'] + API_PATH)
+                if users_list:
+                    user_index = len(users_list)
+                if server['user_limit'] > user_index:
+                    server_list.append(server)
             # bad request telbot api
             # bot.edit_message_text(chat_id=message.chat.id, message_id=msg_wait.message_id,
             #                                   text= MESSAGES['SERVERS_LIST'], reply_markup=servers_list_markup(server_list))

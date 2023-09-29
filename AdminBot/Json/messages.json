@@ -141,7 +141,8 @@
     "INFO_PLAN_TOTAL_SALE": "Total sales",
     "SUCCESS_SERVER_TITLE_EDITED":"✅Title edited to:",
     "SUCCESS_SERVER_USER_LIMIT_EDITED" : "✅User limit edited to:",
-    "SUCCESS_SERVER_URL_EDITED": "✅URL edited to:"
+    "SUCCESS_SERVER_URL_EDITED": "✅URL edited to:",
+    "SERVER": "Server:"
   },
   "FA": {
     "WELCOME": "به ربات مدیریت هیدی بات خوش آمدید.",
@@ -275,7 +276,7 @@
     "INFO_SERVER": "سرور:",
     "INFO_SERVER_USER_NUMBER": "تعداد کاربر:",
     "INFO_SERVER_USER_PLAN": "تعداد پلن:",
-    "DELETE_SERVER_QUESTION": "آیا از حذف سرور مطمئن هستید؟\n⚠️بعد از حذف اشتراک‌های مربوط به این سرور برای کاربران قابل مشاهده نمی‌باشد.",
+    "DELETE_SERVER_QUESTION": "آیا از حذف سرور مطمئن هستید؟\n⚠️بعد از حذف، اشتراک‌های مربوط به این سرور برای کاربران قابل مشاهده نمی‌باشد و غیر قابل بازگردانی می‌باشد.",
     "ERROR_SERVER_NOT_FOUND": "❌سرور یافت نشد",
     "INFO_PLAN_ID": "آی دی:",
     "INFO_PLAN_USAGE": "محدودیت مصرف(GB):",
@@ -285,7 +286,8 @@
     "INFO_PLAN_TOTAL_SALE": "مجموع فروش:",
     "SUCCESS_SERVER_TITLE_EDITED":"✅عنوان سرور ویرایش شد به:",
     "SUCCESS_SERVER_USER_LIMIT_EDITED" : "✅محدودیت کاربر ویرایش شد به:",
-    "SUCCESS_SERVER_URL_EDITED": "✅لینک سرور ویرایش شد به:"
+    "SUCCESS_SERVER_URL_EDITED": "✅لینک سرور ویرایش شد به:",
+    "SERVER": "سرور:"
 
 
   }

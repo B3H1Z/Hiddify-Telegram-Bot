@@ -1,10 +1,10 @@
 # Description: This file contains all the templates used in the bot.
 from config import LANG, VERSION, API_PATH
 from AdminBot.content import MESSAGES
-from Utils import api
+from Utils import api, utils 
 
 # Single User Info Message Template
-def user_info_template(usr, header=""):
+def user_info_template(usr, server, header=""):
     if not usr['comment']:
         usr['comment'] = "-"
     if usr['remaining_day'] == 0:
@@ -16,6 +16,7 @@ def user_info_template(usr, header=""):
 {header}
 {MESSAGES['INFO_USER']} <a href='{usr['link']}'> {usr['name']} </a>
 ❖⬩╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍⬩❖
+{MESSAGES['SERVER']} {server['title']}
 {MESSAGES['INFO_USAGE']} {usr['usage']['current_usage_GB']} {MESSAGES['OF']} {usr['usage']['usage_limit_GB']} {MESSAGES['GB']}
 {MESSAGES['INFO_REMAINING_DAYS']} {usr['remaining_day']}
 {MESSAGES['INFO_LAST_CONNECTION']} {usr['last_connection']}
@@ -38,7 +39,7 @@ def server_info_template(server, plans, header=""):
 
     return f"""
 {header}
-{MESSAGES['INFO_SERVER']} <a href='{server['url']}\\admin'> {server['title']} </a>
+{MESSAGES['INFO_SERVER']} <a href='{server['url']}/admin'> {server['title']} </a>
 ❖⬩╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍⬩❖
 {MESSAGES['INFO_SERVER_USER_NUMBER']} {user_index} {MESSAGES['OF']} {server['user_limit']}
 {MESSAGES['INFO_SERVER_USER_PLAN']} {plans_num}
@@ -50,16 +51,15 @@ def plan_info_template(plan, orders, header=""):
         for order in orders:
             num_orders += 1
     sale = num_orders * plan['price']
-
     return f"""
 {header}
 {MESSAGES['INFO_PLAN_ID']} {plan['id']}
 ❖⬩╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍⬩❖
 {MESSAGES['INFO_PLAN_USAGE']} {plan['size_gb']} 
 {MESSAGES['INFO_PLAN_DAYS']} {plan['days']} 
-{MESSAGES['INFO_PLAN_PRICE']} {plan['price']} 
+{MESSAGES['INFO_PLAN_PRICE']} {utils.rial_to_toman(plan['price'])} 
 {MESSAGES['INFO_PLAN_NUM_ORDER']} {num_orders} 
-{MESSAGES['INFO_PLAN_TOTAL_SALE']} {sale} 
+{MESSAGES['INFO_PLAN_TOTAL_SALE']} {utils.rial_to_toman(sale)} 
 """
 
 # Users List Message Template

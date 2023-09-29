@@ -22,8 +22,9 @@ bot = telebot.TeleBot(TELEGRAM_TOKEN, parse_mode="HTML")
 bot.delete_webhook()
 
 URL = 'url'
-selected_server_id = 0
+selected_server = None
 search_mode = "Single"
+server_mode = "Single"
 searched_name = ""
 if CLIENT_TOKEN:
     user_bot = user_bot()
@@ -141,9 +142,9 @@ def confirm_add_user(message: Message, server_id):
             if not usr:
                 bot.send_message(message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'])
                 return
-            msg = templates.user_info_template(usr, MESSAGES['NEW_USER_INFO'])
+            msg = templates.user_info_template(usr, server, MESSAGES['NEW_USER_INFO'])
             bot.delete_message(message.chat.id, msg_wait.message_id)
-            bot.send_message(message.chat.id, msg, reply_markup=markups.user_info_markup(usr['uuid']))
+            bot.send_message(message.chat.id, msg, reply_markup=markups.user_info_markup(usr['uuid'], server))
 
         else:
             bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'],
@@ -249,8 +250,13 @@ def search_user_uuid(message: Message, server_id):
         bot.send_message(message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'],
                          reply_markup=markups.main_menu_keyboard_markup())
         return
+    server = USERS_DB.find_server(id=int(server_id))
+    if not server:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_SERVER_NOT_FOUND'])
+        return
+    server = server[0]
     bot.send_message(message.chat.id, MESSAGES['SUCCESS_SEARCH_USER'], reply_markup=markups.main_menu_keyboard_markup())
-    bot.send_message(message.chat.id, templates.user_info_template(user, MESSAGES['SEARCH_RESULT']),
+    bot.send_message(message.chat.id, templates.user_info_template(user, server, MESSAGES['SEARCH_RESULT']),
                      reply_markup=markups.user_info_markup(user['uuid']))
 
 
@@ -265,8 +271,13 @@ def search_user_config(message: Message, server_id):
         bot.send_message(message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'],
                          reply_markup=markups.main_menu_keyboard_markup())
         return
+    server = USERS_DB.find_server(id=int(server_id))
+    if not server:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_SERVER_NOT_FOUND'])
+        return
+    server = server[0]
     bot.send_message(message.chat.id, MESSAGES['SUCCESS_SEARCH_USER'], reply_markup=markups.main_menu_keyboard_markup())
-    bot.send_message(message.chat.id, templates.user_info_template(user, MESSAGES['SEARCH_RESULT']),
+    bot.send_message(message.chat.id, templates.user_info_template(user, server, MESSAGES['SEARCH_RESULT']),
                      reply_markup=markups.user_info_markup(user['uuid']))
 
 # All Servers Search User - Name
@@ -282,7 +293,8 @@ def all_server_search_user_name(message: Message):
         for server in servers:
             URL = server['url'] + API_PATH
             searched_users = utils.search_user_by_name(URL, searched_name)
-            users.extend(searched_users)
+            if searched_users:
+                users.extend(searched_users)
     bot.delete_message(message.chat.id, msg_wait.message_id)
     if not users:
         bot.send_message(message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'],
@@ -296,6 +308,7 @@ def all_server_search_user_name(message: Message):
 
 # All Servers Search User - UUID
 def all_server_search_user_uuid(message: Message):
+    selected_server = None
     if is_it_cancel(message):
         return
     msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=markups.while_edit_user_markup())
@@ -305,6 +318,7 @@ def all_server_search_user_uuid(message: Message):
             URL = server['url'] + API_PATH
             user = utils.search_user_by_uuid(URL, message.text)
             if user:
+                selected_server = server
                 break
     
     bot.delete_message(message.chat.id, msg_wait.message_id)
@@ -312,13 +326,15 @@ def all_server_search_user_uuid(message: Message):
         bot.send_message(message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'],
                          reply_markup=markups.main_menu_keyboard_markup())
         return
+    
     bot.send_message(message.chat.id, MESSAGES['SUCCESS_SEARCH_USER'], reply_markup=markups.main_menu_keyboard_markup())
-    bot.send_message(message.chat.id, templates.user_info_template(user, MESSAGES['SEARCH_RESULT']),
+    bot.send_message(message.chat.id, templates.user_info_template(user, selected_server, MESSAGES['SEARCH_RESULT']),
                      reply_markup=markups.user_info_markup(user['uuid']))
 
 
 # All Servers Search User - Config
 def all_server_search_user_config(message: Message):
+    selected_server = None
     if is_it_cancel(message):
         return
     msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=markups.while_edit_user_markup())
@@ -328,6 +344,7 @@ def all_server_search_user_config(message: Message):
             URL = server['url'] + API_PATH
             user = utils.search_user_by_config(URL, message.text)
             if user:
+                selected_server = server
                 break
     
     bot.delete_message(message.chat.id, msg_wait.message_id)
@@ -336,7 +353,7 @@ def all_server_search_user_config(message: Message):
                          reply_markup=markups.main_menu_keyboard_markup())
         return
     bot.send_message(message.chat.id, MESSAGES['SUCCESS_SEARCH_USER'], reply_markup=markups.main_menu_keyboard_markup())
-    bot.send_message(message.chat.id, templates.user_info_template(user, MESSAGES['SEARCH_RESULT']),
+    bot.send_message(message.chat.id, templates.user_info_template(user, selected_server, MESSAGES['SEARCH_RESULT']),
                      reply_markup=markups.user_info_markup(user['uuid']))
 
 # ----------------------------------- Users Bot Management Area -----------------------------------
@@ -709,7 +726,7 @@ def users_bot_sub_status(message: Message):
     if not usr:
         bot.send_message(message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'])
         return
-    msg = templates.user_info_template(usr)
+    msg = templates.user_info_template(usr, selected_server)
     bot.send_message(message.chat.id, msg,
                      reply_markup=markups.user_info_markup(usr['uuid']))
 
@@ -881,14 +898,17 @@ def callback_query(call: CallbackQuery):
     data = call.data.split(':')
     key = data[0]
     value = data[1]
-    global selected_server_id
     global URL
+    #Single , Single_name , Single_expired , All_server_name , All_server_expired
     global search_mode
+    # All , Single
+    global server_mode
     global searched_name
+    global selected_server 
     # ----------------------------------- Users List Area Callbacks -----------------------------------
     # Single User Info Callback
     if key == "info":
-        if search_mode == "Single":
+        if server_mode == "Single":
             usr = utils.user_info(URL, value)
         else:
             servers = USERS_DB.select_servers()
@@ -897,11 +917,12 @@ def callback_query(call: CallbackQuery):
                     URL = server['url'] + API_PATH
                     usr = utils.user_info(URL, value)
                     if usr:
+                        selected_server = server
                         break
         if not usr:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'])
             return
-        msg = templates.user_info_template(usr)
+        msg = templates.user_info_template(usr, selected_server)
         bot.send_message(call.message.chat.id, msg,
                         reply_markup=markups.user_info_markup(usr['uuid']))
 
@@ -910,31 +931,31 @@ def callback_query(call: CallbackQuery):
     elif key == "next":
         # users_list = utils.dict_process(utils.users_to_dict(ADMIN_DB.select_users()))
         users_list = []
-        server_id = selected_server_id
+        server_id = selected_server['id']
         if search_mode == "Single":
             users_list = api.select(URL)
-            server_id = selected_server_id
+            server_id = selected_server['id']
         elif search_mode == "Single_name":
             users_list = utils.search_user_by_name(URL, searched_name)
-            server_id = selected_server_id
+            server_id = selected_server['id']
         elif search_mode == "Single_expired":
             users_list = api.select(URL)
             users_list = utils.expired_users_list(users_list)
-            server_id = selected_server_id
+            server_id = selected_server['id']
         elif search_mode == "All_server_name":
             servers = USERS_DB.select_servers()
             if servers:
                 for server in servers:
-                    URL = server['url'] + API_PATH
-                    searched_users = utils.search_user_by_name(URL, searched_name)
+                    server_url = server['url'] + API_PATH
+                    searched_users = utils.search_user_by_name(server_url, searched_name)
                     users_list.extend(searched_users)
             server_id = "None"
         elif search_mode == "All_server_expired":
             servers = USERS_DB.select_servers()
             if servers:
                 for server in servers:
-                    URL = server['url'] + API_PATH
-                    users = api.select(URL)
+                    server_url = server['url'] + API_PATH
+                    users = api.select(server_url)
                     users = utils.expired_users_list(users)
                     users_list.extend(users)
             server_id = "None"
@@ -960,14 +981,31 @@ def callback_query(call: CallbackQuery):
         #                  reply_markup=markups.main_menu_keyboard_markup())
     # Edit User Main Button Callback
     elif key == "user_edit":
+        if server_mode == "All":
+            servers = USERS_DB.select_servers()
+            if servers:
+                for server in servers:
+                    users_list = api.find(server['url'] + API_PATH, value)
+                    if users_list:
+                        URL = server['url'] + API_PATH
+                        selected_server = server
+                        break
         bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,
                                       reply_markup=markups.edit_user_markup(value))
 
     # Configs User Callback
     elif key == "user_config":
+        if server_mode == "All":
+            servers = USERS_DB.select_servers()
+            if servers:
+                for server in servers:
+                    users_list = api.find(server['url'] + API_PATH, value)
+                    if users_list:
+                        URL = server['url'] + API_PATH
+                        selected_server = server
+                        break
         bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,
                                       reply_markup=markups.sub_url_user_list_markup(value))
-        return
 
     # ----------------------------------- Edit User Area Callbacks -----------------------------------
     # Edit User - Update Message Callback
@@ -976,7 +1014,7 @@ def callback_query(call: CallbackQuery):
         if not usr:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
             return
-        msg = templates.user_info_template(usr, MESSAGES['EDITED_USER_INFO'])
+        msg = templates.user_info_template(usr, selected_server, MESSAGES['EDITED_USER_INFO'])
         bot.edit_message_text(msg, call.message.chat.id, call.message.message_id,
                               reply_markup=markups.edit_user_markup(value))
     # Edit User - Edit Usage Callback
@@ -1085,65 +1123,7 @@ def callback_query(call: CallbackQuery):
     elif key == 'configs_list':
         bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,
                                       reply_markup=markups.sub_url_user_list_markup(value))
-    # User Configs - Direct Link
-    elif key == 'conf_dir':
-        bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,
-                                      reply_markup=markups.sub_user_list_markup(value))
-    # User Configs - Vless Configs Callback
-    elif key == "conf_dir_vless":
-        sub = utils.sub_links(value, URL)
-        if not sub:
-            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
-            return
-        configs = utils.sub_parse(sub['sub_link'])
-        if not configs:
-            bot.send_message(call.message.chat.id, MESSAGES['ERROR_CONFIG_NOT_FOUND'])
-            return
-        if not configs['vless']:
-            bot.send_message(call.message.chat.id, MESSAGES['ERROR_CONFIG_NOT_FOUND'])
-            return
-        msgs = templates.configs_template(configs['vless'])
-        for message in msgs:
-            if message:
-                bot.send_message(call.message.chat.id, f"{message}",
-                                 reply_markup=markups.main_menu_keyboard_markup())
-    # User Configs - VMess Configs Callback
-    elif key == "conf_dir_vmess":
-        sub = utils.sub_links(value, URL)
-        if not sub:
-            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
-            return
-        configs = utils.sub_parse(sub['sub_link'])
-        if not configs:
-            bot.send_message(call.message.chat.id, MESSAGES['ERROR_CONFIG_NOT_FOUND'])
-            return
-        if not configs['vmess']:
-            bot.send_message(call.message.chat.id, MESSAGES['ERROR_CONFIG_NOT_FOUND'])
-            return
-        msgs = templates.configs_template(configs['vmess'])
-        for message in msgs:
-            if message:
-                bot.send_message(call.message.chat.id, f"{message}",
-                                 reply_markup=markups.main_menu_keyboard_markup())
-    # User Configs - Trojan Configs Callback
-    elif key == "conf_dir_trojan":
-        sub = utils.sub_links(value, URL)
-        if not sub:
-            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
-            return
-        configs = utils.sub_parse(sub['sub_link'])
-        if not configs:
-            bot.send_message(call.message.chat.id, MESSAGES['ERROR_CONFIG_NOT_FOUND'])
-            return
-        if not configs['trojan']:
-            bot.send_message(call.message.chat.id, MESSAGES['ERROR_CONFIG_NOT_FOUND'])
-            return
-        msgs = templates.configs_template(configs['trojan'])
-        for message in msgs:
-            if message:
-                bot.send_message(call.message.chat.id, f"{message}",
-                                 reply_markup=markups.main_menu_keyboard_markup())
-
+        
     # User Configs - Subscription Configs Callback
     elif key == "conf_sub_url":
         sub = utils.sub_links(value, URL)
@@ -1295,8 +1275,8 @@ def callback_query(call: CallbackQuery):
             servers = USERS_DB.select_servers()
             if servers:
                 for server in servers:
-                    URL = server['url'] + API_PATH
-                    users = api.select(URL)
+                    server_url = server['url'] + API_PATH
+                    users = api.select(server_url)
                     users = utils.expired_users_list(users)
                     users_list.extend(users)
         else:
@@ -1311,13 +1291,14 @@ def callback_query(call: CallbackQuery):
 
     # ----------------------------------- Server Management Callbacks -----------------------------------
     elif key == "server_selected":
+        server_mode = "Single"
         server = USERS_DB.find_server(id=int(value))
         if not server:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_SERVER_NOT_FOUND'])
             return
         server = server[0]
         URL = server['url'] + API_PATH
-        selected_server_id = server['id'] 
+        selected_server = server
         plans = USERS_DB.select_plans()
         msg = templates.server_info_template(server,plans)
         bot.edit_message_text(msg, call.message.chat.id, call.message.message_id,
@@ -1359,7 +1340,8 @@ def callback_query(call: CallbackQuery):
         bot.register_next_step_handler(call.message, edit_server_url, value)
     # Server Management - Confirm Delete Server Callback
     elif key == "confirm_delete_server":
-        status = USERS_DB.edit_server(value, status=0)
+        #status = USERS_DB.edit_server(value, status=0)
+        status = USERS_DB.delete_server(server_id=int(value))
         if not status:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
             
@@ -1869,9 +1851,12 @@ def callback_query(call: CallbackQuery):
         if not usr:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'])
             return
-        msg = templates.user_info_template(usr)
+        msg = templates.user_info_template(usr, selected_server)
         bot.edit_message_text(msg, call.message.chat.id, call.message.message_id,
                               reply_markup=markups.user_info_markup(usr['uuid']))
+    elif key == "back_to_sub_url_user_list":
+        bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,
+                                      reply_markup=markups.sub_url_user_list_markup(value))
     elif key == "back_to_server_management":
         servers = USERS_DB.select_servers()
         bot.edit_message_text(KEY_MARKUP['SERVERS_MANAGEMENT'], call.message.chat.id, call.message.message_id,
@@ -1977,6 +1962,8 @@ def server_status(message: Message):
 # Search User Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['USERS_SEARCH'])
 def search_user(message: Message):
+    global server_mode
+    server_mode = "All"
     bot.send_message(message.chat.id, MESSAGES['SEARCH_USER'],
     reply_markup=markups.search_user_markup())
 

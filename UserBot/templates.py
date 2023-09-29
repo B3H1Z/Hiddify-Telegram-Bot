@@ -4,7 +4,7 @@ from UserBot.content import MESSAGES
 from Utils.utils import rial_to_toman, toman_to_rial,all_configs_settings
 from Database.dbManager import USERS_DB
 # User Subscription Info Template
-def user_info_template(sub_id, usr, header=""):
+def user_info_template(sub_id, server, usr, header=""):
     settings = USERS_DB.find_bool_config(key='visible_hiddify_hyperlink')
     if settings:
         settings = settings[0]
@@ -22,6 +22,7 @@ def user_info_template(sub_id, usr, header=""):
 {header}
 
 {MESSAGES['USER_NAME']} {user_name}
+{MESSAGES['SERVER']} {server['title']}
 {MESSAGES['INFO_USAGE']} {usr['usage']['current_usage_GB']} {MESSAGES['OF']} {usr['usage']['usage_limit_GB']} {MESSAGES['GB']}
 {MESSAGES['INFO_REMAINING_DAYS']} {usr['remaining_day']} {MESSAGES['DAY_EXPIRE']}
 {MESSAGES['INFO_ID']} <code>{sub_id}</code>
