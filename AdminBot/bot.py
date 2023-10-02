@@ -116,7 +116,7 @@ def add_user_usage_days(message: Message, server_id):
         return
     add_user_data['usage_days'] = message.text
     bot.send_message(message.chat.id,
-                     f"{MESSAGES['ADD_USER_CONFIRM']}\n\n{MESSAGES['INFO_USER']} {add_user_data['name']}\n"
+                     f"{MESSAGES['ADD_USER_CONFIRM']}\n\n{MESSAGES['INFO_USER_NAME']} {add_user_data['name']}\n"
                      f"{MESSAGES['INFO_USAGE']} {add_user_data['limit']} {MESSAGES['GB']}\n{MESSAGES['INFO_REMAINING_DAYS']} {add_user_data['usage_days']} {MESSAGES['DAY']}",
                      reply_markup=markups.confirm_add_user_markup())
     bot.register_next_step_handler(message, confirm_add_user, server_id)
@@ -456,7 +456,14 @@ def search_bot_user_payment(message: Message):
         return
     bot.send_message(message.chat.id, MESSAGES['SUCCESS_SEARCH_PAYMENT'], reply_markup=markups.main_menu_keyboard_markup())
     payment = payments[0]
-    msg = templates.bot_payment_info_template(payment)
+    user_data = USERS_DB.find_user(telegram_id=payment['telegram_id'])
+    if not user_data:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'],
+                            reply_markup=markups.main_menu_keyboard_markup())
+        return
+    user_data = user_data[0]
+    
+    msg = templates.bot_payment_info_template(payment,user_data)
     photo_path = os.path.join(os.getcwd(), 'UserBot', 'Receiptions', payment['payment_image'])
     bot.send_photo(message.chat.id, photo=open(photo_path, 'rb'),
                 caption=msg, reply_markup=markups.main_menu_keyboard_markup())
@@ -792,6 +799,12 @@ def users_bot_order_status(message: Message):
     #     bot.send_message(message.chat.id, MESSAGES['ERROR_ORDER_NOT_FOUND'], reply_markup=markups.main_menu_keyboard_markup())
     #     return
     payment = payment[0]
+    user_data = USERS_DB.find_user(telegram_id=payment['telegram_id'])
+    if not user_data:
+            bot.send_message(message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'],
+                             reply_markup=main_menu_keyboard_markup())
+            return
+    user_data = user_data[0]
     is_it_accepted = None
     if payment['approved'] == 0:
         is_it_accepted = MESSAGES['PAYMENT_ACCEPT_STATUS_NOT_CONFIRMED']
@@ -802,7 +815,7 @@ def users_bot_order_status(message: Message):
 
     photo_path = path_recp = os.path.join(os.getcwd(), 'UserBot', 'Receiptions', payment['payment_image'])
     bot.send_photo(message.chat.id, photo=open(photo_path, 'rb'),
-                   caption=payment_received_template(payment,
+                   caption=payment_received_template(payment,user,
                                                      footer=f"{MESSAGES['PAYMENT_ACCEPT_STATUS']} {is_it_accepted}\n{MESSAGES['CREATED_AT']} {payment['created_at']}"),
                    reply_markup=markups.main_menu_keyboard_markup())
 
@@ -986,6 +999,17 @@ def users_bot_settings_renewal_method_advanced_usage(message: Message):
     else:
         new_renewal_usage = int(message.text)
     status = USERS_DB.edit_int_config("advanced_renewal_usage", value=new_renewal_usage)
+    if not status:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
+    bot.send_message(message.chat.id, MESSAGES['SUCCESS_UPDATE_DATA'], reply_markup=markups.main_menu_keyboard_markup())
+
+def edit_wallet_balance(message: Message,telegram_id):
+    if is_it_cancel(message):
+        return
+    if not is_it_digit(message,):
+        return
+    new_balance = utils.toman_to_rial(message.text)
+    status = USERS_DB.edit_wallet(telegram_id=telegram_id, balance=new_balance)
     if not status:
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
     bot.send_message(message.chat.id, MESSAGES['SUCCESS_UPDATE_DATA'], reply_markup=markups.main_menu_keyboard_markup())
@@ -1604,7 +1628,12 @@ def callback_query(call: CallbackQuery):
                 bot.send_message(call.message.chat.id, MESSAGES['ERROR_PAYMENT_NOT_FOUND'])
                 return
             payment = payments[0]
-            msg = templates.bot_payment_info_template(payment)
+            user_data = USERS_DB.find_user(telegram_id=payment['telegram_id'])
+            if not user_data:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'])
+                return
+            user_data = user_data[0]
+            msg = templates.bot_payment_info_template(payment,user_data)
             photo_path = os.path.join(os.getcwd(), 'UserBot', 'Receiptions', payment['payment_image'])
             if payment['approved'] == None:
                 bot.send_photo(call.message.chat.id, photo=open(photo_path, 'rb'),
@@ -1684,6 +1713,12 @@ def callback_query(call: CallbackQuery):
         msg = templates.bot_payments_list_template(paymets)
         bot.edit_message_text(msg, call.message.chat.id, call.message.message_id,
                               reply_markup=markups.bot_user_item_list_markup(paymets))
+    
+    elif key == "users_bot_wallet_edit_balance":
+        bot.send_message(call.message.chat.id, MESSAGES['EDIT_WALLET_BALANCE'],
+                            reply_markup=markups.while_edit_user_markup())
+        bot.register_next_step_handler(call.message, edit_wallet_balance, value)
+        
 
     elif key == "users_bot_gifts_user_list":
         list_mode = "User_Gifts"
@@ -1810,11 +1845,11 @@ def callback_query(call: CallbackQuery):
         item_mode = "Payment"
         payments_list = USERS_DB.select_payments()
         if not payments_list:
-            bot.send_message(message.chat.id, MESSAGES['ERROR_PAYMENT_NOT_FOUND'])
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_PAYMENT_NOT_FOUND'])
             return
         digital_payments_list = [payment for payment in payments_list if payment['payment_method'] == "Digital"]
         if not digital_payments_list:
-            bot.send_message(message.chat.id, MESSAGES['ERROR_PAYMENT_NOT_FOUND'])
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_PAYMENT_NOT_FOUND'])
             return
         digital_payments_list.sort(key = operator.itemgetter('created_at'), reverse=True)
         msg = templates.bot_payments_list_template(digital_payments_list)
@@ -2288,7 +2323,12 @@ def callback_query(call: CallbackQuery):
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_PAYMENT_NOT_FOUND'])
             return
         payment = payments[0]
-        msg = templates.bot_payment_info_template(payment, footer=MESSAGES['CHANGE_STATUS_PAYMENT_CONFIRM_REQUEST'])
+        user_data = USERS_DB.find_user(telegram_id=payment['telegram_id'])
+        if not user_data:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+            return
+        user_data = user_data[0]
+        msg = templates.bot_payment_info_template(payment,user_data, footer=MESSAGES['CHANGE_STATUS_PAYMENT_CONFIRM_REQUEST'])
         bot.edit_message_caption(msg, call.message.chat.id, call.message.message_id,
                                       reply_markup=markups.confirm_change_status_payment_by_admin(value))
     # Payment - Confirm change status Payment Callback
@@ -2320,7 +2360,12 @@ def callback_query(call: CallbackQuery):
                     bot.send_message(call.message.chat.id, MESSAGES['ERROR_PAYMENT_NOT_FOUND'])
                     return
                 payment = payments[0]
-                msg = templates.bot_payment_info_template(payment)
+                user_data = USERS_DB.find_user(telegram_id=payment['telegram_id'])
+                if not user_data:
+                    bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+                    return
+                user_data = user_data[0]
+                msg = templates.bot_payment_info_template(payment,user_data)
                 bot.edit_message_caption(msg, call.message.chat.id, call.message.message_id,
                                       reply_markup=markups.change_status_payment_by_admin(value))
                 user_bot.send_message(int(payment['telegram_id']),
@@ -2346,7 +2391,12 @@ def callback_query(call: CallbackQuery):
                     bot.send_message(call.message.chat.id, MESSAGES['ERROR_PAYMENT_NOT_FOUND'])
                     return
                 payment = payments[0]
-                msg = templates.bot_payment_info_template(payment)
+                user_data = USERS_DB.find_user(telegram_id=payment['telegram_id'])
+                if not user_data:
+                    bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+                    return
+                user_data = user_data[0]
+                msg = templates.bot_payment_info_template(payment,user_data)
                 bot.edit_message_caption(msg, call.message.chat.id, call.message.message_id,
                                       reply_markup=markups.change_status_payment_by_admin(value))
                 user_bot.send_message(int(payment['telegram_id']),
@@ -2360,7 +2410,12 @@ def callback_query(call: CallbackQuery):
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_PAYMENT_NOT_FOUND'])
             return
         payment = payments[0]
-        msg = templates.bot_payment_info_template(payment)
+        user_data = USERS_DB.find_user(telegram_id=payment['telegram_id'])
+        if not user_data:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+            return
+        user_data = user_data[0]
+        msg = templates.bot_payment_info_template(payment,user_data)
         bot.edit_message_caption(msg, call.message.chat.id, call.message.message_id,
                                       reply_markup=markups.change_status_payment_by_admin(value))
 

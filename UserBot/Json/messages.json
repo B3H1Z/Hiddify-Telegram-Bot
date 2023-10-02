@@ -5,7 +5,7 @@
         "SUBSCRIPTION_STATUS": "☑️Status:",
         "ACTIVE_SUBSCRIPTION_STATUS": "🟢 Active",
         "DEACTIVE_SUBSCRIPTION_STATUS": "🔴 Deactive",
-        "SERVER": "Server:",
+        "SERVER": "📡Server:",
         "INFO_USAGE": "📊Usage:",
         "INFO_REMAINING_DAYS": "⏳Remaining Days:",
         "INFO_ID": "🔑UUID:",
@@ -81,7 +81,10 @@
         "MANUAL_HDR": "⭕Connection Guide",
         "WELCOME_TO_ADMIN": "Users bot has been successfully launched.\nPlease send /start command to start working.",
         "BUY_SUBSCRIPTION_CLOSED": "Buy subscription is not available at the moment.",
-        "RENEWAL_SUBSCRIPTION_CLOSED": "Renewal subscription is not available at the moment."
+        "RENEWAL_SUBSCRIPTION_CLOSED": "Renewal subscription is not available at the moment.",
+        "INFO_USER_NAME": "⬖ User:",
+        "INFO_USER_USERNAME": "⬖ Username:",
+        "INFO_USER_NUM_ID": "⬖ User ID:"
     },
     "FA": {
         "WELCOME": "به ربات کاربران خوش آمدید",
@@ -89,7 +92,7 @@
         "SUBSCRIPTION_STATUS": "❔وضعیت:",
         "ACTIVE_SUBSCRIPTION_STATUS": "🟢 فعال",
         "DEACTIVE_SUBSCRIPTION_STATUS": "🔴 غیر فعال",
-        "SERVER": "سرور:",
+        "SERVER": "📡سرور:",
         "INFO_USAGE": "📊میزان استفاده:",
         "INFO_REMAINING_DAYS": "⏳زمان باقی مانده:",
         "INFO_ID": "🔑شناسه:",
@@ -165,6 +168,9 @@
         "MANUAL_HDR": "لطفا سیستم عامل خود را انتخاب کنید",
         "WELCOME_TO_ADMIN": "ربات کاربران هیدی بات با موفقیت راه‌اندازی شد.\nبرای شروع کار، دستور /start را ارسال کنید.",
         "BUY_SUBSCRIPTION_CLOSED": "در حال حاضر امکان خرید اشتراک وجود ندارد.",
-        "RENEWAL_SUBSCRIPTION_CLOSED": "در حال حاضر امکان تمدید اشتراک وجود ندارد."
+        "RENEWAL_SUBSCRIPTION_CLOSED": "در حال حاضر امکان تمدید اشتراک وجود ندارد.",
+        "INFO_USER_NAME": "⬖ کاربر:",
+        "INFO_USER_USERNAME": "⬖ نام کاربری:",
+        "INFO_USER_NUM_ID": "⬖ شناسه کاربر:"
     }
 }

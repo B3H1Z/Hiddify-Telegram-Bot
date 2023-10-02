@@ -44,7 +44,9 @@
     "INFO_REMAINING_DAYS": "📆Remaining Days:",
     "INFO_LAST_CONNECTION": "📶Last Connection:",
     "INFO_COMMENT": "📝Comment:",
-    "INFO_USER": "⬖ Name:",
+    "INFO_USER_NAME": "⬖ Name:",
+    "INFO_USER_USERNAME": "⬖ Username:",
+    "INFO_USER_NUM_ID": "⬖ Telegram ID:",
     "HEADER_USERS_LIST": "⬖ Users List",
     "HEADER_USERS_LIST_MSG": "ℹ️You can see the list of users and their information here.",
     "NUM_USERS": "🟢Number of users: ",
@@ -189,7 +191,9 @@
     "PAYMENT_CHANGED_TO_CONFIRMED_ADMIN": "✅Payment changed to confirmed",
     "PAYMENT_CHANGED_TO_NOT_CONFIRMED_ADMIN": "❌Payment changed to rejected",
     "SUCCESS_SEARCH_ORDER": "✅Order found",
-    "SUCCESS_SEARCH_PAYMENT": "✅Payment found"
+    "SUCCESS_SEARCH_PAYMENT": "✅Payment found",
+    "NOT_SET ": "Not set",
+    "EDIT_WALLET_BALANCE": "Please enter the new balance:"
   },
   "FA": {
     "WELCOME": "به ربات مدیریت هیدی بات خوش آمدید.",
@@ -236,7 +240,9 @@
     "INFO_REMAINING_DAYS": "📆انقضا:",
     "INFO_LAST_CONNECTION": "📶آخرین اتصال:",
     "INFO_COMMENT": "📝یادداشت:",
-    "INFO_USER": "⬖ کاربر:",
+    "INFO_USER_NAME": "⬖ کاربر:",
+    "INFO_USER_USERNAME": "⬖ نام کاربری:",
+    "INFO_USER_NUM_ID": "⬖ شناسه کاربر:",
     "HEADER_USERS_LIST": "⬖ لیست کاربران",
     "HEADER_USERS_LIST_MSG": "ش️ما می‌توانید لیست کاربران و اطلاعات آن‌ها را اینجا مشاهده کنید",
     "NUM_USERS": "⬖ تعداد کاربران: ",
@@ -381,6 +387,8 @@
     "PAYMENT_CHANGED_TO_CONFIRMED_ADMIN": "✅وضعیت پرداخت به تایید شده تغییر یافت",
     "PAYMENT_CHANGED_TO_NOT_CONFIRMED_ADMIN": "❌وضعیت پرداخت به رد شده تغییر یافت",
     "SUCCESS_SEARCH_ORDER": "✅سفارش یافت شد",
-    "SUCCESS_SEARCH_PAYMENT": "✅پرداخت یافت شد"
+    "SUCCESS_SEARCH_PAYMENT": "✅پرداخت یافت شد",
+    "NOT_SET": "تنظیم نشده",
+    "EDIT_WALLET_BALANCE": "لطفا مبلغی که میخواهید موجودی کیف پول به آن تغییر کند را به تومان وارد کنید:"
   }
 }

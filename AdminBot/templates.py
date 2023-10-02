@@ -16,7 +16,7 @@ def user_info_template(usr, server, header=""):
 
     return f"""
 {header}
-{MESSAGES['INFO_USER']} <a href='{usr['link']}'> {usr['name']} </a>
+{MESSAGES['INFO_USER_NAME']} <a href='{usr['link']}'> {usr['name']} </a>
 ❖⬩╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍⬩❖
 {MESSAGES['SERVER']} {server['title']}
 {MESSAGES['INFO_USAGE']} {usr['usage']['current_usage_GB']} {MESSAGES['OF']} {usr['usage']['usage_limit_GB']} {MESSAGES['GB']}
@@ -144,11 +144,14 @@ def bot_users_info_template(user, orders, payments, wallet, non_order_subs, orde
     if wallet:
         total_balance = wallet['balance']
     name = user['full_name'] if user['full_name'] else user['telegram_id']
+    username = f"@{user['username']}" if user['username'] else MESSAGES['NOT_SET']
     free_test_status = "✅" if user['test_subscription'] else "❌"
 
     return f"""
 {header}
-{MESSAGES['INFO_USER']}{name}
+{MESSAGES['INFO_USER_NAME']}{name}
+{MESSAGES['INFO_USER_USERNAME']}{username}
+{MESSAGES['INFO_USER_NUM_ID']}{user['telegram_id']}
 {MESSAGES['GET_FREE_TEST_STATUS']}{free_test_status}
 {MESSAGES['WALLET_BALANCE']}{utils.rial_to_toman(total_balance)}{MESSAGES['TOMAN']}
 ❖⬩╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍⬩❖
@@ -164,36 +167,41 @@ def bot_users_info_template(user, orders, payments, wallet, non_order_subs, orde
 
 # Bot Users Order Info Message Template
 def bot_orders_info_template(order, plan, user, server, header=""):
+    name = user['full_name'] if user['full_name'] else user['telegram_id']
+    username = f"@{user['username']}" if user['username'] else MESSAGES['NOT_SET']
 
     return f"""
 {header}
 {MESSAGES['BOT_ORDER_ID']}<code>{order['id']}</code>
 {MESSAGES['BOT_ORDER_DATE']}{order['created_at']}
-{MESSAGES['INFO_USER']}<b>{user['full_name']}</b>
+{MESSAGES['INFO_USER_NAME']}<b>{name}</b>
+{MESSAGES['INFO_USER_USERNAME']}{username}
+{MESSAGES['INFO_USER_NUM_ID']}{user['telegram_id']}
 ❖⬩╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍⬩❖
 {MESSAGES['ORDERED_VALUME']}{plan['size_gb']}
 {MESSAGES['ORDERED_DAYS']}{plan['days']}
 {MESSAGES['ORDERED_PRICE']}{utils.rial_to_toman(plan['price'])}{MESSAGES['TOMAN']}
 ❖⬩╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍⬩❖
-{MESSAGES['SUB_NAME']}{order['user_name']}
 {MESSAGES['SERVER']}{server['title']}
 """
 
 # Payment Received Template - Send to Admin
-def bot_payment_info_template(payment, header="", footer=""):
+def bot_payment_info_template(payment,user, header="", footer=""):
     #approved = "✅" if payment['approved'] else "❌"
     if payment['approved']: approved = "✅"
     elif payment['approved'] == False: approved = "❌"
     else: approved = "⏳"
-        
-
+    username = f"@{user['username']}" if user['username'] else MESSAGES['NOT_SET']
+    name = user['full_name'] if user['full_name'] else user['telegram_id']
     return f"""
 {header}
 
-{MESSAGES['PAYMENTS_ID']}<code>{payment['id']}</code>
-{MESSAGES['INFO_USER']}<b>{payment['user_name']}</b>
+{MESSAGES['PAYMENTS_ID']} <code>{payment['id']}</code>
+{MESSAGES['INFO_USER_NAME']} <b>{name}</b>
+{MESSAGES['INFO_USER_USERNAME']} {username}
+{MESSAGES['INFO_USER_NUM_ID']} {user['telegram_id']}
 {MESSAGES['BOT_PAYMENT_DATE']} {payment['created_at']}
-{MESSAGES['PAIED_AMOUNT']}<b>{utils.rial_to_toman(payment['payment_amount'])}</b> {MESSAGES['TOMAN']}
+{MESSAGES['PAIED_AMOUNT']} <b>{utils.rial_to_toman(payment['payment_amount'])}</b> {MESSAGES['TOMAN']}
 ❖⬩╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍⬩❖
 {MESSAGES['STATUS']} {approved}
 {MESSAGES['PAYMENTS_METHOD']} {payment['payment_method']}

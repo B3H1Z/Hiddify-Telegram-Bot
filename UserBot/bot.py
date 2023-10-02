@@ -288,9 +288,15 @@ def next_step_send_screenshot(message, charge_wallet):
                              reply_markup=main_menu_keyboard_markup())
             return
         payment = payment[0]
+        user_data = USERS_DB.find_user(telegram_id=message.chat.id)
+        if not user_data:
+            bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                             reply_markup=main_menu_keyboard_markup())
+            return
+        user_data = user_data[0]
         for ADMIN in ADMINS_ID:
             admin_bot.send_photo(ADMIN, open(path_recp, 'rb'),
-                                 caption=payment_received_template(payment),
+                                 caption=payment_received_template(payment,user_data),
                                  reply_markup=confirm_payment_by_admin(charge_wallet['id']))
         bot.send_message(message.chat.id, MESSAGES['WAIT_FOR_ADMIN_CONFIRMATION'],
                          reply_markup=main_menu_keyboard_markup())
@@ -1006,15 +1012,17 @@ def start_bot(message: Message):
     if not join_status:
         return
     settings = utils.all_configs_settings()
-    if " " in message.text:
-        referral_coed = int(message.text.split()[1])
+    # if " " in message.text:
+    #     referral_coed = int(message.text.split()[1])
     MESSAGES['WELCOME'] = MESSAGES['WELCOME'] if not settings['msg_user_start'] else settings['msg_user_start']
     if USERS_DB.find_user(telegram_id=message.chat.id):
-        edit_name= USERS_DB.edit_user(full_name=message.from_user.full_name)
+        edit_name= USERS_DB.edit_user(telegram_id=message.chat.id,full_name=message.from_user.full_name)
+        edit_username = USERS_DB.edit_user(telegram_id=message.chat.id,username=message.from_user.username)
         bot.send_message(message.chat.id, MESSAGES['WELCOME'], reply_markup=main_menu_keyboard_markup())
         return
     created_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    status = USERS_DB.add_user(telegram_id=message.chat.id, full_name=message.from_user.full_name, created_at=created_at)
+    status = USERS_DB.add_user(telegram_id=message.chat.id,username=message.from_user.username, full_name=message.from_user.full_name, created_at=created_at)
+
     if not status:
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())

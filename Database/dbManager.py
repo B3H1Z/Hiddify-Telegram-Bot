@@ -42,6 +42,7 @@ class UserDBManager:
                         "id INTEGER PRIMARY KEY AUTOINCREMENT,"
                         "telegram_id INTEGER NOT NULL UNIQUE,"
                         "full_name TEXT NULL,"
+                        "username TEXT NULL,"
                         # "referral_code INTEGER NOT NULL,"
                         # "referred_by INTEGER NULL,"
                         # "discount_percent INTEGER NOT NULL DEFAULT 0,"
@@ -58,25 +59,23 @@ class UserDBManager:
                         "price INTEGER NOT NULL,"
                         "server_id INTEGER NOT NULL,"
                         "description TEXT NULL,"
-                        #"gift BOOLEAN NOT NULL,"
                         "status BOOLEAN NOT NULL,"
                         "FOREIGN KEY (server_id) REFERENCES server (id))")
             self.conn.commit()
             logging.info("Plans table created successfully!")
 
-            cur.execute("CREATE TABLE IF NOT EXISTS user_plans ("
-                        "id INTEGER PRIMARY KEY,"
-                        "telegram_id INTEGER NOT NULL UNIQUE,"
-                        "plan_id INTEGER NOT NULL,"
-                        "FOREIGN KEY (telegram_id) REFERENCES users (telegram_id),"
-                        "FOREIGN KEY (plan_id) REFERENCES plans (id))")
-            self.conn.commit()
-            logging.info("Plans table created successfully!")
+            # cur.execute("CREATE TABLE IF NOT EXISTS user_plans ("
+            #             "id INTEGER PRIMARY KEY,"
+            #             "telegram_id INTEGER NOT NULL UNIQUE,"
+            #             "plan_id INTEGER NOT NULL,"
+            #             "FOREIGN KEY (telegram_id) REFERENCES users (telegram_id),"
+            #             "FOREIGN KEY (plan_id) REFERENCES plans (id))")
+            # self.conn.commit()
+            # logging.info("Plans table created successfully!")
 
             cur.execute("CREATE TABLE IF NOT EXISTS orders ("
                         "id INTEGER PRIMARY KEY,"
                         "telegram_id INTEGER NOT NULL,"
-                        "user_name TEXT NOT NULL,"
                         "plan_id INTEGER NOT NULL,"
                         "created_at TEXT NOT NULL,"
                         "FOREIGN KEY (telegram_id) REFERENCES user (telegram_id),"
@@ -217,11 +216,11 @@ class UserDBManager:
 
         return True
 
-    def add_user(self, telegram_id, full_name, created_at):
+    def add_user(self, telegram_id, full_name,username, created_at):
         cur = self.conn.cursor()
         try:
-            cur.execute("INSERT INTO users(telegram_id, full_name, created_at) VALUES(?,?,?)",
-                        (telegram_id, full_name, created_at))
+            cur.execute("INSERT INTO users(telegram_id, full_name,username, created_at) VALUES(?,?,?,?)",
+                        (telegram_id, full_name,username, created_at))
             self.conn.commit()
             logging.info(f"User [{telegram_id}] added successfully!")
             return True
@@ -230,11 +229,11 @@ class UserDBManager:
             logging.error(f"Error while adding user [{telegram_id}] \n Error: {e}")
             return False
 
-    def add_plan(self, plan_id, size_gb, days, price, server_id, description=None, status=True, gift=False):
+    def add_plan(self, plan_id, size_gb, days, price, server_id, description=None, status=True):
         cur = self.conn.cursor()
         try:
-            cur.execute("INSERT INTO plans(id,size_gb, days, price, server_id, description, status, gift) VALUES(?,?,?,?,?,?,?,?)",
-                        (plan_id, size_gb, days, price, server_id, description, status, gift))
+            cur.execute("INSERT INTO plans(id,size_gb, days, price, server_id, description, status) VALUES(?,?,?,?,?,?,?)",
+                        (plan_id, size_gb, days, price, server_id, description, status))
             self.conn.commit()
             logging.info(f"Plan [{size_gb}GB] added successfully!")
             return True

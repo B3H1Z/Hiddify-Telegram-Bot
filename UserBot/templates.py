@@ -80,13 +80,19 @@ Card owner <b>{card_holder_name}</b>
 
 
 # Payment Received Template - Send to Admin
-def payment_received_template(payment, header="", footer=""):
+def payment_received_template(payment,user, header="", footer=""):
+    username = f"@{user['username']}" if user['username'] else MESSAGES['NOT_SET']
+    name = user['full_name'] if user['full_name'] else user['telegram_id']
+
+
     if LANG == 'FA':
         return f"""
 {header}
 
 شماره تراکنش: <code>{payment['id']}</code>
-نام کاربر: <b>{payment['user_name']}</b>
+{MESSAGES['INFO_USER_NAME']} <b>{name}</b>
+{MESSAGES['INFO_USER_USERNAME']} {username}
+{MESSAGES['INFO_USER_NUM_ID']} {user['telegram_id']}
 هزینه پرداخت شده: <b>{rial_to_toman(payment['payment_amount'])}</b> {MESSAGES['TOMAN']}
 ---------------------
 ⬇️درخواست افزایش موجودی کیف پول⬇️
@@ -98,7 +104,9 @@ def payment_received_template(payment, header="", footer=""):
 {header}
 
 Payment number: <b>{payment['id']}</b>
-Registered name: <b>{payment['user_name']}</b>
+{MESSAGES['INFO_USER_NAME']} <b>{name}</b>
+{MESSAGES['INFO_USER_USERNAME']} {username}
+{MESSAGES['INFO_USER_NUM_ID']} {user['telegram_id']}
 Paid amount: <b>{payment['payment_amount']}</b> {MESSAGES['TOMAN']}
 ---------------------
 ⬇️Request to increase wallet balance⬇️
