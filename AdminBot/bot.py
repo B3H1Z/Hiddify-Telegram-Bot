@@ -2,6 +2,7 @@
 import datetime
 import html
 import logging
+import operator
 import time
 import telebot
 import os
@@ -26,6 +27,10 @@ selected_server = None
 search_mode = "Single"
 server_mode = "Single"
 searched_name = ""
+list_mode = ""
+item_mode= ""
+selected_telegram_id = "0"
+
 if CLIENT_TOKEN:
     user_bot = user_bot()
 # ----------------------------------- Helper Functions -----------------------------------
@@ -355,6 +360,107 @@ def all_server_search_user_config(message: Message):
     bot.send_message(message.chat.id, MESSAGES['SUCCESS_SEARCH_USER'], reply_markup=markups.main_menu_keyboard_markup())
     bot.send_message(message.chat.id, templates.user_info_template(user, selected_server, MESSAGES['SEARCH_RESULT']),
                      reply_markup=markups.user_info_markup(user['uuid']))
+
+# ----------------------------------- Users Bot Search Area -----------------------------------
+# User Bot Search  - Name
+def search_bot_user_name(message: Message):
+    global searched_name
+    if is_it_cancel(message):
+        return
+    searched_name = message.text
+    users = USERS_DB.find_user(full_name=searched_name)
+    if not users:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'],
+                         reply_markup=markups.main_menu_keyboard_markup())
+        return
+    users.sort(key = operator.itemgetter('created_at'), reverse=True)
+    bot.send_message(message.chat.id, MESSAGES['SUCCESS_SEARCH_USER'], reply_markup=markups.main_menu_keyboard_markup())
+
+    wallets_list = USERS_DB.select_wallet()
+    orders_list = USERS_DB.select_orders()
+    msg = templates.bot_users_list_template(users, wallets_list, orders_list)
+    bot.send_message(message.chat.id, msg, reply_markup=markups.bot_users_list_markup(users))
+
+# User Bot Search  - Name
+def search_bot_user_telegram_id(message: Message):
+    if is_it_cancel(message):
+        return
+    if not is_it_digit(message):
+        return
+    users = USERS_DB.find_user(telegram_id=int(searched_name))
+    if not users:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'],
+                        reply_markup=markups.main_menu_keyboard_markup())
+        return
+    user = users[0]
+    bot.send_message(message.chat.id, MESSAGES['SUCCESS_SEARCH_USER'], reply_markup=markups.main_menu_keyboard_markup())
+
+    orders = USERS_DB.find_order(telegram_id=user['telegram_id'])
+    paymets = USERS_DB.find_payment(telegram_id=user['telegram_id'])
+    wallet = None
+    wallets = USERS_DB.find_wallet(telegram_id=user['telegram_id'])
+    if wallets:
+        wallet = wallets[0]
+    non_order_subs = utils.non_order_user_info(user['telegram_id'])
+    order_subs = utils.order_user_info(user['telegram_id'])
+    plans_list = USERS_DB.select_plans()
+    msg = templates.bot_users_info_template(user, orders, paymets, wallet, non_order_subs, order_subs, plans_list)
+    bot.send_message(message.chat.id, msg, reply_markup=markups.bot_user_info_markup(user['telegram_id']))
+
+
+# User Bot Search  - Order
+def search_bot_user_order(message: Message):
+    if is_it_cancel(message):
+        return
+    if not is_it_digit(message):
+        return
+    orders = USERS_DB.find_order(id=int(message.text))
+    if not orders:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_ORDER_NOT_FOUND'],
+                        reply_markup=markups.main_menu_keyboard_markup())
+        return
+    order = orders[0]
+    bot.send_message(message.chat.id, MESSAGES['SUCCESS_SEARCH_ORDER'], reply_markup=markups.main_menu_keyboard_markup())
+    plans = USERS_DB.find_plan(id=order['plan_id'])
+    if not plans:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'],
+                            reply_markup=markups.main_menu_keyboard_markup())
+        return
+    plan = plans[0]
+    #subs = 
+    users = USERS_DB.find_user(telegram_id=order['telegram_id'])
+    if not users:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'],
+                            reply_markup=markups.main_menu_keyboard_markup())
+        return
+    user = users[0]
+    servers = USERS_DB.find_server(id=plan['server_id'])
+    if not servers:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'],
+                            reply_markup=markups.main_menu_keyboard_markup())
+        return
+    server = servers[0]
+    msg = templates.bot_orders_info_template(order, plan, user, server)
+    bot.send_message(message.chat.id, msg)
+
+# User Bot Search  - Payment
+def search_bot_user_payment(message: Message):
+    if is_it_cancel(message):
+        return
+    if not is_it_digit(message):
+        return
+    payments = USERS_DB.find_payment(id=int(message.text))
+    if not payments:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_ORDER_NOT_FOUND'],
+                        reply_markup=markups.main_menu_keyboard_markup())
+        return
+    bot.send_message(message.chat.id, MESSAGES['SUCCESS_SEARCH_PAYMENT'], reply_markup=markups.main_menu_keyboard_markup())
+    payment = payments[0]
+    msg = templates.bot_payment_info_template(payment)
+    photo_path = os.path.join(os.getcwd(), 'UserBot', 'Receiptions', payment['payment_image'])
+    bot.send_photo(message.chat.id, photo=open(photo_path, 'rb'),
+                caption=msg, reply_markup=markups.main_menu_keyboard_markup())
+
 
 # ----------------------------------- Users Bot Management Area -----------------------------------
 add_plan_data = {}
@@ -905,9 +1011,18 @@ def callback_query(call: CallbackQuery):
     global server_mode
     global searched_name
     global selected_server 
+    #User_Orders, User_Payments, User_Gifts, Orders, Approved_Payments
+    #Non_Approved_Payments, Pending_Payments, Card_Payments, Digital_Payments
+    #Bot_User, Bot_Users_Search_Name, User_Refferals
+    global list_mode 
+    #Order, Payment, Gift
+    global item_mode
+    global selected_telegram_id
     # ----------------------------------- Users List Area Callbacks -----------------------------------
     # Single User Info Callback
     if key == "info":
+        print(server_mode)
+        print(value)
         if server_mode == "Single":
             usr = utils.user_info(URL, value)
         else:
@@ -1383,8 +1498,329 @@ def callback_query(call: CallbackQuery):
 
     # ----------------------------------- Users Bot Management Callbacks -----------------------------------
     elif key == "users_bot_management_menu":
-        bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,
+        bot.edit_message_text(KEY_MARKUP['USERS_BOT_MANAGEMENT'], call.message.chat.id, call.message.message_id,
                                       reply_markup=markups.users_bot_management_markup())
+        
+    elif key == "bot_users_list_management":
+         bot.edit_message_text(KEY_MARKUP['BOT_USERS_MANAGEMENT'], call.message.chat.id, call.message.message_id,
+                              reply_markup=markups.users_bot_users_management_markup())
+        
+    elif key == "bot_users_list":
+        list_mode = "Bot_Users"
+        users_list = USERS_DB.select_users()
+        wallets_list = USERS_DB.select_wallet()
+        orders_list = USERS_DB.select_orders()
+        if not users_list:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'])
+            return
+        msg = templates.bot_users_list_template(users_list, wallets_list, orders_list)
+        bot.edit_message_text(msg, call.message.chat.id, call.message.message_id,
+                              reply_markup=markups.bot_users_list_markup(users_list))
+        users_list.sort(key = operator.itemgetter('created_at'), reverse=True)
+    elif key == "search_users_bot":
+         
+         bot.edit_message_text(MESSAGES['SEARCH_USER'], call.message.chat.id, call.message.message_id,
+                          reply_markup=markups.users_bot_users_search_method_markup())
+    
+    elif key == "bot_users_search_name":
+        list_mode = "Bot_Users"
+        bot.send_message(call.message.chat.id, MESSAGES['SEARCH_USER_NAME'],
+                         reply_markup=markups.while_edit_user_markup())
+        bot.register_next_step_handler(call.message, search_bot_user_name)
+
+    elif key == "bot_users_search_telegram_id":
+        bot.send_message(call.message.chat.id, MESSAGES['SEARCH_USER_TELEGRAM_ID'],
+                         reply_markup=markups.while_edit_user_markup())
+        bot.register_next_step_handler(call.message, search_bot_user_telegram_id)
+
+    elif key == "bot_user_info":
+        selected_telegram_id = value
+        print(selected_telegram_id)
+        users = USERS_DB.find_user(telegram_id=int(value))
+        if not users:
+             bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'],
+                              reply_markup=markups.main_menu_keyboard_markup())
+             return
+        user = users[0]
+        orders = USERS_DB.find_order(telegram_id=user['telegram_id'])
+        paymets = USERS_DB.find_payment(telegram_id=user['telegram_id'])
+        wallet = None
+        wallets = USERS_DB.find_wallet(telegram_id=user['telegram_id'])
+        if wallets:
+            wallet = wallets[0]
+        non_order_subs = utils.non_order_user_info(user['telegram_id'])
+        order_subs = utils.order_user_info(user['telegram_id'])
+        plans_list = USERS_DB.select_plans()
+        msg = templates.bot_users_info_template(user, orders, paymets, wallet, non_order_subs, order_subs, plans_list)
+        bot.send_message(call.message.chat.id, msg, reply_markup=markups.bot_user_info_markup(value))
+
+    elif key == "bot_user_next":
+        if list_mode == "Bot_User":
+           users_list = USERS_DB.select_users()
+        elif list_mode == "Bot_Users_Search_Name":
+            users_list = USERS_DB.find_user(full_name=searched_name)
+        elif list_mode == "User_Refferals":
+            users_list = USERS_DB.find_user(telegram_id=int(selected_telegram_id))
+        if not users_list:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'])
+            return 
+        users_list.sort(key = operator.itemgetter('created_at'), reverse=True)
+        bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,
+                                    reply_markup=markups.bot_users_list_markup(users_list, int(value)))
+
+
+    elif key == "bot_user_item_info":
+        if item_mode == "Order":
+            orders = USERS_DB.find_order(id=int(value))
+            if not orders:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'],
+                                reply_markup=markups.main_menu_keyboard_markup())
+                return
+            order = orders[0]
+            plans = USERS_DB.find_plan(id=order['plan_id'])
+            if not plans:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'],
+                                reply_markup=markups.main_menu_keyboard_markup())
+                return
+            plan = plans[0]
+            #subs = 
+            users = USERS_DB.find_user(telegram_id=order['telegram_id'])
+            if not users:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'],
+                                reply_markup=markups.main_menu_keyboard_markup())
+                return
+            user = users[0]
+            servers = USERS_DB.find_server(id=plan['server_id'])
+            if not servers:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'],
+                                reply_markup=markups.main_menu_keyboard_markup())
+                return
+            server = servers[0]
+            msg = templates.bot_orders_info_template(order, plan, user, server)
+            bot.send_message(call.message.chat.id, msg)
+        elif item_mode == "Payment":
+            payments = USERS_DB.find_payment(id=int(value))
+            if not payments:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_PAYMENT_NOT_FOUND'])
+                return
+            payment = payments[0]
+            msg = templates.bot_payment_info_template(payment)
+            photo_path = os.path.join(os.getcwd(), 'UserBot', 'Receiptions', payment['payment_image'])
+            if payment['approved'] == None:
+                bot.send_photo(call.message.chat.id, photo=open(photo_path, 'rb'),
+                            caption=msg, reply_markup=markups.confirm_payment_by_admin(payment['id']))
+            else:
+                bot.send_photo(call.message.chat.id, photo=open(photo_path, 'rb'),
+                            caption=msg, reply_markup=markups.change_status_payment_by_admin(payment['id']))
+        elif item_mode == "Gift":
+            gift = USERS_DB.find_user_plans(id=int(value))
+
+    elif key == "bot_user_item_next":
+        if list_mode == "User_Orders":
+            item_list = USERS_DB.find_order(telegram_id=int(selected_telegram_id))
+        elif list_mode == "User_Payments":
+            item_list = USERS_DB.find_payment(telegram_id=int(selected_telegram_id))
+        elif list_mode == "User_Gifts":
+            item_list = USERS_DB.find_user_plans(telegram_id=int(selected_telegram_id))
+        elif list_mode == "Orders":
+            item_list = USERS_DB.select_orders()
+        if list_mode == "Approved_Payments":
+            payments_list = USERS_DB.select_payments()
+            item_list = [payment for payment in payments_list if payment['approved'] == 1]
+        elif list_mode == "Non_Approved_Payments":
+            payments_list = USERS_DB.select_payments()
+            item_list = [payment for payment in payments_list if payment['approved'] == 0]
+        elif list_mode == "Pending_Payments":
+            payments_list = USERS_DB.select_payments()
+            item_list = [payment for payment in payments_list if payment['approved'] == None]
+        elif list_mode == "Card_Payments":
+            payments_list = USERS_DB.select_payments()
+            item_list = [payment for payment in payments_list if payment['payment_method'] == "Card"]
+        elif list_mode == "Digital_Payments":
+            payments_list = USERS_DB.select_payments()
+            item_list = [payment for payment in payments_list if payment['payment_method'] == "Digital"]
+        if not item_list:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'])
+            return 
+        if not list_mode == "User_Gifts":
+            item_list.sort(key = operator.itemgetter('created_at'), reverse=True)
+        bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,
+                                    reply_markup=markups.bot_user_item_list_markup(item_list, int(value)))
+
+    elif key == "bot_users_sub_user_list":
+        server_mode = "All"
+        subs = utils.non_order_user_info(int(value))
+        order_subs = utils.order_user_info(int(value))
+        if order_subs:
+            subs.extend(order_subs)
+        if not subs:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_SUB_NOT_FOUND'])
+            return
+        msg = templates.users_list_template(subs)
+        bot.send_message(call.message.chat.id, msg, reply_markup=markups.users_list_markup("None", subs))
+
+    elif key == "users_bot_orders_user_list":
+        list_mode = "User_Orders"
+        item_mode = "Order"
+        orders_list = USERS_DB.find_order(telegram_id=int(value))
+        
+        plans_list = USERS_DB.select_plans()
+        if not orders_list:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_ORDER_NOT_FOUND'])
+            return
+        orders_list.sort(key = operator.itemgetter('created_at'), reverse=True)
+        msg = templates.bot_orders_list_template(orders_list, plans_list)
+        bot.edit_message_text(msg, call.message.chat.id, call.message.message_id,
+                              reply_markup=markups.bot_user_item_list_markup(orders_list))
+
+    elif key == "users_bot_payments_user_list":
+        list_mode = "User_Payments"
+        item_mode = "Payment"
+        paymets = USERS_DB.find_payment(telegram_id=int(value))
+        if not paymets:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_PAYMENT_NOT_FOUND'])
+            return
+        paymets.sort(key = operator.itemgetter('created_at'), reverse=True)
+        msg = templates.bot_payments_list_template(paymets)
+        bot.edit_message_text(msg, call.message.chat.id, call.message.message_id,
+                              reply_markup=markups.bot_user_item_list_markup(paymets))
+
+    elif key == "users_bot_gifts_user_list":
+        list_mode = "User_Gifts"
+        item_mode = "Gift"
+        gift = USERS_DB.find_user_plans(telegram_id=int(value))
+        if not gift:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_GIFT_NOT_FOUND'])
+            return
+        # msg = templates.bot_gift_list_template(paymets)
+        # bot.edit_message_text(msg, call.message.chat.id, call.message.message_id,
+        #                       reply_markup=markups.bot_user_item_list_markup(gift))
+
+    elif key == "users_bot_referred_user_list":
+        list_mode = "User_Refferals"
+        users = USERS_DB.find_user(telegram_id=int(value))
+        if not users:
+             bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'],
+                              reply_markup=markups.main_menu_keyboard_markup())
+             return
+        user = users[0] 
+        #referred_user = 
+
+
+
+    elif key == "users_bot_orders_list_management":
+        bot.edit_message_text(KEY_MARKUP['ORDERS_MANAGEMENT'], call.message.chat.id, call.message.message_id,
+                              reply_markup=markups.users_bot_orders_management_markup())
+
+    elif key == "users_bot_orders_list":
+        list_mode = "Orders"
+        item_mode = "Order"
+        orders_list = USERS_DB.select_orders()
+        plans_list = USERS_DB.select_plans()
+        if not orders_list:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_ORDER_NOT_FOUND'])
+            return
+        orders_list.sort(key = operator.itemgetter('created_at'), reverse=True)
+        msg = templates.bot_orders_list_template(orders_list, plans_list)
+        bot.edit_message_text(msg, call.message.chat.id, call.message.message_id,
+                              reply_markup=markups.bot_user_item_list_markup(orders_list))
+        
+
+    elif key == "search_orders":
+        bot.send_message(call.message.chat.id, MESSAGES['ORDER_NUMBER_REQUEST'],
+                         reply_markup=markups.while_edit_user_markup())
+        bot.register_next_step_handler(call.message, search_bot_user_order)
+        
+
+    elif key == "users_bot_payments_list_management":
+         bot.edit_message_text(KEY_MARKUP['PAYMENT_MANAGEMENT'], call.message.chat.id, call.message.message_id,
+                              reply_markup=markups.users_bot_payments_management_markup())
+        
+    elif key == "search_payments":
+        bot.send_message(call.message.chat.id, MESSAGES['PAYMENT_NUMBER_REQUEST'],
+                         reply_markup=markups.while_edit_user_markup())
+        bot.register_next_step_handler(call.message, search_bot_user_payment)
+
+    elif key == "bot_users_approved_payments_list":
+        list_mode = "Approved_Payments"
+        item_mode = "Payment"
+        payments_list = USERS_DB.select_payments()
+        if not payments_list:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_PAYMENT_NOT_FOUND'])
+            return
+        approved_payments_list = [payment for payment in payments_list if payment['approved'] == 1]
+        if not approved_payments_list:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_PAYMENT_NOT_FOUND'])
+            return
+        approved_payments_list.sort(key = operator.itemgetter('created_at'), reverse=True)
+        msg = templates.bot_payments_list_template(approved_payments_list)
+        bot.edit_message_text(msg, call.message.chat.id, call.message.message_id,
+                              reply_markup=markups.bot_user_item_list_markup(approved_payments_list))
+
+    elif key == "users_bot_non_approved_payments_list":
+        list_mode = "Non_Approved_Payments"
+        item_mode = "Payment"
+        payments_list = USERS_DB.select_payments()
+        if not payments_list:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_PAYMENT_NOT_FOUND'])
+            return
+        non_approved_payments_list = [payment for payment in payments_list if payment['approved'] == 0]
+        if not non_approved_payments_list:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_PAYMENT_NOT_FOUND'])
+            return
+        non_approved_payments_list.sort(key = operator.itemgetter('created_at'), reverse=True)
+        msg = templates.bot_payments_list_template(non_approved_payments_list)
+        bot.edit_message_text(msg, call.message.chat.id, call.message.message_id,
+                              reply_markup=markups.bot_user_item_list_markup(non_approved_payments_list))
+
+    elif key == "users_bot_pending_payments_list":
+        list_mode = "Pending_Payments"
+        item_mode = "Payment"
+        payments_list = USERS_DB.select_payments()
+        if not payments_list:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_PAYMENT_NOT_FOUND'])
+            return
+        pending_payments_list = [payment for payment in payments_list if payment['approved'] == None]
+        if not pending_payments_list:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_PAYMENT_NOT_FOUND'])
+            return
+        pending_payments_list.sort(key = operator.itemgetter('created_at'), reverse=True)
+        msg = templates.bot_payments_list_template(pending_payments_list)
+        bot.edit_message_text(msg, call.message.chat.id, call.message.message_id,
+                              reply_markup=markups.bot_user_item_list_markup(pending_payments_list))
+
+    elif key == "users_bot_card_payments_list":
+        list_mode = "Card_Payments"
+        item_mode = "Payment"
+        payments_list = USERS_DB.select_payments()
+        if not payments_list:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_PAYMENT_NOT_FOUND'])
+            return
+        card_payments_list = [payment for payment in payments_list if payment['payment_method'] == "Card"]
+        if not card_payments_list:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_PAYMENT_NOT_FOUND'])
+            return
+        card_payments_list.sort(key = operator.itemgetter('created_at'), reverse=True)
+        msg = templates.bot_payments_list_template(card_payments_list)
+        bot.edit_message_text(msg, call.message.chat.id, call.message.message_id,
+                              reply_markup=markups.bot_user_item_list_markup(card_payments_list))
+
+    elif key == "users_bot_digital_payments_list":
+        list_mode = "Digital_Payments"
+        item_mode = "Payment"
+        payments_list = USERS_DB.select_payments()
+        if not payments_list:
+            bot.send_message(message.chat.id, MESSAGES['ERROR_PAYMENT_NOT_FOUND'])
+            return
+        digital_payments_list = [payment for payment in payments_list if payment['payment_method'] == "Digital"]
+        if not digital_payments_list:
+            bot.send_message(message.chat.id, MESSAGES['ERROR_PAYMENT_NOT_FOUND'])
+            return
+        digital_payments_list.sort(key = operator.itemgetter('created_at'), reverse=True)
+        msg = templates.bot_payments_list_template(digital_payments_list)
+        bot.edit_message_text(msg, call.message.chat.id, call.message.message_id,
+                              reply_markup=markups.bot_user_item_list_markup(digital_payments_list))
+
 
     # Plan Management - Add Plan Callback
     elif key == "users_bot_add_plan":
@@ -1774,13 +2210,13 @@ def callback_query(call: CallbackQuery):
                          reply_markup=markups.while_edit_user_markup())
         bot.register_next_step_handler(call.message, users_bot_settings_renewal_method_advanced_usage)
     # User Bot Settings  - Order Status Callback
-    elif key == "users_bot_orders_status":
-        bot.send_message(call.message.chat.id, f"{MESSAGES['USERS_BOT_ORDER_NUMBER_REQUEST']}")
-        bot.register_next_step_handler(call.message, users_bot_order_status)
+    # elif key == "users_bot_orders_status":
+    #     bot.send_message(call.message.chat.id, f"{MESSAGES['USERS_BOT_ORDER_NUMBER_REQUEST']}")
+    #     bot.register_next_step_handler(call.message, users_bot_order_status)
 
-    elif key == "users_bot_sub_status":
-        bot.send_message(call.message.chat.id, f"{MESSAGES['USERS_BOT_SUB_ID_REQUEST']}")
-        bot.register_next_step_handler(call.message, users_bot_sub_status)
+    # elif key == "users_bot_sub_status":
+    #     bot.send_message(call.message.chat.id, f"{MESSAGES['USERS_BOT_SUB_ID_REQUEST']}")
+    #     bot.register_next_step_handler(call.message, users_bot_sub_status)
 
 
     # ----------------------------------- Payment Callbacks -----------------------------------
@@ -1845,6 +2281,90 @@ def callback_query(call: CallbackQuery):
         else:
             bot.send_message(call.message.chat.id, f"{MESSAGES['ERROR_UNKNOWN']}\n{MESSAGES['ORDER_ID']}: {payment_id}")
 
+    # Payment - Change status Payment Callback
+    elif key == "change_status_payment_by_admin":
+        payments = USERS_DB.find_payment(id=int(value))
+        if not payments:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_PAYMENT_NOT_FOUND'])
+            return
+        payment = payments[0]
+        msg = templates.bot_payment_info_template(payment, footer=MESSAGES['CHANGE_STATUS_PAYMENT_CONFIRM_REQUEST'])
+        bot.edit_message_caption(msg, call.message.chat.id, call.message.message_id,
+                                      reply_markup=markups.confirm_change_status_payment_by_admin(value))
+    # Payment - Confirm change status Payment Callback
+    elif key == "confirm_change_status_payment_by_admin":
+        if not CLIENT_TOKEN:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_CLIENT_TOKEN'])
+            return
+        payment_id = int(value)
+        payments = USERS_DB.find_payment(id=payment_id)
+        if not payments:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_PAYMENT_NOT_FOUND'])
+            return
+        payment = payments[0]
+        if payment['approved']:
+            payment_status = USERS_DB.edit_payment(payment_id, approved=False)
+            if payment_status:
+                wallet = USERS_DB.find_wallet(telegram_id=payment['telegram_id'])
+                if not wallet:
+                    bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+                    return
+                wallet = wallet[0]
+                new_balance = int(wallet['balance']) - int(payment['payment_amount'])
+                wallet_status = USERS_DB.edit_wallet(wallet['telegram_id'], balance=new_balance)
+                if not wallet_status:
+                    bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+                    return
+                payments = USERS_DB.find_payment(id=payment_id)
+                if not payments:
+                    bot.send_message(call.message.chat.id, MESSAGES['ERROR_PAYMENT_NOT_FOUND'])
+                    return
+                payment = payments[0]
+                msg = templates.bot_payment_info_template(payment)
+                bot.edit_message_caption(msg, call.message.chat.id, call.message.message_id,
+                                      reply_markup=markups.change_status_payment_by_admin(value))
+                user_bot.send_message(int(payment['telegram_id']),
+                                    f"{MESSAGES['PAYMENT_CHANGED_TO_NOT_CONFIRMED']}\n{MESSAGES['ORDER_ID']} {payment_id}")
+                bot.send_message(call.message.chat.id,
+                                f"{MESSAGES['PAYMENT_CHANGED_TO_NOT_CONFIRMED_ADMIN']}\n{MESSAGES['ORDER_ID']} {payment_id}")
+
+        elif payment['approved'] == False:
+            payment_status = USERS_DB.edit_payment(payment_id, approved=True)
+            if payment_status:
+                wallet = USERS_DB.find_wallet(telegram_id=payment['telegram_id'])
+                if not wallet:
+                    bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+                    return
+                wallet = wallet[0]
+                new_balance = int(wallet['balance']) + int(payment['payment_amount'])
+                wallet_status = USERS_DB.edit_wallet(wallet['telegram_id'], balance=new_balance)
+                if not wallet_status:
+                    bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+                    return
+                payments = USERS_DB.find_payment(id=payment_id)
+                if not payments:
+                    bot.send_message(call.message.chat.id, MESSAGES['ERROR_PAYMENT_NOT_FOUND'])
+                    return
+                payment = payments[0]
+                msg = templates.bot_payment_info_template(payment)
+                bot.edit_message_caption(msg, call.message.chat.id, call.message.message_id,
+                                      reply_markup=markups.change_status_payment_by_admin(value))
+                user_bot.send_message(int(payment['telegram_id']),
+                                    f"{MESSAGES['WALLET_CHANGED_TO_PAYMENT_CONFIRMED']}\n{MESSAGES['ORDER_ID']} {payment_id}")
+                bot.send_message(call.message.chat.id,
+                                f"{MESSAGES['PAYMENT_CHANGED_TO_CONFIRMED_ADMIN']}\n{MESSAGES['ORDER_ID']} {payment_id}")
+                
+    elif key == "cancel_change_status_payment_by_admin":
+        payments = USERS_DB.find_payment(id=int(value))
+        if not payments:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_PAYMENT_NOT_FOUND'])
+            return
+        payment = payments[0]
+        msg = templates.bot_payment_info_template(payment)
+        bot.edit_message_caption(msg, call.message.chat.id, call.message.message_id,
+                                      reply_markup=markups.change_status_payment_by_admin(value))
+
+            
     # Back to User Panel Callback
     elif key == "back_to_user_panel":
         usr = utils.user_info(URL, value)
@@ -1898,6 +2418,65 @@ def callback_query(call: CallbackQuery):
         msg = templates.users_list_template(users_list)
         bot.edit_message_text(msg, call.message.chat.id, call.message.message_id,
                               reply_markup=markups.users_list_markup(value, users_list))
+        
+    elif key == "back_to_users_bot_users_management":
+        bot.edit_message_text(KEY_MARKUP['BOT_USERS_MANAGEMENT'], call.message.chat.id, call.message.message_id,
+                              reply_markup=markups.users_bot_users_management_markup())
+    elif key == "back_to_bot_users_or_reffral_management":
+        if list_mode == "Bot_Users_Search_Name" or "Bot_User":
+            bot.edit_message_text(KEY_MARKUP['BOT_USERS_MANAGEMENT'], call.message.chat.id, call.message.message_id,
+                              reply_markup=markups.users_bot_users_management_markup())
+        elif list_mode == "User_Refferals":
+            users = USERS_DB.find_user(telegram_id=int(selected_telegram_id))
+            if not users:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'],
+                                reply_markup=markups.main_menu_keyboard_markup())
+                return
+            user = users[0]
+            orders = USERS_DB.find_order(telegram_id=user['telegram_id'])
+            paymets = USERS_DB.find_payment(telegram_id=user['telegram_id'])
+            wallet = None
+            wallets = USERS_DB.find_wallet(telegram_id=user['telegram_id'])
+            if wallets:
+                wallet = wallets[0]
+            non_order_subs = utils.non_order_user_info(user['telegram_id'])
+            order_subs = utils.order_user_info(user['telegram_id'])
+            plans_list = USERS_DB.select_plans()
+            msg = templates.bot_users_info_template(user, orders, paymets, wallet, non_order_subs, order_subs, plans_list)
+            bot.send_message(call.message.chat.id, msg, reply_markup=markups.bot_user_info_markup(value))
+    
+    elif key == "back_management_item_list":
+        approved_payments = list_mode == "Approved_Payments"
+        non_approved_payments = list_mode == "Non_Approved_Payments"
+        pending_payments = list_mode == "Pending_Payments"
+        card_payments = list_mode == "Card_Payments"
+        digital_payments = list_mode == "Digital_Payments"
+        if list_mode == "Orders":
+            bot.edit_message_text(KEY_MARKUP['ORDERS_MANAGEMENT'], call.message.chat.id, call.message.message_id,
+                              reply_markup=markups.users_bot_orders_management_markup())
+        elif approved_payments  or non_approved_payments or pending_payments or card_payments or digital_payments:
+            bot.edit_message_text(KEY_MARKUP['PAYMENT_MANAGEMENT'], call.message.chat.id, call.message.message_id,
+                              reply_markup=markups.users_bot_payments_management_markup())
+        elif list_mode == "User_Payments" or list_mode == "User_Gifts" or list_mode == "User_Orders":
+            users = USERS_DB.find_user(telegram_id=int(selected_telegram_id))
+            if not users:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'],
+                                reply_markup=markups.main_menu_keyboard_markup())
+                return
+            user = users[0]
+            orders = USERS_DB.find_order(telegram_id=user['telegram_id'])
+            paymets = USERS_DB.find_payment(telegram_id=user['telegram_id'])
+            wallet = None
+            wallets = USERS_DB.find_wallet(telegram_id=user['telegram_id'])
+            if wallets:
+                wallet = wallets[0]
+            non_order_subs = utils.non_order_user_info(user['telegram_id'])
+            order_subs = utils.order_user_info(user['telegram_id'])
+            plans_list = USERS_DB.select_plans()
+            msg = templates.bot_users_info_template(user, orders, paymets, wallet, non_order_subs, order_subs, plans_list)
+            bot.edit_message_text(msg, call.message.chat.id, call.message.message_id,
+                                  reply_markup=markups.bot_user_info_markup(selected_telegram_id))
+
 
 
 

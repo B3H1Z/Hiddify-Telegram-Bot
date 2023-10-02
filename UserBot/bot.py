@@ -590,11 +590,15 @@ def callback_query(call: CallbackQuery):
             return
 
         if USERS_DB.find_user(telegram_id=user_id):
+            status = USERS_DB.edit_user(telegram_id=user_id, full_name=call.message.from_user.full_name)
             bot.send_message(user_id, MESSAGES['WELCOME'], reply_markup=main_menu_keyboard_markup())
             return
 
         created_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        status = USERS_DB.add_user(telegram_id=user_id, created_at=created_at)
+        # user = call.message.from_user
+        # full_name = call.message.from_user.full_name
+        # full_name = call.message.chat.full_name
+        status = USERS_DB.add_user(telegram_id=user_id, full_name=call.message.from_user.full_name, created_at=created_at)
 
         if not status:
             bot.send_message(user_id, MESSAGES['UNKNOWN_ERROR'], reply_markup=main_menu_keyboard_markup())
@@ -1002,13 +1006,15 @@ def start_bot(message: Message):
     if not join_status:
         return
     settings = utils.all_configs_settings()
+    if " " in message.text:
+        referral_coed = int(message.text.split()[1])
     MESSAGES['WELCOME'] = MESSAGES['WELCOME'] if not settings['msg_user_start'] else settings['msg_user_start']
     if USERS_DB.find_user(telegram_id=message.chat.id):
+        edit_name= USERS_DB.edit_user(full_name=message.from_user.full_name)
         bot.send_message(message.chat.id, MESSAGES['WELCOME'], reply_markup=main_menu_keyboard_markup())
         return
     created_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-    status = USERS_DB.add_user(telegram_id=message.chat.id, created_at=created_at)
+    status = USERS_DB.add_user(telegram_id=message.chat.id, full_name=message.from_user.full_name, created_at=created_at)
     if not status:
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())

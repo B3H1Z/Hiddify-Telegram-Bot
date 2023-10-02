@@ -149,17 +149,172 @@ def search_user_markup(server_id=None):
 def users_bot_management_markup(value=None):
     markup = InlineKeyboardMarkup()
     markup.row_width = 2
-    markup.add(
-        InlineKeyboardButton(KEY_MARKUP['USERS_BOT_ORDERS_STATUS'], callback_data=f"users_bot_orders_status:None"),
-        InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SUB_STATUS'], callback_data=f"users_bot_sub_status:None"))
+    # markup.add(
+    #     InlineKeyboardButton(KEY_MARKUP['USERS_BOT_ORDERS_STATUS'], callback_data=f"users_bot_orders_status:None"),
+    #     InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SUB_STATUS'], callback_data=f"users_bot_sub_status:None"))
     # markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_ADD_PLAN'], callback_data=f"users_bot_add_plan:None"),
     #            InlineKeyboardButton(KEY_MARKUP['USERS_BOT_DEL_PLAN'], callback_data=f"users_bot_list_plans:None"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['BOT_USERS_MANAGEMENT'],
+                                    callback_data=f"bot_users_list_management:None"))
+    # markup.add(InlineKeyboardButton(KEY_MARKUP['ORDERS_MANAGEMENT'],
+    #                                 callback_data=f"users_bot_orders_list_management:None"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['PAYMENT_MANAGEMENT'],
+                                    callback_data=f"users_bot_payments_list_management:None"),
+                                    InlineKeyboardButton(KEY_MARKUP['ORDERS_MANAGEMENT'],
+                                    callback_data=f"users_bot_orders_list_management:None"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SEND_MESSAGE_TO_USERS'],
                                     callback_data=f"users_bot_send_msg_users:None"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_OWNER_INFO'], callback_data=f"users_bot_owner_info:None"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS'], callback_data=f"users_bot_settings:None"))
     return markup
 
+# Users Bot Users List Management - Inline Keyboard Markup
+def users_bot_users_management_markup(value=None):
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 2
+    markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_LIST'], callback_data=f"bot_users_list:None"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['SEARCH_USERS_BOT'], callback_data=f"search_users_bot:None"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"users_bot_management_menu:None"))
+    return markup
+
+# Users Bot Search Method  - Inline Keyboard Markup
+def users_bot_users_search_method_markup(value=None):
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 2
+    markup.add(InlineKeyboardButton(KEY_MARKUP['SEARCH_USER_NAME'], callback_data=f"bot_users_search_name:None"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['SEARCH_USER_TELEGRAM_ID'], callback_data=f"bot_users_search_telegram_id:None"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_users_bot_users_management:None"))
+    return markup
+
+# Users List Inline Keyboard Markup
+def bot_users_list_markup(users, page=1):
+    markup = InlineKeyboardMarkup(row_width=3)
+    USER_PER_PAGE = 20
+    start = (page - 1) * USER_PER_PAGE
+    end = start + USER_PER_PAGE
+    keys = []
+    for user in users[start:end]:
+        keys.append(InlineKeyboardButton(f"{user['full_name']}", callback_data=f"bot_user_info:{user['telegram_id']}"))
+    markup.add(*keys)
+    if page < len(users) / USER_PER_PAGE:
+        markup.add(InlineKeyboardButton(KEY_MARKUP['NEXT_PAGE'], callback_data=f"bot_user_next:{page + 1}"), row_width=2)
+    if page > 1:
+        markup.add(InlineKeyboardButton(KEY_MARKUP['PREV_PAGE'], callback_data=f"bot_user_next:{page - 1}"), row_width=1)
+    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_bot_users_or_reffral_management:None"))
+    return markup
+
+# # Orders List Inline Keyboard Markup
+# def bot_order_list_markup(orders, page=1):
+#     markup = InlineKeyboardMarkup(row_width=3)
+#     USER_PER_PAGE = 20
+#     start = (page - 1) * USER_PER_PAGE
+#     end = start + USER_PER_PAGE
+#     keys = []
+#     for order in orders[start:end]:
+#         keys.append(InlineKeyboardButton(f"{order['user_name']}", callback_data=f"bot_user_order_info:{order['id']}"))
+#     markup.add(*keys)
+#     if page < len(orders) / USER_PER_PAGE:
+#         markup.add(InlineKeyboardButton(KEY_MARKUP['NEXT_PAGE'], callback_data=f"bot_user_order_next:{page + 1}"), row_width=2)
+#     if page > 1:
+#         markup.add(InlineKeyboardButton(KEY_MARKUP['PREV_PAGE'], callback_data=f"bot_user_order_next:{page - 1}"), row_width=1)
+#     markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"users_bot_management_menu:None"))
+#     return markup
+
+# # Payment List Inline Keyboard Markup
+# def bot_payment_list_markup(payments, page=1):
+#     markup = InlineKeyboardMarkup(row_width=3)
+#     USER_PER_PAGE = 20
+#     start = (page - 1) * USER_PER_PAGE
+#     end = start + USER_PER_PAGE
+#     keys = []
+#     for payment in payments[start:end]:
+#         keys.append(InlineKeyboardButton(f"{payment['user_name']}", callback_data=f"bot_user_payment_info:{payment['id']}"))
+#     markup.add(*keys)
+#     if page < len(payments) / USER_PER_PAGE:
+#         markup.add(InlineKeyboardButton(KEY_MARKUP['NEXT_PAGE'], callback_data=f"bot_user_payment_next:{page + 1}"), row_width=2)
+#     if page > 1:
+#         markup.add(InlineKeyboardButton(KEY_MARKUP['PREV_PAGE'], callback_data=f"bot_user_payment_next:{page - 1}"), row_width=1)
+#     markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"users_bot_management_menu:None"))
+#     return markup
+
+# User Item List Inline Keyboard Markup
+def bot_user_item_list_markup(items, page=1):
+    markup = InlineKeyboardMarkup(row_width=3)
+    USER_PER_PAGE = 20
+    start = (page - 1) * USER_PER_PAGE
+    end = start + USER_PER_PAGE
+    keys = []
+    for item in items[start:end]:
+        keys.append(InlineKeyboardButton(f"{item['id']}", callback_data=f"bot_user_item_info:{item['id']}"))
+    markup.add(*keys)
+    if page < len(items) / USER_PER_PAGE:
+        markup.add(InlineKeyboardButton(KEY_MARKUP['NEXT_PAGE'], callback_data=f"bot_user_item_next:{page + 1}"), row_width=2)
+    if page > 1:
+        markup.add(InlineKeyboardButton(KEY_MARKUP['PREV_PAGE'], callback_data=f"bot_user_item_next:{page - 1}"), row_width=1)
+    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_management_item_list:None"))
+    return markup
+
+# Users Bot Users info Management - Inline Keyboard Markup
+def bot_user_info_markup(telegram_id):
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 2
+    markup.add(InlineKeyboardButton(KEY_MARKUP['USER_SUB_LIST'], callback_data=f"bot_users_sub_user_list:{telegram_id}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['ORDERS_LIST'], callback_data=f"users_bot_orders_user_list:{telegram_id}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['PAYMENTS_LIST'], callback_data=f"users_bot_payments_user_list:{telegram_id}"))
+    # markup.add(InlineKeyboardButton(KEY_MARKUP['GIFT_LIST'], callback_data=f"users_bot_gifts_user_list:{telegram_id}"),
+    #            InlineKeyboardButton(KEY_MARKUP['REFERRED_LIST'], callback_data=f"users_bot_referred_user_list:{telegram_id}"))
+    #markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"users_bot_management_menu:None"))
+    return markup
+
+# Users Bot Users List Management - Inline Keyboard Markup
+def users_bot_orders_management_markup(value=None):
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 2
+    markup.add(InlineKeyboardButton(KEY_MARKUP['ORDERS_LIST'], callback_data=f"users_bot_orders_list:None"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['SEARCH_ORDERS'], callback_data=f"search_orders:None"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"users_bot_management_menu:None"))
+    return markup
+
+def confirm_payment_by_admin(payment_id):
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 1
+    markup.add(
+        InlineKeyboardButton(KEY_MARKUP['CONFIRM_PAYMENT'], callback_data=f"confirm_payment_by_admin:{payment_id}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['NO'], callback_data=f"cancel_payment_by_admin:{payment_id}"))
+    return markup
+
+def change_status_payment_by_admin(payment_id):
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 1
+    markup.add(
+        InlineKeyboardButton(KEY_MARKUP['CHANGE_STATUS_PAYMENT'], callback_data=f"change_status_payment_by_admin:{payment_id}"))
+    return markup
+
+def confirm_change_status_payment_by_admin(payment_id):
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 1
+    markup.add(
+        InlineKeyboardButton(KEY_MARKUP['CONFIRM'], callback_data=f"confirm_change_status_payment_by_admin:{payment_id}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['CANCEL'], callback_data=f"cancel_change_status_payment_by_admin:{payment_id}"))
+    return markup
+
+# Users Bot Payments List Management - Inline Keyboard Markup
+def users_bot_payments_management_markup(value=None):
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 2
+    markup.add(InlineKeyboardButton(KEY_MARKUP['APPROVED_PAYMENTS_LIST'],
+                                    callback_data=f"bot_users_approved_payments_list:None"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['NON_APPROVED_PAYMENTS_LIST'],
+                                    callback_data=f"users_bot_non_approved_payments_list:None"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['PENDING_PAYMENT_LIST'],
+                                    callback_data=f"users_bot_pending_payments_list:None"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['CARD_PAYMENT_LIST'],
+                                    callback_data=f"users_bot_card_payments_list:None"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['DIGITAL_PAYMENT_LIST'], 
+                                    callback_data=f"users_bot_digital_payments_list:None"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['SEARCH_PAYMENTS'], callback_data=f"search_payments:None"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"users_bot_management_menu:None"))
+    return markup
 
 # Users Bot Management - Settings - Inline Keyboard Markup
 def users_bot_management_settings_markup(settings):

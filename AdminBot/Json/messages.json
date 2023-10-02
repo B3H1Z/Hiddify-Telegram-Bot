@@ -44,13 +44,17 @@
     "INFO_REMAINING_DAYS": "📆Remaining Days:",
     "INFO_LAST_CONNECTION": "📶Last Connection:",
     "INFO_COMMENT": "📝Comment:",
-    "INFO_USER": "👤Name:",
-    "HEADER_USERS_LIST": "👤Users List",
+    "INFO_USER": "⬖ Name:",
+    "HEADER_USERS_LIST": "⬖ Users List",
     "HEADER_USERS_LIST_MSG": "ℹ️You can see the list of users and their information here.",
     "NUM_USERS": "🟢Number of users: ",
     "NUM_USERS_ONLINE": "🔵Online users: ",
+    "NUM_GET_FREE_USERS": "⬖ Number of received free test: ",
+    "NUM_ORDERED_USERS": "⬖ Number of users placed order: ",
+    "TOTAL_BALANCE_USERS": "⬖ Total balance of users' wallets: ",
     "SEARCH_USER": "Please select the search method",
     "SEARCH_USER_NAME": "Please enter the name of the user: ",
+    "SEARCH_USER_TELEGRAM_ID": "Please enter the Telegram ID of the user: ",
     "SEARCH_USER_UUID": "Please enter the UUID of the user: ",
     "SEARCH_USER_CONFIG": "Please enter one of the config of the user: ",
     "SEARCH_RESULT": "[Search Result]",
@@ -106,7 +110,8 @@
     "PAYMENT_CONFIRMED_ADMIN": "✅Payment confirmed",
     "PAYMENT_NOT_CONFIRMED_ADMIN": "❌Payment not confirmed",
     "ERROR_PAYMENT_NOT_FOUND": "❌Payment not found",
-    "ERROR_ORDER_NOT_FOUND": "❌Payment not found",
+    "ERROR_ORDER_NOT_FOUND": "❌Order not found",
+    "ERROR_GIFT_NOT_FOUND": "❌Gift not found",
     "ORDER_ID": "Payment number:",
     "SUB_ID": "Subscription ID:",
     "USER_TIME_EXPIRED": "⚠️EXPIRED",
@@ -142,7 +147,49 @@
     "SUCCESS_SERVER_TITLE_EDITED":"✅Title edited to:",
     "SUCCESS_SERVER_USER_LIMIT_EDITED" : "✅User limit edited to:",
     "SUCCESS_SERVER_URL_EDITED": "✅URL edited to:",
-    "SERVER": "Server:"
+    "SERVER": "⬖ Server:",
+    "HEADER_ORDERS_LIST": "⬖ Orders List",
+    "NUM_ORDERS": "⬖ Number of Orders: ",
+    "TOTAL_ORDERS_VALUME": "⬖ Total volume ordered(GB): ",
+    "TOTAL_ORDERS_SALES": "⬖ Total value of orders: ",
+    "LAST_30DAYS_NUM_ORDERS": "⬖ Number of Last 30 Days Orders: ",
+    "LAST_30DAYS_ORDERS_VALUME": "⬖ Volume ordered in Last 30 Days(GB): ",
+    "LAST_30DAYS_ORDERS_SALES": "⬖ Value of orders in Last 30 Days: ",
+    "THIS_MONTH_NUM_ORDERS": "⬖ Number of This Month Orders: ",
+    "THIS_MONTH_ORDERS_VALUME": "⬖ Volume ordered in This Month(GB): ",
+    "THIS_MONTH_ORDERS_SALES": "⬖ Value of orders in This Month: ",
+    "HEADER_PAYMENT_LIST": "⬖ Payment List",
+    "NUM_PAYMENTS": "⬖ Number of Payments: ",
+    "TOTAL_PAYMENTS_AMOUNT": "⬖ Total amount payment: ",
+    "LAST_30DAYS_NUM_PAYMENTS": "⬖ Number of Last 30 Days Payments: ",
+    "LAST_30DAYS_PAYMENTS_AMOUNT": "⬖ Amount of Payments in Last 30 Days: ",
+    "THIS_MONTH_NUM_PAYMENTS": "⬖ Number of This Month Payments: ",
+    "THIS_MONTH_PAYMENTS_AMOUNT": "⬖ Amount of Payments in This Month: ",
+    "GET_FREE_TEST_STATUS": "⬖ Free Test Status: ",
+    "WALLET_BALANCE": "⬖ Wallet Balance: ",
+    "NUM_ORDER_SUB": "⬖ Number of ordered subscriptions: ",
+    "NUM_NON_ORDER_SUB": "⬖ Number of connected subscriptions: ",
+    "NUM_APPROVED_PAYMENTS": "⬖ Number of Approved Payments: ",
+    "BOT_ORDER_ID": "⬖ Order Number: ",
+    "ORDERED_VALUME": "⬖ Ordered Volume: ",
+    "ORDERED_DAYS": "⬖ Ordered Days: ",
+    "ORDERED_PRICE": "⬖ Ordered Price: ",
+    "SUB_NAME": "⬖ Subscription title: ",
+    "BOT_ORDER_DATE": "⬖ Order Date: ",
+    "ORDER_NUMBER_REQUEST": "Please enter the order number:",
+    "PAYMENTS_ID": "⬖ Payment number: ",
+    "BOT_PAYMENT_DATE": "⬖ Payment Date: ",
+    "PAIED_AMOUNT": "⬖ Paid amount: ",
+    "STATUS": "⬖ Status: ",
+    "PAYMENTS_METHOD": "⬖ Payment Method: ",
+    "PAYMENT_NUMBER_REQUEST": "Please enter the payment number:",
+    "CHANGE_STATUS_PAYMENT_CONFIRM_REQUEST": "⚠️Are you sure about the changing payment status?",
+    "WALLET_CHANGED_TO_PAYMENT_CONFIRMED": "✅Payment changed to confirmed by admin\nYour wallet balance has increased.",
+    "PAYMENT_CHANGED_TO_NOT_CONFIRMED": "❌Payment changed to rejected by admin And the payment amount is deducted from your wallet balance\nPlease contact support if a mistake has been made.",
+    "PAYMENT_CHANGED_TO_CONFIRMED_ADMIN": "✅Payment changed to confirmed",
+    "PAYMENT_CHANGED_TO_NOT_CONFIRMED_ADMIN": "❌Payment changed to rejected",
+    "SUCCESS_SEARCH_ORDER": "✅Order found",
+    "SUCCESS_SEARCH_PAYMENT": "✅Payment found"
   },
   "FA": {
     "WELCOME": "به ربات مدیریت هیدی بات خوش آمدید.",
@@ -189,13 +236,17 @@
     "INFO_REMAINING_DAYS": "📆انقضا:",
     "INFO_LAST_CONNECTION": "📶آخرین اتصال:",
     "INFO_COMMENT": "📝یادداشت:",
-    "INFO_USER": "👤کاربر:",
-    "HEADER_USERS_LIST": "👤لیست کاربران",
+    "INFO_USER": "⬖ کاربر:",
+    "HEADER_USERS_LIST": "⬖ لیست کاربران",
     "HEADER_USERS_LIST_MSG": "ش️ما می‌توانید لیست کاربران و اطلاعات آن‌ها را اینجا مشاهده کنید",
-    "NUM_USERS": "🟢تعداد کاربران: ",
+    "NUM_USERS": "⬖ تعداد کاربران: ",
     "NUM_USERS_ONLINE": "🔵کاربران آنلاین: ",
+    "NUM_GET_FREE_USERS": "⬖ تعداد کاربران تست رایگان: ",
+    "NUM_ORDERED_USERS": "⬖ تعداد کاربران سفارشات: ",
+    "TOTAL_BALANCE_USERS": "⬖ مجموع موجودی کیف پول کاربران: ",
     "SEARCH_USER": "لطفاً روش جستجو را انتخاب کنید",
     "SEARCH_USER_NAME": "لطفاً نام کاربر را وارد کنید: ",
+    "SEARCH_USER_TELEGRAM_ID": "لطفا Telegram ID کاربر را وارد کنید: ",
     "SEARCH_USER_UUID": "لطفاً UUID کاربر را وارد کنید: ",
     "SEARCH_USER_CONFIG": "لطفاً یکی از کانفیگ های کاربر را وارد کنید: ",
     "SEARCH_RESULT": "[نتیجه جستجو]",
@@ -250,8 +301,9 @@
     "ERROR_PAYMENT_ALREADY_REJECTED": "❌پرداخت قبلا رد شده است",
     "PAYMENT_CONFIRMED_ADMIN": "✅پرداخت با موفقیت تایید شد",
     "PAYMENT_NOT_CONFIRMED_ADMIN": "❌پرداخت تایید نشد",
-    "ERROR_ORDER_NOT_FOUND": "❌تراکنش یافت نشد",
+    "ERROR_ORDER_NOT_FOUND": "❌سفارش یافت نشد",
     "ERROR_PAYMENT_NOT_FOUND": "❌پرداخت یافت نشد",
+    "ERROR_GIFT_NOT_FOUND": "❌هدیه یافت نشد",
     "ORDER_ID": "شماره تراکنش",
     "SUB_ID": "شناسه اشتراک",
     "USER_TIME_EXPIRED": "⚠️منقضی",
@@ -287,8 +339,48 @@
     "SUCCESS_SERVER_TITLE_EDITED":"✅عنوان سرور ویرایش شد به:",
     "SUCCESS_SERVER_USER_LIMIT_EDITED" : "✅محدودیت کاربر ویرایش شد به:",
     "SUCCESS_SERVER_URL_EDITED": "✅لینک سرور ویرایش شد به:",
-    "SERVER": "سرور:"
-
-
+    "SERVER": "⬖ سرور: ",
+    "HEADER_ORDERS_LIST": "⬖ لیست سفارشات",
+    "NUM_ORDERS": "⬖ تعداد سفارشات: ",
+    "TOTAL_ORDERS_VALUME": "⬖ مجموع حجم سفارشات(GB): ",
+    "TOTAL_ORDERS_SALES": "⬖ مجموع ارزش سفارشات: ",
+    "LAST_30DAYS_NUM_ORDERS": "⬖ تعداد سفارشات 30 روز گذشته: ",
+    "LAST_30DAYS_ORDERS_VALUME": "⬖ حجم سفارشات 30 روز گذشته(GB): ",
+    "LAST_30DAYS_ORDERS_SALES": "⬖ ارزش سفارشات 30 روز گذشته: ",
+    "THIS_MONTH_NUM_ORDERS": "⬖ تعداد سفارشات این ماه: ",
+    "THIS_MONTH_ORDERS_VALUME": "⬖ حجم سفارشات این ماه(GB): ",
+    "THIS_MONTH_ORDERS_SALES": "⬖ ارزش سفارشات این ماه: ",
+    "HEADER_PAYMENT_LIST": "⬖ لیست پرداخت‌ها",
+    "NUM_PAYMENTS": "⬖ تعداد پرداخت‌ها: ",
+    "TOTAL_PAYMENTS_AMOUNT": "⬖ مبلغ پرداخت‌ها: ",
+    "LAST_30DAYS_NUM_PAYMENTS": "⬖ پرداخت‌های 30 روز گذشته: ",
+    "LAST_30DAYS_PAYMENTS_AMOUNT": "⬖ مبلغ پرداخت‌های 30 روز گذشته: ",
+    "THIS_MONTH_NUM_PAYMENTS": "⬖ پرداخت‌های این ماه: ",
+    "THIS_MONTH_PAYMENTS_AMOUNT": "⬖ مبلغ پرداخت‌های این ماه: ",
+    "GET_FREE_TEST_STATUS": "⬖ وضعیت دریافت تست رایگان: ",
+    "WALLET_BALANCE": "⬖ موجودی کیف پول: ",
+    "NUM_ORDER_SUB": "⬖ تعداد اشتراک‌های خریداری شده: ",
+    "NUM_NON_ORDER_SUB": "⬖ تعداد اشتراک‌های متصل شده: ",
+    "NUM_APPROVED_PAYMENTS": "⬖ تعداد پرداخت‌های تایید شده: ",
+    "BOT_ORDER_ID": "⬖ شماره سفارش: ",
+    "ORDERED_VALUME": "⬖ حجم سفارش(GB): ",
+    "ORDERED_DAYS": "⬖ تعداد روز سفارش: ",
+    "ORDERED_PRICE": "⬖ مبلغ سفارش: ",
+    "SUB_NAME": "⬖ عنوان اشتراک: ",
+    "BOT_ORDER_DATE": "⬖ تاریخ سفارش: ",
+    "ORDER_NUMBER_REQUEST": "لطفا شماره سفارش را وارد کنید:",
+    "PAYMENTS_ID": "⬖ شماره پرداخت: ",
+    "BOT_PAYMENT_DATE": "⬖ تاریخ پرداخت:",
+    "PAIED_AMOUNT": "⬖ مبلغ پرداخت: ",
+    "STATUS": "⬖ وضعیت: ",
+    "PAYMENTS_METHOD": "⬖ روش پرداخت: ",
+    "PAYMENT_NUMBER_REQUEST": "لطفا شماره پرداخت را وارد کنید:",
+    "CHANGE_STATUS_PAYMENT_CONFIRM_REQUEST": "⚠️آیا از تغییر وضعیت پرداخت، اطمینان دارید؟",
+    "WALLET_CHANGED_TO_PAYMENT_CONFIRMED": "✅وضعت پرداخت شما توسط مدیر به تایید شده تغییر یافت\nاز طریق دکمه [💰کیف پول] میتوانید به موجودی کیف پول خود دسترسی داشته باشید.",
+    "PAYMENT_CHANGED_TO_NOT_CONFIRMED": "❌وضعیت پرداخت شما توسط مدیر به رد شده تغییر یافت و مبلغ پرداخت از موجود کیف پول شما کسر شد!\nلطفا اگر اشتباهی صورت گرفته با پشتیبانی در تماس باشید.",
+    "PAYMENT_CHANGED_TO_CONFIRMED_ADMIN": "✅وضعیت پرداخت به تایید شده تغییر یافت",
+    "PAYMENT_CHANGED_TO_NOT_CONFIRMED_ADMIN": "❌وضعیت پرداخت به رد شده تغییر یافت",
+    "SUCCESS_SEARCH_ORDER": "✅سفارش یافت شد",
+    "SUCCESS_SEARCH_PAYMENT": "✅پرداخت یافت شد"
   }
 }

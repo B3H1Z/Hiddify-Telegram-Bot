@@ -2,6 +2,8 @@
 from config import LANG, VERSION, API_PATH
 from AdminBot.content import MESSAGES
 from Utils import api, utils 
+import datetime
+
 
 # Single User Info Message Template
 def user_info_template(usr, server, header=""):
@@ -57,9 +59,9 @@ def plan_info_template(plan, orders, header=""):
 ❖⬩╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍⬩❖
 {MESSAGES['INFO_PLAN_USAGE']} {plan['size_gb']} 
 {MESSAGES['INFO_PLAN_DAYS']} {plan['days']} 
-{MESSAGES['INFO_PLAN_PRICE']} {utils.rial_to_toman(plan['price'])} 
+{MESSAGES['INFO_PLAN_PRICE']} {utils.rial_to_toman(plan['price'])} {MESSAGES['TOMAN']}
 {MESSAGES['INFO_PLAN_NUM_ORDER']} {num_orders} 
-{MESSAGES['INFO_PLAN_TOTAL_SALE']} {utils.rial_to_toman(sale)} 
+{MESSAGES['INFO_PLAN_TOTAL_SALE']} {utils.rial_to_toman(sale)} {MESSAGES['TOMAN']}
 """
 
 # Users List Message Template
@@ -79,6 +81,227 @@ def users_list_template(users, heder=""):
 """
 
 
+# Bot Users List Message Template
+def bot_users_list_template(users, wallets, orders, header=""):
+
+    users_get_free = 0
+    ordered_users = 0
+    total_balance_wallets= 0
+    if wallets:
+        for wallet in wallets:
+            total_balance_wallets += wallet['balance']
+    if orders:
+        for user in users:
+            if user['test_subscription']:
+                users_get_free += 1
+            for order in orders:
+                if order['telegram_id'] == user['telegram_id']:
+                    ordered_users += 1
+                    break
+    else:
+        for user in users:
+            if user['test_subscription']:
+                users_get_free += 1
+        
+
+    return f"""
+{header}
+<b>{MESSAGES['HEADER_USERS_LIST']}</b>
+{MESSAGES['HEADER_USERS_LIST_MSG']}
+{MESSAGES['NUM_USERS']} {len(users)}
+{MESSAGES['NUM_GET_FREE_USERS']} {users_get_free}
+{MESSAGES['NUM_ORDERED_USERS']} {ordered_users}
+{MESSAGES['TOTAL_BALANCE_USERS']} {utils.rial_to_toman(total_balance_wallets)}{MESSAGES['TOMAN']}
+"""
+# Bot Users Info Message Template
+def bot_users_info_template(user, orders, payments, wallet, non_order_subs, order_subs, plans, header=""):
+    total_orders = 0
+    total_payment = 0
+    approved_payment = 0
+    total_order_subs = 0
+    total_non_order_subs = 0
+    total_balance = 0
+    total_valume = 0
+    total_sales = 0
+    if orders:
+        total_orders = len(orders)
+        if plans:
+            for order in orders:
+                for plan in plans:
+                    if order['plan_id'] == plan['id']:
+                        total_valume += plan['size_gb']
+                        total_sales += plan['price']
+                        break
+    if payments:
+        total_payment = len(payments)
+        approved_payments = [payment for payment in payments if payment['approved'] == 1]
+        if approved_payments:
+            approved_payment = len(approved_payments)
+    if non_order_subs:
+        total_non_order_subs = len(non_order_subs)
+    if order_subs:
+        total_order_subs = len(order_subs)
+    if wallet:
+        total_balance = wallet['balance']
+    name = user['full_name'] if user['full_name'] else user['telegram_id']
+    free_test_status = "✅" if user['test_subscription'] else "❌"
+
+    return f"""
+{header}
+{MESSAGES['INFO_USER']}{name}
+{MESSAGES['GET_FREE_TEST_STATUS']}{free_test_status}
+{MESSAGES['WALLET_BALANCE']}{utils.rial_to_toman(total_balance)}{MESSAGES['TOMAN']}
+❖⬩╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍⬩❖
+{MESSAGES['NUM_ORDER_SUB']} {total_order_subs}
+{MESSAGES['NUM_NON_ORDER_SUB']} {total_non_order_subs}
+{MESSAGES['NUM_PAYMENTS']} {total_payment}
+{MESSAGES['NUM_APPROVED_PAYMENTS']} {approved_payment}
+❖⬩╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍⬩❖
+{MESSAGES['NUM_ORDERS']} {total_orders}
+{MESSAGES['TOTAL_ORDERS_VALUME']} {total_valume}
+{MESSAGES['TOTAL_ORDERS_SALES']} {utils.rial_to_toman(total_sales)}{MESSAGES['TOMAN']}
+"""
+
+# Bot Users Order Info Message Template
+def bot_orders_info_template(order, plan, user, server, header=""):
+
+    return f"""
+{header}
+{MESSAGES['BOT_ORDER_ID']}<code>{order['id']}</code>
+{MESSAGES['BOT_ORDER_DATE']}{order['created_at']}
+{MESSAGES['INFO_USER']}<b>{user['full_name']}</b>
+❖⬩╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍⬩❖
+{MESSAGES['ORDERED_VALUME']}{plan['size_gb']}
+{MESSAGES['ORDERED_DAYS']}{plan['days']}
+{MESSAGES['ORDERED_PRICE']}{utils.rial_to_toman(plan['price'])}{MESSAGES['TOMAN']}
+❖⬩╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍⬩❖
+{MESSAGES['SUB_NAME']}{order['user_name']}
+{MESSAGES['SERVER']}{server['title']}
+"""
+
+# Payment Received Template - Send to Admin
+def bot_payment_info_template(payment, header="", footer=""):
+    #approved = "✅" if payment['approved'] else "❌"
+    if payment['approved']: approved = "✅"
+    elif payment['approved'] == False: approved = "❌"
+    else: approved = "⏳"
+        
+
+    return f"""
+{header}
+
+{MESSAGES['PAYMENTS_ID']}<code>{payment['id']}</code>
+{MESSAGES['INFO_USER']}<b>{payment['user_name']}</b>
+{MESSAGES['BOT_PAYMENT_DATE']} {payment['created_at']}
+{MESSAGES['PAIED_AMOUNT']}<b>{utils.rial_to_toman(payment['payment_amount'])}</b> {MESSAGES['TOMAN']}
+❖⬩╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍⬩❖
+{MESSAGES['STATUS']} {approved}
+{MESSAGES['PAYMENTS_METHOD']} {payment['payment_method']}
+
+{footer}
+"""
+# Bot Users List Message Template
+def bot_orders_list_template(orders, plans, header=""):
+
+    total_orders = 0
+    total_valume = 0
+    total_sales = 0
+    last30day = datetime.datetime.now() - datetime.timedelta(days=30)
+    last30days_orders = [order for order in orders if datetime.datetime.strptime(order['created_at'], "%Y-%m-%d %H:%M:%S") >= last30day]
+    last30days_num_orders = 0
+    last30days_valume = 0
+    last30days_sales = 0
+    first_day_this_month = datetime.datetime.today().replace(day=1)
+    this_month_orders = [order for order in orders if datetime.datetime.strptime(order['created_at'], "%Y-%m-%d %H:%M:%S") >= first_day_this_month]
+    this_month_num_orders = 0
+    this_month_valume = 0
+    this_month_sales = 0
+    if orders:
+        total_orders = len(orders)
+        if plans:
+            for order in orders:
+                for plan in plans:
+                    if order['plan_id'] == plan['id']:
+                        total_valume += plan['size_gb']
+                        total_sales += plan['price']
+                        break
+    if last30days_orders:
+        last30days_num_orders = len(last30days_orders)
+        if plans:
+            for order in last30days_orders:
+                for plan in plans:
+                    if order['plan_id'] == plan['id']:
+                        last30days_valume += plan['size_gb']
+                        last30days_sales += plan['price']
+                        break
+    if this_month_orders:
+        this_month_num_orders = len(this_month_orders)
+        if plans:
+            for order in this_month_orders:
+                for plan in plans:
+                    if order['plan_id'] == plan['id']:
+                        this_month_valume += plan['size_gb']
+                        this_month_sales += plan['price']
+                        break
+        
+
+    return f"""
+{header}
+<b>{MESSAGES['HEADER_ORDERS_LIST']}</b>
+{MESSAGES['NUM_ORDERS']} {total_orders}
+{MESSAGES['TOTAL_ORDERS_VALUME']} {total_valume}
+{MESSAGES['TOTAL_ORDERS_SALES']} {utils.rial_to_toman(total_sales)}{MESSAGES['TOMAN']}
+❖⬩╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍⬩❖
+{MESSAGES['LAST_30DAYS_NUM_ORDERS']} {last30days_num_orders}
+{MESSAGES['LAST_30DAYS_ORDERS_VALUME']} {last30days_valume }
+{MESSAGES['LAST_30DAYS_ORDERS_SALES']} {utils.rial_to_toman(last30days_sales)}{MESSAGES['TOMAN']}
+❖⬩╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍⬩❖
+{MESSAGES['THIS_MONTH_NUM_ORDERS']} {this_month_num_orders}
+{MESSAGES['THIS_MONTH_ORDERS_VALUME']} {this_month_valume}
+{MESSAGES['THIS_MONTH_ORDERS_SALES']} {utils.rial_to_toman(this_month_sales)}{MESSAGES['TOMAN']}
+"""
+
+# Bot Users List Message Template
+def bot_payments_list_template(payments, header=""):
+
+    total_payments = 0
+    total_amount = 0
+    last30day = datetime.datetime.now() - datetime.timedelta(days=30)
+    last30days_payments  = [payment for payment in payments if datetime.datetime.strptime(payment['created_at'], "%Y-%m-%d %H:%M:%S") >= last30day]
+    last30days_num_payments = 0
+    last30days_amount = 0
+    first_day_this_month = datetime.datetime.today().replace(day=1)
+    this_month_orders = [payment for payment in payments if datetime.datetime.strptime(payment['created_at'], "%Y-%m-%d %H:%M:%S") >= first_day_this_month]
+    this_month_num_payments = 0
+    this_month_amount = 0
+    if payments:
+        total_payments = len(payments)
+        for payment in payments:
+                total_amount += payment['payment_amount']
+
+    if last30days_payments:
+        last30days_num_payments = len(last30days_payments)
+        for payment in last30days_payments:
+                last30days_amount += payment['payment_amount']
+
+    if this_month_orders:
+        this_month_num_payments = len(this_month_orders)
+        for payment in this_month_orders:
+                this_month_amount += payment['payment_amount']
+        
+
+    return f"""
+{header}
+<b>{MESSAGES['HEADER_PAYMENT_LIST']}</b>
+{MESSAGES['NUM_PAYMENTS']}{total_payments}
+{MESSAGES['TOTAL_PAYMENTS_AMOUNT']}{utils.rial_to_toman(total_amount)}{MESSAGES['TOMAN']}
+❖⬩╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍⬩❖
+{MESSAGES['LAST_30DAYS_NUM_PAYMENTS']}{last30days_num_payments}
+{MESSAGES['LAST_30DAYS_PAYMENTS_AMOUNT']}{utils.rial_to_toman(last30days_amount)}{MESSAGES['TOMAN']}
+❖⬩╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍⬩❖
+{MESSAGES['THIS_MONTH_NUM_PAYMENTS']}{this_month_num_payments}
+{MESSAGES['THIS_MONTH_PAYMENTS_AMOUNT']}{utils.rial_to_toman(this_month_amount)}{MESSAGES['TOMAN']}
+"""
 # Configs List Message Template
 def configs_template(configs):
     messages = []
