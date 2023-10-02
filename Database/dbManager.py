@@ -733,7 +733,7 @@ class UserDBManager:
     def set_default_configs(self):
         
         self.add_bool_config("visible_hiddify_hyperlink", True)
-        self.add_bool_config("three_random_num_price", True)
+        self.add_bool_config("three_random_num_price", False)
         self.add_bool_config("force_join_channel", False)
         self.add_bool_config("panel_auto_backup", True)
         self.add_bool_config("bot_auto_backup", True)

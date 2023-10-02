@@ -398,7 +398,7 @@ def next_step_send_name_for_get_free_test(message: Message, server_id):
         return
 
     settings = utils.all_configs_settings()
-    test_user_comment = "Free Test User"
+    test_user_comment = "HidyBot:FreeTest"
     server = USERS_DB.find_server(id=server_id)
     if not server:
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],

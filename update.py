@@ -202,6 +202,9 @@ def update_v5_1_0_to_v5_5_0():
             logging.error("Database error: %s" % e)
             print("SQLite error:", e)
         
+        # remove user_name from orders table
+        drop_columns_from_table('orders', ['user_name']) 
+        
         
         
     
