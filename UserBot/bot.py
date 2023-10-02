@@ -334,13 +334,13 @@ def next_step_send_name_for_buy_from_wallet(message: Message, plan):
     URL = server['url'] + API_PATH
 
     # value = ADMIN_DB.add_default_user(name, plan['days'], plan['size_gb'],)
-    value = api.insert(URL, name=name, usage_limit_GB=plan['size_gb'], package_days=plan['days'])
+    sub_id = random.randint(1000000, 9999999)
+    value = api.insert(URL, name=name, usage_limit_GB=plan['size_gb'], package_days=plan['days'],comment=f"HidyBot:{sub_id}")
     if not value:
         bot.send_message(message.chat.id,
                          f"{MESSAGES['UNKNOWN_ERROR']}:Create User Error\n{MESSAGES['ORDER_ID']} {order_id}",
                          reply_markup=main_menu_keyboard_markup())
         return
-    sub_id = random.randint(1000000, 9999999)
     add_sub_status = USERS_DB.add_order_subscription(sub_id, order_id, value, server_id)
     if not add_sub_status:
         bot.send_message(message.chat.id,
