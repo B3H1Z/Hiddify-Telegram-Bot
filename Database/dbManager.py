@@ -491,15 +491,16 @@ class UserDBManager:
 
         return True
 
-    def delete_order_subscriptions(self, order_id):
+    def delete_order_subscription(self, **kwargs):
         cur = self.conn.cursor()
         try:
-            cur.execute("DELETE FROM order_subscriptions WHERE order_id=?", (order_id,))
-            self.conn.commit()
-            logging.info(f"Order [{order_id}] deleted successfully!")
+            for key, value in kwargs.items():
+                cur.execute(f"DELETE FROM order_subscriptions WHERE {key}=?", (value,))
+                self.conn.commit()
+                logging.info(f"Order [{value}] deleted successfully!")
             return True
         except Error as e:
-            logging.error(f"Error while deleting order [{order_id}] \n Error: {e}")
+            logging.error(f"Error while deleting order [{kwargs}] \n Error: {e}")
             return False
 
     def add_non_order_subscription(self, non_sub_id, telegram_id, uuid, server_id):
