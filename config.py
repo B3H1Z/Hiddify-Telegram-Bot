@@ -211,7 +211,7 @@ def set_by_user():
         if not url:
             continue
         break
-
+    print()
     print(colored("Example: EN (default: FA)\n[It is better that the language of the bot is the same as the panel]",
                   "yellow"))
     while True:
