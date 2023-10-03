@@ -149,7 +149,7 @@ def confirm_add_user(message: Message, server_id):
                 return
             msg = templates.user_info_template(usr, server, MESSAGES['NEW_USER_INFO'])
             bot.delete_message(message.chat.id, msg_wait.message_id)
-            bot.send_message(message.chat.id, msg, reply_markup=markups.user_info_markup(usr['uuid'], server))
+            bot.send_message(message.chat.id, msg, reply_markup=markups.user_info_markup(usr['uuid']))
 
         else:
             bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'],

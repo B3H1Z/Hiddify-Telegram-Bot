@@ -278,9 +278,7 @@ def next_step_send_screenshot(message, charge_wallet):
     payment_method = "Card"
 
     status = USERS_DB.add_payment(charge_wallet['id'], message.chat.id,
-                                  charge_wallet['amount'], payment_method, file_name,
-                                  message.from_user.full_name,
-                                  created_at)
+                                  charge_wallet['amount'], payment_method, file_name, created_at)
     if status:
         payment = USERS_DB.find_payment(id=charge_wallet['id'])
         if not payment:

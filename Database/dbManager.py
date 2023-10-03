@@ -844,13 +844,12 @@ class UserDBManager:
             logging.error(f"Error while updating balance [{key}] to [{value}] \n Error: {e}")
             return False
 
-    def add_payment(self, payment_id, telegram_id, payment_amount, payment_method, payment_image, user_name,
-                    created_at):
+    def add_payment(self, payment_id, telegram_id, payment_amount, payment_method, payment_image, created_at):
         cur = self.conn.cursor()
         try:
             cur.execute(
-                "INSERT INTO payments(id,telegram_id, payment_amount,payment_method,payment_image,user_name,created_at) VALUES(?,?,?,?,?,?,?)",
-                (payment_id, telegram_id, payment_amount, payment_method, payment_image, user_name, created_at))
+                "INSERT INTO payments(id,telegram_id, payment_amount,payment_method,payment_image,created_at) VALUES(?,?,?,?,?,?)",
+                (payment_id, telegram_id, payment_amount, payment_method, payment_image, created_at))
             self.conn.commit()
             logging.info(f"Payment [{payment_id}] added successfully!")
             return True
