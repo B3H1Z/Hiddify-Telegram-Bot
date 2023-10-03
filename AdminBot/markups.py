@@ -194,7 +194,8 @@ def bot_users_list_markup(users, page=1):
     end = start + USER_PER_PAGE
     keys = []
     for user in users[start:end]:
-        keys.append(InlineKeyboardButton(f"{user['full_name']}", callback_data=f"bot_user_info:{user['telegram_id']}"))
+        name = user['full_name'] if user['full_name'] else user['telegram_id']
+        keys.append(InlineKeyboardButton(f"{name}", callback_data=f"bot_user_info:{user['telegram_id']}"))
     markup.add(*keys)
     if page < len(users) / USER_PER_PAGE:
         markup.add(InlineKeyboardButton(KEY_MARKUP['NEXT_PAGE'], callback_data=f"bot_user_next:{page + 1}"), row_width=2)

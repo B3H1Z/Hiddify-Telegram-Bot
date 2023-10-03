@@ -168,16 +168,17 @@ def update_v5_1_0_to_v5_5_0():
         try:
             cur = conn.cursor()
             cur.execute("ALTER TABLE order_subscriptions ADD COLUMN server_id INTEGER")
-            cur.execute("UPDATE plans SET server_id = 1")
+            cur.execute("UPDATE order_subscriptions SET server_id = 1")
             conn.commit()
         except sqlite3.Error as e:
             logging.error("Database error: %s" % e)
             print("SQLite error:", e)
         # add server_id to non_order_subscriptions table
         try:
+            # check if server_id is exists
             cur = conn.cursor()
             cur.execute("ALTER TABLE non_order_subscriptions ADD COLUMN server_id INTEGER")
-            cur.execute("UPDATE plans SET server_id = 1")
+            cur.execute("UPDATE non_order_subscriptions SET server_id = 1")
             conn.commit()
         except sqlite3.Error as e:
             logging.error("Database error: %s" % e)
@@ -202,8 +203,8 @@ def update_v5_1_0_to_v5_5_0():
             logging.error("Database error: %s" % e)
             print("SQLite error:", e)
         
-        # remove user_name from orders table
-        drop_columns_from_table('orders', ['user_name']) 
+        # remove user_name from payments table
+        drop_columns_from_table('payments', ['user_name']) 
         
         
         
@@ -216,7 +217,7 @@ def update_by_version(current_version, target_version):
         if is_version_less(current_version, "5.0.0"):
             update_v4_v5()
         if is_version_less(current_version, "5.5.0"):
-            update_v5_1_0_to_v5_5_0()       
+            update_v5_1_0_to_v5_5_0()
     else:
         print("No update is needed")
         logging.info("No update is needed")

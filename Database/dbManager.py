@@ -4,6 +4,8 @@ import logging
 import os
 import sqlite3
 from sqlite3 import Error
+from version import is_version_less
+from config import VERSION
 #from urllib.parse import urlparse
 
 #from Utils import api
@@ -77,6 +79,7 @@ class UserDBManager:
                         "id INTEGER PRIMARY KEY,"
                         "telegram_id INTEGER NOT NULL,"
                         "plan_id INTEGER NOT NULL,"
+                        "user_name TEXT NOT NULL,"
                         "created_at TEXT NOT NULL,"
                         "FOREIGN KEY (telegram_id) REFERENCES user (telegram_id),"
                         "FOREIGN KEY (plan_id) REFERENCES plans (id))")
@@ -134,7 +137,7 @@ class UserDBManager:
                         "payment_amount INTEGER NOT NULL,"
                         "payment_method TEXT NOT NULL,"
                         "payment_image TEXT NOT NULL,"
-                        "user_name TEXT NOT NULL,"
+                        # "user_name TEXT NOT NULL,"
                         "approved BOOLEAN NULL,"
                         "created_at TEXT NOT NULL,"
                         "FOREIGN KEY (telegram_id) REFERENCES users (telegram_id))")
@@ -1002,11 +1005,26 @@ class UserDBManager:
 
             with open(backup_file, 'r') as json_file:
                 backup_data = json.load(json_file)
-
+                
             if not isinstance(backup_data, dict):
                 logging.error('Backup data should be a dictionary.')
                 print('Backup data should be a dictionary.')
                 return
+            # print(backup_data.get('version'), VERSION)
+            # if backup_data.get('version') != VERSION:
+            #     if backup_data.get('version') is None:
+            #         logging.error('Backup data version is not found.')
+            #         print('Backup data version is not found.')
+            #         return
+            #     if VERSION.find('-pre'):
+            #         VERSION = VERSION.split('-pre')[0]
+            #     if is_version_less(backup_data.get('version'),VERSION ):
+            #         logging.error('Backup data version is less than current version.')
+            #         print('Backup data version is less than current version.')
+            #         if is_version_less(backup_data.get('version'), '5.5.0'):
+            #             logging.error('Backup data version is less than 5.5.0.')
+            #             print('Backup data version is less than 5.5.0.')
+            #             return 
 
             self.conn.execute('BEGIN TRANSACTION')
 

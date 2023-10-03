@@ -182,6 +182,7 @@ def bot_orders_info_template(order, plan, user, server, header=""):
 {MESSAGES['ORDERED_DAYS']}{plan['days']}
 {MESSAGES['ORDERED_PRICE']}{utils.rial_to_toman(plan['price'])}{MESSAGES['TOMAN']}
 ❖⬩╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍⬩❖
+{MESSAGES['SUB_NAME']}{order['user_name']}
 {MESSAGES['SERVER']}{server['title']}
 """
 

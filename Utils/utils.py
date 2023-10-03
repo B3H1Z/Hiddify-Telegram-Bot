@@ -556,4 +556,3 @@ def restore_json_bot(file):
     os.rmdir(extract_path)
     
     return True
-
