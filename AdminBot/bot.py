@@ -1511,6 +1511,7 @@ def callback_query(call: CallbackQuery):
         plans_markup = markups.plans_list_markup(plans_list,value)
         bot.edit_message_text({MESSAGES['USERS_BOT_PLANS_LIST']}, call.message.chat.id, call.message.message_id,
                          reply_markup=plans_markup)
+        bot.send_message(call.message.chat.id, MESSAGES['SUCCESS_REMOVED_SERVER'], reply_markup=makups.main_menu_keyboard_markup())
         
     elif key == "server_list_of_users":
         users_list = api.select(URL)
