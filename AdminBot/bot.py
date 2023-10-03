@@ -1009,6 +1009,12 @@ def edit_wallet_balance(message: Message,telegram_id):
     if not is_it_digit(message,):
         return
     new_balance = utils.toman_to_rial(message.text)
+    wallet_status = USERS_DB.find_wallet(telegram_id=telegram_id)
+    if not wallet_status:
+        status = USERS_DB.add_wallet(telegram_id=telegram_id)
+        if not status:
+                bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'])
+                return
     status = USERS_DB.edit_wallet(telegram_id=telegram_id, balance=new_balance)
     if not status:
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())

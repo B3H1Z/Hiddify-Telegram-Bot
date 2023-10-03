@@ -375,12 +375,12 @@ class UserDBManager:
 
         return True
     
-    def add_order(self, order_id, telegram_id, plan_id, created_at):
+    def add_order(self, order_id, telegram_id,user_name, plan_id, created_at):
         cur = self.conn.cursor()
         try:
             cur.execute(
-                "INSERT INTO orders(id,telegram_id, plan_id,created_at) VALUES(?,?,?,?)",
-                (order_id, telegram_id, plan_id, created_at))
+                "INSERT INTO orders(id,telegram_id, plan_id,user_name,created_at) VALUES(?,?,?,?,?)",
+                (order_id, telegram_id, plan_id,user_name, created_at))
             self.conn.commit()
             logging.info(f"Order [{order_id}] added successfully!")
             return True

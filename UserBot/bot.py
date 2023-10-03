@@ -223,7 +223,7 @@ def renewal_from_wallet_confirm(message: Message):
     # Add New Order
     order_id = random.randint(1000000, 9999999)
     created_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    status = USERS_DB.add_order(order_id, message.chat.id, plan_id, created_at)
+    status = USERS_DB.add_order(order_id, message.chat.id,user_info_process['name'], plan_id, created_at)
     if not status:
         bot.send_message(message.chat.id,
                          f"{MESSAGES['UNKNOWN_ERROR']}\n{MESSAGES['ORDER_ID']} {order_id}",
@@ -347,8 +347,7 @@ def next_step_send_name_for_buy_from_wallet(message: Message, plan):
                          f"{MESSAGES['UNKNOWN_ERROR']}:Add Subscription Error\n{MESSAGES['ORDER_ID']} {order_id}",
                          reply_markup=main_menu_keyboard_markup())
         return
-    status = USERS_DB.add_order(order_id, message.chat.id, plan['id'], created_at)
-
+    status = USERS_DB.add_order(order_id, message.chat.id,name, plan['id'], created_at)
     if not status:
         bot.send_message(message.chat.id,
                          f"{MESSAGES['UNKNOWN_ERROR']}:Add Order Error\n{MESSAGES['ORDER_ID']} {order_id}",
