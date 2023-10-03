@@ -1498,7 +1498,7 @@ def callback_query(call: CallbackQuery):
         servers = USERS_DB.select_servers()
         bot.edit_message_text(KEY_MARKUP['SERVERS_MANAGEMENT'], call.message.chat.id, call.message.message_id,
                                     reply_markup=markups.servers_management_markup(servers)) 
-        bot.send_message(call.message.chat.id, MESSAGES['SUCCESS_REMOVED_SERVER'], reply_markup=makups.main_menu_keyboard_markup())
+        bot.send_message(call.message.chat.id, MESSAGES['SUCCESS_REMOVED_SERVER'], reply_markup=markups.main_menu_keyboard_markup())
 
         
     # Server Management - List of Plans for Server Callback
