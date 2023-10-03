@@ -1486,9 +1486,30 @@ def callback_query(call: CallbackQuery):
     # Server Management - Confirm Delete Server Callback
     elif key == "confirm_delete_server":
         #status = USERS_DB.edit_server(value, status=0)
-        status = USERS_DB.delete_server(server_id=int(value))
+        status = USERS_DB.delete_server(id=int(value))
         if not status:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+        # delete all plans with this server_id
+        plans = USERS_DB.select_plans()
+        if plans:
+            for plan in plans:
+                if plan['server_id'] == int(value):
+                    USERS_DB.delete_plan(id=plan['id'])
+                    
+        order_subscriptions = USERS_DB.select_order_subscription()
+        if order_subscriptions:
+            for order_subscription in order_subscriptions:
+                if order_subscription['server_id'] == int(value):
+                    USERS_DB.delete_order_subscription(id=order_subscription['id'])
+        
+        non_order_subscriptions = USERS_DB.select_non_order_subscription()
+        if non_order_subscriptions:
+            for non_order_subscription in non_order_subscriptions:
+                if non_order_subscription['server_id'] == int(value):
+                    USERS_DB.delete_non_order_subscription(id=non_order_subscription['id'])
+        
+        
+        
             
         servers = USERS_DB.select_servers()
         bot.edit_message_text(KEY_MARKUP['SERVERS_MANAGEMENT'], call.message.chat.id, call.message.message_id,
