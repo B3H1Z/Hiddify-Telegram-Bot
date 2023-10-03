@@ -678,7 +678,7 @@ def callback_query(call: CallbackQuery):
     # ----------------------------------- User Subscriptions Info Area -----------------------------------
     # Unlink non-order subscription
     elif key == 'unlink_subscription':
-        delete_status = USERS_DB.delete_non_order_subscriptions(uuid=value)
+        delete_status = USERS_DB.delete_non_order_subscription(uuid=value)
         if delete_status:
             bot.delete_message(call.message.chat.id, call.message.message_id)
             bot.send_message(call.message.chat.id, MESSAGES['SUBSCRIPTION_UNLINKED'],

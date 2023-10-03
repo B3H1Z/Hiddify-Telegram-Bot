@@ -547,7 +547,7 @@ class UserDBManager:
             logging.error(f"Error while finding order {kwargs} \n Error:{e}")
             return None
 
-    def delete_non_order_subscriptions(self, **kwargs):
+    def delete_non_order_subscription(self, **kwargs):
         cur = self.conn.cursor()
         try:
             for key, value in kwargs.items():

@@ -1490,15 +1490,11 @@ def callback_query(call: CallbackQuery):
         status = USERS_DB.delete_server(id=server_id)
         if not status:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
-        # delete all plans with this server_id
+        
         USERS_DB.delete_plan(server_id=server_id)
         USERS_DB.delete_order_subscription(server_id=server_id)
         USERS_DB.delete_non_order_subscription(server_id=server_id)
-                    
-        
-        
-        
-            
+    
         servers = USERS_DB.select_servers()
         bot.edit_message_text(KEY_MARKUP['SERVERS_MANAGEMENT'], call.message.chat.id, call.message.message_id,
                                     reply_markup=markups.servers_management_markup(servers)) 
