@@ -5,7 +5,6 @@ import os
 import sqlite3
 from sqlite3 import Error
 from version import is_version_less
-from config import VERSION
 #from urllib.parse import urlparse
 
 #from Utils import api
