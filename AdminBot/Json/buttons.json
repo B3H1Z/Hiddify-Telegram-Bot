@@ -109,6 +109,7 @@
     "CHANGE_STATUS_PAYMENT": "Change Payment Status",
     "CONFIRM_PAYMENT": "✅Confirm Payment",
     "NO": "❌No",
+    "YES": "✅Yes",
     "ANSWER": "Answer",
     "SEND_MESSAGE": "Send Message"
   },
@@ -222,6 +223,7 @@
     "CHANGE_STATUS_PAYMENT": "تغییر وضعیت تراکنش",
     "CONFIRM_PAYMENT": "✅تایید تراکنش",
     "NO": "❌خیر",
+    "YES": "✅بله",
     "ANSWER": "پاسخ",
     "SEND_MESSAGE": "📤ارسال پیام"
 
