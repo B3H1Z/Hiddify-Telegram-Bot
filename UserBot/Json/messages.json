@@ -86,7 +86,8 @@
         "INFO_USER_USERNAME": "⬖ Username:",
         "INFO_USER_NUM_ID": "⬖ User ID:",
         "ANSWER_TO_ADMIN": "Please submit your answer:",
-        "MESSAGE_SENDED": "Message Sended"
+        "MESSAGE_SENDED": "Message Sended",
+        "NOT_SET":"Not set"
     },
     "FA": {
         "WELCOME": "به ربات کاربران خوش آمدید",
@@ -175,6 +176,7 @@
         "INFO_USER_USERNAME": "⬖ نام کاربری:",
         "INFO_USER_NUM_ID": "⬖ شناسه کاربر:",
         "ANSWER_TO_ADMIN": "لطفا پاسخ خود را ارسال کنید:",
-        "MESSAGE_SENDED": "پیام ارسال شد"
+        "MESSAGE_SENDED": "پیام ارسال شد",
+        "NOT_SET": "تنظیم نشده"
     }
 }
