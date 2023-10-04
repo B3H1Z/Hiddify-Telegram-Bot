@@ -1003,6 +1003,28 @@ def callback_query(call: CallbackQuery):
         # bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,
         #                               reply_markup=plans_list_markup(plans, renewal=True,uuid=value))
         update_info_subscription(call.message, value,plans_list_markup(plans, renewal=True,uuid=value))
+    
+    elif key == "back_to_servers":
+        servers = USERS_DB.select_servers()
+        server_list = []
+        if not servers:
+            bot.send_message(message.chat.id, MESSAGES['SERVERS_NOT_FOUND'], reply_markup=main_menu_keyboard_markup())
+            return
+        for server in servers:
+            user_index = 0
+            #if server['status']:
+            users_list = api.select(server['url'] + API_PATH)
+            if users_list:
+                user_index = len(users_list)
+            if server['user_limit'] > user_index:
+                server_list.append(server)
+        # bad request telbot api
+        # bot.edit_message_text(chat_id=message.chat.id, message_id=msg_wait.message_id,
+        #                                   text= MESSAGES['SERVERS_LIST'], reply_markup=servers_list_markup(server_list))
+        #bot.delete_message(message.chat.id, msg_wait.message_id)
+        bot.edit_message_text(reply_markup=servers_list_markup(server_list), chat_id=call.message.chat.id, message_id=call.message.message_id,
+                                      text=MESSAGES['SERVERS_LIST'])
+        
 
     # Delete Message
     elif key == "del_msg":
