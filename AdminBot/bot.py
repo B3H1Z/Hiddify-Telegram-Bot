@@ -466,7 +466,7 @@ def search_bot_user_payment(message: Message):
     msg = templates.bot_payment_info_template(payment,user_data)
     photo_path = os.path.join(os.getcwd(), 'UserBot', 'Receiptions', payment['payment_image'])
     bot.send_photo(message.chat.id, photo=open(photo_path, 'rb'),
-                caption=msg, reply_markup=markups.main_menu_keyboard_markup())
+                caption=msg, reply_markup=markups.change_status_payment_by_admin(payment['id']))
 
 
 # ----------------------------------- Users Bot Management Area -----------------------------------
@@ -820,34 +820,46 @@ def users_bot_settings_update_message(message: Message, markup,title=MESSAGES['U
 #                    reply_markup=markups.main_menu_keyboard_markup())
 
 
-# def users_bot_sub_status(message: Message):
-#     if is_it_cancel(message):
-#         return
-#     if not is_it_digit(message):
-#         return
+def users_bot_sub_status(message: Message):
+    if is_it_cancel(message):
+        return
+    if not is_it_digit(message):
+        return
 
-#     if len(message.text) == 7:
-#         user = USERS_DB.find_order_subscription(id=int(message.text))
-#     elif len(message.text) == 8:
-#         user = USERS_DB.find_non_order_subscription(id=int(message.text))
-#     else:
-#         bot.send_message(message.chat.id, MESSAGES['ERROR_SUB_NOT_FOUND'],
-#                          reply_markup=markups.main_menu_keyboard_markup())
-#         return
+    if len(message.text) == 7:
+        user = USERS_DB.find_order_subscription(id=int(message.text))
+    elif len(message.text) == 8:
+        user = USERS_DB.find_non_order_subscription(id=int(message.text))
+    else:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_SUB_NOT_FOUND'],
+                         reply_markup=markups.main_menu_keyboard_markup())
+        return
 
-#     if not user:
-#         bot.send_message(message.chat.id, MESSAGES['ERROR_SUB_NOT_FOUND'],
-#                          reply_markup=markups.main_menu_keyboard_markup())
-#         return
-#     user_uuid = user[0]['uuid']
+    if not user:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_SUB_NOT_FOUND'],
+                         reply_markup=markups.main_menu_keyboard_markup())
+        return
+    user_uuid = user[0]['uuid']
+    selected_server = None
+    servers = USERS_DB.select_servers()
+    usr = None
+    if servers:
+        for server in servers:
+            URL = server['url'] + API_PATH
+            usr = utils.user_info(URL, user_uuid)
+            if usr:
+                selected_server = server
+                break
+            else:
+                continue
+        if not usr:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'])
+            return
+        msg = templates.user_info_template(usr, selected_server)
+        bot.send_message(message.chat.id, msg,
+                        reply_markup=markups.user_info_markup(usr['uuid']))
 
-#     usr = utils.user_info(URL, user_uuid)
-#     if not usr:
-#         bot.send_message(message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'])
-#         return
-#     msg = templates.user_info_template(usr, selected_server)
-#     bot.send_message(message.chat.id, msg,
-#                      reply_markup=markups.user_info_markup(usr['uuid']))
+
 
 
 def users_bot_settings_min_depo(message: Message):
@@ -1076,8 +1088,6 @@ def callback_query(call: CallbackQuery):
     # ----------------------------------- Users List Area Callbacks -----------------------------------
     # Single User Info Callback
     if key == "info":
-        print(server_mode)
-        print(value)
         if server_mode == "Single":
             usr = utils.user_info(URL, value)
         else:
@@ -2287,9 +2297,9 @@ def callback_query(call: CallbackQuery):
     #     bot.send_message(call.message.chat.id, f"{MESSAGES['USERS_BOT_ORDER_NUMBER_REQUEST']}")
     #     bot.register_next_step_handler(call.message, users_bot_order_status)
 
-    # elif key == "users_bot_sub_status":
-    #     bot.send_message(call.message.chat.id, f"{MESSAGES['USERS_BOT_SUB_ID_REQUEST']}")
-    #     bot.register_next_step_handler(call.message, users_bot_sub_status)
+    elif key == "users_bot_sub_status":
+        bot.send_message(call.message.chat.id, f"{MESSAGES['USERS_BOT_SUB_ID_REQUEST']}")
+        bot.register_next_step_handler(call.message, users_bot_sub_status)
 
 
     # ----------------------------------- Payment Callbacks -----------------------------------
@@ -2627,11 +2637,17 @@ def send_welcome(message: Message):
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['SERVER_BACKUP'])
 def server_backup(message: Message):
     msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'])
-    file_name = utils.backup_panel()
-    if file_name:
-        bot.send_document(message.chat.id, open(file_name, 'rb'))
+    zip_file_name = utils.full_backup()
+    if not zip_file_name:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+        logging.error("Backup failed")
+        return
+    
+    if message.chat.id in ADMINS_ID:
+        bot.send_document(message.chat.id, open(zip_file_name, 'rb'), caption="🤖Backup",disable_notification=True)
     else:
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+        
     bot.delete_message(message.chat.id, msg_wait.message_id)
 
 

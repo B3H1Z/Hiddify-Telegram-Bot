@@ -76,7 +76,7 @@
     "USERS_BOT_SETTINGS_NOTIF_REMINDER": "Subscription Reminder",
     "USERS_BOT_SETTINGS_NOTIF_REMINDER_USAGE": "Usage Reminder",
     "USERS_BOT_SETTINGS_NOTIF_REMINDER_DAYS": "Days Reminder",
-    "USERS_BOT_SETTINGS_PANEL_AUTO_BACKUP": "Panel Auto Backup",
+    "USERS_BOT_SETTINGS_PANEL_AUTO_BACKUP": "Auto Backup",
     "USERS_BOT_SETTINGS_BOT_AUTO_BACKUP": "Bot Auto Backup",
     "USERS_BOT_SETTINGS_PANEL_MANUAL": "Manual",
     "USERS_BOT_SETTINGS_PANEL_MANUAL_ANDROID": "Android Manual",
@@ -121,21 +121,21 @@
     "ORDERS_MANAGEMENT": "📗مدیریت سفارشات",
     "ORDERS_LIST": "📗لیست سفارشات",
     "SEARCH_ORDERS": "🔍جستجوی سفارشات",
-    "PAYMENT_MANAGEMENT": "💵مدیریت پرداخت‌ها",
-    "APPROVED_PAYMENTS_LIST": "✅لیست پرداخت‌های تایید شده",
-    "NON_APPROVED_PAYMENTS_LIST": "🚫لیست پرداخت‌های رد شده",
-    "PENDING_PAYMENT_LIST": "⏳لیست پرداخت‌های در انتظار",
-    "CARD_PAYMENT_LIST": "💳لیست پرداخت‌های کارت به کارت",
-    "DIGITAL_PAYMENT_LIST": "💸لیست پرداخت‌های دیجیتال",
-    "SEARCH_PAYMENTS": "🔍جستجوی پرداخت‌ها",
+    "PAYMENT_MANAGEMENT": "💵مدیریت تراکنشات",
+    "APPROVED_PAYMENTS_LIST": "✅لیست تراکنشات تایید شده",
+    "NON_APPROVED_PAYMENTS_LIST": "🚫لیست تراکنشات رد شده",
+    "PENDING_PAYMENT_LIST": "⏳لیست تراکنشات در انتظار",
+    "CARD_PAYMENT_LIST": "💳لیست تراکنشات کارت به کارت",
+    "DIGITAL_PAYMENT_LIST": "💸لیست تراکنشات دیجیتال",
+    "SEARCH_PAYMENTS": "🔍جستجوی تراکنش",
     "USER_SUB_LIST": "📋لیست سرویس‌ها",
     "EDIT_WALLET": "💳ویرایش کیف پول",
-    "PAYMENTS_LIST": "💵لیست پرداخت‌ها",
+    "PAYMENTS_LIST": "💵لیست تراکنشات",
     "GIFT_LIST": "🎁لیست هدایا",
     "REFERRED_LIST": "🎗لیست معرفی شده‌ها",
     "USERS_SEARCH": "🔍جستجوی کاربر",
     "ADD_USER": "➕افزودن کاربر",
-    "SERVER_BACKUP": "📥بکاپ پنل",
+    "SERVER_BACKUP": "📥دریافت بکاپ",
     "SERVER_STATUS": "📈وضعیت سرور",
     "USERS_BOT_MANAGEMENT": "🤖مدیریت ربات کاربران",
     "NEXT_PAGE": "➡️",
@@ -176,8 +176,8 @@
     "USERS_BOT_SEND_MESSAGE_TO_USERS": "📩ارسال پیام همگانی",
     "USERS_BOT_SETTINGS": "⚙️تنظیمات",
     "USERS_BOT_SETTINGS_SHOW_HIDI_LINK": "هایپرلینک هیدیفای",
-    "USERS_BOT_SETTINGS_SHOW_THREE_RAND": "مشخصه تصادفی پرداخت",
-    "USERS_BOT_SETTINGS_MIN_DEPO": "محدودیت حداقل پرداخت",
+    "USERS_BOT_SETTINGS_SHOW_THREE_RAND": "مشخصه تصادفی قیمت",
+    "USERS_BOT_SETTINGS_MIN_DEPO": "محدودیت حداقل تراکنش",
     "USERS_BOT_SETTINGS_PNL_V8_FEATURES": "اشتراک های نسخه 8",
     "USERS_BOT_SETTINGS_CHANNEL_ID": "تنظیم کانال پشتیبانی",
     "USERS_BOT_SETTINGS_CHANNEL_ّFORCE_JOIN": "عضویت اجباری",
@@ -189,7 +189,7 @@
     "USERS_BOT_SETTINGS_NOTIF_REMINDER": "یادآور وضعیت اشتراک",
     "USERS_BOT_SETTINGS_NOTIF_REMINDER_USAGE": "یادآور وضعیت مصرف",
     "USERS_BOT_SETTINGS_NOTIF_REMINDER_DAYS": "یادآور وضعیت زمان",
-    "USERS_BOT_SETTINGS_PANEL_AUTO_BACKUP": "بکاپ خودکار پنل",
+    "USERS_BOT_SETTINGS_PANEL_AUTO_BACKUP": "ارسال خودکار بکاپ",
     "USERS_BOT_SETTINGS_BOT_AUTO_BACKUP": "بکاپ خودکار ربات",
     "USERS_BOT_SETTINGS_PANEL_MANUAL": "متن راهنما",
     "USERS_BOT_SETTINGS_PANEL_MANUAL_ANDROID": "راهنمای اندروید",
@@ -219,11 +219,11 @@
     "SERVER_EDIT_TITLE": "ویرایش عنوان",
     "SERVER_EDIT_USER_LIMIT": "ویرایش محدودیت کاربر",
     "SERVER_EDIT_URL": "ویرایش لینک",
-    "CHANGE_STATUS_PAYMENT": "تغییر وضعیت پرداخت",
-    "CONFIRM_PAYMENT": "✅تایید پرداخت",
+    "CHANGE_STATUS_PAYMENT": "تغییر وضعیت تراکنش",
+    "CONFIRM_PAYMENT": "✅تایید تراکنش",
     "NO": "❌خیر",
     "ANSWER": "پاسخ",
-    "SEND_MESSAGE": "ارسال پیام"
+    "SEND_MESSAGE": "📤ارسال پیام"
 
   }
 }

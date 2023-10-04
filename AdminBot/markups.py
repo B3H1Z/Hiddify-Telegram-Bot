@@ -150,10 +150,9 @@ def search_user_markup(server_id=None):
 # Users Bot Management - Inline Keyboard Markup
 def users_bot_management_markup(value=None):
     markup = InlineKeyboardMarkup()
-    markup.row_width = 2
+    markup.row_width = 3
     # markup.add(
     #     InlineKeyboardButton(KEY_MARKUP['USERS_BOT_ORDERS_STATUS'], callback_data=f"users_bot_orders_status:None"),
-    #     InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SUB_STATUS'], callback_data=f"users_bot_sub_status:None"))
     # markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_ADD_PLAN'], callback_data=f"users_bot_add_plan:None"),
     #            InlineKeyboardButton(KEY_MARKUP['USERS_BOT_DEL_PLAN'], callback_data=f"users_bot_list_plans:None"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['BOT_USERS_MANAGEMENT'],
@@ -163,7 +162,8 @@ def users_bot_management_markup(value=None):
     markup.add(InlineKeyboardButton(KEY_MARKUP['PAYMENT_MANAGEMENT'],
                                     callback_data=f"users_bot_payments_list_management:None"),
                                     InlineKeyboardButton(KEY_MARKUP['ORDERS_MANAGEMENT'],
-                                    callback_data=f"users_bot_orders_list_management:None"))
+                                    callback_data=f"users_bot_orders_list_management:None"),)
+    markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SUB_STATUS'], callback_data=f"users_bot_sub_status:None"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SEND_MESSAGE_TO_USERS'],
                                     callback_data=f"users_bot_send_msg_users:None"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_OWNER_INFO'], callback_data=f"users_bot_owner_info:None"))
@@ -313,11 +313,6 @@ def users_bot_management_settings_markup(settings):
                                     callback_data=f"users_bot_settings_hyperlink:{settings['visible_hiddify_hyperlink']}"))
     markup.add(InlineKeyboardButton(f"{KEY_MARKUP['USERS_BOT_SETTINGS_SHOW_THREE_RAND']} | {status_three_rand}",
                                     callback_data=f"users_bot_settings_three_rand_price:{settings['three_random_num_price']}"))
-    markup.add(InlineKeyboardButton(f"{KEY_MARKUP['USERS_BOT_SETTINGS_PANEL_AUTO_BACKUP']} | {status_panel_auto_backup}",
-                             callback_data=f"users_bot_settings_panel_auto_backup:{settings['panel_auto_backup']}"),
-               InlineKeyboardButton(f"{KEY_MARKUP['USERS_BOT_SETTINGS_BOT_AUTO_BACKUP']} | {status_bot_auto_backup}",
-                                    callback_data=f"users_bot_settings_bot_auto_backup:{settings['bot_auto_backup']}")
-               )
     
     markup.add(InlineKeyboardButton(f"{KEY_MARKUP['USERS_BOT_SETTINGS_BUY_SUBSCRIPTION_STATUS']} | {status_buy_sub}",
                                     callback_data=f"users_bot_settings_buy_sub_status:{settings['buy_subscription_status']}"),
@@ -328,6 +323,11 @@ def users_bot_management_settings_markup(settings):
                                     callback_data=f"users_bot_settings_force_join:{settings['force_join_channel']}"),
                InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_CHANNEL_ID'],
                                     callback_data=f"users_bot_settings_channel_id:{settings['channel_id']}"))
+    markup.add(InlineKeyboardButton(f"{KEY_MARKUP['USERS_BOT_SETTINGS_PANEL_AUTO_BACKUP']} | {status_panel_auto_backup}",
+                             callback_data=f"users_bot_settings_panel_auto_backup:{settings['panel_auto_backup']}"),)
+            #    InlineKeyboardButton(f"{KEY_MARKUP['USERS_BOT_SETTINGS_BOT_AUTO_BACKUP']} | {status_bot_auto_backup}",
+            #                         callback_data=f"users_bot_settings_bot_auto_backup:{settings['bot_auto_backup']}")
+            #    )
 
     markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_SET_WELCOME_MSG'],
                                     callback_data=f"users_bot_settings_set_welcome_msg:None"),

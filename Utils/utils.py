@@ -17,7 +17,7 @@ import AdminBot.templates
 from Utils import api
 from version import __version__
 import zipfile
-
+import shutil
 # Global variables
 # Make Session for requests
 session = requests.session()
@@ -180,7 +180,6 @@ def sub_links(uuid, url= None):
                 if users_list:
                     url = server['url']
                     break
-    print(url)
     BASE_URL = urlparse(url).scheme + "://" + urlparse(url).netloc
     logging.info(f"Get sub links of user - {uuid}")
     sub = {}
@@ -231,9 +230,10 @@ def sub_parse(sub):
 
 
 # Backup panel
-def backup_panel():
+def backup_panel(url):
     logging.info(f"Backup panel")
-    dir_panel = urlparse(PANEL_URL).path.split('/')
+    BASE_URL = urlparse(url,).scheme + "://" + urlparse(url,).netloc
+    dir_panel = urlparse(url).path.split('/')
     backup_url = f"{BASE_URL}/{dir_panel[1]}/{dir_panel[2]}/admin/backup/backupfile/"
 
     backup_req = get_request(backup_url)
@@ -243,7 +243,7 @@ def backup_panel():
     now = datetime.now()
     dt_string = now.strftime("%d-%m-%Y_%H-%M-%S")
 
-    file_name = f"Backup_{dt_string}.json"
+    file_name = f"Backup_{urlparse(url,).netloc}_{dt_string}.json"
 
     file_name = os.path.join(BACKUP_LOC, file_name)
     if not os.path.exists(BACKUP_LOC):
@@ -252,6 +252,37 @@ def backup_panel():
         f.write(backup_req.text)
     return file_name
 
+# zip an array of files
+def zip_files(files, zip_file_name,path=None):
+    if path:
+        zip_file_name = os.path.join(path, zip_file_name)
+    with zipfile.ZipFile(zip_file_name, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+        for file in files:
+            # Get the base name of the file (i.e. the file name without the parent folders)
+            base_name = os.path.basename(file)
+            # Write the file to the zip archive with the base name as the arcname
+            zip_file.write(file, arcname=base_name)
+    return zip_file_name
+
+# full backup
+def full_backup():
+    files = []
+    servers = USERS_DB.select_servers()
+    for server in servers:
+        file_name = backup_panel(server['url'])
+        if file_name:
+            files.append(file_name)
+    backup_bot = backup_json_bot()
+    if backup_bot:
+        files.append(backup_bot)
+    if files:
+        now = datetime.now()
+        dt_string = now.strftime("%d-%m-%Y_%H-%M-%S")
+        zip_title = f"Backup_{dt_string}.zip"
+        zip_file_name = zip_files(files, zip_title,path=BACKUP_LOC)
+        if zip_file_name:
+            return zip_file_name
+    return False
 
 # Extract UUID from config
 def extract_uuid_from_config(config):
@@ -527,12 +558,56 @@ def backup_json_bot():
 
 
 def restore_json_bot(file):
-    extract_path = os.path.join(os.getcwd(), "Backup", "Bot", "tmp", os.path.basename(file).replace(".zip", ""))
+    extract_path = os.path.join(BOT_BACKUP_LOC, "tmp", os.path.basename(file).replace(".zip", ""))
     if not os.path.exists(file):
         return False
-    with zipfile.ZipFile(file, 'r') as zip:
-        zip.extractall(extract_path)
-    bk_json_file = os.path.join(extract_path, os.path.basename(file).replace(".zip", ".json"))
+    if not file.endswith(".zip"):
+        return False
+    try:
+        if not os.path.exists(extract_path):
+            os.makedirs(extract_path)
+    except Exception as e:
+        logging.exception(f"Exception: {e}")
+        return False
+    try:
+        with zipfile.ZipFile(file, 'r') as outer_zip:
+            # Iterate through all entries in the outer zip
+            for entry in outer_zip.namelist():
+                # Check if the entry is a zip file
+                if entry.lower().endswith('.zip'):
+                    nested_zip_filename = entry
+                    # Extract the nested zip file
+                    with outer_zip.open(nested_zip_filename) as nested_zip_file:
+                        # Save the nested zip file to a temporary location
+                        nested_zip_path = os.path.join(extract_path, nested_zip_filename)
+                        with open(nested_zip_path, 'wb') as f:
+                            f.write(nested_zip_file.read())
+
+                        # Extract contents of the nested zip file
+                        with zipfile.ZipFile(nested_zip_path, 'r') as nested_zip:
+                            # Check if the JSON file exists
+                            # select json file
+                            json_filename = None
+                            for file in nested_zip.namelist():
+                                if file.endswith('.json'):
+                                    json_filename = file
+                                    break
+                            if json_filename in nested_zip.namelist():
+                                nested_zip.extractall(extract_path)
+                else:
+                            json_filename = None
+                            for file in outer_zip.namelist():
+                                if file.endswith('.json'):
+                                    json_filename = file
+                                    break
+                            if json_filename in outer_zip.namelist():
+                                outer_zip.extractall(extract_path)
+    except Exception as e:
+        logging.exception(f"Exception: {e}")
+        return False
+                
+            
+    bk_json_file = os.path.join(extract_path, os.path.basename(json_filename))
     # with open(bk_json_file, 'r') as f:
     #     bk_json_data = json.load(f)
     status_db = USERS_DB.restore_from_json(bk_json_file)
@@ -545,14 +620,17 @@ def restore_json_bot(file):
                     os.path.join(RECEIPTIONS_LOC, file))
         except Exception as e:
             logging.exception(f"Exception: {e}")
-    # remove tmp folder
-    os.remove(bk_json_file)
-    # remove RECEIPTIONS all files
-    for file in os.listdir(os.path.join(extract_path, os.path.basename(RECEIPTIONS_LOC))):
-        os.remove(os.path.join(extract_path, os.path.basename(RECEIPTIONS_LOC), file))
-    os.rmdir(os.path.join(extract_path, os.path.basename(RECEIPTIONS_LOC)))
-    # romove hidyBot.db
-    os.remove(os.path.join(extract_path, os.path.basename(USERS_DB_LOC)))
-    os.rmdir(extract_path)
-    
+    try:
+        # remove tmp folder
+        os.remove(bk_json_file)
+        # remove RECEIPTIONS all files
+        for file in os.listdir(os.path.join(extract_path, os.path.basename(RECEIPTIONS_LOC))):
+            os.remove(os.path.join(extract_path, os.path.basename(RECEIPTIONS_LOC), file))
+        os.rmdir(os.path.join(extract_path, os.path.basename(RECEIPTIONS_LOC)))
+        # romove hidyBot.db
+        os.remove(os.path.join(extract_path, os.path.basename(USERS_DB_LOC)))
+        shutil.rmtree(extract_path)
+    except Exception as e:
+        logging.exception(f"Exception: {e}")
+        return False
     return True
