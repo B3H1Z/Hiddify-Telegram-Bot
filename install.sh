@@ -131,7 +131,7 @@ echo -e "${GREEN}Step 4: Running config.py to generate config.json...${RESET}"
 python3 config.py || display_error_and_exit "Failed to run config.py."
 
 echo -e "${GREEN}Step 5: Running the bot in the background...${RESET}"
-nohup python3 hiddifyTelegramBot.py >>/opt/Hiddify-Telegram-Bot/bot.log 2>&1 &
+nohup python3 hiddifyTelegramBot.py >>$install_dir/bot.log 2>&1 &
 
 echo -e "${GREEN}Step 6: Adding cron jobs...${RESET}"
 
