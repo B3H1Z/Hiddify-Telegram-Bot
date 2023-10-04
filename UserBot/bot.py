@@ -12,7 +12,7 @@ from UserBot.content import *
 import Utils.utils as utils
 from Shared.common import admin_bot
 from Database.dbManager import USERS_DB
-from Utils.api import api
+from Utils import api
 
 # *********************************** Configuration Bot ***********************************
 bot = telebot.TeleBot(CLIENT_TOKEN, parse_mode="HTML")
@@ -93,7 +93,6 @@ def is_user_in_channel(user_id):
             return False
     return True
 
-
 # Next Step Buy From Wallet - Confirm
 def buy_from_wallet_confirm(message: Message, plan):
     if not plan:
@@ -104,12 +103,14 @@ def buy_from_wallet_confirm(message: Message, plan):
     wallet = USERS_DB.find_wallet(telegram_id=message.chat.id)
     if not wallet:
         # Wallet not created
-        bot.send_message(message.chat.id, MESSAGES['LACK_OF_WALLET_BALANCE'])
+        bot.send_message(message.chat.id, MESSAGES['LACK_OF_WALLET_BALANCE'],
+                         reply_markup=main_menu_keyboard_markup())
 
     if wallet:
         wallet = wallet[0]
         if plan['price'] > wallet['balance']:
-            bot.send_message(message.chat.id, MESSAGES['LACK_OF_WALLET_BALANCE'])
+            bot.send_message(message.chat.id, MESSAGES['LACK_OF_WALLET_BALANCE'],
+                             reply_markup=main_menu_keyboard_markup())
             return
         else:
             bot.send_message(message.chat.id, MESSAGES['REQUEST_SEND_NAME'], reply_markup=cancel_markup())
@@ -139,7 +140,8 @@ def renewal_from_wallet_confirm(message: Message):
     wallet = USERS_DB.find_wallet(telegram_id=message.chat.id)
     if not wallet:
         # Wallet not created
-        bot.send_message(message.chat.id, MESSAGES['LACK_OF_WALLET_BALANCE'])
+        bot.send_message(message.chat.id, MESSAGES['LACK_OF_WALLET_BALANCE'],
+                             reply_markup=main_menu_keyboard_markup())
         return
 
     wallet = wallet[0]
@@ -155,7 +157,15 @@ def renewal_from_wallet_confirm(message: Message):
         del renew_subscription_dict[message.chat.id]
         return
 
-    user = api.find(uuid=uuid)
+    server_id = plan_info['server_id']
+    server = USERS_DB.find_server(id=server_id)
+    if not server:
+        bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                         reply_markup=main_menu_keyboard_markup())
+        return
+    server = server[0]
+    URL = server['url'] + API_PATH
+    user = api.find(URL, uuid=uuid)
     if not user:
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
@@ -167,7 +177,7 @@ def renewal_from_wallet_confirm(message: Message):
                          reply_markup=main_menu_keyboard_markup())
         return
 
-    user_info_process = utils.dict_process(user_info)
+    user_info_process = utils.dict_process(URL, user_info)
     user_info = user_info[0]
 
     if not user_info_process:
@@ -208,20 +218,19 @@ def renewal_from_wallet_confirm(message: Message):
             current_usage_GB = user_info['current_usage_GB']
             
     last_reset_time = datetime.datetime.now().strftime("%Y-%m-%d")        
-    api.update(uuid=uuid, usage_limit_GB=new_usage_limit, start_date=last_reset_time, package_days=new_package_days, current_usage_GB=current_usage_GB)
-
+    api.update(URL, uuid=uuid, usage_limit_GB=new_usage_limit, start_date=last_reset_time, package_days=new_package_days, current_usage_GB=current_usage_GB)
 
     # Add New Order
     order_id = random.randint(1000000, 9999999)
     created_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    status = USERS_DB.add_order(order_id, message.chat.id, user_info_process['name'], plan_id, created_at)
+    status = USERS_DB.add_order(order_id, message.chat.id,user_info_process['name'], plan_id, created_at)
     if not status:
         bot.send_message(message.chat.id,
                          f"{MESSAGES['UNKNOWN_ERROR']}\n{MESSAGES['ORDER_ID']} {order_id}",
                          reply_markup=main_menu_keyboard_markup())
         return
     # edit_status = ADMIN_DB.edit_user(uuid=uuid, usage_limit_GB=new_usage_limit, package_days=new_package_days)
-    edit_status = api.update(uuid=uuid, usage_limit_GB=new_usage_limit, package_days=new_package_days)
+    edit_status = api.update(URL, uuid=uuid, usage_limit_GB=new_usage_limit, package_days=new_package_days)
     if not edit_status:
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
@@ -229,12 +238,15 @@ def renewal_from_wallet_confirm(message: Message):
 
     bot.send_message(message.chat.id, MESSAGES['SUCCESSFUL_RENEWAL'], reply_markup=main_menu_keyboard_markup())
     update_info_subscription(message, uuid)
-    link = f"{BASE_URL}/{urlparse(PANEL_URL).path.split('/')[1]}/{uuid}/"
+    BASE_URL = urlparse(server['url']).scheme + "://" + urlparse(server['url']).netloc
+    link = f"{BASE_URL}/{urlparse(server['url']).path.split('/')[1]}/{uuid}/"
     user_name = f"<a href='{link}'> {user_info_process['name']} </a>"
     sub = utils.find_order_subscription_by_uuid(uuid)
     for ADMIN in ADMINS_ID:
         admin_bot.send_message(ADMIN,
-                               f"{MESSAGES['ADMIN_NOTIFY_NEW_RENEWAL']} {user_name} {MESSAGES['ADMIN_NOTIFY_NEW_RENEWAL_2']}\n{MESSAGES['INFO_ID']} <code>{sub['id']}</code>")
+                               f"""{MESSAGES['ADMIN_NOTIFY_NEW_RENEWAL']} {user_name} {MESSAGES['ADMIN_NOTIFY_NEW_RENEWAL_2']}
+{MESSAGES['SERVER']}<a href='{server['url']}/admin'> {server['title']} </a>
+{MESSAGES['INFO_ID']} <code>{sub['id']}</code>""")
 
 
 # Next Step Buy Plan - Send Screenshot
@@ -266,9 +278,7 @@ def next_step_send_screenshot(message, charge_wallet):
     payment_method = "Card"
 
     status = USERS_DB.add_payment(charge_wallet['id'], message.chat.id,
-                                  charge_wallet['amount'], payment_method, file_name,
-                                  message.from_user.full_name,
-                                  created_at)
+                                  charge_wallet['amount'], payment_method, file_name, created_at)
     if status:
         payment = USERS_DB.find_payment(id=charge_wallet['id'])
         if not payment:
@@ -276,14 +286,26 @@ def next_step_send_screenshot(message, charge_wallet):
                              reply_markup=main_menu_keyboard_markup())
             return
         payment = payment[0]
+        user_data = USERS_DB.find_user(telegram_id=message.chat.id)
+        if not user_data:
+            bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                             reply_markup=main_menu_keyboard_markup())
+            return
+        user_data = user_data[0]
         for ADMIN in ADMINS_ID:
             admin_bot.send_photo(ADMIN, open(path_recp, 'rb'),
-                                 caption=payment_received_template(payment),
+                                 caption=payment_received_template(payment,user_data),
                                  reply_markup=confirm_payment_by_admin(charge_wallet['id']))
         bot.send_message(message.chat.id, MESSAGES['WAIT_FOR_ADMIN_CONFIRMATION'],
                          reply_markup=main_menu_keyboard_markup())
     else:
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                         reply_markup=main_menu_keyboard_markup())
+        
+# Next Step Payment - Send Answer
+def next_step_answer_to_admin(message, admin_id):
+    admin_bot.send_message(int(admin_id), f"{message.text}\n{MESSAGES['INFO_USER_NAME']} {message.from_user.full_name}")
+    bot.send_message(message.chat.id, MESSAGES['MESSAGE_SENDED'],
                          reply_markup=main_menu_keyboard_markup())
 
 
@@ -306,26 +328,33 @@ def next_step_send_name_for_buy_from_wallet(message: Message, plan):
     paid_amount = plan['price']
 
     order_id = random.randint(1000000, 9999999)
+    server_id = plan['server_id']
+    server = USERS_DB.find_server(id=server_id)
+    if not server:
+        bot.send_message(message.chat.id, f"{MESSAGES['UNKNOWN_ERROR']}:Server Not Found",
+                         reply_markup=main_menu_keyboard_markup())
+        return
+    server = server[0]
+    URL = server['url'] + API_PATH
 
     # value = ADMIN_DB.add_default_user(name, plan['days'], plan['size_gb'],)
-    value = api.insert(name=name, usage_limit_GB=plan['size_gb'], package_days=plan['days'])
+    sub_id = random.randint(1000000, 9999999)
+    value = api.insert(URL, name=name, usage_limit_GB=plan['size_gb'], package_days=plan['days'],comment=f"HidyBot:{sub_id}")
     if not value:
         bot.send_message(message.chat.id,
-                         f"{MESSAGES['UNKNOWN_ERROR']}\n{MESSAGES['ORDER_ID']} {order_id}",
+                         f"{MESSAGES['UNKNOWN_ERROR']}:Create User Error\n{MESSAGES['ORDER_ID']} {order_id}",
                          reply_markup=main_menu_keyboard_markup())
         return
-    sub_id = random.randint(1000000, 9999999)
-    add_sub_status = USERS_DB.add_order_subscription(sub_id, order_id, value)
+    add_sub_status = USERS_DB.add_order_subscription(sub_id, order_id, value, server_id)
     if not add_sub_status:
         bot.send_message(message.chat.id,
-                         f"{MESSAGES['UNKNOWN_ERROR']}\n{MESSAGES['ORDER_ID']} {order_id}",
+                         f"{MESSAGES['UNKNOWN_ERROR']}:Add Subscription Error\n{MESSAGES['ORDER_ID']} {order_id}",
                          reply_markup=main_menu_keyboard_markup())
         return
-    status = USERS_DB.add_order(order_id, message.chat.id, name, plan['id'], created_at)
-
+    status = USERS_DB.add_order(order_id, message.chat.id,name, plan['id'], created_at)
     if not status:
         bot.send_message(message.chat.id,
-                         f"{MESSAGES['UNKNOWN_ERROR']}\n{MESSAGES['ORDER_ID']} {order_id}",
+                         f"{MESSAGES['UNKNOWN_ERROR']}:Add Order Error\n{MESSAGES['ORDER_ID']} {order_id}",
                          reply_markup=main_menu_keyboard_markup())
         return
     wallet = USERS_DB.find_wallet(telegram_id=message.chat.id)
@@ -335,22 +364,34 @@ def next_step_send_name_for_buy_from_wallet(message: Message, plan):
         user_info = USERS_DB.edit_wallet(message.chat.id, balance=wallet_balance)
         if not user_info:
             bot.send_message(message.chat.id,
-                             f"{MESSAGES['UNKNOWN_ERROR']}\n{MESSAGES['ORDER_ID']} {order_id}",
+                             f"{MESSAGES['UNKNOWN_ERROR']}:Edit Wallet Balance Error\n{MESSAGES['ORDER_ID']} {order_id}",
                              reply_markup=main_menu_keyboard_markup())
             return
     bot.send_message(message.chat.id,
                      f"{MESSAGES['PAYMENT_CONFIRMED']}\n{MESSAGES['ORDER_ID']} {order_id}",
                      reply_markup=main_menu_keyboard_markup())
-    link = f"{BASE_URL}/{urlparse(PANEL_URL).path.split('/')[1]}/{value}/"
+    
+    user_info = api.find(URL, value)
+    user_info = utils.users_to_dict([user_info])
+    user_info = utils.dict_process(URL, user_info)
+    user_info = user_info[0]
+    api_user_data = user_info_template(sub_id, server, user_info, MESSAGES['INFO_USER'])
+    bot.send_message(message.chat.id, api_user_data,
+                                 reply_markup=user_info_markup(user_info['uuid']))
+    
+    BASE_URL = urlparse(server['url']).scheme + "://" + urlparse(server['url']).netloc
+    link = f"{BASE_URL}/{urlparse(server['url']).path.split('/')[1]}/{value}/"
     user_name = f"<a href='{link}'> {name} </a>"
     for ADMIN in ADMINS_ID:
         admin_bot.send_message(ADMIN,
-                               f"{MESSAGES['ADMIN_NOTIFY_NEW_SUB']} {user_name} {MESSAGES['ADMIN_NOTIFY_CONFIRM']}\n{MESSAGES['INFO_ID']} <code>{sub_id}</code>")
+                               f"""{MESSAGES['ADMIN_NOTIFY_NEW_SUB']} {user_name} {MESSAGES['ADMIN_NOTIFY_CONFIRM']}
+{MESSAGES['SERVER']}<a href='{server['url']}/admin'> {server['title']} </a>
+{MESSAGES['INFO_ID']} <code>{sub_id}</code>""")
 
 
 # ----------------------------------- Get Free Test Area -----------------------------------
 # Next Step Get Free Test - Send Name
-def next_step_send_name_for_get_free_test(message: Message):
+def next_step_send_name_for_get_free_test(message: Message, server_id):
     if is_it_cancel(message):
         return
     name = message.text
@@ -360,17 +401,23 @@ def next_step_send_name_for_get_free_test(message: Message):
         return
 
     settings = utils.all_configs_settings()
-    test_user_comment = "Free Test User"
-
+    test_user_comment = "HidyBot:FreeTest"
+    server = USERS_DB.find_server(id=server_id)
+    if not server:
+        bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                         reply_markup=main_menu_keyboard_markup())
+        return
+    server = server[0]
+    URL = server['url'] + API_PATH
     # uuid = ADMIN_DB.add_default_user(name, test_user_days, test_user_size_gb, int(PANEL_ADMIN_ID), test_user_comment)
-    uuid = api.insert(name=name, usage_limit_GB=settings['test_sub_size_gb'], package_days=settings['test_sub_days'],
+    uuid = api.insert(URL, name=name, usage_limit_GB=settings['test_sub_size_gb'], package_days=settings['test_sub_days'],
                       comment=test_user_comment)
     if not uuid:
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
         return
     non_order_id = random.randint(1000000, 9999999)
-    non_order_status = USERS_DB.add_non_order_subscription(non_order_id, message.chat.id, uuid)
+    non_order_status = USERS_DB.add_non_order_subscription(non_order_id, message.chat.id, uuid, server_id)
     if not non_order_status:
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
@@ -383,11 +430,21 @@ def next_step_send_name_for_get_free_test(message: Message):
         return
     bot.send_message(message.chat.id, MESSAGES['GET_FREE_CONFIRMED'],
                      reply_markup=main_menu_keyboard_markup())
-    link = f"{BASE_URL}/{urlparse(PANEL_URL).path.split('/')[1]}/{uuid}/"
+    user_info = api.find(URL, uuid)
+    user_info = utils.users_to_dict([user_info])
+    user_info = utils.dict_process(URL, user_info)
+    user_info = user_info[0]
+    api_user_data = user_info_template(non_order_id, server, user_info, MESSAGES['INFO_USER'])
+    bot.send_message(message.chat.id, api_user_data,
+                                 reply_markup=user_info_markup(user_info['uuid']))
+    BASE_URL = urlparse(server['url']).scheme + "://" + urlparse(server['url']).netloc
+    link = f"{BASE_URL}/{urlparse(server['url']).path.split('/')[1]}/{uuid}/"
     user_name = f"<a href='{link}'> {name} </a>"
     for ADMIN in ADMINS_ID:
         admin_bot.send_message(ADMIN,
-                               f"{MESSAGES['ADMIN_NOTIFY_NEW_FREE_TEST']} {user_name} {MESSAGES['ADMIN_NOTIFY_CONFIRM']}\n{MESSAGES['INFO_ID']} <code>{non_order_id}</code>")
+                               f"""{MESSAGES['ADMIN_NOTIFY_NEW_FREE_TEST']} {user_name} {MESSAGES['ADMIN_NOTIFY_CONFIRM']}
+{MESSAGES['SERVER']}<a href='{server['url']}/admin'> {server['title']} </a>
+{MESSAGES['INFO_ID']} <code>{non_order_id}</code>""")
 
 
 # ----------------------------------- To QR Area -----------------------------------
@@ -428,7 +485,16 @@ def next_step_link_subscription(message: Message):
                              reply_markup=main_menu_keyboard_markup())
             return
         non_sub_id = random.randint(10000000, 99999999)
-        status = USERS_DB.add_non_order_subscription(non_sub_id, message.chat.id, uuid)
+        servers = USERS_DB.select_servers()
+        if not servers:
+            bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'], reply_markup=main_menu_keyboard_markup())
+            return
+        for server in servers:
+            users_list = api.find(server['url'] + API_PATH, uuid)
+            if users_list:
+                server_id = server['id']
+                break
+        status = USERS_DB.add_non_order_subscription(non_sub_id, message.chat.id, uuid, server_id)
         if status:
             bot.send_message(message.chat.id, MESSAGES['SUBSCRIPTION_CONFIRMED'],
                              reply_markup=main_menu_keyboard_markup())
@@ -491,16 +557,23 @@ def update_info_subscription(message: Message, uuid,markup=None):
             mrkup = user_info_markup(sub['uuid'])
     else:
         mrkup = markup
-
-    user = api.find(uuid=sub['uuid'])
+    server_id = sub['server_id']
+    server = USERS_DB.find_server(id=server_id)
+    if not server:
+        bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                         reply_markup=main_menu_keyboard_markup())
+        return
+    server = server[0]
+    URL = server['url'] + API_PATH
+    user = api.find(URL, uuid=sub['uuid'])
     if not user:
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
         return
-    user = utils.dict_process(utils.users_to_dict([user]))[0]
+    user = utils.dict_process(URL, utils.users_to_dict([user]))[0]
     try:
         bot.edit_message_text(chat_id=message.chat.id, message_id=message.message_id,
-                              text=user_info_template(sub['id'], user, MESSAGES['INFO_USER']),
+                              text=user_info_template(sub['id'], server, user, MESSAGES['INFO_USER']),
                               reply_markup=mrkup)
     except:
         pass
@@ -510,6 +583,7 @@ def update_info_subscription(message: Message, uuid,markup=None):
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call: CallbackQuery):
     bot.answer_callback_query(call.id, MESSAGES['WAIT'])
+    bot.clear_step_handler(call.message)
     # Split Callback Data to Key(Command) and UUID
     data = call.data.split(':')
     key = data[0]
@@ -525,11 +599,15 @@ def callback_query(call: CallbackQuery):
             return
 
         if USERS_DB.find_user(telegram_id=user_id):
+            status = USERS_DB.edit_user(telegram_id=user_id, full_name=call.message.from_user.full_name)
             bot.send_message(user_id, MESSAGES['WELCOME'], reply_markup=main_menu_keyboard_markup())
             return
 
         created_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        status = USERS_DB.add_user(telegram_id=user_id, created_at=created_at)
+        # user = call.message.from_user
+        # full_name = call.message.from_user.full_name
+        # full_name = call.message.chat.full_name
+        status = USERS_DB.add_user(telegram_id=user_id, full_name=call.message.from_user.full_name, created_at=created_at)
 
         if not status:
             bot.send_message(user_id, MESSAGES['UNKNOWN_ERROR'], reply_markup=main_menu_keyboard_markup())
@@ -553,6 +631,29 @@ def callback_query(call: CallbackQuery):
                          reply_markup=main_menu_keyboard_markup())
 
     # ----------------------------------- Buy Plan Area -----------------------------------
+    elif key == 'server_selected':
+        plans = USERS_DB.find_plan(server_id=int(value))
+        if not plans:
+            bot.send_message(call.message.chat.id, MESSAGES['PLANS_NOT_FOUND'], reply_markup=main_menu_keyboard_markup())
+            return
+        plan_markup = plans_list_markup(plans)
+        if not plan_markup:
+            bot.send_message(call.message.chat.id, MESSAGES['PLANS_NOT_FOUND'], reply_markup=main_menu_keyboard_markup())
+            return
+        bot.edit_message_text(MESSAGES['PLANS_LIST'], call.message.chat.id, call.message.message_id,
+                                    reply_markup=plan_markup)
+        
+    elif key == 'free_test_server_selected':
+        users = USERS_DB.find_user(telegram_id=call.message.chat.id)
+        if users:
+            user = users[0]
+            if user['test_subscription']:
+                bot.send_message(call.message.chat.id, MESSAGES['ALREADY_RECEIVED_FREE'],
+                                reply_markup=main_menu_keyboard_markup())
+                return
+            bot.delete_message(call.message.chat.id, call.message.message_id)
+            bot.send_message(call.message.chat.id, MESSAGES['REQUEST_SEND_NAME'], reply_markup=cancel_markup())
+            bot.register_next_step_handler(call.message, next_step_send_name_for_get_free_test, value)
     # Send Asked Plan Info
     elif key == 'plan_selected':
         plan = USERS_DB.find_plan(id=value)[0]
@@ -568,6 +669,7 @@ def callback_query(call: CallbackQuery):
     elif key == 'confirm_buy_from_wallet':
         plan = USERS_DB.find_plan(id=value)[0]
         buy_from_wallet_confirm(call.message, plan)
+        bot.delete_message(call.message.chat.id, call.message.message_id)
     elif key == 'confirm_renewal_from_wallet':
         plan = USERS_DB.find_plan(id=value)[0]
         renewal_from_wallet_confirm(call.message)
@@ -576,11 +678,17 @@ def callback_query(call: CallbackQuery):
         bot.delete_message(call.message.chat.id, call.message.message_id)
         bot.send_message(call.message.chat.id, MESSAGES['REQUEST_SEND_SCREENSHOT'])
         bot.register_next_step_handler(call.message, next_step_send_screenshot, charge_wallet)
+    #Answer to Admin After send Screenshot
+    elif key == 'answer_to_admin':
+        #bot.delete_message(call.message.chat.id,call.message.message_id)
+        bot.send_message(call.message.chat.id, MESSAGES['ANSWER_TO_ADMIN'],
+                        reply_markup=cancel_markup())
+        bot.register_next_step_handler(call.message, next_step_answer_to_admin, value)
 
     # ----------------------------------- User Subscriptions Info Area -----------------------------------
     # Unlink non-order subscription
     elif key == 'unlink_subscription':
-        delete_status = USERS_DB.delete_non_order_subscriptions(uuid=value)
+        delete_status = USERS_DB.delete_non_order_subscription(uuid=value)
         if delete_status:
             bot.delete_message(call.message.chat.id, call.message.message_id)
             bot.send_message(call.message.chat.id, MESSAGES['SUBSCRIPTION_UNLINKED'],
@@ -606,20 +714,28 @@ def callback_query(call: CallbackQuery):
             bot.send_message(call.message.chat.id, MESSAGES['RENEWAL_SUBSCRIPTION_CLOSED'],
                              reply_markup=main_menu_keyboard_markup())
             return
-        
-        user = api.find(uuid=value)
+        servers = USERS_DB.select_servers()
+        server_id = 0
+        user= []
+        URL = "url"
+        if servers:
+            for server in servers:
+                user = api.find(server['url'] + API_PATH, value)
+                if user:
+                    server_id = server['id']
+                    URL = server['url'] + API_PATH
+                    break
         if not user:
             bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                              reply_markup=main_menu_keyboard_markup())
             return
-
         user_info = utils.users_to_dict([user])
         if not user_info:
             bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                              reply_markup=main_menu_keyboard_markup())
             return
 
-        user_info_process = utils.dict_process(user_info)
+        user_info_process = utils.dict_process(URL, user_info)
         if not user_info_process:
             bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                              reply_markup=main_menu_keyboard_markup())
@@ -636,7 +752,7 @@ def callback_query(call: CallbackQuery):
             'uuid': None,
             'plan_id': None,
         }
-        plans = USERS_DB.select_plans()
+        plans = USERS_DB.find_plan(server_id=server_id)
         if not plans:
             bot.send_message(call.message.chat.id, MESSAGES['PLANS_NOT_FOUND'],
                              reply_markup=main_menu_keyboard_markup())
@@ -905,13 +1021,17 @@ def start_bot(message: Message):
     if not join_status:
         return
     settings = utils.all_configs_settings()
+    # if " " in message.text:
+    #     referral_coed = int(message.text.split()[1])
     MESSAGES['WELCOME'] = MESSAGES['WELCOME'] if not settings['msg_user_start'] else settings['msg_user_start']
     if USERS_DB.find_user(telegram_id=message.chat.id):
+        edit_name= USERS_DB.edit_user(telegram_id=message.chat.id,full_name=message.from_user.full_name)
+        edit_username = USERS_DB.edit_user(telegram_id=message.chat.id,username=message.from_user.username)
         bot.send_message(message.chat.id, MESSAGES['WELCOME'], reply_markup=main_menu_keyboard_markup())
         return
     created_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    status = USERS_DB.add_user(telegram_id=message.chat.id,username=message.from_user.username, full_name=message.from_user.full_name, created_at=created_at)
 
-    status = USERS_DB.add_user(telegram_id=message.chat.id, created_at=created_at)
     if not status:
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
@@ -944,13 +1064,27 @@ def subscription_status(message: Message):
     if non_order_subs:
         for non_order_sub in non_order_subs:
             if non_order_sub:
-                api_user_data = user_info_template(non_order_sub['sub_id'], non_order_sub, MESSAGES['INFO_USER'])
+                server_id = non_order_sub['server_id']
+                server = USERS_DB.find_server(id=server_id)
+                if not server:
+                    bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                                    reply_markup=main_menu_keyboard_markup())
+                    return
+                server = server[0]
+                api_user_data = user_info_template(non_order_sub['sub_id'], server, non_order_sub, MESSAGES['INFO_USER'])
                 bot.send_message(message.chat.id, api_user_data,
                                  reply_markup=user_info_non_sub_markup(non_order_sub['uuid']))
     if order_subs:
         for order_sub in order_subs:
             if order_sub:
-                api_user_data = user_info_template(order_sub['sub_id'], order_sub, MESSAGES['INFO_USER'])
+                server_id = order_sub['server_id']
+                server = USERS_DB.find_server(id=server_id)
+                if not server:
+                    bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                                    reply_markup=main_menu_keyboard_markup())
+                    return
+                server = server[0]
+                api_user_data = user_info_template(order_sub['sub_id'], server, order_sub, MESSAGES['INFO_USER'])
                 bot.send_message(message.chat.id, api_user_data,
                                  reply_markup=user_info_markup(order_sub['uuid']))
 
@@ -965,15 +1099,25 @@ def buy_subscription(message: Message):
     if not settings['buy_subscription_status']:
         bot.send_message(message.chat.id, MESSAGES['BUY_SUBSCRIPTION_CLOSED'], reply_markup=main_menu_keyboard_markup())
         return
-    plans = USERS_DB.select_plans()
-    if not plans:
-        bot.send_message(message.chat.id, MESSAGES['PLANS_NOT_FOUND'], reply_markup=main_menu_keyboard_markup())
+    #msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=main_menu_keyboard_markup())
+    servers = USERS_DB.select_servers()
+    server_list = []
+    if not servers:
+        bot.send_message(message.chat.id, MESSAGES['SERVERS_NOT_FOUND'], reply_markup=main_menu_keyboard_markup())
         return
-    plan_markup = plans_list_markup(plans)
-    if not plan_markup:
-        bot.send_message(message.chat.id, MESSAGES['PLANS_NOT_FOUND'], reply_markup=main_menu_keyboard_markup())
-        return
-    bot.send_message(message.chat.id, MESSAGES['PLANS_LIST'], reply_markup=plan_markup)
+    for server in servers:
+        user_index = 0
+        #if server['status']:
+        users_list = api.select(server['url'] + API_PATH)
+        if users_list:
+            user_index = len(users_list)
+        if server['user_limit'] > user_index:
+            server_list.append(server)
+    # bad request telbot api
+    # bot.edit_message_text(chat_id=message.chat.id, message_id=msg_wait.message_id,
+    #                                   text= MESSAGES['SERVERS_LIST'], reply_markup=servers_list_markup(server_list))
+    #bot.delete_message(message.chat.id, msg_wait.message_id)
+    bot.send_message(message.chat.id, MESSAGES['SERVERS_LIST'], reply_markup=servers_list_markup(server_list))
 
 
 # Config To QR Message Handler
@@ -1059,8 +1203,28 @@ def free_test(message: Message):
                              reply_markup=main_menu_keyboard_markup())
             return
         else:
-            bot.send_message(message.chat.id, MESSAGES['REQUEST_SEND_NAME'], reply_markup=cancel_markup())
-            bot.register_next_step_handler(message, next_step_send_name_for_get_free_test)
+            # bot.send_message(message.chat.id, MESSAGES['REQUEST_SEND_NAME'], reply_markup=cancel_markup())
+            # bot.register_next_step_handler(message, next_step_send_name_for_get_free_test)
+            msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=main_menu_keyboard_markup())
+            servers = USERS_DB.select_servers()
+            server_list = []
+            if not servers:
+                bot.send_message(message.chat.id, MESSAGES['SERVERS_NOT_FOUND'], reply_markup=main_menu_keyboard_markup())
+                return
+            for server in servers:
+                user_index = 0
+                #if server['status']:
+                users_list = api.select(server['url'] + API_PATH)
+                if users_list:
+                    user_index = len(users_list)
+                if server['user_limit'] > user_index:
+                    server_list.append(server)
+            # bad request telbot api
+            # bot.edit_message_text(chat_id=message.chat.id, message_id=msg_wait.message_id,
+            #                                   text= MESSAGES['SERVERS_LIST'], reply_markup=servers_list_markup(server_list))
+            bot.delete_message(message.chat.id, msg_wait.message_id)
+            bot.send_message(message.chat.id, MESSAGES['SERVERS_LIST'], reply_markup=servers_list_markup(server_list, True))
+
 
 
 # Cancel Message Handler

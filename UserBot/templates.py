@@ -4,7 +4,7 @@ from UserBot.content import MESSAGES
 from Utils.utils import rial_to_toman, toman_to_rial,all_configs_settings
 from Database.dbManager import USERS_DB
 # User Subscription Info Template
-def user_info_template(sub_id, usr, header=""):
+def user_info_template(sub_id, server, usr, header=""):
     settings = USERS_DB.find_bool_config(key='visible_hiddify_hyperlink')
     if settings:
         settings = settings[0]
@@ -22,6 +22,7 @@ def user_info_template(sub_id, usr, header=""):
 {header}
 
 {MESSAGES['USER_NAME']} {user_name}
+{MESSAGES['SERVER']} {server['title']}
 {MESSAGES['INFO_USAGE']} {usr['usage']['current_usage_GB']} {MESSAGES['OF']} {usr['usage']['usage_limit_GB']} {MESSAGES['GB']}
 {MESSAGES['INFO_REMAINING_DAYS']} {usr['remaining_day']} {MESSAGES['DAY_EXPIRE']}
 {MESSAGES['INFO_ID']} <code>{sub_id}</code>
@@ -79,14 +80,20 @@ Card owner <b>{card_holder_name}</b>
 
 
 # Payment Received Template - Send to Admin
-def payment_received_template(payment, header="", footer=""):
+def payment_received_template(payment,user, header="", footer=""):
+    username = f"@{user['username']}" if user['username'] else MESSAGES['NOT_SET']
+    name = user['full_name'] if user['full_name'] else user['telegram_id']
+
+
     if LANG == 'FA':
         return f"""
 {header}
 
-شماره تراکنش: <code>{payment['id']}</code>
-نام کاربر: <b>{payment['user_name']}</b>
-هزینه پرداخت شده: <b>{rial_to_toman(payment['payment_amount'])}</b> {MESSAGES['TOMAN']}
+شناسه تراکنش: <code>{payment['id']}</code>
+مبلغ تراکنش: <b>{rial_to_toman(payment['payment_amount'])}</b> {MESSAGES['TOMAN']}
+{MESSAGES['INFO_USER_NAME']} <b>{name}</b>
+{MESSAGES['INFO_USER_USERNAME']} {username}
+{MESSAGES['INFO_USER_NUM_ID']} {user['telegram_id']}
 ---------------------
 ⬇️درخواست افزایش موجودی کیف پول⬇️
 
@@ -97,8 +104,10 @@ def payment_received_template(payment, header="", footer=""):
 {header}
 
 Payment number: <b>{payment['id']}</b>
-Registered name: <b>{payment['user_name']}</b>
 Paid amount: <b>{payment['payment_amount']}</b> {MESSAGES['TOMAN']}
+{MESSAGES['INFO_USER_NAME']} <b>{name}</b>
+{MESSAGES['INFO_USER_USERNAME']} {username}
+{MESSAGES['INFO_USER_NUM_ID']} {user['telegram_id']}
 ---------------------
 ⬇️Request to increase wallet balance⬇️
 

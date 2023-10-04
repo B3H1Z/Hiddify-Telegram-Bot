@@ -17,15 +17,23 @@ os.environ['no_proxy'] = '*'
 VERSION = __version__
 
 USERS_DB_LOC = os.path.join(os.getcwd(), "Database", "hidyBot.db")
-LOG_LOC = os.path.join(os.getcwd(), "Logs", "hidyBot.log")
+LOG_DIR = os.path.join(os.getcwd(), "Logs")
+LOG_LOC = os.path.join(LOG_DIR, "hidyBot.log")
 BACKUP_LOC = os.path.join(os.getcwd(), "Backup")
 RECEIPTIONS_LOC = os.path.join(os.getcwd(), "UserBot", "Receiptions")
 BOT_BACKUP_LOC = os.path.join(os.getcwd(), "Backup", "Bot")
 API_PATH = "/api/v1"
 HIDY_BOT_ID = "@HidyBotGroup"
-# if Logs directory not exists, create it
-if not os.path.exists(os.path.join(os.getcwd(), "Logs")):
-    os.mkdir(os.path.join(os.getcwd(), "Logs"))
+
+# if directories not exists, create it
+if not os.path.exists(LOG_DIR):
+    os.mkdir(LOG_DIR)
+if not os.path.exists(BACKUP_LOC):
+    os.mkdir(BACKUP_LOC)
+if not os.path.exists(RECEIPTIONS_LOC):
+    os.mkdir(RECEIPTIONS_LOC)
+
+# set logging  
 logging.basicConfig(handlers=[logging.FileHandler(filename=LOG_LOC,
                                                   encoding='utf-8', mode='w')],
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -107,7 +115,7 @@ def set_config_variables(configs, server_url):
 
 
 def panel_url_validator(url):
-    if not url.startswith("https://" or "http://"):
+    if not (url.startswith("https://") or url.startswith("http://")):
         print(colored("URL must start with http:// or https://", "red"))
         return False
     if url.endswith("/"):
@@ -119,12 +127,14 @@ def panel_url_validator(url):
     print(colored("Checking URL...", "yellow"))
     try:
         request = requests.get(f"{url}/admin/")
-    except requests.exceptions.ConnectionError:
+    except requests.exceptions.ConnectionError as e:
         print(colored("URL is not valid! Error in connection", "red"))
-
+        print(colored(f"Error: {e}", "red"))
         return False
+    
     if request.status_code != 200:
         print(colored("URL is not valid!", "red"))
+        print(colored(f"Error: {request.status_code}", "red"))
         return False
     elif request.status_code == 200:
         print(colored("URL is valid!", "green"))
@@ -209,7 +219,7 @@ def set_by_user():
         if not url:
             continue
         break
-
+    print()
     print(colored("Example: EN (default: FA)\n[It is better that the language of the bot is the same as the panel]",
                   "yellow"))
     while True:
@@ -238,15 +248,16 @@ def set_config_in_db(db, admin_ids, token, url, lang, client_token):
             db.edit_str_config("bot_lang", value=lang)
         # if servers is not exists, create it
         if not db.select_servers():
-            db.add_server(url, default_server=True)
+            db.add_server(url, 2000, title="Main Server", default_server=True)
         else:
             # find default server
             default_server = db.find_server(default_server=True)
             default_server_id = default_server[0]['id']
             if default_server:
-                db.edit_server(default_server_id, url=url, default_server=True)
+                if default_server['url'] != url:
+                    db.edit_server(default_server_id, url=url)
             else:
-                db.add_server(url, default_server=True)
+                db.add_server(url, 2000, title="Main Server", default_server=True)
     except Exception as e:
         logging.error(f"Error while inserting config to database \n Error:{e}")
         raise Exception(f"Error while inserting config to database \nBe in touch with {HIDY_BOT_ID}")

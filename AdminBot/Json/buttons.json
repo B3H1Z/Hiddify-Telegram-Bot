@@ -2,7 +2,24 @@
   "EN": {
     "CONFIRM": "✅Confirm",
     "CANCEL": "❌Cancel",
-    "USERS_LIST": "👤Users Management",
+    "BOT_USERS_MANAGEMENT": "👤Bot Users Management",
+    "USERS_LIST": "👤Bot Users List",
+    "SEARCH_USERS_BOT": "🔍Search Bot Users",
+    "ORDERS_MANAGEMENT": "📗Orders Management",
+    "ORDERS_LIST": "📗Orders List",
+    "SEARCH_ORDERS": "🔍Search Orders",
+    "PAYMENT_MANAGEMENT": "💵Payment Management",
+    "APPROVED_PAYMENTS_LIST": "✅Approved Payment List",
+    "NON_APPROVED_PAYMENTS_LIST": "🚫Non Approved Payment List",
+    "PENDING_PAYMENT_LIST": "⏳Pending Payment List",
+    "CARD_PAYMENT_LIST": "💳Card Payment List",
+    "DIGITAL_PAYMENT_LIST": "💸Digital Payment List",
+    "SEARCH_PAYMENTS": "🔍Search Payment",
+    "USER_SUB_LIST": "📋Subscriptions List",
+    "EDIT_WALLET": "💳Edit Wallet",
+    "PAYMENTS_LIST": "💵Payment List",
+    "GIFT_LIST": "🎁Gift List",
+    "REFERRED_LIST": "🎗Referred List",
     "USERS_SEARCH": "🔍Search User",
     "ADD_USER": "➕Add User",
     "SERVER_BACKUP": "📥Panel Backup",
@@ -30,6 +47,7 @@
     "CONFIGS_SING_BOX": "Sing-box",
     "CONFIGS_FULL_SING_BOX": "Full Sing-box",
     "SEARCH_USER_NAME": "Search by Name",
+    "SEARCH_USER_TELEGRAM_ID": "Search by Telegram ID",
     "SEARCH_USER_UUID": "Search by UUID",
     "SEARCH_USER_CONFIG": "Search by Config",
     "SEARCH_EXPIRED_USERS": "Expired Users List",
@@ -58,7 +76,7 @@
     "USERS_BOT_SETTINGS_NOTIF_REMINDER": "Subscription Reminder",
     "USERS_BOT_SETTINGS_NOTIF_REMINDER_USAGE": "Usage Reminder",
     "USERS_BOT_SETTINGS_NOTIF_REMINDER_DAYS": "Days Reminder",
-    "USERS_BOT_SETTINGS_PANEL_AUTO_BACKUP": "Panel Auto Backup",
+    "USERS_BOT_SETTINGS_PANEL_AUTO_BACKUP": "Auto Backup",
     "USERS_BOT_SETTINGS_BOT_AUTO_BACKUP": "Bot Auto Backup",
     "USERS_BOT_SETTINGS_PANEL_MANUAL": "Manual",
     "USERS_BOT_SETTINGS_PANEL_MANUAL_ANDROID": "Android Manual",
@@ -78,15 +96,46 @@
     "USERS_BOT_SETTINGS_RENEWAL_METHOD_ADVANCED_USAGE": "Maximum Usage for Renewal",
     "ABOUT_BOT": "ℹ️",
     "TO_QR": "ً🖼QR",
-    "SUPPORT_GROUP": "Support Group"
+    "SUPPORT_GROUP": "Support Group",
+    "SERVERS_MANAGEMENT":"🖥Servers Management",
+    "ADD_SERVER": "➕Add Server",
+    "EDIT_SERVER": "Edit Server",
+    "DELETE_SERVER": "➖Delete Server",
+    "SERVER_LIST_OF_USERS": "👤Users List",
+    "SERVER_LIST_OF_PLANS": "Plans List",
+    "SERVER_EDIT_TITLE": "Edit title",
+    "SERVER_EDIT_USER_LIMIT": "Edit User Limit",
+    "SERVER_EDIT_URL": "Edit URL",
+    "CHANGE_STATUS_PAYMENT": "Change Payment Status",
+    "CONFIRM_PAYMENT": "✅Confirm Payment",
+    "NO": "❌No",
+    "ANSWER": "Answer",
+    "SEND_MESSAGE": "Send Message"
   },
   "FA": {
     "CONFIRM": "✅تأیید",
     "CANCEL": "❌لغو",
-    "USERS_LIST": "👤مدیریت کاربران",
+    "BOT_USERS_MANAGEMENT": "👤مدیریت کاربران ربات",
+    "USERS_LIST": "👤لیست کاربران ربات",
+    "SEARCH_USERS_BOT": "🔍جستجوی کاربران ربات",
+    "ORDERS_MANAGEMENT": "📗مدیریت سفارشات",
+    "ORDERS_LIST": "📗لیست سفارشات",
+    "SEARCH_ORDERS": "🔍جستجوی سفارشات",
+    "PAYMENT_MANAGEMENT": "💵مدیریت تراکنشات",
+    "APPROVED_PAYMENTS_LIST": "✅لیست تراکنشات تایید شده",
+    "NON_APPROVED_PAYMENTS_LIST": "🚫لیست تراکنشات رد شده",
+    "PENDING_PAYMENT_LIST": "⏳لیست تراکنشات در انتظار",
+    "CARD_PAYMENT_LIST": "💳لیست تراکنشات کارت به کارت",
+    "DIGITAL_PAYMENT_LIST": "💸لیست تراکنشات دیجیتال",
+    "SEARCH_PAYMENTS": "🔍جستجوی تراکنش",
+    "USER_SUB_LIST": "📋لیست سرویس‌ها",
+    "EDIT_WALLET": "💳ویرایش کیف پول",
+    "PAYMENTS_LIST": "💵لیست تراکنشات",
+    "GIFT_LIST": "🎁لیست هدایا",
+    "REFERRED_LIST": "🎗لیست معرفی شده‌ها",
     "USERS_SEARCH": "🔍جستجوی کاربر",
     "ADD_USER": "➕افزودن کاربر",
-    "SERVER_BACKUP": "📥بکاپ پنل",
+    "SERVER_BACKUP": "📥دریافت بکاپ",
     "SERVER_STATUS": "📈وضعیت سرور",
     "USERS_BOT_MANAGEMENT": "🤖مدیریت ربات کاربران",
     "NEXT_PAGE": "➡️",
@@ -111,6 +160,7 @@
     "CONFIGS_SING_BOX": "Sing-box",
     "CONFIGS_FULL_SING_BOX": "Full Sing-box",
     "SEARCH_USER_NAME": "جستجو با نام",
+    "SEARCH_USER_TELEGRAM_ID": "جستجو با Telegram ID",
     "SEARCH_USER_UUID": "جستجو با UUID",
     "SEARCH_USER_CONFIG": "جستجو با کانفیگ",
     "SEARCH_EXPIRED_USERS": "لیست کاربران منقضی",
@@ -126,8 +176,8 @@
     "USERS_BOT_SEND_MESSAGE_TO_USERS": "📩ارسال پیام همگانی",
     "USERS_BOT_SETTINGS": "⚙️تنظیمات",
     "USERS_BOT_SETTINGS_SHOW_HIDI_LINK": "هایپرلینک هیدیفای",
-    "USERS_BOT_SETTINGS_SHOW_THREE_RAND": "مشخصه تصادفی پرداخت",
-    "USERS_BOT_SETTINGS_MIN_DEPO": "محدودیت حداقل پرداخت",
+    "USERS_BOT_SETTINGS_SHOW_THREE_RAND": "مشخصه تصادفی قیمت",
+    "USERS_BOT_SETTINGS_MIN_DEPO": "محدودیت حداقل تراکنش",
     "USERS_BOT_SETTINGS_PNL_V8_FEATURES": "اشتراک های نسخه 8",
     "USERS_BOT_SETTINGS_CHANNEL_ID": "تنظیم کانال پشتیبانی",
     "USERS_BOT_SETTINGS_CHANNEL_ّFORCE_JOIN": "عضویت اجباری",
@@ -139,7 +189,7 @@
     "USERS_BOT_SETTINGS_NOTIF_REMINDER": "یادآور وضعیت اشتراک",
     "USERS_BOT_SETTINGS_NOTIF_REMINDER_USAGE": "یادآور وضعیت مصرف",
     "USERS_BOT_SETTINGS_NOTIF_REMINDER_DAYS": "یادآور وضعیت زمان",
-    "USERS_BOT_SETTINGS_PANEL_AUTO_BACKUP": "بکاپ خودکار پنل",
+    "USERS_BOT_SETTINGS_PANEL_AUTO_BACKUP": "ارسال خودکار بکاپ",
     "USERS_BOT_SETTINGS_BOT_AUTO_BACKUP": "بکاپ خودکار ربات",
     "USERS_BOT_SETTINGS_PANEL_MANUAL": "متن راهنما",
     "USERS_BOT_SETTINGS_PANEL_MANUAL_ANDROID": "راهنمای اندروید",
@@ -159,6 +209,21 @@
     "USERS_BOT_SETTINGS_RENEWAL_METHOD_ADVANCED_USAGE": "حداکثر مصرف مجاز برای تمدید",
     "ABOUT_BOT": "ℹ️",
     "TO_QR": "ً🖼کیوآر",
-    "SUPPORT_GROUP": "گروه پشتیبانی"
+    "SUPPORT_GROUP": "گروه پشتیبانی",
+    "SERVERS_MANAGEMENT":"🖥 مدیریت سرورها",
+    "ADD_SERVER": "➕افزودن سرور",
+    "EDIT_SERVER": "ویرایش سرور",
+    "DELETE_SERVER": "حذف سرور",
+    "SERVER_LIST_OF_USERS": "مدیریت کاربران",
+    "SERVER_LIST_OF_PLANS": "لیست پلن‌ها",
+    "SERVER_EDIT_TITLE": "ویرایش عنوان",
+    "SERVER_EDIT_USER_LIMIT": "ویرایش محدودیت کاربر",
+    "SERVER_EDIT_URL": "ویرایش لینک",
+    "CHANGE_STATUS_PAYMENT": "تغییر وضعیت تراکنش",
+    "CONFIRM_PAYMENT": "✅تایید تراکنش",
+    "NO": "❌خیر",
+    "ANSWER": "پاسخ",
+    "SEND_MESSAGE": "📤ارسال پیام"
+
   }
 }

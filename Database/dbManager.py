@@ -4,21 +4,28 @@ import logging
 import os
 import sqlite3
 from sqlite3 import Error
+from version import is_version_less
+#from urllib.parse import urlparse
+
+#from Utils import api
+#from config import PANEL_URL, API_PATH, USERS_DB_LOC
+
+
+
 
 class UserDBManager:
     def __init__(self, db_file):
         self.conn = self.create_connection(db_file)
         self.create_user_table()
         #self.set_default_configs()
-    
+
     #close connection
     def __del__(self):
         self.conn.close()
     
     def close(self):
         self.conn.close()
-        
-        
+    
 
     def create_connection(self, db_file):
         """ Create a database connection to a SQLite database """
@@ -35,6 +42,12 @@ class UserDBManager:
             cur.execute("CREATE TABLE IF NOT EXISTS users ("
                         "id INTEGER PRIMARY KEY AUTOINCREMENT,"
                         "telegram_id INTEGER NOT NULL UNIQUE,"
+                        "full_name TEXT NULL,"
+                        "username TEXT NULL,"
+                        # "referral_code INTEGER NOT NULL,"
+                        # "referred_by INTEGER NULL,"
+                        # "discount_percent INTEGER NOT NULL DEFAULT 0,"
+                        # "count_warn INTEGER NOT NULL DEFAULT 0,"
                         "test_subscription BOOLEAN NOT NULL DEFAULT 0,"
                         "created_at TEXT NOT NULL)")
             self.conn.commit()
@@ -45,16 +58,27 @@ class UserDBManager:
                         "size_gb INTEGER NOT NULL,"
                         "days INTEGER NOT NULL,"
                         "price INTEGER NOT NULL,"
+                        "server_id INTEGER NOT NULL,"
                         "description TEXT NULL,"
-                        "status BOOLEAN NOT NULL)")
+                        "status BOOLEAN NOT NULL,"
+                        "FOREIGN KEY (server_id) REFERENCES server (id))")
             self.conn.commit()
             logging.info("Plans table created successfully!")
+
+            # cur.execute("CREATE TABLE IF NOT EXISTS user_plans ("
+            #             "id INTEGER PRIMARY KEY,"
+            #             "telegram_id INTEGER NOT NULL UNIQUE,"
+            #             "plan_id INTEGER NOT NULL,"
+            #             "FOREIGN KEY (telegram_id) REFERENCES users (telegram_id),"
+            #             "FOREIGN KEY (plan_id) REFERENCES plans (id))")
+            # self.conn.commit()
+            # logging.info("Plans table created successfully!")
 
             cur.execute("CREATE TABLE IF NOT EXISTS orders ("
                         "id INTEGER PRIMARY KEY,"
                         "telegram_id INTEGER NOT NULL,"
-                        "user_name TEXT NOT NULL,"
                         "plan_id INTEGER NOT NULL,"
+                        "user_name TEXT NOT NULL,"
                         "created_at TEXT NOT NULL,"
                         "FOREIGN KEY (telegram_id) REFERENCES user (telegram_id),"
                         "FOREIGN KEY (plan_id) REFERENCES plans (id))")
@@ -65,6 +89,8 @@ class UserDBManager:
                         "id INTEGER PRIMARY KEY,"
                         "order_id INTEGER NOT NULL,"
                         "uuid TEXT NOT NULL,"
+                        "server_id INTEGER NOT NULL,"
+                        "FOREIGN KEY (server_id) REFERENCES server (id),"
                         "FOREIGN KEY (order_id) REFERENCES orders (id))")
             self.conn.commit()
             logging.info("Order subscriptions table created successfully!")
@@ -73,6 +99,8 @@ class UserDBManager:
                         "id INTEGER PRIMARY KEY,"
                         "telegram_id INTEGER NOT NULL,"
                         "uuid TEXT NOT NULL UNIQUE,"
+                        "server_id INTEGER NOT NULL,"
+                        "FOREIGN KEY (server_id) REFERENCES server (id),"
                         "FOREIGN KEY (telegram_id) REFERENCES user (telegram_id))")
             self.conn.commit()
             logging.info("Non order subscriptions table created successfully!")
@@ -108,7 +136,7 @@ class UserDBManager:
                         "payment_amount INTEGER NOT NULL,"
                         "payment_method TEXT NOT NULL,"
                         "payment_image TEXT NOT NULL,"
-                        "user_name TEXT NOT NULL,"
+                        # "user_name TEXT NOT NULL,"
                         "approved BOOLEAN NULL,"
                         "created_at TEXT NOT NULL,"
                         "FOREIGN KEY (telegram_id) REFERENCES users (telegram_id))")
@@ -119,6 +147,8 @@ class UserDBManager:
                         "id INTEGER PRIMARY KEY AUTOINCREMENT,"
                         "url TEXT NOT NULL,"
                         "title TEXT, description TEXT,"
+                        "user_limit INTEGER NOT NULL,"
+                        "status BOOLEAN NOT NULL,"
                         "default_server BOOLEAN NOT NULL DEFAULT 0)")
             self.conn.commit()
             logging.info("Servers table created successfully!")
@@ -188,11 +218,11 @@ class UserDBManager:
 
         return True
 
-    def add_user(self, telegram_id, created_at):
+    def add_user(self, telegram_id, full_name,username, created_at):
         cur = self.conn.cursor()
         try:
-            cur.execute("INSERT INTO users(telegram_id, created_at) VALUES(?,?)",
-                        (telegram_id, created_at))
+            cur.execute("INSERT INTO users(telegram_id, full_name,username, created_at) VALUES(?,?,?,?)",
+                        (telegram_id, full_name,username, created_at))
             self.conn.commit()
             logging.info(f"User [{telegram_id}] added successfully!")
             return True
@@ -201,11 +231,11 @@ class UserDBManager:
             logging.error(f"Error while adding user [{telegram_id}] \n Error: {e}")
             return False
 
-    def add_plan(self, plan_id, size_gb, days, price, description=None, status=True):
+    def add_plan(self, plan_id, size_gb, days, price, server_id, description=None, status=True):
         cur = self.conn.cursor()
         try:
-            cur.execute("INSERT INTO plans(id,size_gb, days, price, description, status) VALUES(?,?,?,?,?,?)",
-                        (plan_id, size_gb, days, price, description, status))
+            cur.execute("INSERT INTO plans(id,size_gb, days, price, server_id, description, status) VALUES(?,?,?,?,?,?,?)",
+                        (plan_id, size_gb, days, price, server_id, description, status))
             self.conn.commit()
             logging.info(f"Plan [{size_gb}GB] added successfully!")
             return True
@@ -272,13 +302,85 @@ class UserDBManager:
                 return False
 
         return True
+    
+    def add_user_plans(self, telegram_id, plan_id):
+        cur = self.conn.cursor()
+        try:
+            cur.execute("INSERT INTO user_plans(telegram_id, plan_id) VALUES(?,?)",
+                        (telegram_id, plan_id))
+            self.conn.commit()
+            logging.info(f"Plan [{plan_id}] Reserved for [{telegram_id}] successfully!")
+            return True
 
-    def add_order(self, order_id, telegram_id, user_name, plan_id, created_at):
+        except Error as e:
+            logging.error(f"Error while Reserving plan [{plan_id}] for [{telegram_id}] \n Error: {e}")
+            return False
+
+    def select_user_plans(self):
+        cur = self.conn.cursor()
+        try:
+            cur.execute("SELECT * FROM user_plans")
+            rows = cur.fetchall()
+            rows = [dict(zip([key[0] for key in cur.description], row)) for row in rows]
+            return rows
+        except Error as e:
+            logging.error(f"Error while selecting all user_plans \n Error:{e}")
+            return None
+
+    def find_user_plans(self, **kwargs):
+        if len(kwargs) != 1:
+            logging.warning("You can only use one key to find user_plan!")
+            return None
+        rows = []
+        cur = self.conn.cursor()
+        try:
+            for key, value in kwargs.items():
+                cur.execute(f"SELECT * FROM user_plans WHERE {key}=?", (value,))
+                rows = cur.fetchall()
+            if len(rows) == 0:
+                logging.info(f"Plan {kwargs} not found!")
+                return None
+            rows = [dict(zip([key[0] for key in cur.description], row)) for row in rows]
+            return rows
+        except Error as e:
+            logging.error(f"Error while finding user_plans {kwargs} \n Error:{e}")
+            return None
+
+    def delete_user_plans(self, **kwargs):
+        if len(kwargs) != 1:
+            logging.warning("You can only use one key to delete user_plan!")
+            return False
+        cur = self.conn.cursor()
+        try:
+            for key, value in kwargs.items():
+                cur.execute(f"DELETE FROM user_plans WHERE {key}=?", (value,))
+                self.conn.commit()
+            logging.info(f"Plan {kwargs} deleted successfully!")
+            return True
+        except Error as e:
+            logging.error(f"Error while deleting user_plans {kwargs} \n Error:{e}")
+            return False
+
+    def edit_user_plans(self, user_plans_id, **kwargs):
+        cur = self.conn.cursor()
+
+        for key, value in kwargs.items():
+            try:
+                cur.execute(f"UPDATE user_plans SET {key}=? WHERE id=?", (value, user_plans_id))
+                self.conn.commit()
+                logging.info(f"user_plans [{user_plans_id}] successfully update [{key}] to [{value}]")
+            except Error as e:
+                logging.error(f"Error while updating user_plans [{user_plans_id}] [{key}] to [{value}] \n Error: {e}")
+                return False
+
+        return True
+    
+    def add_order(self, order_id, telegram_id,user_name, plan_id, created_at):
         cur = self.conn.cursor()
         try:
             cur.execute(
-                "INSERT INTO orders(id,telegram_id,user_name, plan_id,created_at) VALUES(?,?,?,?,?)",
-                (order_id, telegram_id, user_name, plan_id, created_at))
+                "INSERT INTO orders(id,telegram_id, plan_id,user_name,created_at) VALUES(?,?,?,?,?)",
+                (order_id, telegram_id, plan_id,user_name, created_at))
             self.conn.commit()
             logging.info(f"Order [{order_id}] added successfully!")
             return True
@@ -331,12 +433,12 @@ class UserDBManager:
 
         return True
 
-    def add_order_subscription(self, sub_id, order_id, uuid):
+    def add_order_subscription(self, sub_id, order_id, uuid, server_id):
         cur = self.conn.cursor()
         try:
             cur.execute(
-                "INSERT INTO order_subscriptions(id,order_id,uuid) VALUES(?,?,?)",
-                (sub_id, order_id, uuid))
+                "INSERT INTO order_subscriptions(id,order_id,uuid,server_id) VALUES(?,?,?,?)",
+                (sub_id, order_id, uuid, server_id))
             self.conn.commit()
             logging.info(f"Order [{order_id}] added successfully!")
             return True
@@ -389,23 +491,24 @@ class UserDBManager:
 
         return True
 
-    def delete_order_subscriptions(self, order_id):
+    def delete_order_subscription(self, **kwargs):
         cur = self.conn.cursor()
         try:
-            cur.execute("DELETE FROM order_subscriptions WHERE order_id=?", (order_id,))
-            self.conn.commit()
-            logging.info(f"Order [{order_id}] deleted successfully!")
+            for key, value in kwargs.items():
+                cur.execute(f"DELETE FROM order_subscriptions WHERE {key}=?", (value,))
+                self.conn.commit()
+                logging.info(f"Order [{value}] deleted successfully!")
             return True
         except Error as e:
-            logging.error(f"Error while deleting order [{order_id}] \n Error: {e}")
+            logging.error(f"Error while deleting order [{kwargs}] \n Error: {e}")
             return False
 
-    def add_non_order_subscription(self, non_sub_id, telegram_id, uuid):
+    def add_non_order_subscription(self, non_sub_id, telegram_id, uuid, server_id):
         cur = self.conn.cursor()
         try:
             cur.execute(
-                "INSERT INTO non_order_subscriptions(id,telegram_id,uuid) VALUES(?,?,?)",
-                (non_sub_id, telegram_id, uuid))
+                "INSERT INTO non_order_subscriptions(id,telegram_id,uuid,server_id) VALUES(?,?,?,?)",
+                (non_sub_id, telegram_id, uuid, server_id))
             self.conn.commit()
             logging.info(f"Order [{telegram_id}] added successfully!")
             return True
@@ -444,7 +547,7 @@ class UserDBManager:
             logging.error(f"Error while finding order {kwargs} \n Error:{e}")
             return None
 
-    def delete_non_order_subscriptions(self, **kwargs):
+    def delete_non_order_subscription(self, **kwargs):
         cur = self.conn.cursor()
         try:
             for key, value in kwargs.items():
@@ -602,11 +705,9 @@ class UserDBManager:
         except Error as e:
             logging.error(f"Error while finding settings {kwargs} \n Error:{e}")
             return None
-
     def edit_int_config(self, key_row, **kwargs):
         cur = self.conn.cursor()
-        for key, value in kwargs.items():
-            value = int(value)
+        for key, value in kwargs.items():            
             try:
                 cur.execute(f"UPDATE int_config SET {key}=? WHERE key=?", (value, key_row))
                 self.conn.commit()
@@ -618,7 +719,6 @@ class UserDBManager:
         return True
 
     def add_int_config(self, key, value):
-        value = int(value)
         cur = self.conn.cursor()
         try:
             cur.execute(
@@ -636,7 +736,7 @@ class UserDBManager:
     def set_default_configs(self):
         
         self.add_bool_config("visible_hiddify_hyperlink", True)
-        self.add_bool_config("three_random_num_price", True)
+        self.add_bool_config("three_random_num_price", False)
         self.add_bool_config("force_join_channel", False)
         self.add_bool_config("panel_auto_backup", True)
         self.add_bool_config("bot_auto_backup", True)
@@ -744,13 +844,12 @@ class UserDBManager:
             logging.error(f"Error while updating balance [{key}] to [{value}] \n Error: {e}")
             return False
 
-    def add_payment(self, payment_id, telegram_id, payment_amount, payment_method, payment_image, user_name,
-                    created_at):
+    def add_payment(self, payment_id, telegram_id, payment_amount, payment_method, payment_image, created_at):
         cur = self.conn.cursor()
         try:
             cur.execute(
-                "INSERT INTO payments(id,telegram_id, payment_amount,payment_method,payment_image,user_name,created_at) VALUES(?,?,?,?,?,?,?)",
-                (payment_id, telegram_id, payment_amount, payment_method, payment_image, user_name, created_at))
+                "INSERT INTO payments(id,telegram_id, payment_amount,payment_method,payment_image,created_at) VALUES(?,?,?,?,?,?)",
+                (payment_id, telegram_id, payment_amount, payment_method, payment_image, created_at))
             self.conn.commit()
             logging.info(f"Payment [{payment_id}] added successfully!")
             return True
@@ -789,7 +888,18 @@ class UserDBManager:
         except Error as e:
             logging.error(f"Error while finding payment {kwargs} \n Error:{e}")
             return None
-
+        
+    def select_payments(self):
+        cur = self.conn.cursor()
+        try:
+            cur.execute("SELECT * FROM payments")
+            rows = cur.fetchall()
+            rows = [dict(zip([key[0] for key in cur.description], row)) for row in rows]
+            return rows
+        except Error as e:
+            logging.error(f"Error while selecting all payments \n Error:{e}")
+            return None
+    
     def select_servers(self):
         cur = self.conn.cursor()
         try:
@@ -800,20 +910,20 @@ class UserDBManager:
         except Error as e:
             logging.error(f"Error while selecting all servers \n Error:{e}")
             return None
-
-    def add_server(self, url, title=None, description=None, default_server=False):
+        
+    def add_server(self, url, user_limit, title=None, description=None, status=True, default_server=False):
         cur = self.conn.cursor()
         try:
             cur.execute(
-                "INSERT INTO servers(url,title,description,default_server) VALUES(?,?,?,?)",
-                (url, title, description, default_server))
+                "INSERT INTO servers(url,title,description,user_limit,status,default_server) VALUES(?,?,?,?,?,?)",
+                (url, title, description, user_limit, status, default_server))
             self.conn.commit()
             logging.info(f"Server [{url}] added successfully!")
             return True
         except Error as e:
             logging.error(f"Error while adding server [{url}] \n Error: {e}")
             return False
-
+    
     def edit_server(self, server_id, **kwargs):
         cur = self.conn.cursor()
         try:
@@ -825,7 +935,7 @@ class UserDBManager:
         except Error as e:
             logging.error(f"Error while updating server [{server_id}] [{key}] to [{value}] \n Error: {e}")
             return False
-
+    
     def find_server(self, **kwargs):
         if len(kwargs) != 1:
             logging.warning("You can only use one key to find server!")
@@ -844,7 +954,23 @@ class UserDBManager:
         except Error as e:
             logging.error(f"Error while finding server {kwargs} \n Error:{e}")
             return None
-
+        
+    def delete_server(self, **kwargs):
+        if len(kwargs) != 1:
+            logging.warning("You can only use one key to delete server!")
+            return False
+        cur = self.conn.cursor()
+        try:
+            for key, value in kwargs.items():
+                cur.execute(f"DELETE FROM servers WHERE {key}=?", (value,))
+                self.conn.commit()
+            logging.info(f"server {kwargs} deleted successfully!")
+            return True
+        except Error as e:
+            logging.error(f"Error while deleting server {kwargs} \n Error:{e}")
+            return False
+        
+    
     def backup_to_json(self, backup_dir):
         try:
 
@@ -878,11 +1004,26 @@ class UserDBManager:
 
             with open(backup_file, 'r') as json_file:
                 backup_data = json.load(json_file)
-
+                
             if not isinstance(backup_data, dict):
                 logging.error('Backup data should be a dictionary.')
                 print('Backup data should be a dictionary.')
                 return
+            # print(backup_data.get('version'), VERSION)
+            # if backup_data.get('version') != VERSION:
+            #     if backup_data.get('version') is None:
+            #         logging.error('Backup data version is not found.')
+            #         print('Backup data version is not found.')
+            #         return
+            #     if VERSION.find('-pre'):
+            #         VERSION = VERSION.split('-pre')[0]
+            #     if is_version_less(backup_data.get('version'),VERSION ):
+            #         logging.error('Backup data version is less than current version.')
+            #         print('Backup data version is less than current version.')
+            #         if is_version_less(backup_data.get('version'), '5.5.0'):
+            #             logging.error('Backup data version is less than 5.5.0.')
+            #             print('Backup data version is less than 5.5.0.')
+            #             return 
 
             self.conn.execute('BEGIN TRANSACTION')
 

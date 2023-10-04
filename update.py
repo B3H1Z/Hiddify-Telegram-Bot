@@ -150,7 +150,65 @@ def update_v4_v5():
                     logging.error("Database error: %s" % e)
                     print("SQLite error:", e)
             os.remove(CONF_LOC)
+def update_v5_1_0_to_v5_5_0():
+    print("Updating database from version v5.1.0 to v5.5.0")
+    logging.info("Updating database from version v5.1.0 to v5.5.0")
+    with sqlite3.connect(USERS_DB_LOC) as conn:
+        # add server_id to plans table
+        try:
+            cur = conn.cursor()
+            cur.execute("ALTER TABLE plans ADD COLUMN server_id INTEGER")
+            cur.execute("UPDATE plans SET server_id = 1")
+            # set foreign key FOREIGN KEY (server_id) REFERENCES server (id)
+            conn.commit()
+        except sqlite3.Error as e:
+            logging.error("Database error: %s" % e)
+            print("SQLite error:", e)
+        # add server_id to order_subscriptions table
+        try:
+            cur = conn.cursor()
+            cur.execute("ALTER TABLE order_subscriptions ADD COLUMN server_id INTEGER")
+            cur.execute("UPDATE order_subscriptions SET server_id = 1")
+            conn.commit()
+        except sqlite3.Error as e:
+            logging.error("Database error: %s" % e)
+            print("SQLite error:", e)
+        # add server_id to non_order_subscriptions table
+        try:
+            # check if server_id is exists
+            cur = conn.cursor()
+            cur.execute("ALTER TABLE non_order_subscriptions ADD COLUMN server_id INTEGER")
+            cur.execute("UPDATE non_order_subscriptions SET server_id = 1")
+            conn.commit()
+        except sqlite3.Error as e:
+            logging.error("Database error: %s" % e)
+            print("SQLite error:", e)
+        # add user_limit, status to servers table
+        try:
+            cur = conn.cursor()
+            cur.execute("ALTER TABLE servers ADD COLUMN user_limit INTEGER")
+            cur.execute("ALTER TABLE servers ADD COLUMN status BOOLEAN DEFAULT 1")
+            cur.execute("UPDATE servers SET user_limit = 200")
+            conn.commit()
+        except sqlite3.Error as e:
+            logging.error("Database error: %s" % e)
+            print("SQLite error:", e)
+        # add full_name,username to users table
+        try:
+            cur = conn.cursor()
+            cur.execute("ALTER TABLE users ADD COLUMN full_name TEXT NULL")
+            cur.execute("ALTER TABLE users ADD COLUMN username TEXT NULL")
+            conn.commit()
+        except sqlite3.Error as e:
+            logging.error("Database error: %s" % e)
+            print("SQLite error:", e)
         
+        # remove user_name from payments table
+        drop_columns_from_table('payments', ['user_name']) 
+        
+        
+        
+    
 def update_by_version(current_version, target_version):
     if is_version_less(current_version, target_version):
         print("Updating started...")
@@ -158,6 +216,8 @@ def update_by_version(current_version, target_version):
         # if current_version is less than 5, update to 5.0.0
         if is_version_less(current_version, "5.0.0"):
             update_v4_v5()
+        if is_version_less(current_version, "5.5.0"):
+            update_v5_1_0_to_v5_5_0()
     else:
         print("No update is needed")
         logging.info("No update is needed")
@@ -170,6 +230,8 @@ if __name__ == "__main__":
         target_version = args.target_version
         if current_version.find("-pre"):
             current_version = current_version.split("-pre")[0]
+        if target_version.find("-pre"):
+            target_version = target_version.split("-pre")[0]
         print(f"current-version: {current_version} -> target-version: {target_version}")
         logging.info(f"current-version: {current_version} -> target-version: {target_version}")
         update_by_version(current_version, target_version)

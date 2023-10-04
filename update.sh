@@ -1,6 +1,6 @@
 #!/bin/bash
 # shellcheck disable=SC2034
-target_version="5.1.0"
+target_version="5.5.0-pre"
 
 # Define text colors
 GREEN='\033[0;32m'
@@ -139,9 +139,6 @@ else
 
   # Add cron job to run at 12:00 PM daily
   add_cron_job_if_not_exists "0 12 * * * cd $install_dir && python3 crontab.py --reminder"
-
-  # Add cron job to run every 3 hours
-  add_cron_job_if_not_exists "0 */3 * * * cd $install_dir && python3 crontab.py --backup-bot"
 
   echo -e "${YELLOW}Current version: $current_version${RESET}"
   echo -e "${YELLOW}Target version: $target_version${RESET}"
