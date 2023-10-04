@@ -1,6 +1,6 @@
 #!/bin/bash
 # shellcheck disable=SC2034
-target_version="5.5.0-pre"
+target_version="5.5.0"
 
 # Define text colors
 GREEN='\033[0;32m'
