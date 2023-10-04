@@ -108,7 +108,9 @@
     "SERVER_EDIT_URL": "Edit URL",
     "CHANGE_STATUS_PAYMENT": "Change Payment Status",
     "CONFIRM_PAYMENT": "✅Confirm Payment",
-    "NO": "❌No"
+    "NO": "❌No",
+    "ANSWER": "Answer",
+    "SEND_MESSAGE": "Send Message"
   },
   "FA": {
     "CONFIRM": "✅تأیید",
@@ -219,7 +221,9 @@
     "SERVER_EDIT_URL": "ویرایش لینک",
     "CHANGE_STATUS_PAYMENT": "تغییر وضعیت پرداخت",
     "CONFIRM_PAYMENT": "✅تایید پرداخت",
-    "NO": "❌خیر"
+    "NO": "❌خیر",
+    "ANSWER": "پاسخ",
+    "SEND_MESSAGE": "ارسال پیام"
 
   }
 }

@@ -301,6 +301,12 @@ def next_step_send_screenshot(message, charge_wallet):
     else:
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
+        
+# Next Step Payment - Send Answer
+def next_step_answer_to_admin(message, admin_id):
+    admin_bot.send_message(int(admin_id), f"{message.text}\n{MESSAGES['INFO_USER_NAME']} {message.from_user.full_name}")
+    bot.send_message(message.chat.id, MESSAGES['MESSAGE_SENDED'],
+                         reply_markup=main_menu_keyboard_markup())
 
 
 # ----------------------------------- Buy From Wallet Area -----------------------------------
@@ -672,6 +678,12 @@ def callback_query(call: CallbackQuery):
         bot.delete_message(call.message.chat.id, call.message.message_id)
         bot.send_message(call.message.chat.id, MESSAGES['REQUEST_SEND_SCREENSHOT'])
         bot.register_next_step_handler(call.message, next_step_send_screenshot, charge_wallet)
+    #Answer to Admin After send Screenshot
+    elif key == 'answer_to_admin':
+        bot.delete_message(call.message.chat.id,call.message.message_id)
+        bot.send_message(call.message.chat.id, MESSAGES['ANSWER_TO_ADMIN'],
+                        reply_markup=cancel_markup())
+        bot.register_next_step_handler(call.message, next_step_answer_to_admin, value)
 
     # ----------------------------------- User Subscriptions Info Area -----------------------------------
     # Unlink non-order subscription

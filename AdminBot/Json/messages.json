@@ -194,7 +194,10 @@
     "SUCCESS_SEARCH_ORDER": "✅Order found",
     "SUCCESS_SEARCH_PAYMENT": "✅Payment found",
     "NOT_SET ": "Not set",
-    "EDIT_WALLET_BALANCE": "Please enter the new balance:"
+    "EDIT_WALLET_BALANCE": "Please enter the new balance:",
+    "SEND_MESSAGE_TO_USER": "Please enter message you want to send to the user:",
+    "MESSAGE_SENDED": "Message Sended",
+    "ADMIN": "َAdmin:"
   },
   "FA": {
     "WELCOME": "به ربات مدیریت هیدی بات خوش آمدید.",
@@ -391,6 +394,9 @@
     "SUCCESS_SEARCH_ORDER": "✅سفارش یافت شد",
     "SUCCESS_SEARCH_PAYMENT": "✅پرداخت یافت شد",
     "NOT_SET": "تنظیم نشده",
-    "EDIT_WALLET_BALANCE": "لطفا مبلغی که میخواهید موجودی کیف پول به آن تغییر کند را به تومان وارد کنید:"
+    "EDIT_WALLET_BALANCE": "لطفا مبلغی که میخواهید موجودی کیف پول به آن تغییر کند را به تومان وارد کنید:",
+    "SEND_MESSAGE_TO_USER": "لطفا متن پیامی که می خواهید برای کاربر ارسال شود را وارد کنید:",
+    "MESSAGE_SENDED": "پیام ارسال شد",
+    "ADMIN": "ادمین:"
   }
 }

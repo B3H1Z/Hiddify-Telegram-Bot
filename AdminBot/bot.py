@@ -35,7 +35,7 @@ if CLIENT_TOKEN:
     user_bot = user_bot()
 # ----------------------------------- Helper Functions -----------------------------------
 # Check if message is digit
-def is_it_digit(message: Message,allow_float=False, response=MESSAGES['ERROR_INVALID_NUMBER'],
+def is_it_digit(message: Message, allow_float=False, response=MESSAGES['ERROR_INVALID_NUMBER'],
                 markup=markups.main_menu_keyboard_markup()):
     if not message.text:
         bot.send_message(message.chat.id, response, reply_markup=markup)
@@ -470,48 +470,48 @@ def search_bot_user_payment(message: Message):
 
 
 # ----------------------------------- Users Bot Management Area -----------------------------------
-add_plan_data = {}
+#add_plan_data = {}
 
 
 # Add Plan - Size
-def users_bot_add_plan_usage(message: Message):
-    if is_it_cancel(message):
-        return
-    if not is_it_digit(message):
-        return
-    add_plan_data['usage'] = int(message.text)
-    bot.send_message(message.chat.id, MESSAGES['USERS_BOT_ADD_PLAN_DAYS'],
-                     reply_markup=markups.while_edit_user_markup())
-    bot.register_next_step_handler(message, users_bot_add_plan_days)
+# def users_bot_add_plan_usage(message: Message):
+#     if is_it_cancel(message):
+#         return
+#     if not is_it_digit(message):
+#         return
+#     add_plan_data['usage'] = int(message.text)
+#     bot.send_message(message.chat.id, MESSAGES['USERS_BOT_ADD_PLAN_DAYS'],
+#                      reply_markup=markups.while_edit_user_markup())
+#     bot.register_next_step_handler(message, users_bot_add_plan_days)
 
 
-# Add Plan - Days
-def users_bot_add_plan_days(message: Message):
-    if is_it_cancel(message):
-        return
-    if not is_it_digit(message):
-        return
-    add_plan_data['days'] = int(message.text)
-    bot.send_message(message.chat.id, MESSAGES['USERS_BOT_ADD_PLAN_PRICE'],
-                     reply_markup=markups.while_edit_user_markup())
-    bot.register_next_step_handler(message, users_bot_add_plan_price)
+# # Add Plan - Days
+# def users_bot_add_plan_days(message: Message):
+#     if is_it_cancel(message):
+#         return
+#     if not is_it_digit(message):
+#         return
+#     add_plan_data['days'] = int(message.text)
+#     bot.send_message(message.chat.id, MESSAGES['USERS_BOT_ADD_PLAN_PRICE'],
+#                      reply_markup=markups.while_edit_user_markup())
+#     bot.register_next_step_handler(message, users_bot_add_plan_price)
 
 
-# Add Plan - Price
-def users_bot_add_plan_price(message: Message):
-    if is_it_cancel(message):
-        return
-    if not is_it_digit(message):
-        return
-    add_plan_data['price'] = utils.toman_to_rial(message.text)
-    msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=markups.while_edit_user_markup())
-    status = utils.users_bot_add_plan(add_plan_data['usage'], add_plan_data['days'], add_plan_data['price'])
-    bot.delete_message(message.chat.id, msg_wait.message_id)
-    if not status:
-        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
-        return
-    bot.send_message(message.chat.id, MESSAGES['USERS_BOT_ADD_PLAN_SUCCESS'],
-                     reply_markup=markups.main_menu_keyboard_markup())
+# # Add Plan - Price
+# def users_bot_add_plan_price(message: Message):
+#     if is_it_cancel(message):
+#         return
+#     if not is_it_digit(message):
+#         return
+#     add_plan_data['price'] = utils.toman_to_rial(message.text)
+#     msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=markups.while_edit_user_markup())
+#     status = utils.users_bot_add_plan(add_plan_data['usage'], add_plan_data['days'], add_plan_data['price'])
+#     bot.delete_message(message.chat.id, msg_wait.message_id)
+#     if not status:
+#         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
+#         return
+#     bot.send_message(message.chat.id, MESSAGES['USERS_BOT_ADD_PLAN_SUCCESS'],
+#                      reply_markup=markups.main_menu_keyboard_markup())
 
 
 # ----------------------------------- Server Management Area -----------------------------------
@@ -780,74 +780,74 @@ def users_bot_settings_update_message(message: Message, markup,title=MESSAGES['U
                           reply_markup=markup)
 
 
-# Users Bot - Order Status
-def users_bot_order_status(message: Message):
-    from UserBot.templates import payment_received_template
-    if is_it_cancel(message):
-        return
-    if not is_it_digit(message):
-        return
+# # Users Bot - Order Status
+# def users_bot_order_status(message: Message):
+#     from UserBot.templates import payment_received_template
+#     if is_it_cancel(message):
+#         return
+#     if not is_it_digit(message):
+#         return
 
-    payment = USERS_DB.find_payment(id=int(message.text))
-    if not payment:
-        bot.send_message(message.chat.id, MESSAGES['ERROR_ORDER_NOT_FOUND'],
-                         reply_markup=markups.main_menu_keyboard_markup())
-        return
+#     payment = USERS_DB.find_payment(id=int(message.text))
+#     if not payment:
+#         bot.send_message(message.chat.id, MESSAGES['ERROR_ORDER_NOT_FOUND'],
+#                          reply_markup=markups.main_menu_keyboard_markup())
+#         return
 
-    # plan = USERS_DB.find_plan(id=payment[0]['plan_id'])
-    # if not payment:
-    #     bot.send_message(message.chat.id, MESSAGES['ERROR_ORDER_NOT_FOUND'], reply_markup=markups.main_menu_keyboard_markup())
-    #     return
-    payment = payment[0]
-    user_data = USERS_DB.find_user(telegram_id=payment['telegram_id'])
-    if not user_data:
-            bot.send_message(message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'],
-                             reply_markup=main_menu_keyboard_markup())
-            return
-    user_data = user_data[0]
-    is_it_accepted = None
-    if payment['approved'] == 0:
-        is_it_accepted = MESSAGES['PAYMENT_ACCEPT_STATUS_NOT_CONFIRMED']
-    elif payment['approved'] == 1:
-        is_it_accepted = MESSAGES['PAYMENT_ACCEPT_STATUS_CONFIRMED']
-    else:
-        is_it_accepted = MESSAGES['PAYMENT_ACCEPT_STATUS_WAITING']
+#     # plan = USERS_DB.find_plan(id=payment[0]['plan_id'])
+#     # if not payment:
+#     #     bot.send_message(message.chat.id, MESSAGES['ERROR_ORDER_NOT_FOUND'], reply_markup=markups.main_menu_keyboard_markup())
+#     #     return
+#     payment = payment[0]
+#     user_data = USERS_DB.find_user(telegram_id=payment['telegram_id'])
+#     if not user_data:
+#             bot.send_message(message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'],
+#                              reply_markup=markups.main_menu_keyboard_markup())
+#             return
+#     user_data = user_data[0]
+#     is_it_accepted = None
+#     if payment['approved'] == 0:
+#         is_it_accepted = MESSAGES['PAYMENT_ACCEPT_STATUS_NOT_CONFIRMED']
+#     elif payment['approved'] == 1:
+#         is_it_accepted = MESSAGES['PAYMENT_ACCEPT_STATUS_CONFIRMED']
+#     else:
+#         is_it_accepted = MESSAGES['PAYMENT_ACCEPT_STATUS_WAITING']
 
-    photo_path = path_recp = os.path.join(os.getcwd(), 'UserBot', 'Receiptions', payment['payment_image'])
-    bot.send_photo(message.chat.id, photo=open(photo_path, 'rb'),
-                   caption=payment_received_template(payment,user,
-                                                     footer=f"{MESSAGES['PAYMENT_ACCEPT_STATUS']} {is_it_accepted}\n{MESSAGES['CREATED_AT']} {payment['created_at']}"),
-                   reply_markup=markups.main_menu_keyboard_markup())
+#     photo_path = path_recp = os.path.join(os.getcwd(), 'UserBot', 'Receiptions', payment['payment_image'])
+#     bot.send_photo(message.chat.id, photo=open(photo_path, 'rb'),
+#                    caption=payment_received_template(payment,user_data,
+#                                                      footer=f"{MESSAGES['PAYMENT_ACCEPT_STATUS']} {is_it_accepted}\n{MESSAGES['CREATED_AT']} {payment['created_at']}"),
+#                    reply_markup=markups.main_menu_keyboard_markup())
 
 
-def users_bot_sub_status(message: Message):
-    if is_it_cancel(message):
-        return
-    if not is_it_digit(message):
-        return
+# def users_bot_sub_status(message: Message):
+#     if is_it_cancel(message):
+#         return
+#     if not is_it_digit(message):
+#         return
 
-    if len(message.text) == 7:
-        user = USERS_DB.find_order_subscription(id=int(message.text))
-    elif len(message.text) == 8:
-        user = USERS_DB.find_non_order_subscription(id=int(message.text))
-    else:
-        bot.send_message(message.chat.id, MESSAGES['ERROR_SUB_NOT_FOUND'],
-                         reply_markup=markups.main_menu_keyboard_markup())
-        return
+#     if len(message.text) == 7:
+#         user = USERS_DB.find_order_subscription(id=int(message.text))
+#     elif len(message.text) == 8:
+#         user = USERS_DB.find_non_order_subscription(id=int(message.text))
+#     else:
+#         bot.send_message(message.chat.id, MESSAGES['ERROR_SUB_NOT_FOUND'],
+#                          reply_markup=markups.main_menu_keyboard_markup())
+#         return
 
-    if not user:
-        bot.send_message(message.chat.id, MESSAGES['ERROR_SUB_NOT_FOUND'],
-                         reply_markup=markups.main_menu_keyboard_markup())
-        return
-    user_uuid = user[0]['uuid']
+#     if not user:
+#         bot.send_message(message.chat.id, MESSAGES['ERROR_SUB_NOT_FOUND'],
+#                          reply_markup=markups.main_menu_keyboard_markup())
+#         return
+#     user_uuid = user[0]['uuid']
 
-    usr = utils.user_info(URL, user_uuid)
-    if not usr:
-        bot.send_message(message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'])
-        return
-    msg = templates.user_info_template(usr, selected_server)
-    bot.send_message(message.chat.id, msg,
-                     reply_markup=markups.user_info_markup(usr['uuid']))
+#     usr = utils.user_info(URL, user_uuid)
+#     if not usr:
+#         bot.send_message(message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'])
+#         return
+#     msg = templates.user_info_template(usr, selected_server)
+#     bot.send_message(message.chat.id, msg,
+#                      reply_markup=markups.user_info_markup(usr['uuid']))
 
 
 def users_bot_settings_min_depo(message: Message):
@@ -1019,6 +1019,31 @@ def edit_wallet_balance(message: Message,telegram_id):
     if not status:
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
     bot.send_message(message.chat.id, MESSAGES['SUCCESS_UPDATE_DATA'], reply_markup=markups.main_menu_keyboard_markup())
+
+
+def send_message_to_user(message: Message, payment_id):
+    if is_it_cancel(message):
+        return
+    payment_info = USERS_DB.find_payment(id=int(payment_id))
+    if not payment_info:
+        bot.send_message(message.chat.id,
+                            f"{MESSAGES['ERROR_PAYMENT_NOT_FOUND']}\n{MESSAGES['ORDER_ID']} {payment_id}")
+        return
+    payment_info = payment_info[0]
+    user_bot.send_message(int(payment_info['telegram_id']),
+                        f"{MESSAGES['ADMIN']}\n{message.text}\n{MESSAGES['ORDER_ID']} {payment_id}",
+                        reply_markup=markups.send_message_to_user_markup(message.chat.id))
+    bot.send_message(message.chat.id, MESSAGES['MESSAGE_SENDED'],
+                        reply_markup=markups.main_menu_keyboard_markup())
+    
+def users_bot_send_message_to_user(message: Message, telegram_id):
+    if is_it_cancel(message):
+        return
+    user_bot.send_message(int(telegram_id),
+                        f"{MESSAGES['ADMIN']}\n{message.text}", reply_markup=markups.send_message_to_user_markup(message.chat.id))
+    bot.send_message(message.chat.id, MESSAGES['MESSAGE_SENDED'],
+                        reply_markup=markups.main_menu_keyboard_markup())
+    
 # ----------------------------------- Callbacks -----------------------------------
 # Callback Handler for Inline Buttons
 @bot.callback_query_handler(func=lambda call: True)
@@ -2431,6 +2456,23 @@ def callback_query(call: CallbackQuery):
         msg = templates.bot_payment_info_template(payment,user_data)
         bot.edit_message_caption(msg, call.message.chat.id, call.message.message_id,
                                       reply_markup=markups.change_status_payment_by_admin(value))
+        
+    # Payment - Send Message Callback
+    elif key == "send_message_by_admin":
+        if not CLIENT_TOKEN:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_CLIENT_TOKEN'])
+            return
+        bot.send_message(call.message.chat.id, f"{MESSAGES['SEND_MESSAGE_TO_USER']}",
+                         reply_markup=markups.while_add_user_markup())
+        bot.register_next_step_handler(call.message, send_message_to_user, value)
+
+    elif key == "users_bot_send_message_by_admin":
+        if not CLIENT_TOKEN:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_CLIENT_TOKEN'])
+            return
+        bot.send_message(call.message.chat.id, f"{MESSAGES['SEND_MESSAGE_TO_USER']}",
+                         reply_markup=markups.while_add_user_markup())
+        bot.register_next_step_handler(call.message, users_bot_send_message_to_user, value)
 
             
     # Back to User Panel Callback

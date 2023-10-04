@@ -84,7 +84,9 @@
         "RENEWAL_SUBSCRIPTION_CLOSED": "Renewal subscription is not available at the moment.",
         "INFO_USER_NAME": "⬖ User:",
         "INFO_USER_USERNAME": "⬖ Username:",
-        "INFO_USER_NUM_ID": "⬖ User ID:"
+        "INFO_USER_NUM_ID": "⬖ User ID:",
+        "ANSWER_TO_ADMIN": "Please submit your answer:",
+        "MESSAGE_SENDED": "Message Sended"
     },
     "FA": {
         "WELCOME": "به ربات کاربران خوش آمدید",
@@ -171,6 +173,8 @@
         "RENEWAL_SUBSCRIPTION_CLOSED": "در حال حاضر امکان تمدید اشتراک وجود ندارد.",
         "INFO_USER_NAME": "⬖ کاربر:",
         "INFO_USER_USERNAME": "⬖ نام کاربری:",
-        "INFO_USER_NUM_ID": "⬖ شناسه کاربر:"
+        "INFO_USER_NUM_ID": "⬖ شناسه کاربر:",
+        "ANSWER_TO_ADMIN": "لطفا پاسخ خود را ارسال کنید:",
+        "MESSAGE_SENDED": "پیام ارسال شد"
     }
 }
