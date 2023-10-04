@@ -35,7 +35,8 @@
     "RENEWAL_SUBSCRIPTION": "🔄Renewal Subscription",
     "UPDATE_SUBSCRIPTION_INFO": "🔄Update Subscription Info",
     "JOIN_CHANNEL": "📢Join Channel",
-    "FORCE_JOIN_CHANNEL_ACCEPTED": "✅I joined"
+    "FORCE_JOIN_CHANNEL_ACCEPTED": "✅I joined",
+    "SEND_MESSAGE": "Send Message"
   },
   "FA": {
     "BACK": "🔙بازگشت",
@@ -73,6 +74,7 @@
     "RENEWAL_SUBSCRIPTION": "♾ تمدید اشتراک",
     "UPDATE_SUBSCRIPTION_INFO": "🔄 بروزرسانی اطلاعات",
     "JOIN_CHANNEL": "📢عضویت در کانال",
-    "FORCE_JOIN_CHANNEL_ACCEPTED": "✅عضو شدم"
+    "FORCE_JOIN_CHANNEL_ACCEPTED": "✅عضو شدم",
+    "SEND_MESSAGE": "ارسال پیام"
   }
 }

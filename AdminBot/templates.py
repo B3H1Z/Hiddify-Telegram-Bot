@@ -46,7 +46,8 @@ def server_info_template(server, plans, header=""):
 {MESSAGES['INFO_SERVER_USER_NUMBER']} {user_index} {MESSAGES['OF']} {server['user_limit']}
 {MESSAGES['INFO_SERVER_USER_PLAN']} {plans_num}
 """
-# Server Info Message Template
+
+# Plan Info Message Template
 def plan_info_template(plan, orders, header=""):
     num_orders = 0
     if orders:
@@ -113,6 +114,7 @@ def bot_users_list_template(users, wallets, orders, header=""):
 {MESSAGES['NUM_ORDERED_USERS']} {ordered_users}
 {MESSAGES['TOTAL_BALANCE_USERS']} {utils.rial_to_toman(total_balance_wallets)}{MESSAGES['TOMAN']}
 """
+
 # Bot Users Info Message Template
 def bot_users_info_template(user, orders, payments, wallet, non_order_subs, order_subs, plans, header=""):
     total_orders = 0
@@ -209,6 +211,7 @@ def bot_payment_info_template(payment,user, header="", footer=""):
 
 {footer}
 """
+
 # Bot Users List Message Template
 def bot_orders_list_template(orders, plans, header=""):
 
@@ -311,6 +314,7 @@ def bot_payments_list_template(payments, header=""):
 {MESSAGES['THIS_MONTH_NUM_PAYMENTS']}{this_month_num_payments}
 {MESSAGES['THIS_MONTH_PAYMENTS_AMOUNT']}{utils.rial_to_toman(this_month_amount)}{MESSAGES['TOMAN']}
 """
+
 # Configs List Message Template
 def configs_template(configs):
     messages = []
