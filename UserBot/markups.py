@@ -118,7 +118,7 @@ def plans_list_markup(plans, renewal=False,uuid=None):
     if renewal:
         keys.append(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_user_panel:{uuid}"))
     else:
-        keys.append(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"del_msg:None"))
+        keys.append(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"back_to_servers:None"))
     markup.add(*keys)
     return markup
 
@@ -132,6 +132,7 @@ def servers_list_markup(servers, free_test=False):
         for server in servers:
             keys.append(InlineKeyboardButton(f"{server['title']}",
                                              callback_data=f"{callback}:{server['id']}"))
+        keys.append(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"del_msg:None"))
     if len(keys) == 0:
         return None
     markup.add(*keys)
