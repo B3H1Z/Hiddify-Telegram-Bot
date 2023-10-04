@@ -188,7 +188,8 @@ def update_v5_1_0_to_v5_5_0():
             cur = conn.cursor()
             cur.execute("ALTER TABLE servers ADD COLUMN user_limit INTEGER")
             cur.execute("ALTER TABLE servers ADD COLUMN status BOOLEAN DEFAULT 1")
-            cur.execute("UPDATE servers SET user_limit = 200")
+            cur.execute("UPDATE servers SET user_limit = 2000")
+            cur.execute("UPDATE servers SET title = Main Server")
             conn.commit()
         except sqlite3.Error as e:
             logging.error("Database error: %s" % e)
