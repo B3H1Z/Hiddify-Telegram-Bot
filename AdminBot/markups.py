@@ -79,11 +79,11 @@ def edit_user_markup(uuid):
     return markup
 
 
-# Add User Reply Keyboard Markup
-def while_add_user_markup():
-    markup = ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
-    markup.add(KeyboardButton(KEY_MARKUP['CANCEL']))
-    return markup
+# # Add User Reply Keyboard Markup
+# def while_add_user_markup():
+#     markup = ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+#     markup.add(KeyboardButton(KEY_MARKUP['CANCEL']))
+#     return markup
 
 
 # Edit User Reply Keyboard Markup
@@ -273,8 +273,8 @@ def confirm_change_status_payment_by_admin(payment_id):
     markup = InlineKeyboardMarkup()
     markup.row_width = 1
     markup.add(
-        InlineKeyboardButton(KEY_MARKUP['CONFIRM'], callback_data=f"confirm_change_status_payment_by_admin:{payment_id}"))
-    markup.add(InlineKeyboardButton(KEY_MARKUP['CANCEL'], callback_data=f"cancel_change_status_payment_by_admin:{payment_id}"))
+        InlineKeyboardButton(KEY_MARKUP['YES'], callback_data=f"confirm_change_status_payment_by_admin:{payment_id}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['"NO"'], callback_data=f"cancel_change_status_payment_by_admin:{payment_id}"))
     return markup
 
 # Users Bot Payments List Management - Inline Keyboard Markup
