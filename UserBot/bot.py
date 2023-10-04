@@ -680,7 +680,7 @@ def callback_query(call: CallbackQuery):
         bot.register_next_step_handler(call.message, next_step_send_screenshot, charge_wallet)
     #Answer to Admin After send Screenshot
     elif key == 'answer_to_admin':
-        bot.delete_message(call.message.chat.id,call.message.message_id)
+        #bot.delete_message(call.message.chat.id,call.message.message_id)
         bot.send_message(call.message.chat.id, MESSAGES['ANSWER_TO_ADMIN'],
                         reply_markup=cancel_markup())
         bot.register_next_step_handler(call.message, next_step_answer_to_admin, value)
