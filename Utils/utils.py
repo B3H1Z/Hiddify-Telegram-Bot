@@ -215,17 +215,24 @@ def sub_parse(sub):
         if url[0]:
             match = re.search(r'#(.+)$', url[0])
             if match:
-                config_links['vless'].append([url[0], match.group(1)])
+                vless_title = match.group(1).replace("%20", " ")
+                config_links['vless'].append([url[0], vless_title])
         elif url[1]:
             config = url[1].replace("vmess://", "")
             config_parsed = base64decoder(config)
             if config_parsed:
-                config_links['vmess'].append([url[1], config_parsed['ps']])
+                vmess_title = mconfig_parsed['ps'].replace("%20", " ")
+                config_links['vmess'].append([url[1], vmess_title])
         elif url[2]:
             match = re.search(r'#(.+)$', url[2])
             if match:
+                trojan_title = match.group(1).replace("%20", " ")
+                trojan_sni = re.search(r'sni=([^&]+)', url[2])
+                if trojan_sni:
+                    if trojan_sni.group(1) == "fake_ip_for_sub_link":
+                        continue
                 config_links['trojan'].append([url[2], match.group(1)])
-
+        
     return config_links
 
 

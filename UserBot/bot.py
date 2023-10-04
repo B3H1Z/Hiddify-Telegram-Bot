@@ -783,8 +783,17 @@ def callback_query(call: CallbackQuery):
                                       reply_markup=sub_url_user_list_markup(value))
     # User Configs - Direct Link
     elif key == 'conf_dir':
+        sub = utils.sub_links(value)
+        if not sub:
+            bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
+            return
+        configs = utils.sub_parse(sub['sub_link'])
+        if not configs:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_CONFIG_NOT_FOUND'])
+            return
         bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,
-                                      reply_markup=sub_user_list_markup(value))
+                                      reply_markup=sub_user_list_markup(value,configs))
+        
     # User Configs - Vless Configs Callback
     elif key == "conf_dir_vless":
         sub = utils.sub_links(value)
