@@ -637,7 +637,7 @@ def edit_server_url(message: Message, server_id):
         bot.send_message(message.chat.id, MESSAGES['ERROR_SERVER_NOT_FOUND'])
         return
     server = server[0]
-    bot.send_message(message.chat.id, f"{MESSAGES['SUCCESS_SERVER_URL_EDITED']}/n{server['url']}",
+    bot.send_message(message.chat.id, f"{MESSAGES['SUCCESS_SERVER_URL_EDITED']}\n{server['url']}",
                      reply_markup=markups.main_menu_keyboard_markup())
     plans = USERS_DB.select_plans()
     msg = templates.server_info_template(server,plans)
@@ -853,7 +853,7 @@ def users_bot_sub_status(message: Message):
             else:
                 continue
         if not usr:
-            bot.send_message(call.message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'])
+            bot.send_message(message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'])
             return
         msg = templates.user_info_template(usr, selected_server)
         bot.send_message(message.chat.id, msg,
@@ -1627,7 +1627,7 @@ def callback_query(call: CallbackQuery):
         bot.send_message(call.message.chat.id, msg, reply_markup=markups.bot_user_info_markup(value))
 
     elif key == "bot_user_next":
-        if list_mode == "Bot_User":
+        if list_mode == "Bot_Users":
            users_list = USERS_DB.select_users()
         elif list_mode == "Bot_Users_Search_Name":
             users_list = USERS_DB.find_user(full_name=searched_name)
