@@ -17,15 +17,23 @@ os.environ['no_proxy'] = '*'
 VERSION = __version__
 
 USERS_DB_LOC = os.path.join(os.getcwd(), "Database", "hidyBot.db")
-LOG_LOC = os.path.join(os.getcwd(), "Logs", "hidyBot.log")
+LOG_DIR = os.path.join(os.getcwd(), "Logs")
+LOG_LOC = os.path.join(LOG_DIR, "hidyBot.log")
 BACKUP_LOC = os.path.join(os.getcwd(), "Backup")
 RECEIPTIONS_LOC = os.path.join(os.getcwd(), "UserBot", "Receiptions")
 BOT_BACKUP_LOC = os.path.join(os.getcwd(), "Backup", "Bot")
 API_PATH = "/api/v1"
 HIDY_BOT_ID = "@HidyBotGroup"
-# if Logs directory not exists, create it
-if not os.path.exists(os.path.join(os.getcwd(), "Logs")):
-    os.mkdir(os.path.join(os.getcwd(), "Logs"))
+
+# if directories not exists, create it
+if not os.path.exists(LOG_DIR):
+    os.mkdir(LOG_DIR)
+if not os.path.exists(BACKUP_LOC):
+    os.mkdir(BACKUP_LOC)
+if not os.path.exists(RECEIPTIONS_LOC):
+    os.mkdir(RECEIPTIONS_LOC)
+
+# set logging  
 logging.basicConfig(handlers=[logging.FileHandler(filename=LOG_LOC,
                                                   encoding='utf-8', mode='w')],
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
