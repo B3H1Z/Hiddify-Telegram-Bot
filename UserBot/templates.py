@@ -89,11 +89,11 @@ def payment_received_template(payment,user, header="", footer=""):
         return f"""
 {header}
 
-شماره تراکنش: <code>{payment['id']}</code>
+شناسه تراکنش: <code>{payment['id']}</code>
+مبلغ تراکنش: <b>{rial_to_toman(payment['payment_amount'])}</b> {MESSAGES['TOMAN']}
 {MESSAGES['INFO_USER_NAME']} <b>{name}</b>
 {MESSAGES['INFO_USER_USERNAME']} {username}
 {MESSAGES['INFO_USER_NUM_ID']} {user['telegram_id']}
-هزینه پرداخت شده: <b>{rial_to_toman(payment['payment_amount'])}</b> {MESSAGES['TOMAN']}
 ---------------------
 ⬇️درخواست افزایش موجودی کیف پول⬇️
 
@@ -104,10 +104,10 @@ def payment_received_template(payment,user, header="", footer=""):
 {header}
 
 Payment number: <b>{payment['id']}</b>
+Paid amount: <b>{payment['payment_amount']}</b> {MESSAGES['TOMAN']}
 {MESSAGES['INFO_USER_NAME']} <b>{name}</b>
 {MESSAGES['INFO_USER_USERNAME']} {username}
 {MESSAGES['INFO_USER_NUM_ID']} {user['telegram_id']}
-Paid amount: <b>{payment['payment_amount']}</b> {MESSAGES['TOMAN']}
 ---------------------
 ⬇️Request to increase wallet balance⬇️
 

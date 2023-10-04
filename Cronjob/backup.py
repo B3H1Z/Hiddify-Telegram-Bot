@@ -1,13 +1,17 @@
-from Utils.utils import backup_panel,all_configs_settings
 from AdminBot.bot import bot
 from config import ADMINS_ID
+from Utils.utils import full_backup,all_configs_settings
+import logging
 
-# Send backup file to admins
 def cron_backup():
-    file_name = backup_panel()
+    zip_file_name = full_backup()
+    if not zip_file_name:
+        logging.error("Backup failed")
+        return
     settings = all_configs_settings()
     if not settings['panel_auto_backup']:
         return
-    if file_name:
-        for admin_id in ADMINS_ID:
-            bot.send_document(admin_id, open(file_name, 'rb'),caption="🖥️Panel Backup",disable_notification=True)
+    for admin_id in ADMINS_ID:
+        bot.send_document(admin_id, open(zip_file_name, 'rb'), caption="🤖Backup",disable_notification=True)
+    
+    
