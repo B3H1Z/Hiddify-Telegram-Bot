@@ -79,11 +79,11 @@ def edit_user_markup(uuid):
     return markup
 
 
-# Add User Reply Keyboard Markup
-def while_add_user_markup():
-    markup = ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
-    markup.add(KeyboardButton(KEY_MARKUP['CANCEL']))
-    return markup
+# # Add User Reply Keyboard Markup
+# def while_add_user_markup():
+#     markup = ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+#     markup.add(KeyboardButton(KEY_MARKUP['CANCEL']))
+#     return markup
 
 
 # Edit User Reply Keyboard Markup

@@ -89,7 +89,7 @@ def add_user_name(message: Message, server_id):
     if is_it_cancel(message):
         return
     add_user_data['name'] = message.text
-    bot.send_message(message.chat.id, MESSAGES['ADD_USER_USAGE_LIMIT'], reply_markup=markups.while_add_user_markup())
+    bot.send_message(message.chat.id, MESSAGES['ADD_USER_USAGE_LIMIT'], reply_markup=markups.while_edit_user_markup())
     bot.register_next_step_handler(message, add_user_limit, server_id)
 
 
@@ -98,11 +98,11 @@ def add_user_limit(message: Message, server_id):
     if is_it_cancel(message):
         return
     if not is_it_digit(message, f"{MESSAGES['ERROR_INVALID_NUMBER']}\n{MESSAGES['ADD_USER_USAGE_LIMIT']}",
-                       markups.while_add_user_markup()):
+                       markup=markups.while_edit_user_markup()):
         bot.register_next_step_handler(message, add_user_limit, server_id)
         return
     add_user_data['limit'] = message.text
-    bot.send_message(message.chat.id, MESSAGES['ADD_USER_DAYS'], reply_markup=markups.while_add_user_markup())
+    bot.send_message(message.chat.id, MESSAGES['ADD_USER_DAYS'], reply_markup=markups.while_edit_user_markup())
     bot.register_next_step_handler(message, add_user_usage_days, server_id)
 
 
@@ -111,7 +111,7 @@ def add_user_usage_days(message: Message, server_id):
     if is_it_cancel(message, MESSAGES['CANCEL_ADD_USER']):
         return
     if not is_it_digit(message, f"{MESSAGES['ERROR_INVALID_NUMBER']}\n{MESSAGES['ADD_USER_DAYS']}",
-                       markups.while_add_user_markup()):
+                       markup=markups.while_edit_user_markup()):
         bot.register_next_step_handler(message, add_user_usage_days, server_id)
         return
     add_user_data['usage_days'] = message.text
@@ -178,7 +178,8 @@ def edit_user_name(message: Message, uuid):
 def edit_user_usage(message: Message, uuid):
     if is_it_cancel(message):
         return
-    if not is_it_digit(message):
+    if not is_it_digit(message, markup=markups.while_edit_user_markup()):
+        bot.register_next_step_handler(message, edit_user_usage, uuid)
         return
     msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=markups.while_edit_user_markup())
     # status = ADMIN_DB.edit_user(uuid, usage_limit_GB=int(message.text))
@@ -195,7 +196,8 @@ def edit_user_usage(message: Message, uuid):
 def edit_user_days(message: Message, uuid):
     if is_it_cancel(message):
         return
-    if not is_it_digit(message):
+    if not is_it_digit(message, markup=markups.while_edit_user_markup()):
+        bot.register_next_step_handler(message, edit_user_days, uuid)
         return
     msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=markups.while_edit_user_markup())
     # status = ADMIN_DB.edit_user(uuid, package_days=int(message.text))
@@ -385,7 +387,8 @@ def search_bot_user_name(message: Message):
 def search_bot_user_telegram_id(message: Message):
     if is_it_cancel(message):
         return
-    if not is_it_digit(message):
+    if not is_it_digit(message, markup=markups.while_edit_user_markup()):
+        bot.register_next_step_handler(message, search_bot_user_telegram_id)
         return
     users = USERS_DB.find_user(telegram_id=int(searched_name))
     if not users:
@@ -412,7 +415,8 @@ def search_bot_user_telegram_id(message: Message):
 def search_bot_user_order(message: Message):
     if is_it_cancel(message):
         return
-    if not is_it_digit(message):
+    if not is_it_digit(message, markup=markups.while_edit_user_markup()):
+        bot.register_next_step_handler(message, search_bot_user_order)
         return
     orders = USERS_DB.find_order(id=int(message.text))
     if not orders:
@@ -447,7 +451,8 @@ def search_bot_user_order(message: Message):
 def search_bot_user_payment(message: Message):
     if is_it_cancel(message):
         return
-    if not is_it_digit(message):
+    if not is_it_digit(message, markup=markups.while_edit_user_markup()):
+        bot.register_next_step_handler(message, search_bot_user_payment)
         return
     payments = USERS_DB.find_payment(id=int(message.text))
     if not payments:
@@ -653,7 +658,8 @@ add_plan_data = {}
 def users_bot_add_plan_usage(message: Message):
     if is_it_cancel(message):
         return
-    if not is_it_digit(message):
+    if not is_it_digit(message, markup=markups.while_edit_user_markup()):
+        bot.register_next_step_handler(message, users_bot_add_plan_usage)
         return
     add_plan_data['usage'] = int(message.text)
     bot.send_message(message.chat.id, MESSAGES['USERS_BOT_ADD_PLAN_DAYS'],
@@ -665,7 +671,8 @@ def users_bot_add_plan_usage(message: Message):
 def users_bot_add_plan_days(message: Message):
     if is_it_cancel(message):
         return
-    if not is_it_digit(message):
+    if not is_it_digit(message, markup=markups.while_edit_user_markup()):
+        bot.register_next_step_handler(message, users_bot_add_plan_days)
         return
     add_plan_data['days'] = int(message.text)
     bot.send_message(message.chat.id, MESSAGES['USERS_BOT_ADD_PLAN_PRICE'],
@@ -677,7 +684,8 @@ def users_bot_add_plan_days(message: Message):
 def users_bot_add_plan_price(message: Message):
     if is_it_cancel(message):
         return
-    if not is_it_digit(message):
+    if not is_it_digit(message, markup=markups.while_edit_user_markup()):
+        bot.register_next_step_handler(message, users_bot_add_plan_price)
         return
     add_plan_data['price'] = utils.toman_to_rial(message.text)
     msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=markups.while_edit_user_markup())
@@ -720,7 +728,8 @@ def users_bot_edit_owner_info_username(message: Message):
 def users_bot_edit_owner_info_card_number(message: Message):
     if is_it_cancel(message):
         return
-    if not is_it_digit(message):
+    if not is_it_digit(message, markup=markups.while_edit_user_markup()):
+        bot.register_next_step_handler(message, users_bot_edit_owner_info_card_number)
         return
     if len(message.text) != 16:
         bot.send_message(message.chat.id, MESSAGES['ERROR_INVALID_CARD_NUMBER'],
@@ -823,7 +832,8 @@ def users_bot_settings_update_message(message: Message, markup,title=MESSAGES['U
 def users_bot_sub_status(message: Message):
     if is_it_cancel(message):
         return
-    if not is_it_digit(message):
+    if not is_it_digit(message, markup=markups.while_edit_user_markup()):
+        bot.register_next_step_handler(message, users_bot_sub_status)
         return
 
     if len(message.text) == 7:
@@ -865,7 +875,8 @@ def users_bot_sub_status(message: Message):
 def users_bot_settings_min_depo(message: Message):
     if is_it_cancel(message):
         return
-    if not is_it_digit(message):
+    if not is_it_digit(message, markup=markups.while_edit_user_markup()):
+        bot.register_next_step_handler(message, users_bot_settings_min_depo)
         return
     new_min_depo = utils.toman_to_rial(message.text)
     new_min_depo = int(new_min_depo)
@@ -904,7 +915,8 @@ def users_bot_settings_welcome_msg(message: Message):
 def users_bot_settings_test_sub_size(message: Message):
     if is_it_cancel(message):
         return
-    if not is_it_digit(message,allow_float=True):
+    if not is_it_digit(message, allow_float=True, markup=markups.while_edit_user_markup()):
+        bot.register_next_step_handler(message, users_bot_settings_test_sub_size)
         return
     # if float convert float else convert int
     if '.' in message.text:
@@ -921,7 +933,8 @@ def users_bot_settings_test_sub_size(message: Message):
 def users_bot_settings_test_sub_days(message: Message):
     if is_it_cancel(message):
         return
-    if not is_it_digit(message):
+    if not is_it_digit(message, markup=markups.while_edit_user_markup()):
+        bot.register_next_step_handler(message, users_bot_settings_test_sub_days)
         return
     new_test_sub_days = int(message.text)
     status = USERS_DB.edit_int_config("test_sub_days", value=new_test_sub_days)
@@ -934,7 +947,8 @@ def users_bot_settings_test_sub_days(message: Message):
 def users_bot_settings_notif_reminder_usage(message: Message):
     if is_it_cancel(message):
         return
-    if not is_it_digit(message,allow_float=True):
+    if not is_it_digit(message, allow_float=True, markup=markups.while_edit_user_markup()):
+        bot.register_next_step_handler(message, users_bot_settings_notif_reminder_usage)
         return
     if '.' in message.text:
         new_reminder_usage = float(message.text)
@@ -950,7 +964,8 @@ def users_bot_settings_notif_reminder_usage(message: Message):
 def users_bot_settings_notif_reminder_days(message: Message):
     if is_it_cancel(message):
         return
-    if not is_it_digit(message):
+    if not is_it_digit(message, markup=markups.while_edit_user_markup()):
+        bot.register_next_step_handler(message, users_bot_settings_notif_reminder_days)
         return
     new_test_sub_days = int(message.text)
     status = USERS_DB.edit_int_config("reminder_notification_days", value=new_test_sub_days)
@@ -994,17 +1009,20 @@ def users_bot_settings_restore_bot(message: Message):
 def users_bot_settings_renewal_method_advanced_days(message: Message):
     if is_it_cancel(message):
         return
-    if not is_it_digit(message):
+    if not is_it_digit(message, markup=markups.while_edit_user_markup()):
+        bot.register_next_step_handler(message, users_bot_settings_renewal_method_advanced_days)
         return
     new_test_sub_days = int(message.text)
     status = USERS_DB.edit_int_config("advanced_renewal_days", value=new_test_sub_days)
     if not status:
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
     bot.send_message(message.chat.id, MESSAGES['SUCCESS_UPDATE_DATA'], reply_markup=markups.main_menu_keyboard_markup())
+
 def users_bot_settings_renewal_method_advanced_usage(message: Message):
     if is_it_cancel(message):
         return
-    if not is_it_digit(message,allow_float=True):
+    if not is_it_digit(message, allow_float=True, markup=markups.while_edit_user_markup()):
+        bot.register_next_step_handler(message, users_bot_settings_renewal_method_advanced_usage)
         return
     if '.' in message.text:
         new_renewal_usage = float(message.text)
@@ -1018,7 +1036,8 @@ def users_bot_settings_renewal_method_advanced_usage(message: Message):
 def edit_wallet_balance(message: Message,telegram_id):
     if is_it_cancel(message):
         return
-    if not is_it_digit(message,):
+    if not is_it_digit(message, markup=markups.while_edit_user_markup()):
+        bot.register_next_step_handler(message, edit_wallet_balance)
         return
     new_balance = utils.toman_to_rial(message.text)
     wallet_status = USERS_DB.find_wallet(telegram_id=telegram_id)
@@ -1561,7 +1580,7 @@ def callback_query(call: CallbackQuery):
     
     elif key == "server_add_user":
         global add_user_data
-        bot.send_message(call.message.chat.id, MESSAGES['ADD_USER_NAME'], reply_markup=markups.while_add_user_markup())
+        bot.send_message(call.message.chat.id, MESSAGES['ADD_USER_NAME'], reply_markup=markups.while_edit_user_markup())
         bot.register_next_step_handler(call.message, add_user_name, value)
 
     elif key == "server_search_user":
@@ -2298,7 +2317,8 @@ def callback_query(call: CallbackQuery):
     #     bot.register_next_step_handler(call.message, users_bot_order_status)
 
     elif key == "users_bot_sub_status":
-        bot.send_message(call.message.chat.id, f"{MESSAGES['USERS_BOT_SUB_ID_REQUEST']}")
+        bot.send_message(call.message.chat.id, f"{MESSAGES['USERS_BOT_SUB_ID_REQUEST']}",
+                         reply_markup=markups.while_edit_user_markup())
         bot.register_next_step_handler(call.message, users_bot_sub_status)
 
 
@@ -2473,7 +2493,7 @@ def callback_query(call: CallbackQuery):
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_CLIENT_TOKEN'])
             return
         bot.send_message(call.message.chat.id, f"{MESSAGES['SEND_MESSAGE_TO_USER']}",
-                         reply_markup=markups.while_add_user_markup())
+                         reply_markup=markups.while_edit_user_markup())
         bot.register_next_step_handler(call.message, send_message_to_user, value)
 
     elif key == "users_bot_send_message_by_admin":
@@ -2481,7 +2501,7 @@ def callback_query(call: CallbackQuery):
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_CLIENT_TOKEN'])
             return
         bot.send_message(call.message.chat.id, f"{MESSAGES['SEND_MESSAGE_TO_USER']}",
-                         reply_markup=markups.while_add_user_markup())
+                         reply_markup=markups.while_edit_user_markup())
         bot.register_next_step_handler(call.message, users_bot_send_message_to_user, value)
 
             
