@@ -263,7 +263,7 @@ class UserDBManager:
         cur = self.conn.cursor()
         try:
             for key, value in kwargs.items():
-                cur.execute(f"SELECT * FROM plans WHERE {key}=?", (value,))
+                cur.execute(f"SELECT * FROM plans WHERE {key}=? ORDER BY price ASC", (value,))
                 rows = cur.fetchall()
             if len(rows) == 0:
                 logging.info(f"Plan {kwargs} not found!")
