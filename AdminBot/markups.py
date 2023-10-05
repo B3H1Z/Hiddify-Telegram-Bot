@@ -277,7 +277,7 @@ def confirm_change_status_payment_by_admin(payment_id):
     markup.row_width = 1
     markup.add(
         InlineKeyboardButton(KEY_MARKUP['YES'], callback_data=f"confirm_change_status_payment_by_admin:{payment_id}"))
-    markup.add(InlineKeyboardButton(KEY_MARKUP['"NO"'], callback_data=f"cancel_change_status_payment_by_admin:{payment_id}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['NO'], callback_data=f"cancel_change_status_payment_by_admin:{payment_id}"))
     return markup
 
 # Users Bot Payments List Management - Inline Keyboard Markup
