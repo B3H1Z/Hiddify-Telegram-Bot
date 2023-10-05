@@ -173,13 +173,27 @@ def user_info(url, uuid):
 # Get sub links - return dict of sub links
 def sub_links(uuid, url= None):
     if not url:
-        servers = USERS_DB.select_servers()
-        if servers:
-            for server in servers:
-                users_list = api.find(server['url'] + API_PATH, uuid)
-                if users_list:
-                    url = server['url']
-                    break
+        non_order_users = USERS_DB.find_non_order_subscription(uuid=uuid)
+        order_users = USERS_DB.find_order_subscription(uuid=uuid)
+        if order_users:
+            order_user = order_users[0]
+            servers = USERS_DB.find_server(id=order_user['server_id'])
+            if servers:
+                server = servers[0]
+                url = server['url']
+        elif non_order_users:
+            non_order_user = non_order_users[0]
+            servers = USERS_DB.find_server(id=non_order_user['server_id'])
+            if servers:
+                server = servers[0]
+                url = server['url']
+        # servers = USERS_DB.select_servers()
+        # if servers:
+        #     for server in servers:
+        #         users_list = api.find(server['url'] + API_PATH, uuid)
+        #         if users_list:
+        #             url = server['url']
+        #             break
     BASE_URL = urlparse(url).scheme + "://" + urlparse(url).netloc
     logging.info(f"Get sub links of user - {uuid}")
     sub = {}
