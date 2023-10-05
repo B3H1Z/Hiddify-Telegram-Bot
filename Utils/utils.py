@@ -221,7 +221,7 @@ def sub_parse(sub):
             config = url[1].replace("vmess://", "")
             config_parsed = base64decoder(config)
             if config_parsed:
-                vmess_title = mconfig_parsed['ps'].replace("%20", " ")
+                vmess_title = config_parsed['ps'].replace("%20", " ")
                 config_links['vmess'].append([url[1], vmess_title])
         elif url[2]:
             match = re.search(r'#(.+)$', url[2])
