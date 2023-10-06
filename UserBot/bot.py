@@ -192,28 +192,37 @@ def renewal_from_wallet_confirm(message: Message):
                          reply_markup=main_menu_keyboard_markup())
         return
     settings = utils.all_configs_settings()
+    #Default renewal mode
     if settings['renewal_method'] == 1:
         if user_info_process['remaining_day'] <= 0 or user_info_process['usage']['remaining_usage_GB'] <= 0:
             new_usage_limit = plan_info['size_gb']
             new_package_days = plan_info['days']
+            current_usage_GB = 0
         else:
-            new_usage_limit = user_info_process['usage']['remaining_usage_GB'] + plan_info['size_gb']
+            new_usage_limit = user_info['usage_limit_GB'] + plan_info['size_gb']
             new_package_days = plan_info['days']
-            
+            current_usage_GB = user_info['current_usage_GB']
+
+    #advance renewal mode        
     elif settings['renewal_method'] == 2:
             new_usage_limit = plan_info['size_gb']
             new_package_days = plan_info['days']
+            current_usage_GB = 0
     
+    #Fair renewal mode
     elif settings['renewal_method'] == 3:
         if user_info_process['remaining_day'] <= 0 or user_info_process['usage']['remaining_usage_GB'] <= 0:
             new_usage_limit = plan_info['size_gb']
             new_package_days = plan_info['days']
+            current_usage_GB = 0
         else:
-            new_usage_limit = user_info_process['usage']['remaining_usage_GB'] + plan_info['size_gb']
+            new_usage_limit = user_info['usage_limit_GB'] + plan_info['size_gb']
             new_package_days = user_info_process['remaining_day'] + plan_info['days']
-                  
+            current_usage_GB = user_info['current_usage_GB']
+            
     last_reset_time = datetime.datetime.now().strftime("%Y-%m-%d")        
-    api.update(URL, uuid=uuid, usage_limit_GB=new_usage_limit, start_date=last_reset_time, package_days=new_package_days, current_usage_GB=0)
+    api.update(URL, uuid=uuid, usage_limit_GB=new_usage_limit, start_date=last_reset_time, package_days=new_package_days, current_usage_GB=current_usage_GB)
+
 
     # Add New Order
     order_id = random.randint(1000000, 9999999)
