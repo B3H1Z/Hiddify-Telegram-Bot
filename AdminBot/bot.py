@@ -863,8 +863,11 @@ def users_bot_sub_status(message: Message):
             else:
                 continue
         if not usr:
-            bot.send_message(message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'])
+            bot.send_message(message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'],
+                             reply_markup=markups.main_menu_keyboard_markup())
             return
+        bot.send_message(message.chat.id, MESSAGES['SUCCESS_SEARCH_SUB'],
+                             reply_markup=markups.main_menu_keyboard_markup())
         msg = templates.user_info_template(usr, selected_server)
         bot.send_message(message.chat.id, msg,
                         reply_markup=markups.user_info_markup(usr['uuid']))
