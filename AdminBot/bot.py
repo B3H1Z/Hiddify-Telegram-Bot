@@ -1261,7 +1261,7 @@ def callback_query(call: CallbackQuery):
     # User Configs - DIR Configs Callback
 
     elif key == "conf_dir":
-        sub = utils.sub_links(value)
+        sub = utils.sub_links(value, URL)
         if not sub:
             bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'])
             return
