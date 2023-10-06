@@ -251,9 +251,10 @@ def set_config_in_db(db, admin_ids, token, url, lang, client_token):
             db.add_server(url, 2000, title="Main Server", default_server=True)
         else:
             # find default server
-            default_server = db.find_server(default_server=True)
-            default_server_id = default_server[0]['id']
-            if default_server:
+            default_servers = db.find_server(default_server=True)
+            if default_servers:
+                default_server_id = default_servers[0]['id']
+                default_server = default_servers[0]
                 if default_server['url'] != url:
                     db.edit_server(default_server_id, url=url)
             else:
