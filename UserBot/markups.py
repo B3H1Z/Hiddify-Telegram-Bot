@@ -154,6 +154,12 @@ def confirm_payment_by_admin(order_id):
     markup.add(InlineKeyboardButton(KEY_MARKUP['SEND_MESSAGE'], callback_data=f"send_message_by_admin:{order_id}"))
     return markup
 
+def notify_to_admin_markup(user):
+    name = user['full_name'] if user['full_name'] else user['telegram_id']
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 1
+    markup.add(InlineKeyboardButton(f"{name}", callback_data=f"bot_user_info:{user['telegram_id']}"))
+    return markup
 
 def cancel_markup():
     markup = ReplyKeyboardMarkup(row_width=3, resize_keyboard=True)
