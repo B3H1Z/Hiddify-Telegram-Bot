@@ -220,8 +220,13 @@ def renewal_from_wallet_confirm(message: Message):
             new_package_days = user_info_process['remaining_day'] + plan_info['days']
             current_usage_GB = user_info['current_usage_GB']
             
-    last_reset_time = datetime.datetime.now().strftime("%Y-%m-%d")        
-    api.update(URL, uuid=uuid, usage_limit_GB=new_usage_limit, start_date=last_reset_time, package_days=new_package_days, current_usage_GB=current_usage_GB)
+    last_reset_time = datetime.datetime.now().strftime("%Y-%m-%d")    
+    sub = utils.find_order_subscription_by_uuid(uuid) 
+    if not sub:
+        bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                         reply_markup=main_menu_keyboard_markup())
+        return   
+    api.update(URL, uuid=uuid, usage_limit_GB=new_usage_limit, start_date=last_reset_time, package_days=new_package_days, current_usage_GB=current_usage_GB,comment=f"HidyBot:{sub['id']}")
 
 
     # Add New Order
@@ -245,7 +250,6 @@ def renewal_from_wallet_confirm(message: Message):
     BASE_URL = urlparse(server['url']).scheme + "://" + urlparse(server['url']).netloc
     link = f"{BASE_URL}/{urlparse(server['url']).path.split('/')[1]}/{uuid}/"
     user_name = f"<a href='{link}'> {user_info_process['name']} </a>"
-    sub = utils.find_order_subscription_by_uuid(uuid)
     bot_users = USERS_DB.find_user(telegram_id=message.chat.id)
     if bot_users:
         bot_user = bot_users[0]
