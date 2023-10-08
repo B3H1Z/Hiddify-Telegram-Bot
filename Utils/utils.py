@@ -702,7 +702,7 @@ def debug_data():
     
     now = datetime.now()
     dt_string = now.strftime("%d-%m-%Y_%H-%M-%S")
-    bk_json_file = os.path.join(BOT_BACKUP_LOC, f"Debug_Data_{dt_string}.json")
+    bk_json_file = os.path.join(BOT_BACKUP_LOC, f"DB_Data_{dt_string}.json")
     with open(bk_json_file, 'w+') as f:
         json.dump(bk_json_data, f, indent=4)
     zip_file = os.path.join(BOT_BACKUP_LOC, f"Debug_Data_{dt_string}.zip")
