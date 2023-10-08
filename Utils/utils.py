@@ -546,6 +546,32 @@ def find_order_subscription_by_uuid(uuid):
         return non_order_subscription[0]
     else:
         return False
+    
+def is_it_subscription_by_uuid_and_telegram_id(uuid, telegram_id):
+    subs = []
+    orders = USERS_DB.find_order(telegram_id=telegram_id)
+    if orders:
+        for order in orders:
+            ordered_subscriptions = USERS_DB.find_order_subscription(order_id=order['id'])
+            if ordered_subscriptions:
+                for subscription in ordered_subscriptions:
+                    if subscription['uuid'] == uuid:
+                        flag = True
+                        subs.append(subscription)
+                        break
+            if flag == True:
+                break 
+    
+    non_order_subscriptions = USERS_DB.find_non_order_subscription(telegram_id=telegram_id)
+    if non_order_subscriptions:
+        for subscription in non_order_subscriptions:
+            if subscription['uuid'] == uuid:
+                subs.append(subscription)
+                break
+    if subs:
+        return True
+    else:
+        return False
 
 
 def toman_to_rial(toman):
