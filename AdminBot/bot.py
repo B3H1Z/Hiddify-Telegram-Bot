@@ -2722,6 +2722,15 @@ def servers_management(message: Message):
 def about_bot(message: Message):
     bot.send_message(message.chat.id, templates.about_template())
 
+# Debug Handler
+@bot.message_handler(func=lambda message: message.text == KEY_MARKUP['DEBUG'])
+def debug(message: Message):
+    debug_zip = utils.debug_data()
+    if not debug_zip:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+        return
+    bot.send_document(message.chat.id, open(debug_zip, 'rb'), caption="👹Debug")
+
 
 # ----------------------------------- Main -----------------------------------
 # Start Bot
