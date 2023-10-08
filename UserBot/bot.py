@@ -18,7 +18,7 @@ from Utils import api
 bot = telebot.TeleBot(CLIENT_TOKEN, parse_mode="HTML")
 bot.remove_webhook()
 admin_bot = admin_bot()
-BASE_URL = urlparse(PANEL_URL).scheme + "://" + urlparse(PANEL_URL).netloc
+BASE_URL = f"{urlparse(PANEL_URL).scheme}://{urlparse(PANEL_URL).netloc}"
 
 
 # *********************************** Helper Functions ***********************************
@@ -594,31 +594,15 @@ def callback_query(call: CallbackQuery):
     value = data[1]
     # ----------------------------------- Link Subscription Area -----------------------------------
     # Confirm Link Subscription
-    if key == 'start':
+    if key == 'force_join_status':
         bot.delete_message(call.message.chat.id, call.message.message_id)
-        user_id = call.message.chat.id
-        join_status = is_user_in_channel(user_id)
+        join_status = is_user_in_channel(call.message.chat.id)
 
         if not join_status:
             return
-
-        if USERS_DB.find_user(telegram_id=user_id):
-            status = USERS_DB.edit_user(telegram_id=user_id, full_name=call.message.from_user.full_name)
-            bot.send_message(user_id, MESSAGES['WELCOME'], reply_markup=main_menu_keyboard_markup())
-            return
-
-        created_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        # user = call.message.from_user
-        # full_name = call.message.from_user.full_name
-        # full_name = call.message.chat.full_name
-        status = USERS_DB.add_user(telegram_id=user_id, full_name=call.message.from_user.full_name, created_at=created_at)
-
-        if not status:
-            bot.send_message(user_id, MESSAGES['UNKNOWN_ERROR'], reply_markup=main_menu_keyboard_markup())
-            return
-
-        bot.send_message(user_id, MESSAGES['WELCOME'], reply_markup=main_menu_keyboard_markup())
-
+        else:
+            bot.send_message(call.message.chat.id, MESSAGES['JOIN_CHANNEL_SUCCESSFUL'])
+            
     elif key == 'confirm_subscription':
         edit_status = USERS_DB.add_non_order_subscription(call.message.chat.id, value, )
         if edit_status:
@@ -1052,26 +1036,26 @@ def callback_query(call: CallbackQuery):
 # Bot Start Message Handler
 @bot.message_handler(commands=['start'])
 def start_bot(message: Message):
-    join_status = is_user_in_channel(message.chat.id)
-    if not join_status:
-        return
     settings = utils.all_configs_settings()
-    # if " " in message.text:
-    #     referral_coed = int(message.text.split()[1])
+
     MESSAGES['WELCOME'] = MESSAGES['WELCOME'] if not settings['msg_user_start'] else settings['msg_user_start']
+    
     if USERS_DB.find_user(telegram_id=message.chat.id):
         edit_name= USERS_DB.edit_user(telegram_id=message.chat.id,full_name=message.from_user.full_name)
         edit_username = USERS_DB.edit_user(telegram_id=message.chat.id,username=message.from_user.username)
         bot.send_message(message.chat.id, MESSAGES['WELCOME'], reply_markup=main_menu_keyboard_markup())
-        return
-    created_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    status = USERS_DB.add_user(telegram_id=message.chat.id,username=message.from_user.username, full_name=message.from_user.full_name, created_at=created_at)
+    else:
+        created_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        status = USERS_DB.add_user(telegram_id=message.chat.id,username=message.from_user.username, full_name=message.from_user.full_name, created_at=created_at)
+        if not status:
+            bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                             reply_markup=main_menu_keyboard_markup())
+            return
+        bot.send_message(message.chat.id, MESSAGES['WELCOME'], reply_markup=main_menu_keyboard_markup())
 
-    if not status:
-        bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
-                         reply_markup=main_menu_keyboard_markup())
+    join_status = is_user_in_channel(message.chat.id)
+    if not join_status:
         return
-    bot.send_message(message.chat.id, MESSAGES['WELCOME'], reply_markup=main_menu_keyboard_markup())
 
 
 # If user is not in users table, request /start
