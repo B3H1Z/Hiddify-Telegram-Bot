@@ -549,6 +549,7 @@ def find_order_subscription_by_uuid(uuid):
     
 def is_it_subscription_by_uuid_and_telegram_id(uuid, telegram_id):
     subs = []
+    flag = False
     orders = USERS_DB.find_order(telegram_id=telegram_id)
     if orders:
         for order in orders:
