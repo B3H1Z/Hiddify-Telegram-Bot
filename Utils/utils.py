@@ -12,7 +12,7 @@ from Database.dbManager import USERS_DB
 import psutil
 import qrcode
 import requests
-from config import PANEL_URL, BACKUP_LOC, CLIENT_TOKEN, USERS_DB_LOC,RECEIPTIONS_LOC,BOT_BACKUP_LOC, API_PATH
+from config import PANEL_URL, BACKUP_LOC, CLIENT_TOKEN, USERS_DB_LOC,RECEIPTIONS_LOC,BOT_BACKUP_LOC, API_PATH,LOG_DIR
 import AdminBot.templates
 from Utils import api
 from version import __version__
@@ -546,6 +546,32 @@ def find_order_subscription_by_uuid(uuid):
         return non_order_subscription[0]
     else:
         return False
+    
+def is_it_subscription_by_uuid_and_telegram_id(uuid, telegram_id):
+    subs = []
+    orders = USERS_DB.find_order(telegram_id=telegram_id)
+    if orders:
+        for order in orders:
+            ordered_subscriptions = USERS_DB.find_order_subscription(order_id=order['id'])
+            if ordered_subscriptions:
+                for subscription in ordered_subscriptions:
+                    if subscription['uuid'] == uuid:
+                        flag = True
+                        subs.append(subscription)
+                        break
+            if flag == True:
+                break 
+    
+    non_order_subscriptions = USERS_DB.find_non_order_subscription(telegram_id=telegram_id)
+    if non_order_subscriptions:
+        for subscription in non_order_subscriptions:
+            if subscription['uuid'] == uuid:
+                subs.append(subscription)
+                break
+    if subs:
+        return True
+    else:
+        return False
 
 
 def toman_to_rial(toman):
@@ -656,3 +682,38 @@ def restore_json_bot(file):
         logging.exception(f"Exception: {e}")
         return False
     return True
+
+# Debug Data 
+def debug_data():
+    bk_json_data = USERS_DB.backup_to_json(BOT_BACKUP_LOC)
+    if not bk_json_data:
+        return False
+    
+    bk_json_data['version'] = __version__
+    
+    new_servers = []
+    for server in bk_json_data['servers']:
+        url = privacy_friendly_logging_request(server['url'])
+        server['url'] = url
+        new_servers.append(server)
+    bk_json_data['servers'] = new_servers
+    
+    bk_json_data['str_config'] = [x for x in bk_json_data['str_config'] if x['key'] not in ['bot_token_admin','bot_token_client']]
+    
+    now = datetime.now()
+    dt_string = now.strftime("%d-%m-%Y_%H-%M-%S")
+    bk_json_file = os.path.join(BOT_BACKUP_LOC, f"Debug_Data_{dt_string}.json")
+    with open(bk_json_file, 'w+') as f:
+        json.dump(bk_json_data, f, indent=4)
+    zip_file = os.path.join(BOT_BACKUP_LOC, f"Debug_Data_{dt_string}.zip")
+    with zipfile.ZipFile(zip_file, 'w') as zip:
+        zip.write(bk_json_file,os.path.basename(bk_json_file))
+        if os.path.exists(os.path.join(os.getcwd(),"bot.log")):
+            zip.write("bot.log",os.path.basename("bot.log"))
+        if os.path.exists(LOG_DIR):
+            for file in os.listdir(LOG_DIR):
+                zip.write(os.path.join(LOG_DIR, file),file)
+
+    os.remove(bk_json_file)
+    return zip_file
+    

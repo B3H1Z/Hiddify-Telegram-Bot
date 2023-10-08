@@ -154,6 +154,12 @@ def confirm_payment_by_admin(order_id):
     markup.add(InlineKeyboardButton(KEY_MARKUP['SEND_MESSAGE'], callback_data=f"send_message_by_admin:{order_id}"))
     return markup
 
+def notify_to_admin_markup(user):
+    name = user['full_name'] if user['full_name'] else user['telegram_id']
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 1
+    markup.add(InlineKeyboardButton(f"{name}", callback_data=f"bot_user_info:{user['telegram_id']}"))
+    return markup
 
 def cancel_markup():
     markup = ReplyKeyboardMarkup(row_width=3, resize_keyboard=True)
@@ -176,7 +182,7 @@ def force_join_channel_markup(channel_id):
         InlineKeyboardButton(KEY_MARKUP['JOIN_CHANNEL'], url=f"https://t.me/{channel_id}",)
     )
     markup.add(
-        InlineKeyboardButton(KEY_MARKUP['FORCE_JOIN_CHANNEL_ACCEPTED'], callback_data=f"start:None")
+        InlineKeyboardButton(KEY_MARKUP['FORCE_JOIN_CHANNEL_ACCEPTED'], callback_data=f"force_join_status:None")
     )
     return markup
 

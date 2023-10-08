@@ -863,8 +863,11 @@ def users_bot_sub_status(message: Message):
             else:
                 continue
         if not usr:
-            bot.send_message(message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'])
+            bot.send_message(message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'],
+                             reply_markup=markups.main_menu_keyboard_markup())
             return
+        bot.send_message(message.chat.id, MESSAGES['SUCCESS_SEARCH_SUB'],
+                             reply_markup=markups.main_menu_keyboard_markup())
         msg = templates.user_info_template(usr, selected_server)
         bot.send_message(message.chat.id, msg,
                         reply_markup=markups.user_info_markup(usr['uuid']))
@@ -2721,6 +2724,15 @@ def servers_management(message: Message):
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['ABOUT_BOT'])
 def about_bot(message: Message):
     bot.send_message(message.chat.id, templates.about_template())
+
+# Debug Handler
+@bot.message_handler(func=lambda message: message.text == KEY_MARKUP['DEBUG'])
+def debug(message: Message):
+    debug_zip = utils.debug_data()
+    if not debug_zip:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+        return
+    bot.send_document(message.chat.id, open(debug_zip, 'rb'), caption="👹Debug")
 
 
 # ----------------------------------- Main -----------------------------------
