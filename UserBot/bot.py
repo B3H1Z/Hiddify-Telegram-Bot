@@ -19,7 +19,7 @@ bot = telebot.TeleBot(CLIENT_TOKEN, parse_mode="HTML")
 bot.remove_webhook()
 admin_bot = admin_bot()
 BASE_URL = f"{urlparse(PANEL_URL).scheme}://{urlparse(PANEL_URL).netloc}"
-
+selected_server_id = 0
 
 # *********************************** Helper Functions ***********************************
 # Check if message is digit
@@ -605,6 +605,8 @@ def callback_query(call: CallbackQuery):
     data = call.data.split(':')
     key = data[0]
     value = data[1]
+
+    global selected_server_id
     # ----------------------------------- Link Subscription Area -----------------------------------
     # Confirm Link Subscription
     if key == 'force_join_status':
@@ -633,6 +635,7 @@ def callback_query(call: CallbackQuery):
 
     # ----------------------------------- Buy Plan Area -----------------------------------
     elif key == 'server_selected':
+        selected_server_id = int(value)
         plans = USERS_DB.find_plan(server_id=int(value))
         if not plans:
             bot.send_message(call.message.chat.id, MESSAGES['PLANS_NOT_FOUND'], reply_markup=main_menu_keyboard_markup())
@@ -723,7 +726,7 @@ def callback_query(call: CallbackQuery):
             for server in servers:
                 user = api.find(server['url'] + API_PATH, value)
                 if user:
-                    server_id = server['id']
+                    selected_server_id = server['id']
                     URL = server['url'] + API_PATH
                     break
         if not user:
@@ -753,7 +756,7 @@ def callback_query(call: CallbackQuery):
             'uuid': None,
             'plan_id': None,
         }
-        plans = USERS_DB.find_plan(server_id=server_id)
+        plans = USERS_DB.find_plan(server_id=selected_server_id)
         if not plans:
             bot.send_message(call.message.chat.id, MESSAGES['PLANS_NOT_FOUND'],
                              reply_markup=main_menu_keyboard_markup())
@@ -995,7 +998,7 @@ def callback_query(call: CallbackQuery):
 
     # Back To Plans
     elif key == "back_to_plans":
-        plans = USERS_DB.select_plans()
+        plans = USERS_DB.find_plan(server_id=selected_server_id)
         if not plans:
             bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                              reply_markup=main_menu_keyboard_markup())
@@ -1005,7 +1008,7 @@ def callback_query(call: CallbackQuery):
 
     # Back To Renewal Plans
     elif key == "back_to_renewal_plans":
-        plans = USERS_DB.select_plans()
+        plans = USERS_DB.find_plan(server_id=selected_server_id)
         if not plans:
             bot.send_message(call.message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                              reply_markup=main_menu_keyboard_markup())
