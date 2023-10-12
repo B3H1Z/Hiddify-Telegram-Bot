@@ -430,7 +430,7 @@ def next_step_send_name_for_get_free_test(message: Message, server_id):
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
         return
-    non_order_id = random.randint(1000000, 9999999)
+    non_order_id = random.randint(10000000, 99999999)
     non_order_status = USERS_DB.add_non_order_subscription(non_order_id, message.chat.id, uuid, server_id)
     if not non_order_status:
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
