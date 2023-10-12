@@ -3,3 +3,4 @@ pyTelegramBotAPI==4.12.0
 requests==2.30.0
 termcolor==2.3.0
 qrcode==7.4.2
+pytz==2023.3.post1
