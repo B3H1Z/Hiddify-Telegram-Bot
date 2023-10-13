@@ -13,8 +13,13 @@ def main_menu_keyboard_markup():
     markup.add(KeyboardButton(KEY_MARKUP['LINK_SUBSCRIPTION']), KeyboardButton(KEY_MARKUP['BUY_SUBSCRIPTION']))
     markup.add(KeyboardButton(KEY_MARKUP['FREE_TEST']), KeyboardButton(KEY_MARKUP['WALLET']))
     # KeyboardButton(KEY_MARKUP['TO_QR']),
-    markup.add(KeyboardButton(KEY_MARKUP['SEND_TICKET']),
-               KeyboardButton(KEY_MARKUP['MANUAL']))
+    settings = all_configs_settings()
+    if settings['msg_faq']:
+        markup.add(KeyboardButton(KEY_MARKUP['SEND_TICKET']),
+                   KeyboardButton(KEY_MARKUP['MANUAL']), KeyboardButton(KEY_MARKUP['FAQ']))
+    else:
+        markup.add(KeyboardButton(KEY_MARKUP['SEND_TICKET']),
+                   KeyboardButton(KEY_MARKUP['MANUAL']))
     return markup
 
 

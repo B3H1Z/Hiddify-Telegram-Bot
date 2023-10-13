@@ -36,7 +36,8 @@
     "UPDATE_SUBSCRIPTION_INFO": "🔄Update Subscription Info",
     "JOIN_CHANNEL": "📢Join Channel",
     "FORCE_JOIN_CHANNEL_ACCEPTED": "✅I joined",
-    "SEND_MESSAGE": "Send Message"
+    "SEND_MESSAGE": "Send Message",
+    "FAQ": "⁉FAQ"
   },
   "FA": {
     "BACK": "🔙بازگشت",
@@ -75,6 +76,7 @@
     "UPDATE_SUBSCRIPTION_INFO": "🔄 بروزرسانی اطلاعات",
     "JOIN_CHANNEL": "📢عضویت در کانال",
     "FORCE_JOIN_CHANNEL_ACCEPTED": "✅عضو شدم",
-    "SEND_MESSAGE": "📤ارسال پیام"
+    "SEND_MESSAGE": "📤ارسال پیام",
+    "FAQ": "⁉سوالات متداول"
   }
 }

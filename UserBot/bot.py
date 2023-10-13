@@ -1173,6 +1173,16 @@ def help_guide(message: Message):
         return
     bot.send_message(message.chat.id, MESSAGES['MANUAL_HDR'],
                      reply_markup=users_bot_management_settings_panel_manual_markup())
+    
+# Help Guide Message Handler
+@bot.message_handler(func=lambda message: message.text == KEY_MARKUP['FAQ'])
+def faq(message: Message):
+    join_status = is_user_in_channel(message.chat.id)
+    if not join_status:
+        return
+    settings = utils.all_configs_settings()
+    faq_msg = settings['msg_faq'] if settings['msg_faq'] else MESSAGES['UNKNOWN_ERROR']
+    bot.send_message(message.chat.id, faq_msg, reply_markup=main_menu_keyboard_markup())
 
 
 # Ticket To Support Message Handler

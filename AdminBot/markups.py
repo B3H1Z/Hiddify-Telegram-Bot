@@ -336,6 +336,8 @@ def users_bot_management_settings_markup(settings):
                                     callback_data=f"users_bot_settings_set_welcome_msg:None"),
                InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_PANEL_MANUAL'],
                                     callback_data="users_bot_settings_panel_manual_menu:None"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_SET_FAQ_MSG'],
+                                    callback_data=f"users_bot_settings_faq_management:None"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_VISIBLE_SUBS'],
                                     callback_data=f"users_bot_settings_visible_sub_menu:None"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_TEST_SUB'],
@@ -462,6 +464,17 @@ def users_bot_management_settings_panel_manual_markup():
                                     callback_data=f"users_bot_settings_panel_manual:msg_manual_mac"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_PANEL_MANUAL_LIN'],
                                     callback_data=f"users_bot_settings_panel_manual:msg_manual_linux"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"users_bot_settings:None"))
+    return markup
+
+def users_bot_management_settings_faq_markup(faq):
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 1
+    markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_SET_FAQ_MESSAGE'],
+                                    callback_data=f"users_bot_settings_set_faq_msg:{faq}"))
+    if faq:
+        markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_HIDE_FAQ'],
+                                    callback_data=f"users_bot_settings_hide_faq:None"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"users_bot_settings:None"))
     return markup
 
