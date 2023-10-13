@@ -11,6 +11,8 @@ def user_info_template(usr, server, header=""):
         usr['comment'] = "-"
     if usr['remaining_day'] == 0:
         usr['remaining_day'] = MESSAGES['USER_TIME_EXPIRED']
+    elif usr['remaining_day'] == 1:
+        usr['remaining_day'] = MESSAGES['USER_LAST_DAY']
     else:
         usr['remaining_day'] = f"{usr['remaining_day']} {MESSAGES['DAY_EXPIRE']}"
 
