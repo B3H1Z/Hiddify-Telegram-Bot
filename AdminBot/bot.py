@@ -390,7 +390,8 @@ def search_bot_user_telegram_id(message: Message):
     if not is_it_digit(message, markup=markups.while_edit_user_markup()):
         bot.register_next_step_handler(message, search_bot_user_telegram_id)
         return
-    users = USERS_DB.find_user(telegram_id=int(searched_name))
+    searched_id = message.text
+    users = USERS_DB.find_user(telegram_id=int(searched_id))
     if not users:
         bot.send_message(message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'],
                         reply_markup=markups.main_menu_keyboard_markup())
