@@ -346,6 +346,8 @@ def users_bot_management_settings_markup(settings):
                                     callback_data=f"users_bot_settings_min_depo:{settings['min_deposit_amount']}"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_RENEWAL_METHOD'],
                                     callback_data=f"users_bot_settings_renewal_method_menu:None"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_RESET_FREE_TEST_LIMIT'],
+                                    callback_data=f"users_bot_settings_reset_free_test_limit_question:None"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_BACKUP_BOT'],
                                     callback_data=f"users_bot_settings_backup_bot:None"),
                InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_RESTORE_BOT'],
@@ -474,6 +476,14 @@ def users_bot_edit_owner_info_markup():
                                     callback_data=f"users_bot_owner_info_edit_card_number:None"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_OWNER_INFO_EDIT_CARD_NAME'],
                                     callback_data=f"users_bot_owner_info_edit_card_name:None"))
+    return markup
+
+def users_bot_management_settings_reset_free_test_markup():
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 1
+    markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIRM'],
+                                    callback_data=f"users_bot_management_settings_reset_free_test_confirm:None"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"users_bot_settings:None"))
     return markup
 
 #--------------------------------------End Bot User Management -----------------------------------

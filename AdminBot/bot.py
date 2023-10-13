@@ -2333,6 +2333,25 @@ def callback_query(call: CallbackQuery):
                          reply_markup=markups.while_edit_user_markup())
         bot.register_next_step_handler(call.message, users_bot_sub_status)
 
+    elif key == "users_bot_settings_reset_free_test_limit_question":
+        bot.edit_message_text(MESSAGES['USERS_BOT_SETTINGS_RESET_FREE_TEST_LIMIT_QUESTION'], call.message.chat.id, call.message.message_id,
+                                      reply_markup=markups.users_bot_management_settings_reset_free_test_markup())
+        
+    elif key == "users_bot_management_settings_reset_free_test_confirm":
+        users_list = USERS_DB.select_users()
+        free_test_bot_users =  [user for user in users_list if user['test_subscription']]
+        if free_test_bot_users:
+            for user in free_test_bot_users:
+                status = USERS_DB.edit_user(telegram_id=user['telegram_id'],test_subscription=False)
+                if not status:
+                    bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
+                    return
+            bot.send_message(call.message.chat.id, MESSAGES['SUCCESS_RESET_FREE_TEST'], reply_markup=markups.main_menu_keyboard_markup())
+        else:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'], reply_markup=markups.main_menu_keyboard_markup())
+            
+            
+
 
     # ----------------------------------- Payment Callbacks -----------------------------------
     # Payment - Confirm Payment Callback

@@ -21,6 +21,7 @@
     "SUCCESS_SEARCH_SUB": "✅Subscription found",
     "SUCCESS_SEND_MSG_USERS": "✅Message sent to users",
     "SUCCESS_REMOVED_SERVER": "✅Server removed",
+    "SUCCESS_RESET_FREE_TEST": "✅Free trial limit successfully reset",
     "WAIT": "Please wait...",
     "CANCELED": "❌Canceled",
     "CANCEL_ADD_USER": "❌Add User Canceled",
@@ -105,6 +106,7 @@
     "USERS_BOT_SETTINGS_RESTORE_BOT": "This feature is under test, so be careful when using it and ask your questions from the support group.\nRestore Bot Backup File",
     "USERS_BOT_SETTINGS_RENEWAL_METHOD_ADVANCED_DAYS":"Set the number of days before the end of the subscription to allow the user to renew the subscription:",
     "USERS_BOT_SETTINGS_RENEWAL_METHOD_ADVANCED_USAGE":"Set the remaining GB to allow the user to renew the subscription:",
+    "USERS_BOT_SETTINGS_RESET_FREE_TEST_LIMIT_QUESTION": "Are you sure you want to reset your free trial?\n⚠️By confirming this, all users are able to take a free test again",
     "ERROR_INVALID_USERNAME": "❌Invalid username\nUsername must start with @",
     "ERROR_INVALID_CARD_NUMBER": "❌Invalid card number",
     "PAYMENT_CONFIRMED": "✅Payment confirmed",
@@ -119,6 +121,7 @@
     "ORDER_ID": "Payment number:",
     "SUB_ID": "Subscription ID:",
     "USER_TIME_EXPIRED": "⚠️EXPIRED",
+    "USER_LAST_DAY": "Last Day",
     "PAYMENT_ASK_CHANGE_STATUS": "Do you want to change the status of the payment?",
     "PAYMENT_ACCEPT_STATUS_CONFIRMED": "🟢Confirmed",
     "PAYMENT_ACCEPT_STATUS_NOT_CONFIRMED": "🔴Not Confirmed",
@@ -222,6 +225,7 @@
     "SUCCESS_SEARCH_SUB": "✅اشتراک یافت شد",
     "SUCCESS_SEND_MSG_USERS": "✅پیام به کاربران ارسال شد",
     "SUCCESS_REMOVED_SERVER": "✅سرور حذف شد",
+    "SUCCESS_RESET_FREE_TEST": "✅محدودیت تست رایگان با موفقیت بازنشانی شد",
     "WAIT": "لطفاً منتظر بمانید...",
     "CANCELED": "❌لغو شد",
     "CANCEL_ADD_USER": "❌افزودن کاربر لغو شد",
@@ -305,6 +309,7 @@
     "USERS_BOT_SETTINGS_RESTORE_BOT": "📥 لطفا فایل پشتیبان خود را ارسال کنید: \n توجه داشته باشید که این قابلیت حساس میباشد و در صورت وجود هرگونه سوال یا شبهه، ابتدا با گروه پشتیبانی در ارتباط باشید.",
     "USERS_BOT_SETTINGS_RENEWAL_METHOD_ADVANCED_DAYS":"تعیین کنید که چند روز مانده به پایان اشتراک، کاربر مجاز به تمدید اشتراک باشد:",
     "USERS_BOT_SETTINGS_RENEWAL_METHOD_ADVANCED_USAGE":"تعیین کنید که چند گیگ مانده به پایان اشتراک، کاربر مجاز به تمدید اشتراک باشد:",
+    "USERS_BOT_SETTINGS_RESET_FREE_TEST_LIMIT_QUESTION": "آیا از بازنشانی تست رایگان کاربران اطمینان دارید؟\n⚠️با تایید این مورد تمامی کاربران قادر به گرفتن تست رایگان مجدد می‌باشند",
     "SUCCESS_UPDATE_DATA": "✅اطلاعات با موفقیت به روز شد",
     "ERROR_INVALID_USERNAME": "❌آیدی نامعتبر است\n آیدی باید با @ شروع شود",
     "ERROR_INVALID_CARD_NUMBER": "❌شماره کارت نامعتبر است\nشماره کارت باید 16 رقمی باشد",
@@ -320,6 +325,7 @@
     "ORDER_ID": "شناسه تراکنش:",
     "SUB_ID": "شناسه اشتراک",
     "USER_TIME_EXPIRED": "⚠️منقضی",
+    "USER_LAST_DAY": "آخرین روز",
     "PAYMENT_ASK_CHANGE_STATUS": "آیا میخواهید وضعیت تراکنش را تغییر دهید؟",
     "PAYMENT_ACCEPT_STATUS_CONFIRMED": "🟢تایید شده",
     "PAYMENT_ACCEPT_STATUS_NOT_CONFIRMED": "🔴رد شده",

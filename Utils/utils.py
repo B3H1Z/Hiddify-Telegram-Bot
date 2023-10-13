@@ -102,10 +102,15 @@ def Telegram_users_to_dict(Tel_users_dict):
 # Calculate remaining days
 def calculate_remaining_days(start_date, package_days):
     import datetime
+    import pytz
+
+    datetime_iran = datetime.datetime.now(pytz.timezone('Asia/Tehran'))
+    datetime_iran = datetime_iran.replace(tzinfo=None)
     if start_date is None:
         return package_days
     start_date = datetime.datetime.strptime(start_date, "%Y-%m-%d")
-    remaining_days = package_days - (datetime.datetime.now() - start_date).days
+    # remaining_days = package_days - (datetime.datetime.now() - start_date).days
+    remaining_days = package_days - (datetime_iran - start_date).days + 1
     if remaining_days < 0:
         return 0
     return remaining_days

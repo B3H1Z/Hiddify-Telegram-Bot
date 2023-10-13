@@ -94,6 +94,7 @@
     "USERS_BOT_SETTINGS_RENEWAL_METHOD_FAIRLY": "Fairly",
     "USERS_BOT_SETTINGS_RENEWAL_METHOD_ADVANCED_DAYS": "Maximum Days for Renewal",
     "USERS_BOT_SETTINGS_RENEWAL_METHOD_ADVANCED_USAGE": "Maximum Usage for Renewal",
+    "USERS_BOT_SETTINGS_RESET_FREE_TEST_LIMIT": "Reset free test limit",
     "ABOUT_BOT": "ℹ️",
     "TO_QR": "ً🖼QR",
     "SUPPORT_GROUP": "Support Group",
@@ -209,6 +210,7 @@
     "USERS_BOT_SETTINGS_RENEWAL_METHOD_FAIRLY": "منصفانه",
     "USERS_BOT_SETTINGS_RENEWAL_METHOD_ADVANCED_DAYS": "حداکثر زمان مجاز برای تمدید",
     "USERS_BOT_SETTINGS_RENEWAL_METHOD_ADVANCED_USAGE": "حداکثر مصرف مجاز برای تمدید",
+    "USERS_BOT_SETTINGS_RESET_FREE_TEST_LIMIT": "بازنشانی تست رایگان",
     "ABOUT_BOT": "ℹ️",
     "TO_QR": "ً🖼کیوآر",
     "SUPPORT_GROUP": "گروه پشتیبانی",
