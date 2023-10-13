@@ -835,11 +835,21 @@ def users_bot_sub_status(message: Message):
     if not is_it_digit(message, markup=markups.while_edit_user_markup()):
         bot.register_next_step_handler(message, users_bot_sub_status)
         return
-
+    bot_user = None
     if len(message.text) == 7:
         user = USERS_DB.find_order_subscription(id=int(message.text))
+        if user:
+            orders = USERS_DB.find_order(id=user[0]['order_id'])
+            if orders:
+                bot_users = USERS_DB.find_user(telegram_id=orders[0]['telegram_id'])
+                if bot_users:
+                    bot_user = bot_users[0]
     elif len(message.text) == 8:
         user = USERS_DB.find_non_order_subscription(id=int(message.text))
+        if user:
+            bot_users = USERS_DB.find_user(telegram_id=user[0]['telegram_id'])
+            if bot_users:
+                bot_user = bot_users[0]
     else:
         bot.send_message(message.chat.id, MESSAGES['ERROR_SUB_NOT_FOUND'],
                          reply_markup=markups.main_menu_keyboard_markup())
@@ -847,6 +857,11 @@ def users_bot_sub_status(message: Message):
 
     if not user:
         bot.send_message(message.chat.id, MESSAGES['ERROR_SUB_NOT_FOUND'],
+                         reply_markup=markups.main_menu_keyboard_markup())
+        return
+    
+    if not bot_user:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'],
                          reply_markup=markups.main_menu_keyboard_markup())
         return
     user_uuid = user[0]['uuid']
@@ -870,7 +885,7 @@ def users_bot_sub_status(message: Message):
                              reply_markup=markups.main_menu_keyboard_markup())
         msg = templates.user_info_template(usr, selected_server)
         bot.send_message(message.chat.id, msg,
-                        reply_markup=markups.user_info_markup(usr['uuid']))
+                        reply_markup=markups.sub_search_info_markup(usr['uuid'], bot_user))
 
 
 
