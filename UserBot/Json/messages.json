@@ -88,7 +88,8 @@
         "ANSWER_TO_ADMIN": "Please submit your answer:",
         "MESSAGE_SENDED": "Message Sended",
         "NOT_SET":"Not set",
-        "JOIN_CHANNEL_SUCCESSFUL":"Join channel successful"
+        "JOIN_CHANNEL_SUCCESSFUL":"Join channel successful",
+        "SEND_TICKET_TO_ADMIN": "Please submit your question:"
     },
     "FA": {
         "WELCOME": "به ربات کاربران خوش آمدید",
@@ -179,6 +180,7 @@
         "ANSWER_TO_ADMIN": "لطفا پاسخ خود را ارسال کنید:",
         "MESSAGE_SENDED": "پیام ارسال شد",
         "NOT_SET": "تنظیم نشده",
-        "JOIN_CHANNEL_SUCCESSFUL": "✅عضویت شما در کانال با موفقیت انجام شد"
+        "JOIN_CHANNEL_SUCCESSFUL": "✅عضویت شما در کانال با موفقیت انجام شد",
+        "SEND_TICKET_TO_ADMIN": "لطفا پغام خود را در قالب یک متن واحد وارد کنید سپس ارسال کنید:"
     }
 }

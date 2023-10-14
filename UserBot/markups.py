@@ -166,6 +166,19 @@ def notify_to_admin_markup(user):
     markup.add(InlineKeyboardButton(f"{name}", callback_data=f"bot_user_info:{user['telegram_id']}"))
     return markup
 
+def send_ticket_to_admin():
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 1
+    markup.add(
+        InlineKeyboardButton(KEY_MARKUP['SEND_TICKET_TO_ADMIN'], callback_data=f"send_ticket_to_admin:None"))
+    return markup
+
+def answer_to_user_markup(user_id):
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 1
+    markup.add(InlineKeyboardButton(KEY_MARKUP['ANSWER'], callback_data=f"users_bot_send_message_by_admin:{user_id}"))
+    return markup
+
 def cancel_markup():
     markup = ReplyKeyboardMarkup(row_width=3, resize_keyboard=True)
     markup.add(KeyboardButton(KEY_MARKUP['CANCEL']))
