@@ -3,6 +3,7 @@ from config import LANG, VERSION, API_PATH
 from AdminBot.content import MESSAGES
 from Utils import api, utils 
 import datetime
+import urllib.parse
 
 
 # Single User Info Message Template
@@ -324,7 +325,7 @@ def configs_template(configs):
     chunk_size = 5
 
     for config in configs:
-        messages.append(f"<b>{config[1]}</b>\n<code>{config[0]}</code>\n")
+       messages.append(f"<b>{urllib.parse.unquote(config[1])}</b>\n<code>{config[0]}</code>\n")
 
     for i in range(0, len(messages), chunk_size):
         chunk = messages[i:i + chunk_size]

@@ -836,11 +836,21 @@ def users_bot_sub_status(message: Message):
     if not is_it_digit(message, markup=markups.while_edit_user_markup()):
         bot.register_next_step_handler(message, users_bot_sub_status)
         return
-
+    bot_user = None
     if len(message.text) == 7:
         user = USERS_DB.find_order_subscription(id=int(message.text))
+        if user:
+            orders = USERS_DB.find_order(id=user[0]['order_id'])
+            if orders:
+                bot_users = USERS_DB.find_user(telegram_id=orders[0]['telegram_id'])
+                if bot_users:
+                    bot_user = bot_users[0]
     elif len(message.text) == 8:
         user = USERS_DB.find_non_order_subscription(id=int(message.text))
+        if user:
+            bot_users = USERS_DB.find_user(telegram_id=user[0]['telegram_id'])
+            if bot_users:
+                bot_user = bot_users[0]
     else:
         bot.send_message(message.chat.id, MESSAGES['ERROR_SUB_NOT_FOUND'],
                          reply_markup=markups.main_menu_keyboard_markup())
@@ -848,6 +858,11 @@ def users_bot_sub_status(message: Message):
 
     if not user:
         bot.send_message(message.chat.id, MESSAGES['ERROR_SUB_NOT_FOUND'],
+                         reply_markup=markups.main_menu_keyboard_markup())
+        return
+    
+    if not bot_user:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'],
                          reply_markup=markups.main_menu_keyboard_markup())
         return
     user_uuid = user[0]['uuid']
@@ -871,7 +886,7 @@ def users_bot_sub_status(message: Message):
                              reply_markup=markups.main_menu_keyboard_markup())
         msg = templates.user_info_template(usr, selected_server)
         bot.send_message(message.chat.id, msg,
-                        reply_markup=markups.user_info_markup(usr['uuid']))
+                        reply_markup=markups.sub_search_info_markup(usr['uuid'], bot_user))
 
 
 
@@ -915,6 +930,19 @@ def users_bot_settings_welcome_msg(message: Message):
         return
     bot.send_message(message.chat.id, MESSAGES['SUCCESS_UPDATE_DATA'], reply_markup=markups.main_menu_keyboard_markup())
 
+def users_bot_settings_set_faq_msg(message: Message, msg):
+    if is_it_cancel(message):
+        return
+    
+    status = USERS_DB.edit_str_config("msg_faq", value=message.html_text)
+    if not status:
+        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
+        return
+    settings = utils.all_configs_settings()
+    bot.edit_message_reply_markup(message.chat.id, msg.message_id,
+                                  reply_markup=markups.users_bot_management_settings_faq_markup(settings['msg_faq']))
+
+    bot.send_message(message.chat.id, MESSAGES['SUCCESS_UPDATE_DATA'], reply_markup=markups.main_menu_keyboard_markup())
 
 def users_bot_settings_test_sub_size(message: Message):
     if is_it_cancel(message):
@@ -2168,6 +2196,28 @@ def callback_query(call: CallbackQuery):
                          reply_markup=markups.while_edit_user_markup())
         bot.register_next_step_handler(call.message, users_bot_settings_welcome_msg)
 
+    elif key == "users_bot_settings_faq_management":
+        settings = utils.all_configs_settings()
+        bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,
+                                      reply_markup=markups.users_bot_management_settings_faq_markup(settings['msg_faq']))
+
+    elif key == "users_bot_settings_set_faq_msg":
+        msg = call.message
+        bot.send_message(call.message.chat.id,
+                         f"{MESSAGES['CURRENT_VALUE']}: {value}\n{MESSAGES['USERS_BOT_SETTING_FAQ_MSG']}",
+                         reply_markup=markups.while_edit_user_markup())
+        bot.register_next_step_handler(call.message, users_bot_settings_set_faq_msg, msg)
+
+    elif key == "users_bot_settings_hide_faq":
+        settings = utils.all_configs_settings()
+        status = USERS_DB.edit_str_config("msg_faq", value=None)
+        if not status:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
+            return
+        settings = utils.all_configs_settings()
+        bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,
+                                    reply_markup=markups.users_bot_management_settings_faq_markup(settings['msg_faq']))
+        
     elif key == "users_bot_settings_test_sub_menu":
         settings = utils.all_configs_settings()
         bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,

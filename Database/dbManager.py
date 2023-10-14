@@ -773,6 +773,8 @@ class UserDBManager:
         self.add_str_config("msg_manual_mac", None)
         self.add_str_config("msg_manual_linux", None)
 
+        self.add_str_config("msg_faq", None)
+
         self.add_int_config("min_deposit_amount", 10000)
 
         self.add_int_config("reminder_notification_days", 3)

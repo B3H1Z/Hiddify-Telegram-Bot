@@ -27,6 +27,8 @@
     "MANUAL_MAC": "Mac Manual",
     "MANUAL_LIN": "Linux Manual",
     "SEND_TICKET": "📩Supporter",
+    "SEND_TICKET_TO_ADMIN": "📩Send Message To Admin",
+    "ANSWER": "Answer",
     "TO_QR": "ً🖼QR",
     "CONFIGS_LIST": "📝Configs",
     "WALLET": "💰Wallet",
@@ -36,7 +38,8 @@
     "UPDATE_SUBSCRIPTION_INFO": "🔄Update Subscription Info",
     "JOIN_CHANNEL": "📢Join Channel",
     "FORCE_JOIN_CHANNEL_ACCEPTED": "✅I joined",
-    "SEND_MESSAGE": "Send Message"
+    "SEND_MESSAGE": "Send Message",
+    "FAQ": "⁉FAQ"
   },
   "FA": {
     "BACK": "🔙بازگشت",
@@ -66,6 +69,8 @@
     "MANUAL_MAC": "راهنمای مک",
     "MANUAL_LIN": "راهنمای لینوکس",
     "SEND_TICKET": "📩پشتیبانی",
+    "SEND_TICKET_TO_ADMIN": "📩ارسال پیام به ادمین",
+    "ANSWER": "پاسخ",
     "TO_QR": "ً🖼کیوآر",
     "CONFIGS_LIST": "📝 کانفیگ ها",
     "WALLET": "💰کیف پول",
@@ -75,6 +80,7 @@
     "UPDATE_SUBSCRIPTION_INFO": "🔄 بروزرسانی اطلاعات",
     "JOIN_CHANNEL": "📢عضویت در کانال",
     "FORCE_JOIN_CHANNEL_ACCEPTED": "✅عضو شدم",
-    "SEND_MESSAGE": "📤ارسال پیام"
+    "SEND_MESSAGE": "📤ارسال پیام",
+    "FAQ": "⁉سوالات متداول"
   }
 }
