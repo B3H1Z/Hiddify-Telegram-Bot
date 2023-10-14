@@ -315,10 +315,18 @@ def next_step_send_screenshot(message, charge_wallet):
         
 # Next Step Payment - Send Answer
 def next_step_answer_to_admin(message, admin_id):
-    admin_bot.send_message(int(admin_id), f"{message.text}\n{MESSAGES['INFO_USER_NAME']} {message.from_user.full_name}")
+    admin_bot.send_message(int(admin_id), f"{message.text}\n{MESSAGES['INFO_USER_NAME']} {message.from_user.full_name}",
+                           reply_markup=answer_to_user_markup(message.chat.id))
     bot.send_message(message.chat.id, MESSAGES['MESSAGE_SENDED'],
                          reply_markup=main_menu_keyboard_markup())
 
+# Next Step Payment - Send Ticket To Admin
+def next_step_send_ticket_to_admin(message):
+    for ADMIN in ADMINS_ID:
+        admin_bot.send_message(ADMIN, f"{message.text}\n{MESSAGES['INFO_USER_NAME']} {message.from_user.full_name}",
+                               reply_markup=answer_to_user_markup(message.chat.id))
+        bot.send_message(message.chat.id, MESSAGES['MESSAGE_SENDED'],
+                            reply_markup=main_menu_keyboard_markup())
 
 # ----------------------------------- Buy From Wallet Area -----------------------------------
 # Next Step Buy From Wallet - Send Name
@@ -677,17 +685,25 @@ def callback_query(call: CallbackQuery):
     elif key == 'confirm_renewal_from_wallet':
         plan = USERS_DB.find_plan(id=value)[0]
         renewal_from_wallet_confirm(call.message)
+
     # Ask To Send Screenshot
     elif key == 'send_screenshot':
         bot.delete_message(call.message.chat.id, call.message.message_id)
         bot.send_message(call.message.chat.id, MESSAGES['REQUEST_SEND_SCREENSHOT'])
         bot.register_next_step_handler(call.message, next_step_send_screenshot, charge_wallet)
+
     #Answer to Admin After send Screenshot
     elif key == 'answer_to_admin':
         #bot.delete_message(call.message.chat.id,call.message.message_id)
         bot.send_message(call.message.chat.id, MESSAGES['ANSWER_TO_ADMIN'],
                         reply_markup=cancel_markup())
         bot.register_next_step_handler(call.message, next_step_answer_to_admin, value)
+
+    #Send Ticket to Admin 
+    elif key == 'send_ticket_to_admin':
+        bot.send_message(call.message.chat.id, MESSAGES['SEND_TICKET_TO_ADMIN'],
+                        reply_markup=cancel_markup())
+        bot.register_next_step_handler(call.message, next_step_send_ticket_to_admin)
 
     # ----------------------------------- User Subscriptions Info Area -----------------------------------
     # Unlink non-order subscription
@@ -1173,6 +1189,16 @@ def help_guide(message: Message):
         return
     bot.send_message(message.chat.id, MESSAGES['MANUAL_HDR'],
                      reply_markup=users_bot_management_settings_panel_manual_markup())
+    
+# Help Guide Message Handler
+@bot.message_handler(func=lambda message: message.text == KEY_MARKUP['FAQ'])
+def faq(message: Message):
+    join_status = is_user_in_channel(message.chat.id)
+    if not join_status:
+        return
+    settings = utils.all_configs_settings()
+    faq_msg = settings['msg_faq'] if settings['msg_faq'] else MESSAGES['UNKNOWN_ERROR']
+    bot.send_message(message.chat.id, faq_msg, reply_markup=main_menu_keyboard_markup())
 
 
 # Ticket To Support Message Handler
@@ -1182,7 +1208,7 @@ def send_ticket(message: Message):
     if not join_status:
         return
     owner_info = USERS_DB.find_str_config(key="support_username")
-    bot.send_message(message.chat.id, support_template(owner_info), reply_markup=main_menu_keyboard_markup())
+    bot.send_message(message.chat.id, support_template(owner_info), reply_markup=send_ticket_to_admin())
 
 
 # Link Subscription Message Handler

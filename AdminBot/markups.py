@@ -336,6 +336,8 @@ def users_bot_management_settings_markup(settings):
                                     callback_data=f"users_bot_settings_set_welcome_msg:None"),
                InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_PANEL_MANUAL'],
                                     callback_data="users_bot_settings_panel_manual_menu:None"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_SET_FAQ_MSG'],
+                                    callback_data=f"users_bot_settings_faq_management:None"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_VISIBLE_SUBS'],
                                     callback_data=f"users_bot_settings_visible_sub_menu:None"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_TEST_SUB'],
@@ -465,6 +467,17 @@ def users_bot_management_settings_panel_manual_markup():
     markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"users_bot_settings:None"))
     return markup
 
+def users_bot_management_settings_faq_markup(faq):
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 1
+    markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_SET_FAQ_MESSAGE'],
+                                    callback_data=f"users_bot_settings_set_faq_msg:{faq}"))
+    if faq:
+        markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_HIDE_FAQ'],
+                                    callback_data=f"users_bot_settings_hide_faq:None"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"users_bot_settings:None"))
+    return markup
+
 
 # Users Bot Management - Edit Owner Info - Inline Keyboard Markup
 def users_bot_edit_owner_info_markup():
@@ -484,6 +497,17 @@ def users_bot_management_settings_reset_free_test_markup():
     markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIRM'],
                                     callback_data=f"users_bot_management_settings_reset_free_test_confirm:None"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"users_bot_settings:None"))
+    return markup
+
+# Single Subscription Inline Keyboard Markup
+def sub_search_info_markup(uuid,user):
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 1
+    markup.add(InlineKeyboardButton(KEY_MARKUP['CONFIGS_USER'], callback_data=f"user_config:{uuid}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['EDIT_USER'], callback_data=f"user_edit:{uuid}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['DELETE_USER'], callback_data=f"user_delete:{uuid}"))
+    name = user['full_name'] if user['full_name'] else user['telegram_id']
+    markup.add(InlineKeyboardButton(f"{name}", callback_data=f"bot_user_info:{user['telegram_id']}"))
     return markup
 
 #--------------------------------------End Bot User Management -----------------------------------

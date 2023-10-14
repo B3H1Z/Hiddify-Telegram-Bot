@@ -13,8 +13,13 @@ def main_menu_keyboard_markup():
     markup.add(KeyboardButton(KEY_MARKUP['LINK_SUBSCRIPTION']), KeyboardButton(KEY_MARKUP['BUY_SUBSCRIPTION']))
     markup.add(KeyboardButton(KEY_MARKUP['FREE_TEST']), KeyboardButton(KEY_MARKUP['WALLET']))
     # KeyboardButton(KEY_MARKUP['TO_QR']),
-    markup.add(KeyboardButton(KEY_MARKUP['SEND_TICKET']),
-               KeyboardButton(KEY_MARKUP['MANUAL']))
+    settings = all_configs_settings()
+    if settings['msg_faq']:
+        markup.add(KeyboardButton(KEY_MARKUP['SEND_TICKET']),
+                   KeyboardButton(KEY_MARKUP['MANUAL']), KeyboardButton(KEY_MARKUP['FAQ']))
+    else:
+        markup.add(KeyboardButton(KEY_MARKUP['SEND_TICKET']),
+                   KeyboardButton(KEY_MARKUP['MANUAL']))
     return markup
 
 
@@ -159,6 +164,19 @@ def notify_to_admin_markup(user):
     markup = InlineKeyboardMarkup()
     markup.row_width = 1
     markup.add(InlineKeyboardButton(f"{name}", callback_data=f"bot_user_info:{user['telegram_id']}"))
+    return markup
+
+def send_ticket_to_admin():
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 1
+    markup.add(
+        InlineKeyboardButton(KEY_MARKUP['SEND_TICKET_TO_ADMIN'], callback_data=f"send_ticket_to_admin:None"))
+    return markup
+
+def answer_to_user_markup(user_id):
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 1
+    markup.add(InlineKeyboardButton(KEY_MARKUP['ANSWER'], callback_data=f"users_bot_send_message_by_admin:{user_id}"))
     return markup
 
 def cancel_markup():
