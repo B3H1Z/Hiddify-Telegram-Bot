@@ -939,8 +939,11 @@ def users_bot_settings_set_faq_msg(message: Message, msg):
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
         return
     settings = utils.all_configs_settings()
-    bot.edit_message_reply_markup(message.chat.id, msg.message_id,
-                                  reply_markup=markups.users_bot_management_settings_faq_markup(settings['msg_faq']))
+    try:
+        bot.edit_message_reply_markup(message.chat.id, msg.message_id,
+                                  reply_markup=markups.users_bot_management_settings_faq_markup())
+    except:
+        pass
 
     bot.send_message(message.chat.id, MESSAGES['SUCCESS_UPDATE_DATA'], reply_markup=markups.main_menu_keyboard_markup())
 
@@ -2196,14 +2199,15 @@ def callback_query(call: CallbackQuery):
         bot.register_next_step_handler(call.message, users_bot_settings_welcome_msg)
 
     elif key == "users_bot_settings_faq_management":
-        settings = utils.all_configs_settings()
         bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,
-                                      reply_markup=markups.users_bot_management_settings_faq_markup(settings['msg_faq']))
+                                      reply_markup=markups.users_bot_management_settings_faq_markup())
 
     elif key == "users_bot_settings_set_faq_msg":
+        settings = utils.all_configs_settings()
+        faq_text = settings['msg_faq']
         msg = call.message
         bot.send_message(call.message.chat.id,
-                         f"{MESSAGES['CURRENT_VALUE']}: {value}\n{MESSAGES['USERS_BOT_SETTING_FAQ_MSG']}",
+                         f"{MESSAGES['CURRENT_VALUE']}: {faq_text}\n{MESSAGES['USERS_BOT_SETTING_FAQ_MSG']}",
                          reply_markup=markups.while_edit_user_markup())
         bot.register_next_step_handler(call.message, users_bot_settings_set_faq_msg, msg)
 
@@ -2215,7 +2219,7 @@ def callback_query(call: CallbackQuery):
             return
         settings = utils.all_configs_settings()
         bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,
-                                    reply_markup=markups.users_bot_management_settings_faq_markup(settings['msg_faq']))
+                                    reply_markup=markups.users_bot_management_settings_faq_markup())
         
     elif key == "users_bot_settings_test_sub_menu":
         settings = utils.all_configs_settings()
