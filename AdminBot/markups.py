@@ -467,15 +467,15 @@ def users_bot_management_settings_panel_manual_markup():
     markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"users_bot_settings:None"))
     return markup
 
-def users_bot_management_settings_faq_markup(faq):
+def users_bot_management_settings_faq_markup():
     markup = InlineKeyboardMarkup()
     markup.row_width = 1
+    settings = all_configs_settings()
     markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_SET_FAQ_MESSAGE'],
-                                    callback_data=f"users_bot_settings_set_faq_msg:{faq}"))
-    if faq:
+                                    callback_data=f"users_bot_settings_set_faq_msg:None"))
+    if settings['msg_faq']:
         markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_HIDE_FAQ'],
                                     callback_data=f"users_bot_settings_hide_faq:None"))
-    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"users_bot_settings:None"))
     return markup
 
 
