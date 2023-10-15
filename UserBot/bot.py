@@ -315,6 +315,8 @@ def next_step_send_screenshot(message, charge_wallet):
         
 # Next Step Payment - Send Answer
 def next_step_answer_to_admin(message, admin_id):
+    if is_it_cancel(message):
+        return
     bot_users = USERS_DB.find_user(telegram_id=message.chat.id)
     if bot_users:
         bot_user = bot_users[0]
@@ -325,6 +327,8 @@ def next_step_answer_to_admin(message, admin_id):
 
 # Next Step Payment - Send Ticket To Admin
 def next_step_send_ticket_to_admin(message):
+    if is_it_cancel(message):
+        return
     bot_users = USERS_DB.find_user(telegram_id=message.chat.id)
     if bot_users:
         bot_user = bot_users[0]
