@@ -667,6 +667,8 @@ def restore_json_bot(file):
     status_db = USERS_DB.restore_from_json(bk_json_file)
     if not status_db:
         return False
+    if not os.path.exists(os.path.join(extract_path, os.path.basename(RECEIPTIONS_LOC))):
+        os.mkdir(os.path.join(extract_path, os.path.basename(RECEIPTIONS_LOC)))
     # move reception files
     for file in os.listdir(os.path.join(extract_path, os.path.basename(RECEIPTIONS_LOC))):
         try:
@@ -675,14 +677,14 @@ def restore_json_bot(file):
         except Exception as e:
             logging.exception(f"Exception: {e}")
     try:
-        # remove tmp folder
-        os.remove(bk_json_file)
-        # remove RECEIPTIONS all files
-        for file in os.listdir(os.path.join(extract_path, os.path.basename(RECEIPTIONS_LOC))):
-            os.remove(os.path.join(extract_path, os.path.basename(RECEIPTIONS_LOC), file))
-        os.rmdir(os.path.join(extract_path, os.path.basename(RECEIPTIONS_LOC)))
-        # romove hidyBot.db
-        os.remove(os.path.join(extract_path, os.path.basename(USERS_DB_LOC)))
+        # # remove tmp folder
+        # os.remove(bk_json_file)
+        # # remove RECEIPTIONS all files
+        # for file in os.listdir(os.path.join(extract_path, os.path.basename(RECEIPTIONS_LOC))):
+        #     os.remove(os.path.join(extract_path, os.path.basename(RECEIPTIONS_LOC), file))
+        # os.rmdir(os.path.join(extract_path, os.path.basename(RECEIPTIONS_LOC)))
+        # # romove hidyBot.db
+        # os.remove(os.path.join(extract_path, os.path.basename(USERS_DB_LOC)))
         shutil.rmtree(extract_path)
     except Exception as e:
         logging.exception(f"Exception: {e}")
