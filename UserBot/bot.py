@@ -315,17 +315,23 @@ def next_step_send_screenshot(message, charge_wallet):
         
 # Next Step Payment - Send Answer
 def next_step_answer_to_admin(message, admin_id):
-    admin_bot.send_message(int(admin_id), f"{message.text}\n{MESSAGES['INFO_USER_NAME']} {message.from_user.full_name}",
-                           reply_markup=answer_to_user_markup(message.chat.id))
-    bot.send_message(message.chat.id, MESSAGES['MESSAGE_SENDED'],
+    bot_users = USERS_DB.find_user(telegram_id=message.chat.id)
+    if bot_users:
+        bot_user = bot_users[0]
+    admin_bot.send_message(int(admin_id), f"{MESSAGES['NEW_TICKET_RECEIVED']}\n{MESSAGES['TICKET_TEXT']} {message.text}",
+                           reply_markup=answer_to_user_markup(bot_user,message.chat.id))
+    bot.send_message(message.chat.id, MESSAGES['SEND_TICKET_TO_ADMIN_RESPONSE'],
                          reply_markup=main_menu_keyboard_markup())
 
 # Next Step Payment - Send Ticket To Admin
 def next_step_send_ticket_to_admin(message):
+    bot_users = USERS_DB.find_user(telegram_id=message.chat.id)
+    if bot_users:
+        bot_user = bot_users[0]
     for ADMIN in ADMINS_ID:
-        admin_bot.send_message(ADMIN, f"{message.text}\n{MESSAGES['INFO_USER_NAME']} {message.from_user.full_name}",
-                               reply_markup=answer_to_user_markup(message.chat.id))
-        bot.send_message(message.chat.id, MESSAGES['MESSAGE_SENDED'],
+        admin_bot.send_message(ADMIN, f"{MESSAGES['NEW_TICKET_RECEIVED']}\n{MESSAGES['TICKET_TEXT']} {message.text}",
+                               reply_markup=answer_to_user_markup(bot_user,message.chat.id))
+        bot.send_message(message.chat.id, MESSAGES['SEND_TICKET_TO_ADMIN_RESPONSE'],
                             reply_markup=main_menu_keyboard_markup())
 
 # ----------------------------------- Buy From Wallet Area -----------------------------------
@@ -700,7 +706,8 @@ def callback_query(call: CallbackQuery):
         bot.register_next_step_handler(call.message, next_step_answer_to_admin, value)
 
     #Send Ticket to Admin 
-    elif key == 'send_ticket_to_admin':
+    elif key == 'send_ticket_to_support':
+        bot.delete_message(call.message.chat.id,call.message.message_id)
         bot.send_message(call.message.chat.id, MESSAGES['SEND_TICKET_TO_ADMIN'],
                         reply_markup=cancel_markup())
         bot.register_next_step_handler(call.message, next_step_send_ticket_to_admin)
@@ -1207,8 +1214,7 @@ def send_ticket(message: Message):
     join_status = is_user_in_channel(message.chat.id)
     if not join_status:
         return
-    owner_info = USERS_DB.find_str_config(key="support_username")
-    bot.send_message(message.chat.id, support_template(owner_info), reply_markup=send_ticket_to_admin())
+    bot.send_message(message.chat.id, MESSAGES['SEND_TICKET_TO_ADMIN_TEMPLATE'], reply_markup=send_ticket_to_admin())
 
 
 # Link Subscription Message Handler

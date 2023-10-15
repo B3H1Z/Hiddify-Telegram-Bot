@@ -202,7 +202,9 @@
     "EDIT_WALLET_BALANCE": "Please enter the new balance:",
     "SEND_MESSAGE_TO_USER": "Please enter message you want to send to the user:",
     "MESSAGE_SENDED": "Message Sended",
-    "ADMIN": "َAdmin:"
+    "ADMIN": "َAdmin:",
+    "MESSAGE_FROM_ADMIN": "Message from admin",
+    "MESSAGE_TEXT": "Message:"
   },
   "FA": {
     "WELCOME": "به ربات مدیریت هیدی بات خوش آمدید.",
@@ -407,6 +409,8 @@
     "EDIT_WALLET_BALANCE": "لطفا مبلغی که میخواهید موجودی کیف پول به آن تغییر کند را به تومان وارد کنید:",
     "SEND_MESSAGE_TO_USER": "لطفا متن پیامی که می خواهید برای کاربر ارسال شود را وارد کنید:",
     "MESSAGE_SENDED": "پیام ارسال شد",
-    "ADMIN": "ادمین:"
+    "ADMIN": "ادمین:",
+    "MESSAGE_FROM_ADMIN": "📬پیام جدیدی از سمت ادمین دریافت شد",
+    "MESSAGE_TEXT": "📄متن پیام:"
   }
 }

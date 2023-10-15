@@ -89,7 +89,11 @@
         "MESSAGE_SENDED": "Message Sended",
         "NOT_SET":"Not set",
         "JOIN_CHANNEL_SUCCESSFUL":"Join channel successful",
-        "SEND_TICKET_TO_ADMIN": "Please submit your question:"
+        "SEND_TICKET_TO_ADMIN": "Please submit your question:",
+        "SEND_TICKET_TO_ADMIN_RESPONSE": "✅Your message has been sent to support\n⏳We will respond as soon as possible.",
+        "SEND_TICKET_TO_ADMIN_TEMPLATE":"Do you have any questions?\nContact us.",
+        "NEW_TICKET_RECEIVED": "📩New ticket received",
+        "TICKET_TEXT": "📄Ticket text:"
     },
     "FA": {
         "WELCOME": "به ربات کاربران خوش آمدید",
@@ -181,6 +185,10 @@
         "MESSAGE_SENDED": "پیام ارسال شد",
         "NOT_SET": "تنظیم نشده",
         "JOIN_CHANNEL_SUCCESSFUL": "✅عضویت شما در کانال با موفقیت انجام شد",
-        "SEND_TICKET_TO_ADMIN": "لطفا پغام خود را در قالب یک متن واحد وارد کنید سپس ارسال کنید:"
+        "SEND_TICKET_TO_ADMIN": "📞لطفا سوال یا موضوع مورد بحث را در قالب یک پیام کامل و جامع ارسال کنید:",
+        "SEND_TICKET_TO_ADMIN_RESPONSE": "✅ پیام شما با موفقیت برای پشتیبانی ارسال شد\n⏳ما در سریع ترین زمان ممکن پاسخگو خواهیم بود.",
+        "SEND_TICKET_TO_ADMIN_TEMPLATE":"نیاز به پشتیبانی دارید؟\nبا ما در ارتباط باشید.",
+        "NEW_TICKET_RECEIVED": "📩تیکت جدیدی دریافت شد",
+        "TICKET_TEXT": "📄متن تیکت:"
     }
 }

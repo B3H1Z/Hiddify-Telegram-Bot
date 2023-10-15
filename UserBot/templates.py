@@ -166,27 +166,27 @@ def connection_help_template(header=""):
 
 
 # Support Info Template
-def support_template(owner_info, header=""):
-    username = None
-    owner_info = all_configs_settings()
-    if owner_info:
-        username = owner_info['support_username'] if owner_info['support_username'] else "-"
-    else:
-        username = "-"
+# def support_template(owner_info, header=""):
+#     username = None
+#     owner_info = all_configs_settings()
+#     if owner_info:
+#         username = owner_info['support_username'] if owner_info['support_username'] else "-"
+#     else:
+#         username = "-"
 
-    if LANG == 'FA':
-        return f"""
-{header}
+#     if LANG == 'FA':
+#         return f"""
+# {header}
 
-📞پشتیبانی: {username}
-"""
+# 📞پشتیبانی: {username}
+# """
 
-    elif LANG == 'EN':
-        return f"""
-{header}
+#     elif LANG == 'EN':
+#         return f"""
+# {header}
 
-📞Supporter: {username}
-"""
+# 📞Supporter: {username}
+# """
 
 
 # Alert Package Days Template
