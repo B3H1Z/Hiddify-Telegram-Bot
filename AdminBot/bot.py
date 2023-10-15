@@ -1103,7 +1103,7 @@ def users_bot_send_message_to_user(message: Message, telegram_id):
     if is_it_cancel(message):
         return
     user_bot.send_message(int(telegram_id),
-                        f"{MESSAGES['ADMIN']}\n{message.text}", reply_markup=markups.send_message_to_user_markup(message.chat.id))
+                        f"{MESSAGES['MESSAGE_FROM_ADMIN']}\n{MESSAGES['MESSAGE_TEXT']} {message.text}", reply_markup=markups.send_message_to_user_markup(message.chat.id))
     bot.send_message(message.chat.id, MESSAGES['MESSAGE_SENDED'],
                         reply_markup=markups.main_menu_keyboard_markup())
     
@@ -1666,7 +1666,6 @@ def callback_query(call: CallbackQuery):
 
     elif key == "bot_user_info":
         selected_telegram_id = value
-        print(selected_telegram_id)
         users = USERS_DB.find_user(telegram_id=int(value))
         if not users:
              bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'],
