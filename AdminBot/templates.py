@@ -64,6 +64,7 @@ def plan_info_template(plan, orders, header=""):
 {MESSAGES['INFO_PLAN_USAGE']} {plan['size_gb']} 
 {MESSAGES['INFO_PLAN_DAYS']} {plan['days']} 
 {MESSAGES['INFO_PLAN_PRICE']} {utils.rial_to_toman(plan['price'])} {MESSAGES['TOMAN']}
+{MESSAGES['INFO_PLAN_DESC']} {plan['description']}
 {MESSAGES['INFO_PLAN_NUM_ORDER']} {num_orders} 
 {MESSAGES['INFO_PLAN_TOTAL_SALE']} {utils.rial_to_toman(sale)} {MESSAGES['TOMAN']}
 """

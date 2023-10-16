@@ -116,7 +116,8 @@
     "YES": "✅Yes",
     "ANSWER": "Answer",
     "SEND_MESSAGE": "Send Message",
-    "DEBUG":"DEBUG"
+    "DEBUG":"DEBUG",
+    "SKIP":"⏩Skip"
   },
   "FA": {
     "CONFIRM": "✅تأیید",
@@ -235,7 +236,8 @@
     "YES": "✅بله",
     "ANSWER": "📤پاسخ",
     "SEND_MESSAGE": "📤ارسال پیام",
-    "DEBUG":"DEBUG"
+    "DEBUG":"DEBUG",
+    "SKIP":"⏩رد کردن"
 
   }
 }

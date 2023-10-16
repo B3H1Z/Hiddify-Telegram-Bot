@@ -41,7 +41,7 @@ def wallet_info_template(balance):
 
 # Plan Info Template
 def plan_info_template(plan, header=""):
-    return f"""
+    msg = f"""
 {header}
 {MESSAGES['PLAN_INFO']}
 
@@ -49,7 +49,10 @@ def plan_info_template(plan, header=""):
 {MESSAGES['PLAN_INFO_DAYS']} {plan['days']} {MESSAGES['DAY_EXPIRE']}
 {MESSAGES['PLAN_INFO_PRICE']} {rial_to_toman(plan['price'])} {MESSAGES['TOMAN']}
 """
-
+    if plan['description']:
+        msg += f"""{MESSAGES['PLAN_INFO_DESC']} {plan['description']}"""
+    return msg
+    
 
 # Owner Info Template (For Payment)
 def owner_info_template(card_number, card_holder_name, price, header=""):

@@ -33,6 +33,7 @@
         "PLAN_INFO_SIZE": "Size:",
         "PLAN_INFO_DAYS": "Days:",
         "PLAN_INFO_PRICE": "Price:",
+        "PLAN_INFO_DESC": "Description:",
         "TOMAN": "T",
         "RIAL": "R",
         "REQUEST_SEND_SCREENSHOT": "Please send your payment receipt.",
@@ -126,9 +127,10 @@
         "PLAN_ADD_NAME": "لطفا نام خود را وارد کنید:",
         "SUBSCRIPTION_SUCCESS_ADDED": "✅اشتراک شما با موفقیت اضافه شد.",
         "PLAN_INFO": "📋اطلاعات پلن انتخاب شده",
-        "PLAN_INFO_SIZE": "حجم پلن:",
-        "PLAN_INFO_PRICE": "قیمت پلن:",
-        "PLAN_INFO_DAYS": "زمان پلن:",
+        "PLAN_INFO_SIZE": "📊حجم:",
+        "PLAN_INFO_PRICE": "💰قیمت:",
+        "PLAN_INFO_DAYS": "📆زمان:",
+        "PLAN_INFO_DESC": "✏️توضیحات:",
         "TOMAN": "تومان",
         "RIAL": "ریال",
         "REQUEST_SEND_SCREENSHOT": "⬇️لطفا رسید پرداخت خود را در زیر این پیام ارسال کنید:",

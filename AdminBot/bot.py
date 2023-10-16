@@ -689,9 +689,20 @@ def users_bot_add_plan_price(message: Message):
         bot.register_next_step_handler(message, users_bot_add_plan_price)
         return
     add_plan_data['price'] = utils.toman_to_rial(message.text)
+    bot.send_message(message.chat.id, MESSAGES['USERS_BOT_ADD_PLAN_DESC'],
+                     reply_markup=markups.while_edit_skip_user_markup())
+    bot.register_next_step_handler(message, users_bot_add_plan_description)
+def users_bot_add_plan_description(message: Message):
+    if is_it_cancel(message):
+        return
+    if message.text == KEY_MARKUP['SKIP']:
+        add_plan_data['description'] = None
+    else:
+        add_plan_data['description'] = message.text
+    
     msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=markups.while_edit_user_markup())
     status = utils.users_bot_add_plan(add_plan_data['usage'], add_plan_data['days'],
-                                      add_plan_data['price'], add_plan_data['server_id'])
+                                      add_plan_data['price'], add_plan_data['server_id'], add_plan_data['description'])
     bot.delete_message(message.chat.id, msg_wait.message_id)
     if not status:
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
@@ -708,6 +719,8 @@ def users_bot_add_plan_price(message: Message):
         plans_markup = markups.plans_list_markup(plans_list,add_plan_data['server_id'])
         bot.send_message(message.chat.id, {MESSAGES['USERS_BOT_PLANS_LIST']},
                          reply_markup=plans_markup)
+
+
     
 
 # Users Bot - Edit Owner Info - Username

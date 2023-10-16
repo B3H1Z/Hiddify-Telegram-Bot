@@ -92,6 +92,11 @@ def while_edit_user_markup():
     markup.add(KeyboardButton(KEY_MARKUP['CANCEL']))
     return markup
 
+def while_edit_skip_user_markup():
+    markup = ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+    markup.add(KeyboardButton(KEY_MARKUP['SKIP']))
+    markup.add(KeyboardButton(KEY_MARKUP['CANCEL']))
+    return markup
 
 # Confirm Add User Reply Keyboard Markup
 def confirm_add_user_markup():
