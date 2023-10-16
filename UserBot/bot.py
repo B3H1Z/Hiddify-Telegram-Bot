@@ -1299,7 +1299,7 @@ def free_test(message: Message):
         else:
             # bot.send_message(message.chat.id, MESSAGES['REQUEST_SEND_NAME'], reply_markup=cancel_markup())
             # bot.register_next_step_handler(message, next_step_send_name_for_get_free_test)
-            msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=main_menu_keyboard_markup())
+            msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'])
             servers = USERS_DB.select_servers()
             server_list = []
             if not servers:
