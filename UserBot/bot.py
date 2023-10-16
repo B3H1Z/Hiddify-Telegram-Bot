@@ -756,6 +756,7 @@ def callback_query(call: CallbackQuery):
 
         bot.register_next_step_handler(call.message, next_step_increase_wallet_balance)
     elif key == 'increase_wallet_balance_specific':
+        bot.delete_message(call.message.chat.id, call.message.message_id)
         increase_wallet_balance_specific(call.message,value)
     elif key == 'renewal_subscription':
         settings = utils.all_configs_settings()
