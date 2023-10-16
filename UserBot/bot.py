@@ -104,15 +104,15 @@ def buy_from_wallet_confirm(message: Message, plan):
     if not wallet:
         # Wallet not created
         bot.send_message(message.chat.id, MESSAGES['LACK_OF_WALLET_BALANCE'],
-                         reply_markup=main_menu_keyboard_markup())
-
+                         reply_markup=wallet_info_markup())
     if wallet:
         wallet = wallet[0]
         if plan['price'] > wallet['balance']:
             bot.send_message(message.chat.id, MESSAGES['LACK_OF_WALLET_BALANCE'],
-                             reply_markup=main_menu_keyboard_markup())
+                             reply_markup=wallet_info_specific_markup(plan['price'] - wallet['balance']))
             return
         else:
+            bot.delete_message(message.chat.id, message.message_id)
             bot.send_message(message.chat.id, MESSAGES['REQUEST_SEND_NAME'], reply_markup=cancel_markup())
             bot.register_next_step_handler(message, next_step_send_name_for_buy_from_wallet, plan)
 
@@ -575,6 +575,19 @@ def next_step_increase_wallet_balance(message):
                      owner_info_template(settings['card_number'], settings['card_holder'], charge_wallet['amount']),
                      reply_markup=send_screenshot_markup(plan_id=charge_wallet['id']))
 
+def increase_wallet_balance_specific(message,amount):
+    charge_wallet['amount'] = str(amount)
+    if settings['three_random_num_price'] == 1:
+        charge_wallet['amount'] = utils.replace_last_three_with_random(str(amount))
+
+    charge_wallet['id'] = random.randint(1000000, 9999999)
+
+    # Send 0 to identify wallet balance charge
+    bot.send_message(message.chat.id,
+                     owner_info_template(settings['card_number'], settings['card_holder'], charge_wallet['amount']),
+                     reply_markup=send_screenshot_markup(plan_id=charge_wallet['id']))
+    
+
 
 def update_info_subscription(message: Message, uuid,markup=None):
     value = uuid
@@ -653,6 +666,9 @@ def callback_query(call: CallbackQuery):
 
     # ----------------------------------- Buy Plan Area -----------------------------------
     elif key == 'server_selected':
+        if value == 'False':
+            bot.send_message(call.message.chat.id, MESSAGES['SERVER_IS_FULL'], reply_markup=main_menu_keyboard_markup())
+            return
         selected_server_id = int(value)
         plans = USERS_DB.find_plan(server_id=int(value))
         if not plans:
@@ -666,6 +682,9 @@ def callback_query(call: CallbackQuery):
                                     reply_markup=plan_markup)
         
     elif key == 'free_test_server_selected':
+        if value == 'False':
+            bot.send_message(call.message.chat.id, MESSAGES['SERVER_IS_FULL'], reply_markup=main_menu_keyboard_markup())
+            return
         users = USERS_DB.find_user(telegram_id=call.message.chat.id)
         if users:
             user = users[0]
@@ -691,7 +710,6 @@ def callback_query(call: CallbackQuery):
     elif key == 'confirm_buy_from_wallet':
         plan = USERS_DB.find_plan(id=value)[0]
         buy_from_wallet_confirm(call.message, plan)
-        bot.delete_message(call.message.chat.id, call.message.message_id)
     elif key == 'confirm_renewal_from_wallet':
         plan = USERS_DB.find_plan(id=value)[0]
         renewal_from_wallet_confirm(call.message)
@@ -737,8 +755,8 @@ def callback_query(call: CallbackQuery):
         bot.send_message(call.message.chat.id, MESSAGES['INCREASE_WALLET_BALANCE_AMOUNT'], reply_markup=cancel_markup())
 
         bot.register_next_step_handler(call.message, next_step_increase_wallet_balance)
-
-
+    elif key == 'increase_wallet_balance_specific':
+        increase_wallet_balance_specific(call.message,value)
     elif key == 'renewal_subscription':
         settings = utils.all_configs_settings()
         if not settings['renewal_subscription_status']:
@@ -1057,7 +1075,10 @@ def callback_query(call: CallbackQuery):
             if users_list:
                 user_index = len(users_list)
             if server['user_limit'] > user_index:
-                server_list.append(server)
+                server_list.append([server,True])
+            else:
+                server_list.append([server,False])
+                
         # bad request telbot api
         # bot.edit_message_text(chat_id=message.chat.id, message_id=msg_wait.message_id,
         #                                   text= MESSAGES['SERVERS_LIST'], reply_markup=servers_list_markup(server_list))
@@ -1174,7 +1195,9 @@ def buy_subscription(message: Message):
         if users_list:
             user_index = len(users_list)
         if server['user_limit'] > user_index:
-            server_list.append(server)
+            server_list.append([server,True])
+        else:
+            server_list.append([server,False])
     # bad request telbot api
     # bot.edit_message_text(chat_id=message.chat.id, message_id=msg_wait.message_id,
     #                                   text= MESSAGES['SERVERS_LIST'], reply_markup=servers_list_markup(server_list))
@@ -1289,7 +1312,9 @@ def free_test(message: Message):
                 if users_list:
                     user_index = len(users_list)
                 if server['user_limit'] > user_index:
-                    server_list.append(server)
+                    server_list.append([server,True])
+                else:
+                    server_list.append([server,False])
             # bad request telbot api
             # bot.edit_message_text(chat_id=message.chat.id, message_id=msg_wait.message_id,
             #                                   text= MESSAGES['SERVERS_LIST'], reply_markup=servers_list_markup(server_list))

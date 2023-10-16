@@ -241,7 +241,6 @@ def set_config_in_db(db, admin_ids, token, url, lang, client_token):
             db.add_str_config("bot_token_client", value=client_token)
             db.add_str_config("bot_lang", value=lang)
         else:
-            print(json.dumps(admin_ids))
             db.edit_str_config("bot_admin_id", value=json.dumps(admin_ids))
             db.edit_str_config("bot_token_admin", value=token)
             db.edit_str_config("bot_token_client", value=client_token)

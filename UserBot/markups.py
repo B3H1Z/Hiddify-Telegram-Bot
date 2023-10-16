@@ -4,7 +4,7 @@ from telebot.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMar
 from UserBot.content import KEY_MARKUP, MESSAGES
 from UserBot.content import MESSAGES
 from Utils.utils import rial_to_toman,all_configs_settings
-
+from Utils.api import *
 
 # Main Menu Reply Keyboard Markup
 def main_menu_keyboard_markup():
@@ -142,8 +142,10 @@ def servers_list_markup(servers, free_test=False):
     keys = []
     if servers:
         for server in servers:
-            keys.append(InlineKeyboardButton(f"{server['title']}",
-                                             callback_data=f"{callback}:{server['id']}"))
+            server_title = server[0]['title'] if server[1] else f"{server[0]['title']}⛔️"
+            callback_2 = f"{server[0]['id']}" if server[1] else "False"
+            keys.append(InlineKeyboardButton(f"{server_title}",
+                                             callback_data=f"{callback}:{callback_2}"))
         keys.append(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"del_msg:None"))
     if len(keys) == 0:
         return None
@@ -195,6 +197,13 @@ def wallet_info_markup():
     markup.row_width = 1
     markup.add(
         InlineKeyboardButton(KEY_MARKUP['INCREASE_WALLET_BALANCE'], callback_data=f"increase_wallet_balance:wallet"))
+    return markup
+
+def wallet_info_specific_markup(amount):
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 1
+    markup.add(
+        InlineKeyboardButton(KEY_MARKUP['INCREASE_WALLET_BALANCE'], callback_data=f"increase_wallet_balance_specific:{amount}"))
     return markup
 
 def force_join_channel_markup(channel_id):

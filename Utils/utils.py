@@ -406,12 +406,12 @@ def is_it_config_or_sub(config):
 
 
 # Users bot add plan
-def users_bot_add_plan(size, days, price, server_id):
+def users_bot_add_plan(size, days, price, server_id,description=None):
     if not CLIENT_TOKEN:
         return False
     # randon 4 digit number
     plan_id = random.randint(10000, 99999)
-    plan_status = USERS_DB.add_plan(plan_id, size, days, price, server_id)
+    plan_status = USERS_DB.add_plan(plan_id, size, days, price, server_id,description=description)
     if not plan_status:
         return False
     return True
