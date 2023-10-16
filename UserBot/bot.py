@@ -666,6 +666,9 @@ def callback_query(call: CallbackQuery):
 
     # ----------------------------------- Buy Plan Area -----------------------------------
     elif key == 'server_selected':
+        if value == 'False':
+            bot.send_message(call.message.chat.id, MESSAGES['SERVER_IS_FULL'], reply_markup=main_menu_keyboard_markup())
+            return
         selected_server_id = int(value)
         plans = USERS_DB.find_plan(server_id=int(value))
         if not plans:
@@ -679,6 +682,9 @@ def callback_query(call: CallbackQuery):
                                     reply_markup=plan_markup)
         
     elif key == 'free_test_server_selected':
+        if value == 'False':
+            bot.send_message(call.message.chat.id, MESSAGES['SERVER_IS_FULL'], reply_markup=main_menu_keyboard_markup())
+            return
         users = USERS_DB.find_user(telegram_id=call.message.chat.id)
         if users:
             user = users[0]
@@ -1069,7 +1075,10 @@ def callback_query(call: CallbackQuery):
             if users_list:
                 user_index = len(users_list)
             if server['user_limit'] > user_index:
-                server_list.append(server)
+                server_list.append([server,True])
+            else:
+                server_list.append([server,False])
+                
         # bad request telbot api
         # bot.edit_message_text(chat_id=message.chat.id, message_id=msg_wait.message_id,
         #                                   text= MESSAGES['SERVERS_LIST'], reply_markup=servers_list_markup(server_list))
@@ -1186,7 +1195,9 @@ def buy_subscription(message: Message):
         if users_list:
             user_index = len(users_list)
         if server['user_limit'] > user_index:
-            server_list.append(server)
+            server_list.append([server,True])
+        else:
+            server_list.append([server,False])
     # bad request telbot api
     # bot.edit_message_text(chat_id=message.chat.id, message_id=msg_wait.message_id,
     #                                   text= MESSAGES['SERVERS_LIST'], reply_markup=servers_list_markup(server_list))
@@ -1301,7 +1312,9 @@ def free_test(message: Message):
                 if users_list:
                     user_index = len(users_list)
                 if server['user_limit'] > user_index:
-                    server_list.append(server)
+                    server_list.append([server,True])
+                else:
+                    server_list.append([server,False])
             # bad request telbot api
             # bot.edit_message_text(chat_id=message.chat.id, message_id=msg_wait.message_id,
             #                                   text= MESSAGES['SERVERS_LIST'], reply_markup=servers_list_markup(server_list))
