@@ -1,7 +1,7 @@
 import argparse
 
 # Define the version number
-__version__ = "5.8.3"
+__version__ = "5.9.0"
 
 
 def version():
