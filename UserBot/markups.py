@@ -197,6 +197,13 @@ def wallet_info_markup():
         InlineKeyboardButton(KEY_MARKUP['INCREASE_WALLET_BALANCE'], callback_data=f"increase_wallet_balance:wallet"))
     return markup
 
+def wallet_info_specific_markup(amount):
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 1
+    markup.add(
+        InlineKeyboardButton(KEY_MARKUP['INCREASE_WALLET_BALANCE'], callback_data=f"increase_wallet_balance_specific:{amount}"))
+    return markup
+
 def force_join_channel_markup(channel_id):
     markup = InlineKeyboardMarkup()
     markup.row_width = 1
