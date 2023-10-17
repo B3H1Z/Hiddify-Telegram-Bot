@@ -206,7 +206,9 @@
     "MESSAGE_SENDED": "Message Sended",
     "ADMIN": "َAdmin:",
     "MESSAGE_FROM_ADMIN": "Message from admin",
-    "MESSAGE_TEXT": "Message:"
+    "MESSAGE_TEXT": "Message:",
+    "ERROR_USER_HAVE_TEST_SUB": "❌User already have a test subscription",
+    "SUCCESS_RESET_TEST_SUB": "✅Test subscription reset"
   },
   "FA": {
     "WELCOME": "به ربات مدیریت هیدی بات خوش آمدید.",
@@ -415,6 +417,8 @@
     "MESSAGE_SENDED": "پیام ارسال شد",
     "ADMIN": "ادمین:",
     "MESSAGE_FROM_ADMIN": "📬پیام جدیدی از سمت ادمین دریافت شد",
-    "MESSAGE_TEXT": "📄متن پیام:"
+    "MESSAGE_TEXT": "📄متن پیام:",
+    "ERROR_USER_HAVE_TEST_SUB": "❌کاربر اکنون نیز اشتراک تست رایگان دارد",
+    "SUCCESS_RESET_TEST_SUB": "✅اشتراک تست رایگان این کاربر با موفقیت بازنشانی شد"
   }
 }

@@ -117,7 +117,8 @@
     "ANSWER": "Answer",
     "SEND_MESSAGE": "Send Message",
     "DEBUG":"DEBUG",
-    "SKIP":"⏩Skip"
+    "SKIP":"⏩Skip",
+    "RESET_TEST":"🔄Reset Test"
   },
   "FA": {
     "CONFIRM": "✅تأیید",
@@ -237,7 +238,8 @@
     "ANSWER": "📤پاسخ",
     "SEND_MESSAGE": "📤ارسال پیام",
     "DEBUG":"DEBUG",
-    "SKIP":"⏩رد کردن"
+    "SKIP":"⏩رد کردن",
+    "RESET_TEST":"🔄بازنشانی اشتراک تستی"
 
   }
 }

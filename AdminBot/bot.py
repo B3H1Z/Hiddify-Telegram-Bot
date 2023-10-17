@@ -1840,7 +1840,22 @@ def callback_query(call: CallbackQuery):
         bot.send_message(call.message.chat.id, MESSAGES['EDIT_WALLET_BALANCE'],
                             reply_markup=markups.while_edit_user_markup())
         bot.register_next_step_handler(call.message, edit_wallet_balance, value)
-        
+    
+    elif key == "users_bot_reset_test":
+        users = USERS_DB.find_user(telegram_id=int(value))
+        if not users:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'],
+                                reply_markup=markups.main_menu_keyboard_markup())
+                return
+        user = users[0]
+        if user['test_subscription'] == 0:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_USER_HAVE_TEST_SUB'])
+            return
+        status = USERS_DB.edit_user(telegram_id=int(value), test_subscription=0)
+        if not status:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+            return
+        bot.send_message(call.message.chat.id, MESSAGES['SUCCESS_RESET_TEST_SUB'])
 
     elif key == "users_bot_gifts_user_list":
         list_mode = "User_Gifts"

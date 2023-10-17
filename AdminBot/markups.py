@@ -240,6 +240,7 @@ def bot_user_info_markup(telegram_id):
     markup.add(InlineKeyboardButton(KEY_MARKUP['ORDERS_LIST'], callback_data=f"users_bot_orders_user_list:{telegram_id}"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['PAYMENTS_LIST'], callback_data=f"users_bot_payments_user_list:{telegram_id}"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['EDIT_WALLET'], callback_data=f"users_bot_wallet_edit_balance:{telegram_id}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['RESET_TEST'], callback_data=f"users_bot_reset_test:{telegram_id}"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['SEND_MESSAGE'], callback_data=f"users_bot_send_message_by_admin:{telegram_id}"))
     # markup.add(InlineKeyboardButton(KEY_MARKUP['GIFT_LIST'], callback_data=f"users_bot_gifts_user_list:{telegram_id}"),
     #            InlineKeyboardButton(KEY_MARKUP['REFERRED_LIST'], callback_data=f"users_bot_referred_user_list:{telegram_id}"))

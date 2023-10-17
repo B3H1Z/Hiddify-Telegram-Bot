@@ -513,10 +513,12 @@ def order_user_info(telegram_id):
 def replace_last_three_with_random(input_string):
     if len(input_string) <= 3:
         return input_string  # Not enough characters to replace
-
-    random_numbers = ''.join(random.choice(string.digits) for _ in range(3))
-    modified_string = input_string[:-3] + random_numbers
-    return modified_string
+    input_string = int(input_string)
+    input_string += random.randint(1000, 9999)
+    return str(input_string)
+    # random_numbers = ''.join(random.choice(string.digits) for _ in range(3))
+    # modified_string = input_string[:-3] + random_numbers
+    # return modified_string
 
 
 # Privacy-friendly logging - replace your panel url with panel.private.com
