@@ -226,8 +226,11 @@ def renewal_from_wallet_confirm(message: Message):
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
         return   
-    api.update(URL, uuid=uuid, usage_limit_GB=new_usage_limit, start_date=last_reset_time, package_days=new_package_days, current_usage_GB=current_usage_GB,comment=f"HidyBot:{sub['id']}")
-
+    edit_status = api.update(URL, uuid=uuid, usage_limit_GB=new_usage_limit, start_date=last_reset_time, package_days=new_package_days, current_usage_GB=current_usage_GB,comment=f"HidyBot:{sub['id']}")
+    if not edit_status:
+        bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                         reply_markup=main_menu_keyboard_markup())
+        return
 
     # Add New Order
     order_id = random.randint(1000000, 9999999)
@@ -239,11 +242,11 @@ def renewal_from_wallet_confirm(message: Message):
                          reply_markup=main_menu_keyboard_markup())
         return
     # edit_status = ADMIN_DB.edit_user(uuid=uuid, usage_limit_GB=new_usage_limit, package_days=new_package_days)
-    edit_status = api.update(URL, uuid=uuid, usage_limit_GB=new_usage_limit, package_days=new_package_days)
-    if not edit_status:
-        bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
-                         reply_markup=main_menu_keyboard_markup())
-        return
+    # edit_status = api.update(URL, uuid=uuid, usage_limit_GB=new_usage_limit, package_days=new_package_days)
+    # if not edit_status:
+    #     bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+    #                      reply_markup=main_menu_keyboard_markup())
+    #     return
 
     bot.send_message(message.chat.id, MESSAGES['SUCCESSFUL_RENEWAL'], reply_markup=main_menu_keyboard_markup())
     update_info_subscription(message, uuid)
