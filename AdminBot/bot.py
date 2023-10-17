@@ -632,7 +632,7 @@ def edit_server_url(message: Message, server_id):
     if not url:
         bot.send_message(message.chat.id, MESSAGES['ERROR_ADD_SERVER_URL'],
                      reply_markup=markups.while_edit_user_markup())
-        bot.register_next_step_handler(message, edit_server_url, server_id )
+        bot.register_next_step_handler(message, edit_server_url, server_id)
         return
     servers = USERS_DB.select_servers()
     if servers:
@@ -640,7 +640,7 @@ def edit_server_url(message: Message, server_id):
             if server['url'] == url:
                 bot.reply_to(message, MESSAGES['ERROR_SAME_SERVER_URL'],
                             reply_markup=markups.while_edit_user_markup())
-                bot.register_next_step_handler(message, add_server_url)
+                bot.register_next_step_handler(message, edit_server_url, server_id)
                 return
     status = USERS_DB.edit_server(int(server_id), url=url)
     if not status:
