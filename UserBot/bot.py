@@ -139,10 +139,10 @@ def renewal_from_wallet_confirm(message: Message):
 
     wallet = USERS_DB.find_wallet(telegram_id=message.chat.id)
     if not wallet:
-        # Wallet not created
-        bot.send_message(message.chat.id, MESSAGES['LACK_OF_WALLET_BALANCE'],
-                             reply_markup=main_menu_keyboard_markup())
-        return
+        status = USERS_DB.add_wallet(telegram_id=message.chat.id)
+        if not status:
+            bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'])
+            return
 
     wallet = wallet[0]
     plan_info = USERS_DB.find_plan(id=plan_id)
@@ -153,7 +153,7 @@ def renewal_from_wallet_confirm(message: Message):
 
     plan_info = plan_info[0]
     if plan_info['price'] > wallet['balance']:
-        bot.send_message(message.chat.id, MESSAGES['LACK_OF_WALLET_BALANCE'])
+        bot.send_message(message.chat.id, MESSAGES['LACK_OF_WALLET_BALANCE'],reply_markup=wallet_info_specific_markup(plan_info['price'] - wallet['balance']))
         del renew_subscription_dict[message.chat.id]
         return
 
@@ -226,8 +226,11 @@ def renewal_from_wallet_confirm(message: Message):
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
         return   
-    api.update(URL, uuid=uuid, usage_limit_GB=new_usage_limit, start_date=last_reset_time, package_days=new_package_days, current_usage_GB=current_usage_GB,comment=f"HidyBot:{sub['id']}")
-
+    edit_status = api.update(URL, uuid=uuid, usage_limit_GB=new_usage_limit, start_date=last_reset_time, package_days=new_package_days, current_usage_GB=current_usage_GB,comment=f"HidyBot:{sub['id']}")
+    if not edit_status:
+        bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                         reply_markup=main_menu_keyboard_markup())
+        return
 
     # Add New Order
     order_id = random.randint(1000000, 9999999)
@@ -239,11 +242,11 @@ def renewal_from_wallet_confirm(message: Message):
                          reply_markup=main_menu_keyboard_markup())
         return
     # edit_status = ADMIN_DB.edit_user(uuid=uuid, usage_limit_GB=new_usage_limit, package_days=new_package_days)
-    edit_status = api.update(URL, uuid=uuid, usage_limit_GB=new_usage_limit, package_days=new_package_days)
-    if not edit_status:
-        bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
-                         reply_markup=main_menu_keyboard_markup())
-        return
+    # edit_status = api.update(URL, uuid=uuid, usage_limit_GB=new_usage_limit, package_days=new_package_days)
+    # if not edit_status:
+    #     bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+    #                      reply_markup=main_menu_keyboard_markup())
+    #     return
 
     bot.send_message(message.chat.id, MESSAGES['SUCCESSFUL_RENEWAL'], reply_markup=main_menu_keyboard_markup())
     update_info_subscription(message, uuid)
@@ -576,6 +579,14 @@ def next_step_increase_wallet_balance(message):
                      reply_markup=send_screenshot_markup(plan_id=charge_wallet['id']))
 
 def increase_wallet_balance_specific(message,amount):
+    user = USERS_DB.find_user(telegram_id=message.chat.id)
+    if user:
+        wallet_status = USERS_DB.find_wallet(telegram_id=message.chat.id)
+        if not wallet_status:
+            status = USERS_DB.add_wallet(telegram_id=message.chat.id)
+            if not status:
+                bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'])
+                return
     charge_wallet['amount'] = str(amount)
     if settings['three_random_num_price'] == 1:
         charge_wallet['amount'] = utils.replace_last_three_with_random(str(amount))
@@ -1116,7 +1127,14 @@ def start_bot(message: Message):
             bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                              reply_markup=main_menu_keyboard_markup())
             return
-        bot.send_message(message.chat.id, MESSAGES['WELCOME'], reply_markup=main_menu_keyboard_markup())
+        wallet_status = USERS_DB.find_wallet(telegram_id=message.chat.id)
+        if not wallet_status:
+            status = USERS_DB.add_wallet(telegram_id=message.chat.id)
+            if not status:
+                bot.send_message(message.chat.id, f"{MESSAGES['UNKNOWN_ERROR']}:Wallet",
+                                 reply_markup=main_menu_keyboard_markup())
+                return
+            bot.send_message(message.chat.id, MESSAGES['WELCOME'], reply_markup=main_menu_keyboard_markup())
 
     join_status = is_user_in_channel(message.chat.id)
     if not join_status:

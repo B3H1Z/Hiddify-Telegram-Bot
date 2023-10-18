@@ -549,8 +549,7 @@ def add_server_url(message: Message):
     servers = USERS_DB.select_servers()
     if servers:
         for server in servers:
-            previous = server['url']
-            if previous == url:
+            if server['url'] == url:
                 bot.reply_to(message, MESSAGES['ERROR_SAME_SERVER_URL'],
                             reply_markup=markups.while_edit_user_markup())
                 bot.register_next_step_handler(message, add_server_url)
@@ -633,11 +632,20 @@ def edit_server_url(message: Message, server_id):
     if not url:
         bot.send_message(message.chat.id, MESSAGES['ERROR_ADD_SERVER_URL'],
                      reply_markup=markups.while_edit_user_markup())
-        bot.register_next_step_handler(message, edit_server_url, server_id )
+        bot.register_next_step_handler(message, edit_server_url, server_id)
         return
+    servers = USERS_DB.select_servers()
+    if servers:
+        for server in servers:
+            if server['url'] == url:
+                bot.reply_to(message, MESSAGES['ERROR_SAME_SERVER_URL'],
+                            reply_markup=markups.while_edit_user_markup())
+                bot.register_next_step_handler(message, edit_server_url, server_id)
+                return
     status = USERS_DB.edit_server(int(server_id), url=url)
     if not status:
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+        return
     server = USERS_DB.find_server(id=int(server_id))
     if not server:
         bot.send_message(message.chat.id, MESSAGES['ERROR_SERVER_NOT_FOUND'])
@@ -1600,6 +1608,7 @@ def callback_query(call: CallbackQuery):
         status = USERS_DB.delete_server(id=server_id)
         if not status:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+            return
         
         USERS_DB.delete_plan(server_id=server_id)
         USERS_DB.delete_order_subscription(server_id=server_id)
@@ -1660,6 +1669,7 @@ def callback_query(call: CallbackQuery):
         if not users_list:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_USER_NOT_FOUND'])
             return
+        users_list.sort(key = operator.itemgetter('created_at'), reverse=True)
         msg = templates.bot_users_list_template(users_list, wallets_list, orders_list)
         bot.edit_message_text(msg, call.message.chat.id, call.message.message_id,
                               reply_markup=markups.bot_users_list_markup(users_list))
@@ -2451,14 +2461,14 @@ def callback_query(call: CallbackQuery):
             bot.send_message(call.message.chat.id,
                              f"{MESSAGES['ERROR_PAYMENT_ALREADY_CONFIRMED']}\n{MESSAGES['ORDER_ID']} {payment_id}")
             return
-
+        
+        wallet = USERS_DB.find_wallet(telegram_id=payment_info['telegram_id'])
+        if not wallet:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+            return
+        wallet = wallet[0]
         payment_status = USERS_DB.edit_payment(payment_id, approved=True)
         if payment_status:
-            wallet = USERS_DB.find_wallet(telegram_id=payment_info['telegram_id'])
-            if not wallet:
-                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
-                return
-            wallet = wallet[0]
             new_balance = int(wallet['balance']) + int(payment_info['payment_amount'])
             wallet_status = USERS_DB.edit_wallet(wallet['telegram_id'], balance=new_balance)
             if not wallet_status:
