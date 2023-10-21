@@ -1104,8 +1104,10 @@ def edit_wallet_balance(message: Message,telegram_id):
                 return
     status = USERS_DB.edit_wallet(telegram_id=telegram_id, balance=new_balance)
     if not status:
-        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
+        bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'])
     bot.send_message(message.chat.id, MESSAGES['SUCCESS_UPDATE_DATA'], reply_markup=markups.main_menu_keyboard_markup())
+    user_bot.send_message(telegram_id, f"{MESSAGES['WALLET_BALANCE_CHANGED_BY_ADMIN_P1']} {message.text} {MESSAGES['WALLET_BALANCE_CHANGED_BY_ADMIN_P2']}")
+    
 
 
 def send_message_to_user(message: Message, payment_id):
