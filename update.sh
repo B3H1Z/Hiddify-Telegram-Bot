@@ -97,6 +97,7 @@ function update_bot() {
   else
     if git pull --rebase origin "$branch"; then
       pip install -r requirements.txt || display_error_and_exit "Failed to install requirements."
+      > $install_dir/bot.log
       nohup python3 hiddifyTelegramBot.py >>bot.log 2>&1 &
       display_message "${GREEN}Bot has been updated and restarted.${RESET}"
     else

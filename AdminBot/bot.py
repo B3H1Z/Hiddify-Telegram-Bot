@@ -20,7 +20,7 @@ from config import panel_url_validator, API_PATH
 
 # Initialize Bot
 bot = telebot.TeleBot(TELEGRAM_TOKEN, parse_mode="HTML")
-bot.delete_webhook()
+bot.remove_webhook()
 
 URL = 'url'
 selected_server = None
@@ -2837,7 +2837,7 @@ def about_bot(message: Message):
     bot.send_message(message.chat.id, templates.about_template())
 
 # Debug Handler
-@bot.message_handler(func=lambda message: message.text == KEY_MARKUP['DEBUG'])
+@bot.message_handler(commands=['debug'])
 def debug(message: Message):
     debug_zip = utils.debug_data()
     if not debug_zip:
@@ -2853,6 +2853,7 @@ def start():
     try:
         bot.set_my_commands([
             telebot.types.BotCommand("/start", BOT_COMMANDS['START']),
+            telebot.types.BotCommand("/debug", BOT_COMMANDS['DEBUG']),
         ])
     except telebot.apihelper.ApiTelegramException as e:
         if e.result.status_code == 401:

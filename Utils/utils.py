@@ -719,6 +719,12 @@ def debug_data():
     with zipfile.ZipFile(zip_file, 'w') as zip:
         zip.write(bk_json_file,os.path.basename(bk_json_file))
         if os.path.exists(os.path.join(os.getcwd(),"bot.log")):
+            # only send last 1000 lines of log
+            with open(os.path.join(os.getcwd(),"bot.log"), 'r') as f:
+                lines = f.readlines()
+                lines = lines[-1000:]
+                with open(os.path.join(os.getcwd(),"bot.log"), 'w') as f:
+                    f.writelines(lines)
             zip.write("bot.log",os.path.basename("bot.log"))
         if os.path.exists(LOG_DIR):
             for file in os.listdir(LOG_DIR):

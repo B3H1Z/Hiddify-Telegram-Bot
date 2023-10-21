@@ -572,13 +572,13 @@ def next_step_increase_wallet_balance(message):
         charge_wallet['amount'] = utils.replace_last_three_with_random(str(amount))
 
     charge_wallet['id'] = random.randint(1000000, 9999999)
-
     # Send 0 to identify wallet balance charge
     bot.send_message(message.chat.id,
                      owner_info_template(settings['card_number'], settings['card_holder'], charge_wallet['amount']),
                      reply_markup=send_screenshot_markup(plan_id=charge_wallet['id']))
 
 def increase_wallet_balance_specific(message,amount):
+    settings = utils.all_configs_settings()
     user = USERS_DB.find_user(telegram_id=message.chat.id)
     if user:
         wallet_status = USERS_DB.find_wallet(telegram_id=message.chat.id)
