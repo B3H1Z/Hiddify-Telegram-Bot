@@ -332,7 +332,7 @@ def users_bot_management_settings_markup(settings):
     markup.add(InlineKeyboardButton(f"{KEY_MARKUP['USERS_BOT_SETTINGS_CHANNEL_ّFORCE_JOIN']} | {status_force_join}",
                                     callback_data=f"users_bot_settings_force_join:{settings['force_join_channel']}"),
                InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_CHANNEL_ID'],
-                                    callback_data=f"users_bot_settings_channel_id:{settings['channel_id']}"))
+                                    callback_data=f"users_bot_settings_channel_id:None"))
     markup.add(InlineKeyboardButton(f"{KEY_MARKUP['USERS_BOT_SETTINGS_PANEL_AUTO_BACKUP']} | {status_panel_auto_backup}",
                              callback_data=f"users_bot_settings_panel_auto_backup:{settings['panel_auto_backup']}"),)
             #    InlineKeyboardButton(f"{KEY_MARKUP['USERS_BOT_SETTINGS_BOT_AUTO_BACKUP']} | {status_bot_auto_backup}",
