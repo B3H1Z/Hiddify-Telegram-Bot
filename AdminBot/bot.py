@@ -1868,7 +1868,28 @@ def callback_query(call: CallbackQuery):
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
             return
         bot.send_message(call.message.chat.id, MESSAGES['SUCCESS_RESET_TEST_SUB'])
-
+    
+    elif key == "users_bot_ban_user":
+        users = USERS_DB.find_user(telegram_id=int(value))
+        if not users:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'],
+                                reply_markup=markups.main_menu_keyboard_markup())
+                return
+        user = users[0]
+        if user['banned'] == 0:
+            status = USERS_DB.edit_user(telegram_id=int(value), banned=1)
+            if not status:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+                return
+            bot.send_message(call.message.chat.id, MESSAGES['SUCCESS_BAN_USER'])
+            return
+        if user['banned'] == 1:
+            status = USERS_DB.edit_user(telegram_id=int(value), banned=0)
+            if not status:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+                return
+            bot.send_message(call.message.chat.id, MESSAGES['SUCCESS_UNBAN_USER'])
+            return
     elif key == "users_bot_gifts_user_list":
         list_mode = "User_Gifts"
         item_mode = "Gift"

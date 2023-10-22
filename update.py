@@ -206,7 +206,21 @@ def update_v5_1_0_to_v5_5_0():
         
         # remove user_name from payments table
         drop_columns_from_table('payments', ['user_name']) 
-        
+
+def update_v5_9_3_to_v6_0_0():
+    print("Updating database from version v5.9.3 to v6.0.0")
+    logging.info("Updating database from version v5.9.3 to v6.0.0")
+    with sqlite3.connect(USERS_DB_LOC) as conn:
+        # add server_id to plans table
+        try:
+            cur = conn.cursor()
+            # add banned column to users table
+            cur.execute("ALTER TABLE users ADD COLUMN banned BOOLEAN DEFAULT 0")
+            cur.execute("UPDATE users SET banned = 0")
+        except sqlite3.Error as e:
+            logging.error("Database error: %s" % e)
+            print("SQLite error:", e)
+            
         
         
     
@@ -219,6 +233,8 @@ def update_by_version(current_version, target_version):
             update_v4_v5()
         if is_version_less(current_version, "5.5.0"):
             update_v5_1_0_to_v5_5_0()
+        if is_version_less(current_version, "6.0.0"):
+            update_v5_9_3_to_v6_0_0()
     else:
         print("No update is needed")
         logging.info("No update is needed")
