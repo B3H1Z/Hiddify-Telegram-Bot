@@ -4,6 +4,7 @@ import argparse
 __version__ = "6.1.0"
 
 
+
 def version():
     parser = argparse.ArgumentParser()
     parser.add_argument("--version", action="version", version=f"{__version__}")
