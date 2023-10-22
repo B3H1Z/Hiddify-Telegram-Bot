@@ -207,9 +207,9 @@ def update_v5_1_0_to_v5_5_0():
         # remove user_name from payments table
         drop_columns_from_table('payments', ['user_name']) 
 
-def update_v5_9_3_to_v6_0_0():
-    print("Updating database from version v5.9.3 to v6.0.0")
-    logging.info("Updating database from version v5.9.3 to v6.0.0")
+def update_v5_9_5_to_v6_1_0():
+    print("Updating database from version v5.9.5 to v6.1.0")
+    logging.info("Updating database from version v5.9.5 to v6.1.0")
     with sqlite3.connect(USERS_DB_LOC) as conn:
         # add server_id to plans table
         try:
@@ -233,8 +233,8 @@ def update_by_version(current_version, target_version):
             update_v4_v5()
         if is_version_less(current_version, "5.5.0"):
             update_v5_1_0_to_v5_5_0()
-        if is_version_less(current_version, "6.0.0"):
-            update_v5_9_3_to_v6_0_0()
+        if is_version_less(current_version, "6.1.0"):
+            update_v5_9_5_to_v6_1_0()
     else:
         print("No update is needed")
         logging.info("No update is needed")
