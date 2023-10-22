@@ -2761,6 +2761,24 @@ def callback_query(call: CallbackQuery):
             msg = templates.bot_users_info_template(user, orders, paymets, wallet, non_order_subs, order_subs, plans_list)
             bot.edit_message_text(msg, call.message.chat.id, call.message.message_id,
                                   reply_markup=markups.bot_user_info_markup(selected_telegram_id))
+    
+    elif key == "server_status":
+        from Utils.serverInfo import get_server_status
+        msg_wait = bot.send_message(call.message.chat.id, MESSAGES['WAIT'])
+        server = USERS_DB.find_server(id=int(value))
+        if not server:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_SERVER_NOT_FOUND'])
+            return
+        server = server[0]
+        server_status_data = get_server_status(server)
+        if not server_status_data:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+            return
+        bot.delete_message(call.message.chat.id, msg_wait.message_id)
+        bot.send_message(call.message.chat.id, server_status_data, reply_markup=markups.main_menu_keyboard_markup())
+    
+    elif key == "del_msg":
+        bot.delete_message(call.message.chat.id, call.message.message_id)
 
 
 
@@ -2819,14 +2837,9 @@ def server_backup(message: Message):
 # Server Status Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['SERVER_STATUS'])
 def server_status(message: Message):
-    msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'])
-    status = templates.system_status_template(utils.system_status())
-
-    if status:
-        bot.send_message(message.chat.id, status)
-    else:
-        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'])
-    bot.delete_message(message.chat.id, msg_wait.message_id)
+    servers = USERS_DB.select_servers()
+    bot.send_message(message.chat.id, KEY_MARKUP['SERVER_STATUS'],
+                     reply_markup=markups.server_status_markup(servers))
 
 
 # Search User Message Handler

@@ -608,3 +608,15 @@ def start_bot_markup():
     bot_id = HIDY_BOT_ID.replace("@", "")
     markup.add(InlineKeyboardButton(KEY_MARKUP['SUPPORT_GROUP'], url=f"https://t.me/{bot_id}"))
     return markup
+
+def server_status_markup(servers):
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 1
+    keys = []
+    for server in servers:
+        if server['status']:
+            keys.append(InlineKeyboardButton(f"{server['title']}",
+                                             callback_data=f"server_status:{server['id']}"))
+    markup.add(*keys)
+    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"del_msg:None"))
+    return markup
