@@ -235,6 +235,8 @@ def update_by_version(current_version, target_version):
             update_v5_1_0_to_v5_5_0()
         if is_version_less(current_version, "6.1.0"):
             update_v5_9_5_to_v6_1_0()
+        if is_version_less(current_version, "6.1.1"):
+            update_v5_9_5_to_v6_1_0()
     else:
         print("No update is needed")
         logging.info("No update is needed")
