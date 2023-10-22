@@ -1,8 +1,10 @@
 {
     "EN": {
-        "START": "start"
+        "START": "start",
+        "DEBUG": "debug"
     },
     "FA": {
-        "START": "شروع"
+        "START": "شروع",
+        "DEBUG": "اشکال زدایی"
     }
 }

@@ -241,6 +241,7 @@ def bot_user_info_markup(telegram_id):
     markup.add(InlineKeyboardButton(KEY_MARKUP['PAYMENTS_LIST'], callback_data=f"users_bot_payments_user_list:{telegram_id}"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['EDIT_WALLET'], callback_data=f"users_bot_wallet_edit_balance:{telegram_id}"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['RESET_TEST'], callback_data=f"users_bot_reset_test:{telegram_id}"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['BAN_USER'], callback_data=f"users_bot_ban_user:{telegram_id}"))
     markup.add(InlineKeyboardButton(KEY_MARKUP['SEND_MESSAGE'], callback_data=f"users_bot_send_message_by_admin:{telegram_id}"))
     # markup.add(InlineKeyboardButton(KEY_MARKUP['GIFT_LIST'], callback_data=f"users_bot_gifts_user_list:{telegram_id}"),
     #            InlineKeyboardButton(KEY_MARKUP['REFERRED_LIST'], callback_data=f"users_bot_referred_user_list:{telegram_id}"))
@@ -331,7 +332,7 @@ def users_bot_management_settings_markup(settings):
     markup.add(InlineKeyboardButton(f"{KEY_MARKUP['USERS_BOT_SETTINGS_CHANNEL_ّFORCE_JOIN']} | {status_force_join}",
                                     callback_data=f"users_bot_settings_force_join:{settings['force_join_channel']}"),
                InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_CHANNEL_ID'],
-                                    callback_data=f"users_bot_settings_channel_id:{settings['channel_id']}"))
+                                    callback_data=f"users_bot_settings_channel_id:None"))
     markup.add(InlineKeyboardButton(f"{KEY_MARKUP['USERS_BOT_SETTINGS_PANEL_AUTO_BACKUP']} | {status_panel_auto_backup}",
                              callback_data=f"users_bot_settings_panel_auto_backup:{settings['panel_auto_backup']}"),)
             #    InlineKeyboardButton(f"{KEY_MARKUP['USERS_BOT_SETTINGS_BOT_AUTO_BACKUP']} | {status_bot_auto_backup}",
@@ -606,4 +607,16 @@ def start_bot_markup():
     markup.row_width = 1
     bot_id = HIDY_BOT_ID.replace("@", "")
     markup.add(InlineKeyboardButton(KEY_MARKUP['SUPPORT_GROUP'], url=f"https://t.me/{bot_id}"))
+    return markup
+
+def server_status_markup(servers):
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 1
+    keys = []
+    for server in servers:
+        if server['status']:
+            keys.append(InlineKeyboardButton(f"{server['title']}",
+                                             callback_data=f"server_status:{server['id']}"))
+    markup.add(*keys)
+    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"del_msg:None"))
     return markup

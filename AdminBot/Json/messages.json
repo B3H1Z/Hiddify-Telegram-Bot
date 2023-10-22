@@ -208,7 +208,11 @@
     "MESSAGE_FROM_ADMIN": "Message from admin",
     "MESSAGE_TEXT": "Message:",
     "ERROR_USER_HAVE_TEST_SUB": "❌User already have a test subscription",
-    "SUCCESS_RESET_TEST_SUB": "✅Test subscription reset"
+    "SUCCESS_RESET_TEST_SUB": "✅Test subscription reset",
+    "WALLET_BALANCE_CHANGED_BY_ADMIN_P1": "💰Wallet balance changed to",
+    "WALLET_BALANCE_CHANGED_BY_ADMIN_P2": "by admin",
+    "SUCCESS_BAN_USER": "✅User banned",
+    "SUCCESS_UNBAN_USER": "✅User unbanned"
   },
   "FA": {
     "WELCOME": "به ربات مدیریت هیدی بات خوش آمدید.",
@@ -419,6 +423,10 @@
     "MESSAGE_FROM_ADMIN": "📬پیام جدیدی از سمت ادمین دریافت شد",
     "MESSAGE_TEXT": "📄متن پیام:",
     "ERROR_USER_HAVE_TEST_SUB": "❌کاربر اکنون نیز اشتراک تست رایگان دارد",
-    "SUCCESS_RESET_TEST_SUB": "✅اشتراک تست رایگان این کاربر با موفقیت بازنشانی شد"
+    "SUCCESS_RESET_TEST_SUB": "✅اشتراک تست رایگان این کاربر با موفقیت بازنشانی شد",
+    "WALLET_BALANCE_CHANGED_BY_ADMIN_P1": "💰موجودی کیف پول شما توسط مدیر به",
+    "WALLET_BALANCE_CHANGED_BY_ADMIN_P2": "تومان تغییر یافت",
+    "SUCCESS_BAN_USER": "✅کاربر مسدود شد",
+    "SUCCESS_UNBAN_USER": "✅کاربر مسدود شده، آزاد شد"
   }
 }

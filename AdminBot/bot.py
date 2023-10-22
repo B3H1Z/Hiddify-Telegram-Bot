@@ -20,7 +20,7 @@ from config import panel_url_validator, API_PATH
 
 # Initialize Bot
 bot = telebot.TeleBot(TELEGRAM_TOKEN, parse_mode="HTML")
-bot.delete_webhook()
+bot.remove_webhook()
 
 URL = 'url'
 selected_server = None
@@ -1104,8 +1104,10 @@ def edit_wallet_balance(message: Message,telegram_id):
                 return
     status = USERS_DB.edit_wallet(telegram_id=telegram_id, balance=new_balance)
     if not status:
-        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
+        bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'])
     bot.send_message(message.chat.id, MESSAGES['SUCCESS_UPDATE_DATA'], reply_markup=markups.main_menu_keyboard_markup())
+    user_bot.send_message(telegram_id, f"{MESSAGES['WALLET_BALANCE_CHANGED_BY_ADMIN_P1']} {message.text} {MESSAGES['WALLET_BALANCE_CHANGED_BY_ADMIN_P2']}")
+    
 
 
 def send_message_to_user(message: Message, payment_id):
@@ -1866,7 +1868,28 @@ def callback_query(call: CallbackQuery):
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
             return
         bot.send_message(call.message.chat.id, MESSAGES['SUCCESS_RESET_TEST_SUB'])
-
+    
+    elif key == "users_bot_ban_user":
+        users = USERS_DB.find_user(telegram_id=int(value))
+        if not users:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'],
+                                reply_markup=markups.main_menu_keyboard_markup())
+                return
+        user = users[0]
+        if user['banned'] == 0:
+            status = USERS_DB.edit_user(telegram_id=int(value), banned=1)
+            if not status:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+                return
+            bot.send_message(call.message.chat.id, MESSAGES['SUCCESS_BAN_USER'])
+            return
+        if user['banned'] == 1:
+            status = USERS_DB.edit_user(telegram_id=int(value), banned=0)
+            if not status:
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+                return
+            bot.send_message(call.message.chat.id, MESSAGES['SUCCESS_UNBAN_USER'])
+            return
     elif key == "users_bot_gifts_user_list":
         list_mode = "User_Gifts"
         item_mode = "Gift"
@@ -2738,6 +2761,24 @@ def callback_query(call: CallbackQuery):
             msg = templates.bot_users_info_template(user, orders, paymets, wallet, non_order_subs, order_subs, plans_list)
             bot.edit_message_text(msg, call.message.chat.id, call.message.message_id,
                                   reply_markup=markups.bot_user_info_markup(selected_telegram_id))
+    
+    elif key == "server_status":
+        from Utils.serverInfo import get_server_status
+        msg_wait = bot.send_message(call.message.chat.id, MESSAGES['WAIT'])
+        server = USERS_DB.find_server(id=int(value))
+        if not server:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_SERVER_NOT_FOUND'])
+            return
+        server = server[0]
+        server_status_data = get_server_status(server)
+        if not server_status_data:
+            bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+            return
+        bot.delete_message(call.message.chat.id, msg_wait.message_id)
+        bot.send_message(call.message.chat.id, server_status_data, reply_markup=markups.main_menu_keyboard_markup())
+    
+    elif key == "del_msg":
+        bot.delete_message(call.message.chat.id, call.message.message_id)
 
 
 
@@ -2796,14 +2837,9 @@ def server_backup(message: Message):
 # Server Status Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['SERVER_STATUS'])
 def server_status(message: Message):
-    msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'])
-    status = templates.system_status_template(utils.system_status())
-
-    if status:
-        bot.send_message(message.chat.id, status)
-    else:
-        bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'])
-    bot.delete_message(message.chat.id, msg_wait.message_id)
+    servers = USERS_DB.select_servers()
+    bot.send_message(message.chat.id, KEY_MARKUP['SERVER_STATUS'],
+                     reply_markup=markups.server_status_markup(servers))
 
 
 # Search User Message Handler
@@ -2837,7 +2873,7 @@ def about_bot(message: Message):
     bot.send_message(message.chat.id, templates.about_template())
 
 # Debug Handler
-@bot.message_handler(func=lambda message: message.text == KEY_MARKUP['DEBUG'])
+@bot.message_handler(commands=['debug'])
 def debug(message: Message):
     debug_zip = utils.debug_data()
     if not debug_zip:
@@ -2853,6 +2889,7 @@ def start():
     try:
         bot.set_my_commands([
             telebot.types.BotCommand("/start", BOT_COMMANDS['START']),
+            telebot.types.BotCommand("/debug", BOT_COMMANDS['DEBUG']),
         ])
     except telebot.apihelper.ApiTelegramException as e:
         if e.result.status_code == 401:

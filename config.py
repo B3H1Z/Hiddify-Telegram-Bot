@@ -30,6 +30,8 @@ if not os.path.exists(LOG_DIR):
     os.mkdir(LOG_DIR)
 if not os.path.exists(BACKUP_LOC):
     os.mkdir(BACKUP_LOC)
+if not os.path.exists(BOT_BACKUP_LOC):
+    os.mkdir(BOT_BACKUP_LOC)
 if not os.path.exists(RECEIPTIONS_LOC):
     os.mkdir(RECEIPTIONS_LOC)
 

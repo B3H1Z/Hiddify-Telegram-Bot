@@ -95,7 +95,8 @@
         "SEND_TICKET_TO_ADMIN_TEMPLATE":"Do you have any questions?\nContact us.",
         "NEW_TICKET_RECEIVED": "📩New ticket received",
         "TICKET_TEXT": "📄Ticket text:",
-        "SERVER_IS_FULL": "⛔️The capacity of the selected server is full\nPlease select another server\nWe will try to increase the capacity of the servers as soon as possible"
+        "SERVER_IS_FULL": "⛔️The capacity of the selected server is full\nPlease select another server\nWe will try to increase the capacity of the servers as soon as possible",
+        "BANNED_USER": "⛔️You are banned from using the bot"
     },
     "FA": {
         "WELCOME": "به ربات کاربران خوش آمدید",
@@ -193,6 +194,7 @@
         "SEND_TICKET_TO_ADMIN_TEMPLATE":"نیاز به پشتیبانی دارید؟\nبا ما در ارتباط باشید.",
         "NEW_TICKET_RECEIVED": "📩تیکت جدیدی دریافت شد",
         "TICKET_TEXT": "📄متن تیکت:",
-        "SERVER_IS_FULL": "⛔️ظرفیت سرور انتخاب شده تکمیل شده\nلطفا سرور دیگری انتخاب کنید\nسعی ما بر این است که در اسرع وقت ظرفیت سرورها را افزایش دهیم"
+        "SERVER_IS_FULL": "⛔️ظرفیت سرور انتخاب شده تکمیل شده\nلطفا سرور دیگری انتخاب کنید\nسعی ما بر این است که در اسرع وقت ظرفیت سرورها را افزایش دهیم",
+        "BANNED_USER": "⛔️شما از استفاده از ربات محروم شده‌اید"
     }
 }

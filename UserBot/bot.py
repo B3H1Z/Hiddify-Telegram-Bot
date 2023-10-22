@@ -62,7 +62,15 @@ def type_of_subscription(text):
         uuid = utils.extract_uuid_from_config(text)
     return uuid
 
-
+# check is user banned
+def is_user_banned(user_id):
+    user = USERS_DB.find_user(telegram_id=user_id)
+    if user:
+        user = user[0]
+        if user['banned']:
+            bot.send_message(user_id, MESSAGES['BANNED_USER'], reply_markup=main_menu_keyboard_markup())
+            return True
+    return False
 # *********************************** Next-Step Handlers ***********************************
 # ----------------------------------- Buy Plan Area -----------------------------------
 charge_wallet = {}
@@ -572,13 +580,13 @@ def next_step_increase_wallet_balance(message):
         charge_wallet['amount'] = utils.replace_last_three_with_random(str(amount))
 
     charge_wallet['id'] = random.randint(1000000, 9999999)
-
     # Send 0 to identify wallet balance charge
     bot.send_message(message.chat.id,
                      owner_info_template(settings['card_number'], settings['card_holder'], charge_wallet['amount']),
                      reply_markup=send_screenshot_markup(plan_id=charge_wallet['id']))
 
 def increase_wallet_balance_specific(message,amount):
+    settings = utils.all_configs_settings()
     user = USERS_DB.find_user(telegram_id=message.chat.id)
     if user:
         wallet_status = USERS_DB.find_wallet(telegram_id=message.chat.id)
@@ -643,6 +651,8 @@ def update_info_subscription(message: Message, uuid,markup=None):
 def callback_query(call: CallbackQuery):
     bot.answer_callback_query(call.id, MESSAGES['WAIT'])
     bot.clear_step_handler(call.message)
+    if is_user_banned(call.message.chat.id):
+        return
     # Split Callback Data to Key(Command) and UUID
     data = call.data.split(':')
     key = data[0]
@@ -1112,6 +1122,8 @@ def callback_query(call: CallbackQuery):
 # Bot Start Message Handler
 @bot.message_handler(commands=['start'])
 def start_bot(message: Message):
+    if is_user_banned(message.chat.id):
+        return
     settings = utils.all_configs_settings()
 
     MESSAGES['WELCOME'] = MESSAGES['WELCOME'] if not settings['msg_user_start'] else settings['msg_user_start']
@@ -1144,6 +1156,8 @@ def start_bot(message: Message):
 # If user is not in users table, request /start
 @bot.message_handler(func=lambda message: not USERS_DB.find_user(telegram_id=message.chat.id))
 def not_in_users_table(message: Message):
+    if is_user_banned(message.chat.id):
+        return
     join_status = is_user_in_channel(message.chat.id)
     if not join_status:
         return
@@ -1153,6 +1167,8 @@ def not_in_users_table(message: Message):
 # User Subscription Status Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['SUBSCRIPTION_STATUS'])
 def subscription_status(message: Message):
+    if is_user_banned(message.chat.id):
+        return
     join_status = is_user_in_channel(message.chat.id)
     if not join_status:
         return
@@ -1194,6 +1210,8 @@ def subscription_status(message: Message):
 # User Buy Subscription Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['BUY_SUBSCRIPTION'])
 def buy_subscription(message: Message):
+    if is_user_banned(message.chat.id):
+        return
     join_status = is_user_in_channel(message.chat.id)
     if not join_status:
         return
@@ -1227,6 +1245,8 @@ def buy_subscription(message: Message):
 # Config To QR Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['TO_QR'])
 def to_qr(message: Message):
+    if is_user_banned(message.chat.id):
+        return
     join_status = is_user_in_channel(message.chat.id)
     if not join_status:
         return
@@ -1237,6 +1257,8 @@ def to_qr(message: Message):
 # Help Guide Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['MANUAL'])
 def help_guide(message: Message):
+    if is_user_banned(message.chat.id):
+        return
     join_status = is_user_in_channel(message.chat.id)
     if not join_status:
         return
@@ -1246,6 +1268,8 @@ def help_guide(message: Message):
 # Help Guide Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['FAQ'])
 def faq(message: Message):
+    if is_user_banned(message.chat.id):
+        return
     join_status = is_user_in_channel(message.chat.id)
     if not join_status:
         return
@@ -1257,6 +1281,8 @@ def faq(message: Message):
 # Ticket To Support Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['SEND_TICKET'])
 def send_ticket(message: Message):
+    if is_user_banned(message.chat.id):
+        return
     join_status = is_user_in_channel(message.chat.id)
     if not join_status:
         return
@@ -1266,6 +1292,8 @@ def send_ticket(message: Message):
 # Link Subscription Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['LINK_SUBSCRIPTION'])
 def link_subscription(message: Message):
+    if is_user_banned(message.chat.id):
+        return
     join_status = is_user_in_channel(message.chat.id)
     if not join_status:
         return
@@ -1276,6 +1304,8 @@ def link_subscription(message: Message):
 # User Buy Subscription Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['WALLET'])
 def wallet_balance(message: Message):
+    if is_user_banned(message.chat.id):
+        return
     join_status = is_user_in_channel(message.chat.id)
     if not join_status:
         return
@@ -1301,6 +1331,8 @@ def wallet_balance(message: Message):
 # User Buy Subscription Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['FREE_TEST'])
 def free_test(message: Message):
+    if is_user_banned(message.chat.id):
+        return
     join_status = is_user_in_channel(message.chat.id)
     if not join_status:
         return
@@ -1345,6 +1377,8 @@ def free_test(message: Message):
 # Cancel Message Handler
 @bot.message_handler(func=lambda message: message.text == KEY_MARKUP['CANCEL'])
 def cancel(message: Message):
+    if is_user_banned(message.chat.id):
+        return
     join_status = is_user_in_channel(message.chat.id)
     if not join_status:
         return
