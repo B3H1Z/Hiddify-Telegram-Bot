@@ -199,6 +199,12 @@ def renewal_from_wallet_confirm(message: Message):
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
         return
+    last_reset_time = datetime.datetime.now().strftime("%Y-%m-%d")    
+    sub = utils.find_order_subscription_by_uuid(uuid) 
+    if not sub:
+        bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
+                         reply_markup=main_menu_keyboard_markup())
+        return   
     settings = utils.all_configs_settings()
     #Default renewal mode
     if settings['renewal_method'] == 1:
@@ -206,16 +212,21 @@ def renewal_from_wallet_confirm(message: Message):
             new_usage_limit = plan_info['size_gb']
             new_package_days = plan_info['days']
             current_usage_GB = 0
+            edit_status = api.update(URL, uuid=uuid, usage_limit_GB=new_usage_limit, package_days=new_package_days,start_date=last_reset_time, current_usage_GB=current_usage_GB,comment=f"HidyBot:{sub['id']}")
+
         else:
             new_usage_limit = user_info['usage_limit_GB'] + plan_info['size_gb']
-            new_package_days = plan_info['days']
-            current_usage_GB = user_info['current_usage_GB']
+            new_package_days = plan_info['days'] + (user_info['package_days'] - user_info_process['remaining_day'])
+            edit_status = api.update(URL, uuid=uuid, usage_limit_GB=new_usage_limit, package_days=new_package_days,last_reset_time=last_reset_time,comment=f"HidyBot:{sub['id']}")
+
 
     #advance renewal mode        
     elif settings['renewal_method'] == 2:
             new_usage_limit = plan_info['size_gb']
             new_package_days = plan_info['days']
             current_usage_GB = 0
+            edit_status = api.update(URL, uuid=uuid, usage_limit_GB=new_usage_limit, start_date=last_reset_time, package_days=new_package_days, current_usage_GB=current_usage_GB,comment=f"HidyBot:{sub['id']}")
+
     
     #Fair renewal mode
     elif settings['renewal_method'] == 3:
@@ -223,18 +234,15 @@ def renewal_from_wallet_confirm(message: Message):
             new_usage_limit = plan_info['size_gb']
             new_package_days = plan_info['days']
             current_usage_GB = 0
+            edit_status = api.update(URL, uuid=uuid, usage_limit_GB=new_usage_limit, package_days=new_package_days,start_date=last_reset_time, current_usage_GB=current_usage_GB,comment=f"HidyBot:{sub['id']}")
         else:
+            print(user_info)
             new_usage_limit = user_info['usage_limit_GB'] + plan_info['size_gb']
-            new_package_days = user_info_process['remaining_day'] + plan_info['days']
-            current_usage_GB = user_info['current_usage_GB']
+            new_package_days = plan_info['days'] + user_info['package_days']
+            edit_status = api.update(URL, uuid=uuid, usage_limit_GB=new_usage_limit,package_days=new_package_days,last_reset_time=last_reset_time,comment=f"HidyBot:{sub['id']}")
+
             
-    last_reset_time = datetime.datetime.now().strftime("%Y-%m-%d")    
-    sub = utils.find_order_subscription_by_uuid(uuid) 
-    if not sub:
-        bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
-                         reply_markup=main_menu_keyboard_markup())
-        return   
-    edit_status = api.update(URL, uuid=uuid, usage_limit_GB=new_usage_limit, start_date=last_reset_time, package_days=new_package_days, current_usage_GB=current_usage_GB,comment=f"HidyBot:{sub['id']}")
+
     if not edit_status:
         bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'],
                          reply_markup=main_menu_keyboard_markup())
