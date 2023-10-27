@@ -197,7 +197,7 @@ def package_days_expire_soon_template(sub_id, remaining_days):
     if LANG == 'FA':
         return f"""
 تنها {remaining_days} روز تا اتمام اعتبار پکیج شما باقی مانده است.
-لطفا برای خرید پکیج جدید اقدام کنید.
+لطفا برای تمدید پکیج اقدام کنید.
 شناسه پکیج شما: <code>{sub_id}</code>
 """
     elif LANG == 'EN':
