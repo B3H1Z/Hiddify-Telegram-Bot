@@ -1,6 +1,10 @@
 from Utils.utils import all_configs_settings, backup_json_bot
 from AdminBot.bot import bot
 from config import ADMINS_ID
+try:
+    bot.remove_webhook()
+except:
+    pass
 
 # Send backup file to admins
 def cron_backup_bot():
