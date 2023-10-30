@@ -483,6 +483,7 @@ def users_bot_management_settings_faq_markup():
     if settings['msg_faq']:
         markup.add(InlineKeyboardButton(KEY_MARKUP['USERS_BOT_SETTINGS_HIDE_FAQ'],
                                     callback_data=f"users_bot_settings_hide_faq:None"))
+    markup.add(InlineKeyboardButton(KEY_MARKUP['BACK'], callback_data=f"users_bot_settings:None"))
     return markup
 
 
