@@ -2,6 +2,10 @@ from AdminBot.bot import bot
 from config import ADMINS_ID
 from Utils.utils import full_backup,all_configs_settings
 import logging
+try:
+    bot.remove_webhook()
+except:
+    pass
 
 def cron_backup():
     zip_file_name = full_backup()

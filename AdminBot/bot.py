@@ -385,6 +385,7 @@ def search_bot_user_name(message: Message):
 
 # User Bot Search  - Name
 def search_bot_user_telegram_id(message: Message):
+    global selected_telegram_id
     if is_it_cancel(message):
         return
     if not is_it_digit(message, markup=markups.while_edit_user_markup()):
@@ -398,7 +399,7 @@ def search_bot_user_telegram_id(message: Message):
         return
     user = users[0]
     bot.send_message(message.chat.id, MESSAGES['SUCCESS_SEARCH_USER'], reply_markup=markups.main_menu_keyboard_markup())
-
+    selected_telegram_id = user['telegram_id']
     orders = USERS_DB.find_order(telegram_id=user['telegram_id'])
     paymets = USERS_DB.find_payment(telegram_id=user['telegram_id'])
     wallet = None
@@ -959,7 +960,6 @@ def users_bot_settings_set_faq_msg(message: Message, msg):
     if not status:
         bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
         return
-    settings = utils.all_configs_settings()
     try:
         bot.edit_message_reply_markup(message.chat.id, msg.message_id,
                                   reply_markup=markups.users_bot_management_settings_faq_markup())
@@ -2278,7 +2278,6 @@ def callback_query(call: CallbackQuery):
         if not status:
             bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'], reply_markup=markups.main_menu_keyboard_markup())
             return
-        settings = utils.all_configs_settings()
         bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id,
                                     reply_markup=markups.users_bot_management_settings_faq_markup())
         

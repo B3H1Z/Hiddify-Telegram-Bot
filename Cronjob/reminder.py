@@ -2,6 +2,10 @@ from Utils.utils import *
 from UserBot.bot import bot
 from config import CLIENT_TOKEN
 from UserBot.templates import package_size_end_soon_template, package_days_expire_soon_template
+try:
+    bot.remove_webhook()
+except:
+    pass
 
 settings = all_configs_settings()
 ALERT_PACKAGE_GB = settings.get('reminder_notification_usage', 3)
