@@ -2486,8 +2486,12 @@ def callback_query(call: CallbackQuery):
         
         wallet = USERS_DB.find_wallet(telegram_id=payment_info['telegram_id'])
         if not wallet:
-            bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
-            return
+            create_wallet_status = USERS_DB.add_wallet(payment_info['telegram_id'])
+            if not create_wallet_status: 
+                bot.send_message(call.message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+                return
+            wallet = USERS_DB.find_wallet(telegram_id=payment_info['telegram_id'])
+
         wallet = wallet[0]
         payment_status = USERS_DB.edit_payment(payment_id, approved=True)
         if payment_status:

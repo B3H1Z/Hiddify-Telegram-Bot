@@ -1169,7 +1169,7 @@ def not_in_users_table(message: Message):
     join_status = is_user_in_channel(message.chat.id)
     if not join_status:
         return
-    bot.send_message(message.chat.id, MESSAGES['REQUEST_START'])
+    bot.send_message(message.chat.id, MESSAGES['REQUEST_START'], reply_markup=main_menu_keyboard_markup())
 
 
 # User Subscription Status Message Handler
@@ -1227,6 +1227,13 @@ def buy_subscription(message: Message):
     if not settings['buy_subscription_status']:
         bot.send_message(message.chat.id, MESSAGES['BUY_SUBSCRIPTION_CLOSED'], reply_markup=main_menu_keyboard_markup())
         return
+    wallet = USERS_DB.find_wallet(telegram_id=message.chat.id)
+    if not wallet:
+        create_wallet_status = USERS_DB.add_wallet(message.chat.id)
+        if not create_wallet_status: 
+            bot.send_message(message.chat.id, MESSAGES['ERROR_UNKNOWN'])
+            return
+        wallet = USERS_DB.find_wallet(telegram_id=message.chat.id)
     #msg_wait = bot.send_message(message.chat.id, MESSAGES['WAIT'], reply_markup=main_menu_keyboard_markup())
     servers = USERS_DB.select_servers()
     server_list = []

@@ -102,7 +102,7 @@ class UserDBManager:
                         "uuid TEXT NOT NULL UNIQUE,"
                         "server_id INTEGER NOT NULL,"
                         "FOREIGN KEY (server_id) REFERENCES server (id),"
-                        "FOREIGN KEY (telegram_id) REFERENCES user (telegram_id))")
+                        "FOREIGN KEY (telegram_id) REFERENCES users (telegram_id))")
             self.conn.commit()
             logging.info("Non order subscriptions table created successfully!")
 
