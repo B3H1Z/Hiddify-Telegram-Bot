@@ -1207,6 +1207,12 @@ def callback_query(call: CallbackQuery):
                     searched_users = utils.search_user_by_name(server_url, searched_name)
                     users_list.extend(searched_users)
             server_id = "None"
+        elif search_mode =="Telegram_user_subs":
+            users_list = utils.non_order_user_info(int(selected_telegram_id))
+            order_subs = utils.order_user_info(int(selected_telegram_id))
+            if order_subs:
+                users_list.extend(order_subs)
+            server_id = "None"
         elif search_mode == "All_server_expired":
             servers = USERS_DB.select_servers()
             if servers:
@@ -1812,6 +1818,7 @@ def callback_query(call: CallbackQuery):
 
     elif key == "bot_users_sub_user_list":
         server_mode = "All"
+        search_mode = "Telegram_user_subs"
         subs = utils.non_order_user_info(int(value))
         order_subs = utils.order_user_info(int(value))
         if order_subs:
