@@ -543,11 +543,15 @@ def next_step_link_subscription(message: Message):
         if not servers:
             bot.send_message(message.chat.id, MESSAGES['UNKNOWN_ERROR'], reply_markup=main_menu_keyboard_markup())
             return
+        server_id = None
         for server in servers:
             users_list = api.find(server['url'] + API_PATH, uuid)
             if users_list:
                 server_id = server['id']
                 break
+        if not server_id:
+             bot.send_message(message.chat.id, f"{MESSAGES['UNKNOWN_ERROR']}-server not found",
+                             reply_markup=main_menu_keyboard_markup())
         status = USERS_DB.add_non_order_subscription(non_sub_id, message.chat.id, uuid, server_id)
         if status:
             bot.send_message(message.chat.id, MESSAGES['SUBSCRIPTION_CONFIRMED'],
