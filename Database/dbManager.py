@@ -596,7 +596,7 @@ class UserDBManager:
         cur = self.conn.cursor()
         try:
             cur.execute(
-                "INSERT INTO bool_config(key,value) VALUES(?,?)",
+                "INSERT or IGNORE INTO bool_config(key,value) VALUES(?,?)",
                 (key, value))
             self.conn.commit()
             logging.info(f"Settings [{key}] added successfully!")
@@ -666,7 +666,7 @@ class UserDBManager:
         cur = self.conn.cursor()
         try:
             cur.execute(
-                "INSERT INTO str_config(key,value) VALUES(?,?)",
+                "INSERT or IGNORE INTO str_config(key,value) VALUES(?,?)",
                 (key, value))
             self.conn.commit()
             logging.info(f"Settings [{key}] added successfully!")
@@ -723,7 +723,7 @@ class UserDBManager:
         cur = self.conn.cursor()
         try:
             cur.execute(
-                "INSERT INTO int_config(key,value) VALUES(?,?)",
+                "INSERT or IGNORE INTO int_config(key,value) VALUES(?,?)",
                 (key, value))
             self.conn.commit()
             logging.info(f"Settings [{key}] added successfully!")
