@@ -9,12 +9,14 @@
   <a href="./README-FA.md">فارسی</a>
 <br>
   <a href="https://t.me/HidyBotGroup">Telegram Group</a>
+  <a href="https://b3h1z.github.io/HidyBot-Docs/docs/en/home.html">Commercial-Edition Documentation</a>
 
 </p>
 <h1 align="center">Hidy Bot</h1>
 
-Hidy Bot is a Telegram bot that allows you to manage your Hiddify panel directly from Telegram.
-
+Hidy Bot is a Telegram bot that allows you to manage your Hiddify panel, build your store and manage users directly from Telegram.
+> [!WARNING]
+> **Archived Version Notice** > This repository is no longer active and is limited to **Hiddify version 8**. To access the latest updates and premium features, please upgrade to our **Commercial version**.
 ## Features
 - [x] Multi panel support
 - [x] Sell config
