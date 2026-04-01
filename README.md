@@ -9,6 +9,7 @@
   <a href="./README-FA.md">فارسی</a>
 <br>
   <a href="https://t.me/HidyBotGroup">Telegram Group</a>
+  <br>
   <a href="https://b3h1z.github.io/HidyBot-Docs/docs/en/home.html">Commercial-Edition Documentation</a>
 
 </p>
